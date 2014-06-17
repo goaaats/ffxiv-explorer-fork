@@ -9,7 +9,6 @@ import ca.fraggergames.ffxivextract.helpers.LERandomAccessFile;
 
 import com.jcraft.jzlib.Inflater;
 import com.jcraft.jzlib.JZlib;
-import com.jcraft.jzlib.ZStream;
 
 public class SqPack_DatFile {
 		
@@ -115,7 +114,7 @@ public class SqPack_DatFile {
 		return null;
 	}
 
-	static void CHECK_ERR(ZStream z, int err, String msg) {
+	static void CHECK_ERR(Inflater z, int err, String msg) {
 	    if(err!=JZlib.Z_OK){
 	      if(z.msg!=null) System.out.print(z.msg+" ");
 	      System.out.println(msg+" error: "+err);
