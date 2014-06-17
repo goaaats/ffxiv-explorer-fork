@@ -54,7 +54,8 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener {
 		this.getContentPane().add(splitPane);
 		this.setVisible(true);
 		
-		openFile(new File("G:\\FINAL FANTASY XIV - A Realm Reborn\\game\\sqpack\\ffxiv\\000000.win32.index"));
+		lastOpenedFile = new File("G:\\FINAL FANTASY XIV - A Realm Reborn\\game\\sqpack\\ffxiv\\000000.win32.index");
+		openFile(lastOpenedFile);
 	}	
 
 	protected void openFile(File selectedFile) {
@@ -152,6 +153,10 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener {
 
 	@Override
 	public void valueChanged(TreeSelectionEvent e) {
+		
+		if (fileTree.getSelectedFiles().size() == 0)
+			return;
+		
 		try {
 			currentDatFile.extractFile(fileTree.getSelectedFiles().get(0).getOffset());
 		} catch (IOException e1) {
