@@ -1,16 +1,15 @@
 package ca.fraggergames.ffxivextract.models;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.util.zip.Deflater;
-import java.util.zip.GZIPInputStream;
-import java.util.zip.Inflater;
 
 import ca.fraggergames.ffxivextract.helpers.LERandomAccessFile;
+
+import com.jcraft.jzlib.Inflater;
+import com.jcraft.jzlib.JZlib;
+import com.jcraft.jzlib.ZStream;
 
 public class SqPack_DatFile {
 		
@@ -86,11 +85,27 @@ public class SqPack_DatFile {
 		try{
 
 			byte[] decompressed = new byte[uncompressedSize];
-			Inflater decompresser = new Inflater();
-			decompresser.setInput(gzipedData);
-			decompresser.inflate(decompressed);
-			decompresser.end();
-			
+			Inflater inflater = new Inflater();
+
+		    inflater.setInput(gzipedData);
+		    inflater.setOutput(decompressed);
+
+		    int err = inflater.init();
+		    CHECK_ERR(inflater, err, "inflateInit");
+
+		    while(inflater.total_out<uncompressedSize &&
+		      inflater.total_in<gzipedData.length) {
+		      inflater.avail_in=inflater.avail_out=1; /* force small buffers */
+		      err=inflater.inflate(JZlib.Z_NO_FLUSH);
+		      if(err==JZlib.Z_STREAM_END) break;
+		      CHECK_ERR(inflater, err, "inflate");
+		    }
+		    
+		    err=inflater.end();	
+		    CHECK_ERR(inflater, err, "inflateEnd");
+		    
+		    inflater.finished();		    
+		    		    
 			return decompressed;
 		}
 		catch (Exception e)
@@ -100,6 +115,14 @@ public class SqPack_DatFile {
 		return null;
 	}
 
+	static void CHECK_ERR(ZStream z, int err, String msg) {
+	    if(err!=JZlib.Z_OK){
+	      if(z.msg!=null) System.out.print(z.msg+" ");
+	      System.out.println(msg+" error: "+err);
+	      System.exit(1);
+	    }
+	  }
+	
 	public void close() throws IOException{
 		currentFilePointer.close();
 	}

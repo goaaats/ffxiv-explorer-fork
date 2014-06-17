@@ -158,7 +158,18 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener {
 			return;
 		
 		try {
-			currentDatFile.extractFile(fileTree.getSelectedFiles().get(0).getOffset());
+			byte[] data = currentDatFile.extractFile(fileTree.getSelectedFiles().get(0).getOffset());
+			
+			for (int i = 0; i < data.length; i++)
+			{
+				if (data[i] >= 32 && data[i] <= 126)
+					System.out.print(String.format("%c", data[i]));
+				else
+					System.out.print(String.format("%X", data[i]));
+				if (i % 50 == 0 && i != 0)
+					System.out.print("\n");
+			}
+			
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
