@@ -37,10 +37,7 @@ public class ExplorerPanel extends JScrollPane {
 		};
 		
 		fileTree.setCellRenderer(new TreeRenderer());
-		
-		//scroller = new JScrollPane(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-			//	JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-		 //scroller.getViewport().add(fileTree, BorderLayout.CENTER);
+
 		this.getViewport().add(fileTree);		
 	}
 

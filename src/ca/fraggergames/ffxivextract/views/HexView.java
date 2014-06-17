@@ -1,6 +1,12 @@
 package ca.fraggergames.ffxivextract.views;
 
+import java.awt.Color;
+import java.awt.GridBagConstraints;
+import java.awt.GridLayout;
+
+import javax.swing.BoxLayout;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
 public class HexView extends JPanel{
@@ -9,8 +15,19 @@ public class HexView extends JPanel{
 	
 	public HexView(byte[] byteArray, int columnCount)
 	{
+		//TextArea Setup
+		txtHexData.setEditable(false);
+		
+		//Layout Setup
+		JScrollPane scrollPane = new JScrollPane();
+		scrollPane.getViewport().add(txtHexData);
+		
+		setLayout(new GridLayout());
+		GridBagConstraints constraints = new GridBagConstraints();
+		constraints.fill = GridBagConstraints.HORIZONTAL | GridBagConstraints.VERTICAL;
+		add(txtHexData, scrollPane);
+		
 		createTextAreaBody(byteArray, columnCount);
-		add(txtHexData);
 	}
 
 	private void createTextAreaBody(byte[] byteArray, int columnCount) {
