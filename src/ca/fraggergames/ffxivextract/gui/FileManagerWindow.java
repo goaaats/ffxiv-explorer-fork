@@ -227,6 +227,8 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener {
 					String extension = ".dat";
 					if (data[0] == 'E' && data[0] == 'X' && data[0] == 'D' && data[0] == 'F')
 						extension = ".exdf";
+					else if (data[0] == 'E' && data[0] == 'X' && data[0] == 'H' && data[0] == 'F')
+						extension = ".exhf";
 					LERandomAccessFile out = new LERandomAccessFile(lastOpenedFile.getAbsolutePath() + "\\" + String.format("%X", files.get(0).getId() & 0xFFFFFFFF) + extension, "rw");
 					out.write(data, 0, data.length);
 					out.close();
@@ -244,6 +246,8 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener {
 						String extension = ".dat";
 						if (data[0] == 'E' && data[1] == 'X' && data[2] == 'D' && data[3] == 'F')
 							extension = ".exdf";
+						else if (data[0] == 'E' && data[0] == 'X' && data[0] == 'H' && data[0] == 'F')
+							extension = ".exhf";
 						LERandomAccessFile out = new LERandomAccessFile(lastOpenedFile.getAbsolutePath() + "\\" + String.format("%X", files.get(i).getId() & 0xFFFFFFFF) + extension, "rw");
 						out.write(data, 0, data.length);
 						out.close();
