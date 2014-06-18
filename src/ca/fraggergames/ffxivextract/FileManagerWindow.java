@@ -19,6 +19,7 @@ import javax.swing.filechooser.FileFilter;
 
 import ca.fraggergames.ffxivextract.models.SqPack_DatFile;
 import ca.fraggergames.ffxivextract.models.SqPack_IndexFile;
+import ca.fraggergames.ffxivextract.views.HexView;
 
 @SuppressWarnings("serial")
 public class FileManagerWindow extends JFrame implements TreeSelectionListener {
@@ -36,8 +37,9 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener {
 	
 	public FileManagerWindow(String title)
 	{		
+		byte[] hex = {0x0, 0x1, 0x2, 0x3,0x0, 0x1, 0x2, 0x3,0x0, 0x1, 0x2, 0x3,0x0, 0x1, 0x33, 0x53, 0x55,0x31, 0x1, 0x2, 0x3,0x0, 0x1, 0x2, 0x3};
 		splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
-		                           fileTree, new JPanel());	
+		                           fileTree, new HexView(hex, 16));	
 		splitPane.setDividerLocation(150);
 
 		//Provide minimum sizes for the two components in the split pane
@@ -66,8 +68,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener {
 			currentIndexFile = new SqPack_IndexFile(selectedFile.getAbsolutePath());			
 			currentDatFile = new SqPack_DatFile(selectedFile.getAbsolutePath().replace(".index", ".dat0"));
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			return;
 		}
 		
 		currentIndexFile.displayIndexInfo();
