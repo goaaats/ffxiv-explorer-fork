@@ -219,6 +219,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener {
 		if (retunval == JFileChooser.APPROVE_OPTION)
 		{
 			lastOpenedFile = fileChooser.getSelectedFile();
+			lastOpenedFile.mkdirs();
 			
 			if (files.size() == 1)
 			{
