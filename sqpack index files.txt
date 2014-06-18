@@ -15,15 +15,16 @@ Structure (based on 030000.win32.index from FFEvo forums):
 
 ===SEGMENT HEADER=== (starts after SQPACK HEADER)
 0x000: Header Length    Int32;
-0x004: ?                Int32; Unknown, appears in two segments
+0x004: Data Archive #   Int32; This seems to be 0x01 sometimes, however it was 0x02 in 040000.win32.index, a pack with 2 dat files.
 0x008: Segment Offset   Int32; Offset to the segment
 0x00B: Segment Size     Int32; How large a segment is
 0x010: Segment SHA-1    20B;   Hash of the segment... [Segment Offset] to [Segment Offset] + [Segment Size]
 
 Notes: 
--Segment 1 is usually files, Segment 2 is uknown, Segment 3 is folders.
+-Segment 1 is usually files, Segment 2 is unknown, Segment 3 is folders.
 -Segment 2 sometimes has a duplicate, one with size of 0, and one with a normal size.
 -It's assumed that if there is no third segment, only list files.
+-Each segment is followed by a padding of 0x2C 0's
 
 ===FILE SEGMENTS=== (each one is at each folder's [Files Offset], in segment 1) (Each is 16 bytes padded)
 0x000: File ID1 Hash    Int32; Hash to the file name stored somewhere

@@ -34,12 +34,12 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener {
 	//UI
 	ExplorerPanel fileTree = new ExplorerPanel();	
 	JSplitPane splitPane;
+	HexView hexView = new HexView(16);
 	
 	public FileManagerWindow(String title)
-	{		
-		byte[] hex = {0x0, 0x1, 0x2, 0x3,0x0, 0x1, 0x2, 0x3,0x0, 0x1, 0x2, 0x3,0x0, 0x1, 0x33, 0x53, 0x55,0x31, 0x1, 0x2, 0x3,0x0, 0x1, 0x2, 0x3};
+	{				
 		splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
-		                           fileTree, new HexView(hex, 16));	
+		                           fileTree, hexView);	
 		splitPane.setDividerLocation(150);
 
 		//Provide minimum sizes for the two components in the split pane
@@ -160,16 +160,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener {
 		try {
 			byte[] data = currentDatFile.extractFile(fileTree.getSelectedFiles().get(0).getOffset());
 			
-			for (int i = 0; i < data.length; i++)
-			{
-				if (data[i] >= 32 && data[i] <= 126)
-					System.out.print(String.format("%c", data[i]));
-				else
-					System.out.print(String.format("%X", data[i]));
-				if (i % 50 == 0 && i != 0)
-					System.out.print("\n");
-			}
-			
+			hexView.setBytes(data);
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();

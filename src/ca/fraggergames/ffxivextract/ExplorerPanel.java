@@ -120,9 +120,14 @@ public class ExplorerPanel extends JScrollPane {
 		ArrayList<SqPack_File> selectedFiles = new ArrayList<SqPack_File>();
 		TreePath[] selectedPaths = fileTree.getSelectionPaths();
 		
+		if (selectedPaths == null)
+			return selectedFiles;
+		
 		for (TreePath tp : selectedPaths)
 		{
 			Object obj = ((DefaultMutableTreeNode) tp.getLastPathComponent()).getUserObject();
+			if (obj == null)
+				continue;
 			if (obj instanceof SqPack_File)
 				selectedFiles.add((SqPack_File)obj);
 		}

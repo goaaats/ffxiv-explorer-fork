@@ -8,25 +8,32 @@ import javax.swing.BoxLayout;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+import javax.swing.ScrollPaneConstants;
 
-public class HexView extends JPanel{
+public class HexView extends JScrollPane{
 
 	JTextArea txtHexData = new JTextArea();
+	int columnCount;
 	
-	public HexView(byte[] byteArray, int columnCount)
-	{
+	public HexView(int columnCount)
+	{		
+		this.columnCount = columnCount;
+		
 		//TextArea Setup
 		txtHexData.setEditable(false);
 		
 		//Layout Setup
-		JScrollPane scrollPane = new JScrollPane();
-		scrollPane.getViewport().add(txtHexData);
-		
-		setLayout(new GridLayout());
+		//JScrollPane scrollPane = new JScrollPane();
+		//scrollPane.getViewport().add(txtHexData);
+		setVerticalScrollBarPolicy ( ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS );
+		//setLayout(new GridLayout());
 		GridBagConstraints constraints = new GridBagConstraints();
 		constraints.fill = GridBagConstraints.HORIZONTAL | GridBagConstraints.VERTICAL;
-		add(txtHexData, scrollPane);
-		
+		getViewport().add(txtHexData);		
+	}
+	
+	public void setBytes(byte[] byteArray)
+	{
 		createTextAreaBody(byteArray, columnCount);
 	}
 
@@ -85,6 +92,7 @@ public class HexView extends JPanel{
 		
 		
 		txtHexData.setText(data);
+		txtHexData.setCaretPosition(0);
 	}
 			
 }
