@@ -80,6 +80,7 @@ public class SqPack_DatFile {
 		return decompressedData;
 	}
 	
+	@SuppressWarnings("deprecation")
 	private byte[] decompress(byte[] gzipedData, int uncompressedSize) {
 		try{
 
@@ -114,6 +115,7 @@ public class SqPack_DatFile {
 		return null;
 	}
 
+	@SuppressWarnings("deprecation")
 	static void CHECK_ERR(Inflater z, int err, String msg) {
 	    if(err!=JZlib.Z_OK){
 	      if(z.msg!=null) System.out.print(z.msg+" ");

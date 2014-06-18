@@ -16,11 +16,11 @@ import javax.swing.JSplitPane;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.filechooser.FileFilter;
-import javax.swing.filechooser.FileView;
 
 import ca.fraggergames.ffxivextract.models.SqPack_DatFile;
 import ca.fraggergames.ffxivextract.models.SqPack_IndexFile;
 
+@SuppressWarnings("serial")
 public class FileManagerWindow extends JFrame implements TreeSelectionListener {
 	
 	JMenuBar menu = new JMenuBar();
@@ -51,8 +51,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener {
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		this.setSize(900, 600);
 		this.setTitle(title);
-		this.getContentPane().add(splitPane);
-		this.setVisible(true);
+		this.getContentPane().add(splitPane);		
 		
 		lastOpenedFile = new File("G:\\FINAL FANTASY XIV - A Realm Reborn\\game\\sqpack\\ffxiv\\000000.win32.index");
 		openFile(lastOpenedFile);

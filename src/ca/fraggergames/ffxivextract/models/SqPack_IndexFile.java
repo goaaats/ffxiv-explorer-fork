@@ -83,15 +83,13 @@ public class SqPack_IndexFile {
 
 		ref.seek(segmentHeaderStart);
 		
-		int headerLength = ref.readInt();
-		
-		int currentSegmentStart = segmentHeaderStart + 4;
+		int headerLength = ref.readInt();				
 
 		for (int i = 0; i < segments.length; i++) {
 			int firstVal = ref.readInt();
 			if (firstVal == 0) // Fell into padding... we done here
 				break;
-			else if (firstVal == 1) {
+			else if (firstVal < 5) {
 				int offset = ref.readInt();
 				int size = ref.readInt();
 				byte[] sha1 = new byte[20];

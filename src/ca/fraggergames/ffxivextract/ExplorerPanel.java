@@ -18,6 +18,7 @@ import ca.fraggergames.ffxivextract.models.SqPack_File;
 import ca.fraggergames.ffxivextract.models.SqPack_Folder;
 import ca.fraggergames.ffxivextract.models.SqPack_IndexFile;
 
+@SuppressWarnings("serial")
 public class ExplorerPanel extends JScrollPane {
 
 	JTree fileTree;

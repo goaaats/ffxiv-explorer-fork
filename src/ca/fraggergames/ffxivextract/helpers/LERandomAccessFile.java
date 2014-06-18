@@ -36,13 +36,15 @@ public final class LERandomAccessFile implements DataInput, DataOutput
     {
     // ------------------------------ CONSTANTS ------------------------------
 
-    private static final int FIRST_COPYRIGHT_YEAR = 1999;
+    @SuppressWarnings("unused")
+	private static final int FIRST_COPYRIGHT_YEAR = 1999;
 
     /**
      * undisplayed copyright notice.
      *
      * @noinspection UnusedDeclaration
      */
+    @SuppressWarnings("unused")
     private static final String EMBEDDED_COPYRIGHT =
             "Copyright: (c) 1999-2013 Roedy Green, Canadian Mind Products, http://mindprod.com";
 
