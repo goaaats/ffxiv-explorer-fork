@@ -1,11 +1,7 @@
 package ca.fraggergames.ffxivextract.views;
 
-import java.awt.Color;
 import java.awt.GridBagConstraints;
-import java.awt.GridLayout;
 
-import javax.swing.BoxLayout;
-import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.ScrollPaneConstants;
@@ -59,7 +55,7 @@ public class HexView extends JScrollPane{
 					{
 						if (j > byteArray.length -1)
 							data += 'x';
-						else if (byteArray[j] <= 32 || byteArray[j] >= 126)
+						else if (byteArray[j] < 32 || byteArray[j] > 126)
 							data += '.';
 						else
 							data += (char) byteArray[j];
@@ -83,14 +79,13 @@ public class HexView extends JScrollPane{
 			{
 				if (i > byteArray.length -1)
 					data += ' ';
-				else if (byteArray[i] <= 32 || byteArray[i] >= 126)
+				else if (byteArray[i] < 32 || byteArray[i] > 126)
 					data += '.';
 				else
 					data += (char) byteArray[i];
 			}
 					
-		
-		
+				
 		txtHexData.setText(data);
 		txtHexData.setCaretPosition(0);
 	}

@@ -38,7 +38,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener {
 	//UI
 	ExplorerPanel fileTree = new ExplorerPanel();	
 	JSplitPane splitPane;
-	HexView hexView = new HexView(16);
+	HexView hexView = new HexView(64);
 	
 	public FileManagerWindow(String title)
 	{				
@@ -209,7 +209,10 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener {
 			{
 				try {
 					byte[] data = currentDatFile.extractFile(files.get(0).getOffset());
-					LERandomAccessFile out = new LERandomAccessFile(lastOpenedFile, "rw");
+					String extension = ".dat";
+					if (data[0] == 'E' && data[0] == 'X' && data[0] == 'D' && data[0] == 'F')
+						extension = ".exdf";
+					LERandomAccessFile out = new LERandomAccessFile(lastOpenedFile.getAbsolutePath() + "\\" + String.format("%X", files.get(0).getId() & 0xFFFFFFFF) + extension, "rw");
 					out.write(data, 0, data.length);
 					out.close();
 				} catch (FileNotFoundException e) {
@@ -223,7 +226,10 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener {
 				for (int i = 0; i < files.size(); i++){
 					try {
 						byte[] data = currentDatFile.extractFile(files.get(i).getOffset());
-						LERandomAccessFile out = new LERandomAccessFile(lastOpenedFile.getAbsolutePath() + "\\" + String.format("%X", files.get(i).getId() & 0xFFFFFFFF) + ".dat", "rw");
+						String extension = ".dat";
+						if (data[0] == 'E' && data[1] == 'X' && data[2] == 'D' && data[3] == 'F')
+							extension = ".exdf";
+						LERandomAccessFile out = new LERandomAccessFile(lastOpenedFile.getAbsolutePath() + "\\" + String.format("%X", files.get(i).getId() & 0xFFFFFFFF) + extension, "rw");
 						out.write(data, 0, data.length);
 						out.close();
 					} catch (FileNotFoundException e) {
