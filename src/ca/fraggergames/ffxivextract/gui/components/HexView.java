@@ -1,4 +1,4 @@
-package ca.fraggergames.ffxivextract.views;
+package ca.fraggergames.ffxivextract.gui.components;
 
 import java.awt.GridBagConstraints;
 
@@ -6,6 +6,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.ScrollPaneConstants;
 
+@SuppressWarnings("serial")
 public class HexView extends JScrollPane{
 
 	JTextArea txtHexData = new JTextArea();

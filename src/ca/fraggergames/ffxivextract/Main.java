@@ -2,6 +2,8 @@ package ca.fraggergames.ffxivextract;
 
 import javax.swing.UIManager;
 
+import ca.fraggergames.ffxivextract.gui.FileManagerWindow;
+
 public class Main {
 
 	public static void main(String[] args) {

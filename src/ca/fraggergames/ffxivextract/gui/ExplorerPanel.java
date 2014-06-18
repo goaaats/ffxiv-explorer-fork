@@ -1,4 +1,4 @@
-package ca.fraggergames.ffxivextract;
+package ca.fraggergames.ffxivextract.gui;
 
 import java.awt.Color;
 import java.awt.Component;
@@ -82,7 +82,9 @@ public class ExplorerPanel extends JScrollPane {
 
 	    private static final Icon fileIcon =
 	        (Icon) UIManager.get("FileView.fileIcon");
-
+	    private static final Icon folderIcon =
+		        (Icon) UIManager.get("FileView.directoryIcon");
+	    
 	    @Override
 	    public Component getTreeCellRendererComponent(JTree tree, Object value,
 	        boolean sel, boolean exp, boolean leaf, int row, boolean hasFocus) {
@@ -104,8 +106,8 @@ public class ExplorerPanel extends JScrollPane {
 	        }
 	        else //ROOT
 	        {
-	        	setOpenIcon(fileIcon);
-	            setClosedIcon(fileIcon);
+	        	setOpenIcon(folderIcon);
+	            setClosedIcon(folderIcon);
 	        }
 
 	        super.getTreeCellRendererComponent(

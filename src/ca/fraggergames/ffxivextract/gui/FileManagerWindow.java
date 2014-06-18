@@ -1,4 +1,4 @@
-package ca.fraggergames.ffxivextract;
+package ca.fraggergames.ffxivextract.gui;
 
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
@@ -13,17 +13,16 @@ import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
-import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.filechooser.FileFilter;
 
+import ca.fraggergames.ffxivextract.gui.components.HexView;
 import ca.fraggergames.ffxivextract.helpers.LERandomAccessFile;
 import ca.fraggergames.ffxivextract.models.SqPack_DatFile;
 import ca.fraggergames.ffxivextract.models.SqPack_File;
 import ca.fraggergames.ffxivextract.models.SqPack_IndexFile;
-import ca.fraggergames.ffxivextract.views.HexView;
 
 @SuppressWarnings("serial")
 public class FileManagerWindow extends JFrame implements TreeSelectionListener {
@@ -38,7 +37,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener {
 	//UI
 	ExplorerPanel fileTree = new ExplorerPanel();	
 	JSplitPane splitPane;
-	HexView hexView = new HexView(64);
+	HexView hexView = new HexView(32);
 	
 	public FileManagerWindow(String title)
 	{				
@@ -133,18 +132,25 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener {
 			{
 				System.exit(0);
 			}
+			else if (event.getActionCommand().equals("about"))
+			{
+				AboutWindow aboutWindow = new AboutWindow();
+				aboutWindow.setLocationRelativeTo(FileManagerWindow.this);
+				aboutWindow.setVisible(true);
+			}
 		}		
 	};
 
 	private void setupMenu(){		
 		
 		//File Menu
-		JMenu file = new JMenu("File");				
+		JMenu file = new JMenu("File");
+		JMenu help = new JMenu("Help");
 		JMenuItem file_Open = new JMenuItem("Open");
 		file_Open.setActionCommand("open");
 		JMenuItem file_Close = new JMenuItem("Close");
 		file_Close.setActionCommand("close");
-		JMenuItem file_Extract = new JMenuItem("Extract");
+		JMenuItem file_Extract = new JMenuItem("Extract");		
 		file_Extract.setActionCommand("extract");
 		JMenuItem file_Quit = new JMenuItem("Quit");
 		file_Quit.setActionCommand("quit");
@@ -153,13 +159,22 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener {
 		file_Extract.addActionListener(menuHandler);
 		file_Quit.addActionListener(menuHandler);
 		
+		JMenuItem help_About = new JMenuItem("About");
+		help_About.setActionCommand("about");
+		help_About.addActionListener(menuHandler);
+		
 		file.add(file_Open);
 		file.add(file_Close);
-		file.add(file_Extract);		
+		file.addSeparator();
+		file.add(file_Extract);
+		file.addSeparator();
 		file.add(file_Quit);	
 		
+		help.add(help_About);
+		
 		//Super Menus
-		menu.add(file);		
+		menu.add(file);
+		menu.add(help);
 		
 		this.setJMenuBar(menu);
 	}
