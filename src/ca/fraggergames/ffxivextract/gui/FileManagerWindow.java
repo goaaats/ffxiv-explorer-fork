@@ -18,8 +18,10 @@ import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.filechooser.FileFilter;
 
+import ca.fraggergames.ffxivextract.gui.components.EXDF_View;
 import ca.fraggergames.ffxivextract.gui.components.HexView;
 import ca.fraggergames.ffxivextract.helpers.LERandomAccessFile;
+import ca.fraggergames.ffxivextract.models.EXDF_File;
 import ca.fraggergames.ffxivextract.models.SqPack_DatFile;
 import ca.fraggergames.ffxivextract.models.SqPack_File;
 import ca.fraggergames.ffxivextract.models.SqPack_IndexFile;
@@ -41,8 +43,16 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener {
 	
 	public FileManagerWindow(String title)
 	{				
-		splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
-		                           fileTree, hexView);	
+		try {
+			splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
+			                           fileTree, new EXDF_View(new EXDF_File("C:\\Users\\Filip\\Dropbox\\exdfs\\67A9C0A.exdf")));
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}	
 		splitPane.setDividerLocation(150);
 
 		//Provide minimum sizes for the two components in the split pane
@@ -188,7 +198,13 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener {
 		try {
 			byte[] data = currentDatFile.extractFile(fileTree.getSelectedFiles().get(0).getOffset());
 			
-			hexView.setBytes(data);
+			if (data[0] == 'E' && data[1] == 'X' && data[2] == 'D' && data[3] == 'F')
+			{
+				EXDF_View exdfComponent = new EXDF_View(new EXDF_File(data));
+				splitPane.setRightComponent(exdfComponent);
+			}
+			else				
+				hexView.setBytes(data);
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();

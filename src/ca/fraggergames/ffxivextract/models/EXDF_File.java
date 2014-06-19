@@ -50,27 +50,44 @@ public class EXDF_File {
 		}
 
 		// Data
+		strings = new EXDF_StringEntry[offsetSize / 0x08];
 		for (int i = 0; i < offsets.length; i++)
 		{
 			buffer.rewind();
 			buffer.position(offsets[i].offset);
+
+			String stringName;
+			String stringValue;
 			
 			int entrySize = buffer.getInt();
 						
 			buffer.getShort(); //Skip 2 bytes (marker?
 			buffer.getInt(); //Will be null
 			int nameSize = buffer.getInt();
-					
-			//Get Name
-			byte[] string1 = new byte[nameSize];
-			buffer.get(string1);			
-			byte[] string2 = new byte[nameSize];
-			buffer.get(string2);
 			
-			String stringName = new String(string1);
-			String stringValue = new String(string2);
+			int valueSize = entrySize - nameSize - 0x0A;
+			
+			//Get Name
+			if (nameSize > 0)
+			{
+				byte[] string1 = new byte[nameSize];
+				buffer.get(string1);
+				stringName = new String(string1);
+			}
+			else
+				stringName = "";
+			
+			//Get Value
+			if (valueSize > 0){
+			byte[] string2 = new byte[valueSize];
+				buffer.get(string2);
+				stringValue = new String(string2);
+			}			
+			else
+				stringValue = "";
 			
 			strings[i] = new EXDF_StringEntry(stringName, stringValue);
+			System.out.println(strings[i].name + ": " + strings[i].value);
 		}
 		
 	}	

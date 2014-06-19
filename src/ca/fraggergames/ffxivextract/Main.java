@@ -12,8 +12,8 @@ public class Main {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		FileManagerWindow fileMan = new FileManagerWindow("FFXIV 2.0 Data Explorer");
-		fileMan.setVisible(true);
+		FileManagerWindow fileMan = new FileManagerWindow(Constants.APPNAME);
+		fileMan.setVisible(true);		
 	}
 
 }
