@@ -9,6 +9,7 @@ import java.nio.ByteBuffer;
 public class EXDF_File {
 
 	public EXDF_Offset[] offsets;
+	public EXDF_StringEntry[] strings;
 
 	public EXDF_File(byte[] data) throws IOException {
 		loadEXDF(data);
@@ -33,7 +34,7 @@ public class EXDF_File {
 		int signature = buffer.getInt(); 
 		if (signature != 0x45584446) // Should be EXDF or 0x45584446
 			throw new IOException("Not a EXDF");
-		int version = buffer.getInt();
+		int version = buffer.getInt(); //I assume, always 0x00200000
 		int offsetSize = buffer.getInt();
 		int dataSize = buffer.getInt();
 		
@@ -49,6 +50,28 @@ public class EXDF_File {
 		}
 
 		// Data
+		for (int i = 0; i < offsets.length; i++)
+		{
+			buffer.rewind();
+			buffer.position(offsets[i].offset);
+			
+			int entrySize = buffer.getInt();
+						
+			buffer.getShort(); //Skip 2 bytes (marker?
+			buffer.getInt(); //Will be null
+			int nameSize = buffer.getInt();
+					
+			//Get Name
+			byte[] string1 = new byte[nameSize];
+			buffer.get(string1);			
+			byte[] string2 = new byte[nameSize];
+			buffer.get(string2);
+			
+			String stringName = new String(string1);
+			String stringValue = new String(string2);
+			
+			strings[i] = new EXDF_StringEntry(stringName, stringValue);
+		}
 		
 	}	
 
