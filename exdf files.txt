@@ -11,7 +11,7 @@ Structure:
 0x004: Version???        Int32; Int32; Seems to be always 00 02 00 00  
 0x008: Offset Table Size Int32; Size of the offset table (below) 
 0x00C: Data Section Size Int32; Size of the string data section
-
+0x00F: Padding                  Up to 0x1F
 
 ===OFFSET TABLE=== (starts 0x1F(32) bytes from 0x00)
 0x000: Index             Int32; Seems to just up by one every offset
