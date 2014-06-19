@@ -1,0 +1,25 @@
+#### EXDF RESEARCH ####
+
+Current research on EXDF files
+
+!!!NOTE: FILE IS IN BIG ENDIAN FORM!!!
+
+Structure:
+
+===HEADER=== (Header is 32 bytes, padded with 0's)
+0x000: Signature         Int32; "EXDF"
+0x004: Version???        Int32; Int32; Seems to be always 00 02 00 00  
+0x008: Offset Table Size Int32; Size of the offset table (below) 
+0x00C: Data Section Size Int32; Size of the string data section
+0x00F: Padding                  Up to 0x1F
+
+===OFFSET TABLE=== (starts 0x1F(32) bytes from 0x00)
+0x000: Index             Int32; Seems to just up by one every offset
+0x004: Offset            Int32; Points to a string segment in the data section  
+
+===Data Section=== (starts after [Offset Table] or [Offset Table Size] * 0x08 + 0x1F)
+0x000:
+0x004:
+0x004: Size of String Name Int32; Size of the title portion of the string
+0x000: String Name
+0x000: String Value
