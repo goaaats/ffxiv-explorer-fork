@@ -1,0 +1,8 @@
+#### EXHF RESEARCH ####
+
+Current research on EXHF files
+
+-Starts with EXHF.
+-Most bytes are the same but location 0x17 and 0x2F are changing and are always the same.
+-At 0x30, 2 byte segments increment, starting from 0x01.
+-Because of the last incrementing segments.... seems little endian (cmon SE wtf?)?
