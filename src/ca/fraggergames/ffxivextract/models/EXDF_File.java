@@ -21,7 +21,7 @@ public class EXDF_File {
 		int version = buffer.getInt();
 		int offsetSize = buffer.getInt(); 
 		int dataSize = buffer.getInt();  
-		//Skip to 0x24
+		//Skip to 0x1F
 		
 		//Offsets
 		offsets = new EXDF_Offset[offsetSize/0x08];
