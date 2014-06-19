@@ -33,11 +33,12 @@ public class EXDF_File {
 		int signature = buffer.getInt(); 
 		if (signature != 0x45584446) // Should be EXDF or 0x45584446
 			throw new IOException("Not a EXDF");
-		buffer.get(); // Sig is 5 bytes so skip 1
 		int version = buffer.getInt();
 		int offsetSize = buffer.getInt();
 		int dataSize = buffer.getInt();
-		// Skip to 0x1F
+		
+		buffer.rewind();
+		buffer.position(0x20);
 
 		// Offsets
 		offsets = new EXDF_Offset[offsetSize / 0x08];
