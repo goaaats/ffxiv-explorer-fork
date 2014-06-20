@@ -42,17 +42,10 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener {
 	HexView hexView = new HexView(32);
 	
 	public FileManagerWindow(String title)
-	{				
-		try {
-			splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
-			                           fileTree, new EXDF_View(new EXDF_File("C:\\Users\\Filip\\Dropbox\\exdfs\\67A9C0A.exdf")));
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}	
+	{		
+		splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
+			                           fileTree, hexView);
+		
 		splitPane.setDividerLocation(150);
 
 		//Provide minimum sizes for the two components in the split pane
@@ -204,7 +197,10 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener {
 				splitPane.setRightComponent(exdfComponent);
 			}
 			else				
-				hexView.setBytes(data);
+			{
+				splitPane.setRightComponent(hexView);
+				hexView.setBytes(data);				
+			}
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
