@@ -87,9 +87,9 @@ public class EXDF_File {
 
 				strings[i] = new EXDF_StringEntry(stringName, stringValue);
 			}
-		} catch (BufferUnderflowException underflowException) {
-		} catch (BufferOverflowException overflowException) {
-		}
+		} 
+		catch (BufferUnderflowException underflowException) {} 
+		catch (BufferOverflowException overflowException) {}
 	}
 
 }

@@ -233,34 +233,11 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener {
 			lastOpenedFile = fileChooser.getSelectedFile();
 			lastOpenedFile.mkdirs();
 			
-			if (files.size() == 1)
-			{
-				try {
-					byte[] data = currentDatFile.extractFile(files.get(0).getOffset());
-					String extension = ".dat";
-					if (data[0] == 'E' && data[0] == 'X' && data[0] == 'D' && data[0] == 'F')
-						extension = ".exdf";
-					else if (data[0] == 'E' && data[0] == 'X' && data[0] == 'H' && data[0] == 'F')
-						extension = ".exhf";
-					LERandomAccessFile out = new LERandomAccessFile(lastOpenedFile.getAbsolutePath() + "\\" + String.format("%X", files.get(0).getId() & 0xFFFFFFFF) + extension, "rw");
-					out.write(data, 0, data.length);
-					out.close();
-				} catch (FileNotFoundException e) {
-					e.printStackTrace();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
-			else
-			{
+			
 				for (int i = 0; i < files.size(); i++){
 					try {
 						byte[] data = currentDatFile.extractFile(files.get(i).getOffset());
-						String extension = ".dat";
-						if (data[0] == 'E' && data[1] == 'X' && data[2] == 'D' && data[3] == 'F')
-							extension = ".exdf";
-						else if (data[0] == 'E' && data[0] == 'X' && data[0] == 'H' && data[0] == 'F')
-							extension = ".exhf";
+						String extension = getExtension(data);
 						LERandomAccessFile out = new LERandomAccessFile(lastOpenedFile.getAbsolutePath() + "\\" + String.format("%X", files.get(i).getId() & 0xFFFFFFFF) + extension, "rw");
 						out.write(data, 0, data.length);
 						out.close();
@@ -270,8 +247,19 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener {
 						e.printStackTrace();
 					}
 				}
-			}
+			
 		}
+	}
+
+	private String getExtension(byte[] data) {
+		if (data[0] == 'E' && data[1] == 'X' && data[2] == 'D' && data[3] == 'F')
+			return ".exdf";
+		else if (data[0] == 'E' && data[1] == 'X' && data[2] == 'H' && data[3] == 'F')
+			return ".exhf";
+		else if (data[1] == 'L' && data[2] == 'u' && data[3] == 'a' && data[4] == 'Q' )
+			return ".luaq";
+		else
+			return ".dat";
 	}
 
 }
