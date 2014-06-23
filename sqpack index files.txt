@@ -8,7 +8,7 @@ Structure (based on 030000.win32.index from FFEvo forums):
 0x000: Signature        Int32; "SqPack", followed by 0's (12 bytes)
 0x00C: Header Length    Int32;  
 0x010: ?                Int32; Unknown but repeated in other header
-0x014: SqPack Type      Int32; Type 1: Data, Type 2: Index
+0x014: SqPack Type      Int32; Type 0: SQDB, Type 1: Data, Type 2: Index
 0x018: ~~UNKNOWN~~             A lot of 0s, but 0xFFFF at 0x20
 0x3C0: Header SHA-1     20B;   SHA-1 of bytes 0x000-0x3BF
 0x3D4: Padding                 Padding of 0's till [Header Length]
