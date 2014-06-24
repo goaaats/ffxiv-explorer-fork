@@ -4,7 +4,7 @@ Current research on SCD music/sound files
 
 Structure (based on 0c0000.win32.index):
 
-===SEDBSSCF Header===
+===SEDBSSCF HEADER===
 0x00 Signature         Int64; SEDBSSCF
 0x08 Version           Int32; For FFXIV should be 3;
 0x0C ???               Short; Seems to be always 0x00, 0x04
@@ -12,13 +12,13 @@ Structure (based on 0c0000.win32.index):
 0x10 File Size         Int32; Total File size (filesize - 1 should equal the last byte).
 ~~~~~~~~Padding~~~~~~~~       Padded to fill 48bytes
 
-===Offset Header?===   (Seems to contain a lot of offsets)
-0x00 Unknown           Short;
-0x02 Unknown           Short; 
+===OFFSET HEADER?===   (Seems to contain a lot of offsets)
+0x00 ~~Unknown~~       Short;
+0x02 ~~Unknown~~       Short; 
 0x04 Num Sound Files   Short; 
-0x06 Unknown           Int32;
+0x06 ~~Unknown~~       Int32;
   
-===Meta Data Header=== (32byte header)
+===META DATA HEADER=== (32byte header)
 0x00 Music File Length Int32; 
 0x04 Num Channels      Int32; 0x01: Mono, 0x02: Stereo, FFXIV is usually 0x02 channels
 0x08 Frequency         Int32; FFXIV is usually 44100HZ (AC440000)
@@ -28,7 +28,7 @@ Structure (based on 0c0000.win32.index):
 0x18 First Frame Pos   Int32; First OggS after (possibly, not always) encrypted header.
 ~~~~~~~~Padding~~~~~~~~       Padded to fill 32bytes
 
-===Seek Table Header=== (32 bytes)
+===SEEK TABLE HEADER=== (32 bytes)
 0x00 
 0x02 Encode Byte        Short; If not 0x00, XOR the header with this byte
 0x04 
@@ -39,15 +39,15 @@ Structure (based on 0c0000.win32.index):
 0x18 
 ~~~~~~~~~Padding~~~~~~~~       Padded to fill 32bytes 
 
-===Seek Table=== (Size is 4 * [Num Seek Table])
+===SEEK TABLE=== (Size is 4 * [Num Seek Table])
 0x00 Seek Entry        Int32; An offset from the Vorbis header to some Ogg page. 
 
-===Vorbis Header== (Size is [Vorbis Header Size])
+===VORBIS HEADER== (Size is [Vorbis Header Size])
 -A standard Ogg Vorbis header. Check the encode byte in the seek table header to see if this header is encoded. If it is,
 XOR all header bytes with the encode byte.
 -Many songs have a LOOPSTART and LOOPEND comment tag defining where music should begin and end after the first loop.
 
-===Data===
+===DATA===
 Ogg Vorbis data is here
 
 --------------Ogg Vorbis format info for understanding the encrypted header-----------------

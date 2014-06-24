@@ -2,23 +2,21 @@
 
 Current research on SqPack Index files
 
-Structure (based on 030000.win32.index from FFEvo forums):
-
-===SQPACK HEADER===
+===SQPACK HEADER=== (0x400 in size)
 0x000: Signature        Int32; "SqPack", followed by 0's (12 bytes)
-0x00C: Header Length    Int32;  
-0x010: ?                Int32; Unknown but repeated in other header
+0x00c: Header Length    Int32;  
+0x010: ~~Unknown~~             Int32; Unknown but repeated in other header
 0x014: SqPack Type      Int32; Type 0: SQDB, Type 1: Data, Type 2: Index
-0x018: ~~UNKNOWN~~             A lot of 0s, but 0xFFFF at 0x20
-0x3C0: Header SHA-1     20B;   SHA-1 of bytes 0x000-0x3BF
-0x3D4: Padding                 Padding of 0's till [Header Length]
+0x018: ~~Unknown~~             A lot of 0s, but 0xFFFF at 0x20
+0x3c0: SHA-1 of Header  20B;   SHA-1 of bytes 0x000-0x3BF, starts 64bytes before end of header
+~~~~~~~~Padding~~~~~~~~~       Padding of 0's till [Header Length]
 
 ===SEGMENT HEADER=== (starts after SQPACK HEADER)
 0x000: Header Length    Int32;
 0x004: Data Archive #   Int32; This seems to be 0x01 sometimes, however it was 0x02 in 040000.win32.index, a pack with 2 dat files.
 0x008: Segment Offset   Int32; Offset to the segment
-0x00B: Segment Size     Int32; How large a segment is
-0x010: Segment SHA-1    20B;   Hash of the segment... [Segment Offset] to [Segment Offset] + [Segment Size]
+0x00b: Segment Size     Int32; How large a segment is
+0x010: SHA-1 of Segment 20B;   Hash of the segment... [Segment Offset] to [Segment Offset] + [Segment Size]
 
 Notes: 
 -Segment 1 is usually files, Segment 2 is unknown, Segment 3 is folders.
@@ -30,10 +28,10 @@ Notes:
 0x000: File ID1 Hash    Int32; Hash to the file name stored somewhere
 0x004: File ID2 Hash    Int32; Hash to the file path stored somewhere
 0x008: File Data Offset Int32; Multiply by 0x08, points to compressed data in .dat file
-0x00B: Padding                 Padded to a total segment entry size of 16 bytes.
+0x00b: Padding                 Padded to a total segment entry size of 16 bytes.
 
 ===FOLDER SEGMENTS=== (seen in segment 3, points to files in segment 1) (Each is 16 bytes padded)
 0x000: FOLDER ID Hash   Int32; Hash to the folder name stored somewhere
 0x004: Files Offset     Int32; Offset to file list in segment 1.
 0x008: Total Files Size Int32; Total size of all file segments for this folder. To find # files, divide by 0x10 (16).
-0x00B: Padding                 Padded to a total segment entry size of 16 bytes.
+0x00b: Padding                 Padded to a total segment entry size of 16 bytes.

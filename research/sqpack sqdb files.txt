@@ -1,0 +1,21 @@
+#### DAT FILE RESEARCH ####
+
+Current research on SqPack Dat files
+
+===SQPACK HEADER=== (0x400 in size)
+0x000: Signature        Int32; "SqPack", followed by 0's (12 bytes)
+0x00c: Header Length    Int32;  
+0x010: ~~Unknown~~             Int32; Unknown but repeated in other header
+0x014: SqPack Type      Int32; Type 0: SQDB, Type 1: Data, Type 2: Index
+0x018: ~~Unknown~~             A lot of 0s, but 0xFFFF at 0x20
+~~~~~~~~Padding~~~~~~~~~       Padding of 0's till [Header Length]
+
+===SQDB HEADER=== (0x400 in size)
+0x000: Header Length    Int32;
+0x000: ~~~Unknown~~~    Int32; Value of 0x01
+~~~~~~~~~~Padding~~~~~~~       Padding of 0's till [Header Length]
+
+===SQDB ENTRY===
+0x10 bytes of info
+0x08 bytes of hash
+0xEF bytes of string

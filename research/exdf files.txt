@@ -17,7 +17,7 @@ Structure:
 0x000: Index             Int32; Seems to just up by one every offset
 0x004: Offset            Int32; Points to a string segment in the data section  
 
-===Data Section=== (starts after [Offset Table] or [Offset Table Size] * 0x08 + 0x1F)
+===DATA SECTION=== (starts after [Offset Table] or [Offset Table Size] * 0x08 + 0x1F)
 0x000:
 0x004:
 0x004: Size of String Name Int32; Size of the title portion of the string
