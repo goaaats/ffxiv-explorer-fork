@@ -1,0 +1,47 @@
+#### DAT FILE RESEARCH ####
+
+Current research on SqPack Dat files
+
+Structure (based on 030000.win32.index from FFEvo forums):
+
+===SQPACK HEADER=== (0x400 in size)
+0x000: Signature        Int32; "SqPack", followed by 0's (12 bytes)
+0x00C: Header Length    Int32;  
+0x010: ?                Int32; Unknown but repeated in other header
+0x014: SqPack Type      Int32; Type 0: SQDB, Type 1: Data, Type 2: Index
+0x018: ~~UNKNOWN~~             A lot of 0s, but 0xFFFF at 0x20
+0x3C0: Header SHA-1     20B;   SHA-1 of bytes 0x000-0x3BF, starts 64bytes before end of header
+0x3D4: ~~~~~Padding~~~~~       Padding of 0's till [Header Length]
+
+===Header 2???=== (0x400 in size)
+0x000: Header Length    Int32;
+0x004: NULL
+0x008: Unknown          Int32;
+0x020: SHA1             20bytes;
+0x3C0: SHA1             20bytes; Starts 64bytes before end of header
+~~~~~~~~~~Padding~~~~~~~
+
+-----DATA IS BELOW THIS LINE------
+
+===File Entry Header=== (Minimum size is 0x80) !!!Use Index to find entry!!!
+0x000: Header Length     Int32; 
+0x004: Content Type      Int32; 0x04 - Texture, 0x02 - Everything else?
+0x008: Uncompressed Size Int32;
+0x00c: 
+0x010: Block Buffer Size Int32; Buffer size need to read largest block
+0x014: Num Blocks        Int32;    
+
+---This part repeats per Num Blocks---
+0x000: Offset                  Int32; From end of this header (Check [File Entry Offset] + [Header Length])
+0x004: Padding Size            Short;
+0x006: Decompressed Block Size Short;
+
+---Zlib compressed data here----
+
+===Block Header===
+0x000: Header Size         Int32; Seems to be always 0x10bytes
+0x004: NULL                Int32;
+0x008: Compressed Length   Int32;
+0x00C: Decompressed Length Int32; Will be max 16kb.
+
+0x010: Compressed Data          ; Size will be [Compressed Length]
