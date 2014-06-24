@@ -1,0 +1,61 @@
+#### SCD FILE RESEARCH ####
+
+Current research on SCD music/sound files
+
+Structure (based on 0c0000.win32.index):
+
+===SEDBSSCF Header===
+0x00 Signature        Int64; SEDBSSCF
+0x08 Version          Int32; For FFXIV should be 3;
+
+
+===Meta Data Header=== (32byte header)
+0x00 File Length      Int32;
+0x04 Num Channels     Int32; 0x01: Mono, 0x02: Stereo
+0x08 Frequency        Int32; FFXIV is usually 44100HZ (AC440000)
+0x0C Data Type        Int32; 0x06: OGG
+0x14 First Frame Pos  Int32; First OggS after (possibly) encrypted header.
+~~~~PADDING TO 1F~~~~~~
+
+===Offset Table===
+
+
+===Data===
+-Data may be encrypted with a simple XOR encryption. Trying to figure out where the value to XOR with is stored, but 
+to manually do it... find the repeating byte at the start of the data. This is an encoded 0x00 and what you need to
+XOR with to decode. 
+
+
+--------------Ogg Vorbis format info for understanding what is happening-----------------
+
+===OGG PAGE===
+0x00 Signature        Int32;  Value is OggS 
+0x04 Version          Byte;
+0x05 Type             Byte;   Type of header: 0x01: Continuation, 0x02: Beginning, 0x03: End
+0x06 Granule Position Int64;
+0x0E Serial Number    Int32; 
+0x12 Sequence Number  Int32;
+0x16 Checksum         Int32;
+0x1E Num Page Segs    Byte;
+0x1F Segment table    Byte;   Each segment is a byte long, * 0x1E's value. 
+ 
+===VORBIS PAGE===
+0x00 Header Type      Byte;   Type of vorbis header: 0x01: ID Header, 0x03: Comment Header, 0x05: Setup Header. If has leading 0, audio header.
+0x01 Signature        6Bytes; VORBIS
+ 
+--If ID Header--
+1 [vorbis_version] = read 32 bits as unsigned integer
+2 [audio_channels] = read 8 bit integer as unsigned
+3 [audio_sample_rate] = read 32 bits as unsigned integer
+4 [bitrate_maximum] = read 32 bits as signed integer
+5 [bitrate_nominal] = read 32 bits as signed integer
+6 [bitrate_minimum] = read 32 bits as signed integer
+7 [blocksize_0] = 2 exponent (read 4 bits as unsigned integer)
+8 [blocksize_1] = 2 exponent (read 4 bits as unsigned integer)
+9 [framing_flag] = read one bit
+
+--If Comment Header---
+1 [vendor length] = read an unsigned integer of 32 bits
+2 [vendor string] = size of vendor length; Seems to be always “Xiph.Org libVorbis I 20040717” with a varying year.
+3 [fields] = read an unsigned integer of 32 bits
+FFXIV only uses the LoopStart and LoopEnd fields
