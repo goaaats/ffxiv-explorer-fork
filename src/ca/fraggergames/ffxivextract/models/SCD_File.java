@@ -11,8 +11,6 @@ import java.nio.ByteOrder;
 public class SCD_File {
 	
 	SCD_Sound_Info soundInfo;
-	private byte[] vorbisHeader;
-	private byte[] vorbisData;
 	private byte[] oggVorbisFile;
 	
 	public SCD_File(String path) throws IOException{

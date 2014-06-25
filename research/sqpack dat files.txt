@@ -16,10 +16,10 @@ Current research on SqPack Dat files
 0x004: NULL
 0x008: ~~Unknown~~      Int32; Static Value of 0x10
 0x00c: Data Size        Int32; From end of this header (usually 0x800) to EOF. Divided by 0x08.
-0x010: ~~Unknown~~      Int32; Static Value of 0x01
+0x010: Spanned DAT      Int32; 0x01 = .dat0, 0x02 = .dat1 or .dat2, etc
 0x014: NULL             Int32;
-0x018:  Max File Size?   Int32; Always 0x773594 or 2GB. Interestingly if a file is > 2GB, a dat1 is formed. In 13 dat, is 20MB?
-0x01c:  NULL             Int32;
+0x018: Max File Size    Int32; Always 0x773594 or 2GB. Interestingly if a file is > 2GB, a dat1 is formed. In 13 dat, is 20MB?
+0x01c: NULL             Int32;
 0x020: SHA1 of Data     20B;   From end of this header (usually 0x800) to EOF
 0x3c0: SHA1 of Header   20B;   Starts 64bytes before end of header
 ~~~~~~~~~~Padding~~~~~~~       Padding of 0's till [Header Length]
