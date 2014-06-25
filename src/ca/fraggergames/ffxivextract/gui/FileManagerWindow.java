@@ -199,7 +199,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener {
 			else				
 			{
 				splitPane.setRightComponent(hexView);
-				//hexView.setBytes(data);				
+				hexView.setBytes(data);				
 			}
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
