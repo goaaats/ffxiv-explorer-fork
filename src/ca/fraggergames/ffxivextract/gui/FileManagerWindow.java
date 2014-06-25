@@ -6,6 +6,7 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 
 import javax.swing.JFileChooser;
@@ -18,9 +19,11 @@ import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.filechooser.FileFilter;
 
+import ca.fraggergames.ffxivextract.Constants;
 import ca.fraggergames.ffxivextract.gui.components.EXDF_View;
 import ca.fraggergames.ffxivextract.gui.components.Hex_View;
 import ca.fraggergames.ffxivextract.helpers.LERandomAccessFile;
+import ca.fraggergames.ffxivextract.helpers.WinRegistry;
 import ca.fraggergames.ffxivextract.models.EXDF_File;
 import ca.fraggergames.ffxivextract.models.SqPack_DatFile;
 import ca.fraggergames.ffxivextract.models.SqPack_IndexFile;
@@ -61,8 +64,19 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener {
 		this.setTitle(title);
 		this.getContentPane().add(splitPane);		
 		
-		//lastOpenedFile = new File("G:\\FINAL FANTASY XIV - A Realm Reborn\\game\\sqpack\\ffxiv\\000000.win32.index");
-		//openFile(lastOpenedFile);
+		//Check Windows registry for a FFXIV folder
+		String value = null;
+		try {
+			value = WinRegistry.readString (
+				    WinRegistry.HKEY_LOCAL_MACHINE,                             
+				   "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion",           
+				   "ProductName");
+		} catch (Exception e){}
+		
+		if (Constants.DEBUG){
+			lastOpenedFile = new File("C:\\Users\\Filip\\Downloads\\FFXIV-ARR-Bench-Character\\game\\sqpack\\ffxiv\\0b0000.win32.index");
+			openFile(lastOpenedFile);
+		}
 	}	
 
 	protected void openFile(File selectedFile) {
@@ -77,7 +91,9 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener {
 			return;
 		}
 		
-		currentIndexFile.displayIndexInfo();
+		if (Constants.DEBUG)			
+			currentIndexFile.displayIndexInfo();
+		
 		fileTree.fileOpened(currentIndexFile);
 	}
 

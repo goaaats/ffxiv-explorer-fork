@@ -17,7 +17,7 @@ import javax.swing.table.JTableHeader;
 @SuppressWarnings("serial")
 public class Hex_View extends JScrollPane{
 
-	JTable txtHexData = new JTable(new HexTableModel());
+	JTable txtHexData = null;
 	int columnCount;
 	byte[] bytes = null;
 	String byteToStr[] = new String[256];
@@ -27,7 +27,10 @@ public class Hex_View extends JScrollPane{
 	{		
 		this.columnCount = columnCount;		
 		
+		txtHexData = new JTable(new HexTableModel());
+		
 		setVerticalScrollBarPolicy ( ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS );
+		setHorizontalScrollBarPolicy ( ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED );
 		GridBagConstraints constraints = new GridBagConstraints();
 		constraints.fill = GridBagConstraints.HORIZONTAL | GridBagConstraints.VERTICAL;
 		getViewport().add(txtHexData);		
@@ -62,7 +65,7 @@ public class Hex_View extends JScrollPane{
 	          
 	          if (column == 0)	          
 	        	  setBorder(BorderFactory.createMatteBorder(0, 0, 1, 2, Color.LIGHT_GRAY));
-	          else if (column == 16)
+	          else if (column == Hex_View.this.columnCount)
 	          {
 	        	  if (value == null)
 	        		  setBorder(BorderFactory.createMatteBorder(0, 0, 0, 0, Color.LIGHT_GRAY));
@@ -98,7 +101,7 @@ public class Hex_View extends JScrollPane{
 		
 		@Override
 		public int getColumnCount() {
-			return 33; //Address Column + 16 Bytes of Hex + 16 Bytes of Chars
+			return columnCount + 1 + 16; //Address Column + 16 Bytes of Hex + 16 Bytes of Chars
 		}
 
 		@Override
@@ -106,7 +109,7 @@ public class Hex_View extends JScrollPane{
 			if (bytes == null || bytes.length == 0)
 				return 0;
 			else
-				return bytes.length / 16;
+				return bytes.length / columnCount;
 		}
 		
 		@Override
@@ -118,22 +121,22 @@ public class Hex_View extends JScrollPane{
 		public Object getValueAt(int rowIndex, int columnIndex) {
 			if (columnIndex == 0)
 			{
-				return String.format("%x: ", 16 * rowIndex);
+				return String.format("%x: ", columnCount * rowIndex);
 			}
-			else if (columnIndex >= 1 && columnIndex <= 16)
+			else if (columnIndex >= 1 && columnIndex <= columnCount)
 			{
 				//if (((rowIndex * 16) + columnIndex - 1) > bytes.length-1)
 				//	return null;
 				
-				int value = bytes[(rowIndex * 16) + columnIndex - 1];
+				int value = bytes[(rowIndex * columnCount) + columnIndex - 1];
 				return byteToStr[value & 0xFF];
 			}
 			else
 			{
 				//if (((rowIndex * 16) + columnIndex - 17) > bytes.length-1)
-				//	return null;
+					//return null;
 				
-				int value = bytes[(rowIndex * 16) + columnIndex - 17];
+				int value = bytes[(rowIndex * columnCount) + columnIndex - 17];
 				return byteToChar[value & 0xFF];
 			}
 		}
