@@ -1,16 +1,23 @@
 package ca.fraggergames.ffxivextract.gui.components;
 
 import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Graphics;
 import java.awt.GridBagConstraints;
+import java.awt.Insets;
 
+import javax.swing.BorderFactory;
+import javax.swing.JLabel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
-import javax.swing.JTextArea;
 import javax.swing.ScrollPaneConstants;
+import javax.swing.UIManager;
+import javax.swing.border.Border;
+import javax.swing.border.MatteBorder;
 import javax.swing.table.AbstractTableModel;
-
-import ca.fraggergames.ffxivextract.models.EXDF_File;
-import ca.fraggergames.ffxivextract.models.EXDF_StringEntry;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.JTableHeader;
 
 @SuppressWarnings("serial")
 public class Hex_View extends JScrollPane{
@@ -34,20 +41,50 @@ public class Hex_View extends JScrollPane{
 		{
 			byteToStr[i] = String.format("%02X", i);
 			
-			if (i >= 32 && i <= 126)
-				byteToChar[i] = ".";
-			else
-				byteToChar[i] = ""+(char) i;
+			byteToChar[i] = ""+(char) i;
 		}
 				
 		txtHexData.setTableHeader(null);
 		txtHexData.setGridColor(Color.GRAY);
+		txtHexData.getColumnModel().getColumn(0).setMinWidth(70);
+		
+		DefaultTableCellRenderer cellRender = new DefaultTableCellRenderer() {
+	        public Component getTableCellRendererComponent(JTable table, Object value,
+	                         boolean isSelected, boolean hasFocus, int row, int column) {
+	          JTableHeader header = table.getTableHeader();
+	          if (header != null) {
+	            setForeground(Color.BLACK);
+	            setBackground(Color.BLACK);
+	            setFont(header.getFont());
+	          }
+	          
+	          if (column == 0)
+	        	  setHorizontalAlignment(JLabel.RIGHT);
+	          else
+	        	  setHorizontalAlignment(JLabel.CENTER);
+	          setText((value == null) ? "" : value.toString());	          	 	          
+	          
+	          if (column == 0)	          
+	        	  setBorder(BorderFactory.createMatteBorder(0, 0, 1, 2, Color.LIGHT_GRAY));
+	          else if (column == 16)
+	        	  setBorder(BorderFactory.createMatteBorder(0, 0, 1, 2, Color.LIGHT_GRAY));
+	          else
+	        	  setBorder(BorderFactory.createMatteBorder(0, 0, 1, 1, Color.LIGHT_GRAY));
+	          	    
+	          return this;
+	        }
+	      };
+		txtHexData.setShowGrid(false);
+		txtHexData.setIntercellSpacing(new Dimension(0, 0));
+		txtHexData.setDefaultRenderer(Object.class, cellRender);
+		
 	}
 	
 	public void setBytes(byte[] byteArray)
 	{
 		bytes = byteArray;
 		((AbstractTableModel) txtHexData.getModel()).fireTableDataChanged();
+		
 	}
 			
 	class HexTableModel extends AbstractTableModel{
@@ -81,7 +118,7 @@ public class Hex_View extends JScrollPane{
 		public Object getValueAt(int rowIndex, int columnIndex) {
 			if (columnIndex == 0)
 			{
-				return String.format("%x", 16 * rowIndex);
+				return String.format("%x: ", 16 * rowIndex);
 			}
 			else if (columnIndex >= 1 && columnIndex <= 16)
 			{
@@ -96,4 +133,5 @@ public class Hex_View extends JScrollPane{
 		}
 		
 	}
+	
 }
