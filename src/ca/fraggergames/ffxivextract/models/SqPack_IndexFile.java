@@ -136,4 +136,94 @@ public class SqPack_IndexFile {
 			}
 		}
 	}
+
+	public class SqPack_DataSegment {
+
+		private int offset;
+		private int size;
+		private byte[] sha1 = new byte[20];
+		
+		public SqPack_DataSegment(int offset, int size, byte[] sha1)
+		{
+			this.offset = offset;
+			this.size = size;
+			this.sha1 = sha1;
+		}
+		
+		public int getOffset()
+		{
+			return offset;
+		}
+		
+		public int getSize()
+		{
+			return size;
+		}
+
+		public byte[] getSha1()
+		{
+			return sha1;
+		}
+	}
+	
+	public class SqPack_Folder {
+		
+		private int id;
+		private SqPack_File files[];
+		private long fileIndexOffset;
+		
+		protected SqPack_Folder(int id, int numFiles, long fileIndexOffset) {
+			this.id = id;
+			this.files = new SqPack_File[numFiles];
+			this.fileIndexOffset = fileIndexOffset;
+		}
+
+		protected void readFiles(LERandomAccessFile ref) throws IOException{
+			ref.seek(fileIndexOffset);
+			for (int i = 0; i < files.length; i++)
+			{			
+				int id = ref.readInt();
+				ref.readInt();
+				long dataoffset = ref.readInt() * 8;
+				ref.readInt();
+			
+				files[i] = new SqPack_File(id, dataoffset);			
+			}
+		}
+		
+		public int getId()
+		{
+			return id;
+		}
+		
+		public SqPack_File[] getFiles()
+		{
+			return files;
+		}
+		
+	}
+	
+	public class SqPack_File {
+		public int id;
+		public long dataoffset;
+		
+		protected SqPack_File(int id, long offset)
+		{
+			this.id = id;
+			this.dataoffset = offset;
+		}
+		
+		public int getId()
+		{
+			return id;		
+		}
+		
+		public long getOffset()
+		{
+			return dataoffset;
+		}
+	}
+
+
+	
 }

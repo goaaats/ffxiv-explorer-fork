@@ -19,12 +19,12 @@ import javax.swing.event.TreeSelectionListener;
 import javax.swing.filechooser.FileFilter;
 
 import ca.fraggergames.ffxivextract.gui.components.EXDF_View;
-import ca.fraggergames.ffxivextract.gui.components.HexView;
+import ca.fraggergames.ffxivextract.gui.components.Hex_View;
 import ca.fraggergames.ffxivextract.helpers.LERandomAccessFile;
 import ca.fraggergames.ffxivextract.models.EXDF_File;
 import ca.fraggergames.ffxivextract.models.SqPack_DatFile;
-import ca.fraggergames.ffxivextract.models.SqPack_File;
 import ca.fraggergames.ffxivextract.models.SqPack_IndexFile;
+import ca.fraggergames.ffxivextract.models.SqPack_IndexFile.SqPack_File;
 
 @SuppressWarnings("serial")
 public class FileManagerWindow extends JFrame implements TreeSelectionListener {
@@ -39,7 +39,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener {
 	//UI
 	ExplorerPanel fileTree = new ExplorerPanel();	
 	JSplitPane splitPane;
-	HexView hexView = new HexView(32);
+	Hex_View hexView = new Hex_View(32);
 	
 	public FileManagerWindow(String title)
 	{		
@@ -199,7 +199,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener {
 			else				
 			{
 				splitPane.setRightComponent(hexView);
-				hexView.setBytes(data);				
+				//hexView.setBytes(data);				
 			}
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block

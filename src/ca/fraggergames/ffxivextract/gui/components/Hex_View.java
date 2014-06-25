@@ -7,12 +7,12 @@ import javax.swing.JTextArea;
 import javax.swing.ScrollPaneConstants;
 
 @SuppressWarnings("serial")
-public class HexView extends JScrollPane{
+public class Hex_View extends JScrollPane{
 
 	JTextArea txtHexData = new JTextArea();
 	int columnCount;
 	
-	public HexView(int columnCount)
+	public Hex_View(int columnCount)
 	{		
 		this.columnCount = columnCount;
 		
