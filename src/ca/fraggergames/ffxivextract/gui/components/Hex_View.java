@@ -3,18 +3,13 @@ package ca.fraggergames.ffxivextract.gui.components;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.Graphics;
 import java.awt.GridBagConstraints;
-import java.awt.Insets;
 
 import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.ScrollPaneConstants;
-import javax.swing.UIManager;
-import javax.swing.border.Border;
-import javax.swing.border.MatteBorder;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.JTableHeader;
@@ -46,6 +41,7 @@ public class Hex_View extends JScrollPane{
 				
 		txtHexData.setTableHeader(null);
 		txtHexData.setGridColor(Color.GRAY);
+		
 		txtHexData.getColumnModel().getColumn(0).setMinWidth(70);
 		
 		DefaultTableCellRenderer cellRender = new DefaultTableCellRenderer() {
@@ -67,9 +63,20 @@ public class Hex_View extends JScrollPane{
 	          if (column == 0)	          
 	        	  setBorder(BorderFactory.createMatteBorder(0, 0, 1, 2, Color.LIGHT_GRAY));
 	          else if (column == 16)
-	        	  setBorder(BorderFactory.createMatteBorder(0, 0, 1, 2, Color.LIGHT_GRAY));
+	          {
+	        	  if (value == null)
+	        		  setBorder(BorderFactory.createMatteBorder(0, 0, 0, 0, Color.LIGHT_GRAY));
+	        	  else
+	        		  setBorder(BorderFactory.createMatteBorder(0, 0, 1, 2, Color.LIGHT_GRAY));
+	          }
 	          else
-	        	  setBorder(BorderFactory.createMatteBorder(0, 0, 1, 1, Color.LIGHT_GRAY));
+	          {
+	        	  if (value == null)
+	        		  setBorder(BorderFactory.createMatteBorder(0, 0, 0, 0, Color.LIGHT_GRAY));
+	        	  else
+	        		  setBorder(BorderFactory.createMatteBorder(0, 0, 1, 1, Color.LIGHT_GRAY));
+	          }
+	        	  
 	          	    
 	          return this;
 	        }
@@ -88,17 +95,10 @@ public class Hex_View extends JScrollPane{
 	}
 			
 	class HexTableModel extends AbstractTableModel{
-
-		
-		
-		public HexTableModel()
-		{
-			
-		}
 		
 		@Override
 		public int getColumnCount() {
-			return 33;
+			return 33; //Address Column + 16 Bytes of Hex + 16 Bytes of Chars
 		}
 
 		@Override
@@ -113,7 +113,7 @@ public class Hex_View extends JScrollPane{
 		public String getColumnName(int column) {
 			return "";
 		}
-
+		
 		@Override
 		public Object getValueAt(int rowIndex, int columnIndex) {
 			if (columnIndex == 0)
@@ -122,11 +122,17 @@ public class Hex_View extends JScrollPane{
 			}
 			else if (columnIndex >= 1 && columnIndex <= 16)
 			{
+				//if (((rowIndex * 16) + columnIndex - 1) > bytes.length-1)
+				//	return null;
+				
 				int value = bytes[(rowIndex * 16) + columnIndex - 1];
 				return byteToStr[value & 0xFF];
 			}
 			else
 			{
+				//if (((rowIndex * 16) + columnIndex - 17) > bytes.length-1)
+				//	return null;
+				
 				int value = bytes[(rowIndex * 16) + columnIndex - 17];
 				return byteToChar[value & 0xFF];
 			}

@@ -45,7 +45,7 @@ public class SqPack_DatFile {
 		int currentFileOffset = 0;
 		
 		//Extract File
-		for (int i = 0; i < blockCount-1; i++)
+		for (int i = 0; i < blockCount; i++)
 		{
 			// Block Header
 			currentFilePointer.seek(fileOffset + headerLength + dataBlocks[i].offset);
