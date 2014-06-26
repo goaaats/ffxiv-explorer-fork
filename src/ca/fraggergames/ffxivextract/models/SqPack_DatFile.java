@@ -55,9 +55,17 @@ public class SqPack_DatFile {
 			int decompressedBlockSize = currentFilePointer.readInt();
 			
 			if (Constants.DEBUG)
-				System.out.println("Decompressing block " + i + " @ offset: " + String.format("%X", dataBlocks[i].offset));
+				System.out.println("Decompressing block " + i + " @ file offset: " + currentFilePointer.getFilePointer() + " @ block offset: " + String.format("%X", dataBlocks[i].offset) + ". Compressed Size: " + compressedBlockSize + " and Decompressed Size: " + decompressedBlockSize + ". Block Size: " + dataBlocks[i].padding);
 			
-			byte[] decompressedBlock = decompressBlock(compressedBlockSize, decompressedBlockSize);
+			byte[] decompressedBlock = null;			
+			if (compressedBlockSize == 32000) //Not actually compressed, just read decompressed size
+			{
+				decompressedBlock = new byte[decompressedBlockSize];
+				currentFilePointer.readFully(decompressedBlock);
+			}
+			else //Gotta decompress
+				decompressedBlock = decompressBlock(compressedBlockSize, decompressedBlockSize);
+			
 			System.arraycopy(decompressedBlock, 0, decompressedFile, currentFileOffset, decompressedBlockSize);
 			currentFileOffset+=decompressedBlockSize;
 		}
@@ -104,8 +112,8 @@ public class SqPack_DatFile {
 															// for missing zlib
 															// header/footer
 		// Zlib Magic Number
-		gzipedData[0] = (byte) 0x58;
-		gzipedData[1] = (byte) 0x85;
+		gzipedData[0] = (byte) 0x78;
+		gzipedData[1] = (byte) 0x9C;
 
 		// Actual Data
 		currentFilePointer.readFully(gzipedData, 2, compressedSize);
