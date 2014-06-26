@@ -101,7 +101,7 @@ public class Hex_View extends JScrollPane{
 		
 		@Override
 		public int getColumnCount() {
-			return columnCount + 1 + 16; //Address Column + 16 Bytes of Hex + 16 Bytes of Chars
+			return columnCount + 1 + columnCount; //Address Column + 16 Bytes of Hex + 16 Bytes of Chars
 		}
 
 		@Override
@@ -109,7 +109,13 @@ public class Hex_View extends JScrollPane{
 			if (bytes == null || bytes.length == 0)
 				return 0;
 			else
-				return bytes.length / columnCount;
+			{
+				if (bytes.length % columnCount == 0)
+					return (bytes.length / columnCount);
+				else
+					return (bytes.length / columnCount) + 1;
+			}
+				
 		}
 		
 		@Override
@@ -125,18 +131,18 @@ public class Hex_View extends JScrollPane{
 			}
 			else if (columnIndex >= 1 && columnIndex <= columnCount)
 			{
-				//if (((rowIndex * 16) + columnIndex - 1) > bytes.length-1)
-				//	return null;
+				if (((rowIndex * columnCount) + columnIndex - 1) > bytes.length-1)
+					return null;
 				
 				int value = bytes[(rowIndex * columnCount) + columnIndex - 1];
 				return byteToStr[value & 0xFF];
 			}
 			else
 			{
-				//if (((rowIndex * 16) + columnIndex - 17) > bytes.length-1)
-					//return null;
+				if (((rowIndex * columnCount) + columnIndex - columnCount - 1) > bytes.length-1)
+					return null;
 				
-				int value = bytes[(rowIndex * columnCount) + columnIndex - 17];
+				int value = bytes[(rowIndex * columnCount) + columnIndex - columnCount - 1];
 				return byteToChar[value & 0xFF];
 			}
 		}

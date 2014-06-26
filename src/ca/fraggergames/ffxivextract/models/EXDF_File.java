@@ -10,6 +10,9 @@ import java.nio.ByteBuffer;
 
 public class EXDF_File {
 
+	private static String quoteCommaQuote = "\",\"";
+	private static String quoteNewLine = "\"\r\n";
+	
 	public EXDF_Offset[] offsets;
 	public EXDF_StringEntry[] strings;
 
@@ -90,6 +93,22 @@ public class EXDF_File {
 		} 
 		catch (BufferUnderflowException underflowException) {} 
 		catch (BufferOverflowException overflowException) {}
+	}
+
+	public String getCSV() {
+		
+		StringBuilder sb = new StringBuilder();
+		
+		for (int i = 0; i < strings.length; i++)
+		{
+			sb.append('\"');
+			sb.append(strings[i].name);
+			sb.append(quoteCommaQuote);			
+			sb.append(strings[i].value);
+			sb.append(quoteNewLine);			
+		}
+		
+		return sb.toString();
 	}
 
 }
