@@ -6,6 +6,7 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 
 import javax.swing.JFileChooser;
@@ -17,14 +18,18 @@ import javax.swing.JSplitPane;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.filechooser.FileFilter;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
+import ca.fraggergames.ffxivextract.Constants;
 import ca.fraggergames.ffxivextract.gui.components.EXDF_View;
-import ca.fraggergames.ffxivextract.gui.components.HexView;
+import ca.fraggergames.ffxivextract.gui.components.Hex_View;
 import ca.fraggergames.ffxivextract.helpers.LERandomAccessFile;
+import ca.fraggergames.ffxivextract.helpers.WinRegistry;
 import ca.fraggergames.ffxivextract.models.EXDF_File;
+import ca.fraggergames.ffxivextract.models.SCD_File;
 import ca.fraggergames.ffxivextract.models.SqPack_DatFile;
-import ca.fraggergames.ffxivextract.models.SqPack_File;
 import ca.fraggergames.ffxivextract.models.SqPack_IndexFile;
+import ca.fraggergames.ffxivextract.models.SqPack_IndexFile.SqPack_File;
 
 @SuppressWarnings("serial")
 public class FileManagerWindow extends JFrame implements TreeSelectionListener {
@@ -39,7 +44,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener {
 	//UI
 	ExplorerPanel fileTree = new ExplorerPanel();	
 	JSplitPane splitPane;
-	HexView hexView = new HexView(32);
+	Hex_View hexView = new Hex_View(32);
 	
 	public FileManagerWindow(String title)
 	{		
@@ -61,8 +66,19 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener {
 		this.setTitle(title);
 		this.getContentPane().add(splitPane);		
 		
-		//lastOpenedFile = new File("G:\\FINAL FANTASY XIV - A Realm Reborn\\game\\sqpack\\ffxiv\\000000.win32.index");
-		//openFile(lastOpenedFile);
+		//Check Windows registry for a FFXIV folder
+		String value = null;
+		/*try {
+			value = WinRegistry.readString (
+				    WinRegistry.HKEY_LOCAL_MACHINE,                             
+				   "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion",           
+				   "ProductName");
+		} catch (Exception e){}
+		*/
+		if (Constants.DEBUG){
+			lastOpenedFile = new File("F:\\Program Files (x86)\\SquareEnix\\FINAL FANTASY XIV - A Realm Reborn\\game\\sqpack\\ffxiv\\0c0000.win32.index");
+			openFile(lastOpenedFile);
+		}
 	}	
 
 	protected void openFile(File selectedFile) {
@@ -77,7 +93,9 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener {
 			return;
 		}
 		
-		currentIndexFile.displayIndexInfo();
+		if (Constants.DEBUG)			
+			currentIndexFile.displayIndexInfo();
+		
 		fileTree.fileOpened(currentIndexFile);
 	}
 
@@ -94,6 +112,8 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener {
 		}
 		currentIndexFile = null;
 		currentDatFile = null;
+		hexView.setBytes(null);
+		splitPane.setRightComponent(hexView);
 	}
 	
 	ActionListener menuHandler = new ActionListener() {
@@ -127,9 +147,13 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener {
 			{
 				closeFile();				
 			}
-			else if (event.getActionCommand().equals("extract"))
+			else if (event.getActionCommand().equals("extractc"))
 			{
-				extractSelected();
+				extractConverted();
+			}
+			else if (event.getActionCommand().equals("extractr"))
+			{
+				extractRAW();
 			}
 			else if (event.getActionCommand().equals("quit"))
 			{
@@ -153,13 +177,16 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener {
 		file_Open.setActionCommand("open");
 		JMenuItem file_Close = new JMenuItem("Close");
 		file_Close.setActionCommand("close");
-		JMenuItem file_Extract = new JMenuItem("Extract");		
-		file_Extract.setActionCommand("extract");
+		JMenuItem file_Extract = new JMenuItem("Extract");
+		JMenuItem file_ExtractRaw = new JMenuItem("Extract Raw Dat");		
+		file_Extract.setActionCommand("extractc");
+		file_ExtractRaw.setActionCommand("extractr");
 		JMenuItem file_Quit = new JMenuItem("Quit");
 		file_Quit.setActionCommand("quit");
 		file_Open.addActionListener(menuHandler);
 		file_Close.addActionListener(menuHandler);
 		file_Extract.addActionListener(menuHandler);
+		file_ExtractRaw.addActionListener(menuHandler);
 		file_Quit.addActionListener(menuHandler);
 		
 		JMenuItem help_About = new JMenuItem("About");
@@ -170,6 +197,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener {
 		file.add(file_Close);
 		file.addSeparator();
 		file.add(file_Extract);
+		file.add(file_ExtractRaw);
 		file.addSeparator();
 		file.add(file_Quit);	
 		
@@ -207,39 +235,105 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener {
 		}
 	}	
 	
-	private void extractSelected() {
+	private void extractRAW() {
 		JFileChooser fileChooser = new JFileChooser(lastOpenedFile);
 		
 		ArrayList<SqPack_File> files = fileTree.getSelectedFiles();
 		
 		if (files.size() > 1)
 			fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-		
-		fileChooser.setFileFilter(new FileFilter() {
-			
-			@Override
-			public String getDescription() {
-				return null;
-			}
-			
-			@Override
-			public boolean accept(File f) {
-				return f.getName().endsWith(".index") || f.isDirectory();
-			}				
-		});
+		else
+		{			
+			fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);		
+			fileChooser.setSelectedFile(new File(String.format("%X", files.get(0).getId() & 0xFFFFFFFF)));
+			FileNameExtensionFilter filter = new FileNameExtensionFilter("FFXIV Raw Dat (.dat, .exd, .exh, .scd)", new String[] {".dat",".exd",".exh",".scd"});
+			fileChooser.addChoosableFileFilter(filter);
+			fileChooser.setFileFilter(filter);
+			fileChooser.setAcceptAllFileFilterUsed(false);
+		}
+	
 		int retunval = fileChooser.showSaveDialog(FileManagerWindow.this);
 		if (retunval == JFileChooser.APPROVE_OPTION)
 		{
 			lastOpenedFile = fileChooser.getSelectedFile();
-			lastOpenedFile.mkdirs();
+			lastOpenedFile.getParentFile().mkdirs();
 			
 			
 				for (int i = 0; i < files.size(); i++){
 					try {
 						byte[] data = currentDatFile.extractFile(files.get(i).getOffset());
 						String extension = getExtension(data);
-						LERandomAccessFile out = new LERandomAccessFile(lastOpenedFile.getAbsolutePath() + "\\" + String.format("%X", files.get(i).getId() & 0xFFFFFFFF) + extension, "rw");
+						
+						String path = lastOpenedFile.getCanonicalPath();
+						if (files.size() > 1)
+							path = lastOpenedFile.getCanonicalPath() + "\\" + String.format("%X", files.get(i).getId() & 0xFFFFFFFF);
+						
+						LERandomAccessFile out = new LERandomAccessFile(path + extension, "rw");
 						out.write(data, 0, data.length);
+						out.close();
+					} catch (FileNotFoundException e) {
+						e.printStackTrace();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
+			
+		}
+	}
+	
+	private void extractConverted() {
+		JFileChooser fileChooser = new JFileChooser(lastOpenedFile);
+		
+		ArrayList<SqPack_File> files = fileTree.getSelectedFiles();
+		
+		if (files.size() > 1)
+			fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+		else
+		{			
+			fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);		
+			fileChooser.setSelectedFile(new File(String.format("%X", files.get(0).getId() & 0xFFFFFFFF)));
+			FileNameExtensionFilter filter = new FileNameExtensionFilter("FFXIV Raw Dat (.dat, .exd, .exh, .scd)", new String[] {".dat",".exd",".exh",".scd"});
+			fileChooser.addChoosableFileFilter(filter);
+			fileChooser.setFileFilter(filter);
+			fileChooser.setAcceptAllFileFilterUsed(false);
+		}
+	
+		int retunval = fileChooser.showSaveDialog(FileManagerWindow.this);
+		if (retunval == JFileChooser.APPROVE_OPTION)
+		{
+			lastOpenedFile = fileChooser.getSelectedFile();
+			lastOpenedFile.getParentFile().mkdirs();
+			
+			
+				for (int i = 0; i < files.size(); i++){
+					try {
+						byte[] data = currentDatFile.extractFile(files.get(i).getOffset());
+						byte[] dataToSave;
+						String extension = getExtension(data);
+						
+						if (extension.equals(".exd"))
+						{
+							EXDF_File file = new EXDF_File(data);
+							dataToSave = file.getCSV().getBytes();
+							extension = ".csv";
+						}
+						else if (extension.equals(".scd"))
+						{
+							SCD_File file = new SCD_File(data);
+							dataToSave = file.getData();
+							extension = ".ogg";
+						}
+						else
+						{
+							dataToSave = data;
+						}
+						
+						String path = lastOpenedFile.getCanonicalPath();
+						if (files.size() > 1)
+							path = lastOpenedFile.getCanonicalPath() + "\\" + String.format("%X", files.get(i).getId() & 0xFFFFFFFF);
+						
+						LERandomAccessFile out = new LERandomAccessFile(path + extension, "rw");
+						out.write(dataToSave, 0, dataToSave.length);
 						out.close();
 					} catch (FileNotFoundException e) {
 						e.printStackTrace();
@@ -253,11 +347,13 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener {
 
 	private String getExtension(byte[] data) {
 		if (data[0] == 'E' && data[1] == 'X' && data[2] == 'D' && data[3] == 'F')
-			return ".exdf";
+			return ".exd";
 		else if (data[0] == 'E' && data[1] == 'X' && data[2] == 'H' && data[3] == 'F')
-			return ".exhf";
+			return ".exh";
 		else if (data[1] == 'L' && data[2] == 'u' && data[3] == 'a' && data[4] == 'Q' )
-			return ".luaq";
+			return ".luab";
+		else if (data[0] == 'S' && data[1] == 'E' && data[2] == 'D' && data[3] == 'B' )
+			return ".scd";
 		else
 			return ".dat";
 	}

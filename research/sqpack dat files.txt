@@ -36,15 +36,15 @@ Current research on SqPack Dat files
 
 ---This part repeats per Num Blocks---
 0x000: Offset                  Int32; From end of this header (Check [File Entry Offset] + [Header Length])
-0x004: Padding Size            Short;
-0x006: Decompressed Block Size Short;
+0x004: Block Size              Short; Total Block Size, from beginning of header to end of padding.
+0x006: Decompressed Data Size  Short;
 
 ---Zlib compressed data here----
 
 ===BLOCK HEADER===
 0x000: Header Size         Int32; Seems to be always 0x10bytes
 0x004: NULL                Int32;
-0x008: Compressed Length   Int32;
+0x008: Compressed Length   Int32; If this is 32000, IT'S NOT COMPRESSED. Use decompressed length to read the data in and just append
 0x00c: Decompressed Length Int32; Will be max 16kb.
 
 0x010: Compressed Data          ; Size will be [Compressed Length]

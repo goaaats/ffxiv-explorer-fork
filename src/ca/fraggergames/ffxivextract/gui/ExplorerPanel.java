@@ -14,9 +14,9 @@ import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 
-import ca.fraggergames.ffxivextract.models.SqPack_File;
-import ca.fraggergames.ffxivextract.models.SqPack_Folder;
 import ca.fraggergames.ffxivextract.models.SqPack_IndexFile;
+import ca.fraggergames.ffxivextract.models.SqPack_IndexFile.SqPack_File;
+import ca.fraggergames.ffxivextract.models.SqPack_IndexFile.SqPack_Folder;
 
 @SuppressWarnings("serial")
 public class ExplorerPanel extends JScrollPane {
