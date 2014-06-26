@@ -44,7 +44,7 @@ Current research on SqPack Dat files
 ===BLOCK HEADER===
 0x000: Header Size         Int32; Seems to be always 0x10bytes
 0x004: NULL                Int32;
-0x008: Compressed Length   Int32;
+0x008: Compressed Length   Int32; If this is 32000, IT'S NOT COMPRESSED. Use decompressed length to read the data in and just append
 0x00c: Decompressed Length Int32; Will be max 16kb.
 
 0x010: Compressed Data          ; Size will be [Compressed Length]
