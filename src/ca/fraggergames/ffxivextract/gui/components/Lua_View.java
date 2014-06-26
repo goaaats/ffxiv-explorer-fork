@@ -14,6 +14,7 @@ import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.JTableHeader;
 
+@SuppressWarnings("serial")
 public class Lua_View extends JScrollPane {
 
 	JTable luaCodeTable;
@@ -61,6 +62,11 @@ public class Lua_View extends JScrollPane {
 		luaCodeTable.setDefaultRenderer(Object.class, cellRender);
 	}
 
+	public void setCode(String[] code){
+		codeLines = code;
+	}
+	
+	@SuppressWarnings("serial")
 	class LuaCodeTableModel extends AbstractTableModel {
 
 		@Override
