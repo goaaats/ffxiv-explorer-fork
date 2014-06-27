@@ -341,13 +341,11 @@ JNIEXPORT void JNICALL Java_ca_fraggergames_ffxivextract_helpers_LuaDec_decompil
 	jbyte* bufferPtr = (*env)->GetByteArrayElements(env, buffer, 0);
 	jsize size = (*env)->GetArrayLength(env, buffer);
 	doLuadec(bufferPtr, size, isDissassemble);
-
+	(*env)->ReleaseByteArrayElements(env, buffer, bufferPtr, 0);
 	return;
 }
 
 void doLuadec(char * byteCode, int byteCodeSize, int dissemble) {
-	int oargc;
-	char** oargv;
 	char tmp[256];
 	lua_State* L;
 	Proto* f;
@@ -363,15 +361,11 @@ void doLuadec(char * byteCode, int byteCodeSize, int dissemble) {
 	if (disassemble) {
 		printf(
 				"; This file has been disassembled using luadec " VERSION " by sztupy (http://winmo.sztupy.hu)\n");
-		printf("; Command line was: ");
 	} else {
 		printf(
 				"-- Decompiled using luadec " VERSION " by sztupy (http://winmo.sztupy.hu)\n");
-		printf("-- Command line was: ");
 	}
-	for (i = 1; i < oargc; i++) {
-		printf("%s ", oargv[i]);
-	}
+
 	printf("\n\n");
 	f = combine(L, 1);
 	if (guess_locals) {
