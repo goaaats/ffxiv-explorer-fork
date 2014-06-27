@@ -338,9 +338,8 @@ int luaU_guess_locals(Proto * f, int main);
 JNIEXPORT void JNICALL Java_ca_fraggergames_ffxivextract_helpers_LuaDec_decompile(JNIEnv * env, jobject obj, jbyteArray buffer, jint isDissassemble)
 {
 	printf("TEST\n");
-	jbyte* bufferPtr = (*env)->GetByteArrayElements(env, buffer, NULL);
+	jbyte* bufferPtr = (*env)->GetByteArrayElements(env, buffer, 0);
 	jsize size = (*env)->GetArrayLength(env, buffer);
-
 	doLuadec(bufferPtr, size, isDissassemble);
 
 	return;

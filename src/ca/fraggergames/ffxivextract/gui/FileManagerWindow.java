@@ -226,7 +226,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener {
 				splitPane.setRightComponent(exdfComponent);
 			}
 			else if (data[1] == 'L' && data[2] == 'u')
-				LuaDec.decompile(null, 0);
+				LuaDec.decompile(data, 0);
 			else				
 			{
 				splitPane.setRightComponent(hexView);
