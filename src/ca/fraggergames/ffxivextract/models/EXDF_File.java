@@ -70,7 +70,7 @@ public class EXDF_File {
 				buffer.getInt(); // Will be null
 				int nameSize = buffer.getInt();
 
-				int valueSize = entrySize - nameSize - 0x0A;
+				int valueSize = entrySize - nameSize - 0x09;
 
 				// Get Name
 				if (nameSize > 0) {
