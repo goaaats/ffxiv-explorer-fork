@@ -46,6 +46,11 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener {
 	ExplorerPanel fileTree = new ExplorerPanel();	
 	JSplitPane splitPane;
 	Hex_View hexView = new Hex_View(32);
+
+	//MENU
+	JMenuItem file_Extract;
+	JMenuItem file_ExtractRaw;
+	JMenuItem file_Close;
 	
 	public FileManagerWindow(String title)
 	{		
@@ -69,7 +74,8 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener {
 		URL imageURL = getClass().getResource("/res/frameicon.png");
 		ImageIcon image = new ImageIcon(imageURL);
 		this.setIconImage(image.getImage());
-		this.getContentPane().add(splitPane);		
+		this.getContentPane().add(splitPane);	
+		setLocationRelativeTo(null);	
 		
 		//Check Windows registry for a FFXIV folder
 		String value = null;
@@ -102,6 +108,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener {
 			currentIndexFile.displayIndexInfo();
 		
 		fileTree.fileOpened(currentIndexFile);
+		file_Close.setEnabled(true);
 	}
 
 	protected void closeFile() {
@@ -119,6 +126,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener {
 		currentDatFile = null;
 		hexView.setBytes(null);
 		splitPane.setRightComponent(hexView);
+		file_Close.setEnabled(false);
 	}
 	
 	ActionListener menuHandler = new ActionListener() {
@@ -127,20 +135,22 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener {
 		public void actionPerformed(ActionEvent event) {
 			if (event.getActionCommand().equals("open"))
 			{
-				JFileChooser fileChooser = new JFileChooser(lastOpenedFile);				
-				
-				fileChooser.setFileFilter(new FileFilter() {
+				JFileChooser fileChooser = new JFileChooser(lastOpenedFile);
+				FileFilter filter = new FileFilter() {
 					
 					@Override
 					public String getDescription() {
-						return null;
+						return "FFXIV Index File (.index)";
 					}
 					
 					@Override
 					public boolean accept(File f) {
 						return f.getName().endsWith(".index") || f.isDirectory();
 					}				
-				});
+				};
+				fileChooser.addChoosableFileFilter(filter);
+				fileChooser.setFileFilter(filter);
+				fileChooser.setAcceptAllFileFilterUsed(false);
 				int retunval = fileChooser.showOpenDialog(FileManagerWindow.this);
 				if (retunval == JFileChooser.APPROVE_OPTION)
 				{
@@ -180,10 +190,13 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener {
 		JMenu help = new JMenu("Help");
 		JMenuItem file_Open = new JMenuItem("Open");
 		file_Open.setActionCommand("open");
-		JMenuItem file_Close = new JMenuItem("Close");
+		file_Close = new JMenuItem("Close");
+		file_Close.setEnabled(false);
 		file_Close.setActionCommand("close");
-		JMenuItem file_Extract = new JMenuItem("Extract");
-		JMenuItem file_ExtractRaw = new JMenuItem("Extract Raw Dat");		
+		file_Extract = new JMenuItem("Extract");
+		file_Extract.setEnabled(false);
+		file_ExtractRaw = new JMenuItem("Extract Raw Dat");
+		file_ExtractRaw.setEnabled(false);
 		file_Extract.setActionCommand("extractc");
 		file_ExtractRaw.setActionCommand("extractr");
 		JMenuItem file_Quit = new JMenuItem("Quit");
@@ -219,7 +232,16 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener {
 	public void valueChanged(TreeSelectionEvent e) {
 		
 		if (fileTree.getSelectedFiles().size() == 0)
+		{
+			file_Extract.setEnabled(false);
+			file_ExtractRaw.setEnabled(false);
 			return;
+		}
+		else
+		{
+			file_Extract.setEnabled(true);
+			file_ExtractRaw.setEnabled(true);
+		}
 		
 		try {
 			byte[] data = currentDatFile.extractFile(fileTree.getSelectedFiles().get(0).getOffset());
@@ -295,8 +317,19 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener {
 		else
 		{			
 			fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);		
-			fileChooser.setSelectedFile(new File(String.format("%X", files.get(0).getId() & 0xFFFFFFFF)));
-			FileNameExtensionFilter filter = new FileNameExtensionFilter("FFXIV Raw Dat (.dat, .exd, .exh, .scd)", new String[] {".dat",".exd",".exh",".scd"});
+			fileChooser.setSelectedFile(new File(String.format("%X", files.get(0).getId() & 0xFFFFFFFF)));			
+			FileFilter filter = new FileFilter() {
+				
+				@Override
+				public String getDescription() {
+					return "FFXIV Converted (.csv, .ogg)";
+				}
+				
+				@Override
+				public boolean accept(File f) {
+					return f.getName().endsWith(".csv") || f.getName().endsWith(".ogg") || f.isDirectory();
+				}				
+			};
 			fileChooser.addChoosableFileFilter(filter);
 			fileChooser.setFileFilter(filter);
 			fileChooser.setAcceptAllFileFilterUsed(false);

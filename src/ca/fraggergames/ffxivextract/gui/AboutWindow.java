@@ -25,7 +25,7 @@ public class AboutWindow extends JFrame {
 	FancyJLabel appname = new FancyJLabel(Constants.APPNAME);	
 	JLabel author = new FancyJLabel("By Magis");
 	JLabel version = new FancyJLabel("Version: " + Constants.VERSION);
-	JLabel gitcommit = new FancyJLabel("Git Commit: " + Constants.COMMIT.substring(0, 5));
+	JLabel gitcommit = new FancyJLabel("Git Commit: " + Constants.COMMIT.substring(0, 10));
 	
 	JLabel magisImage = new JLabel();
 	
