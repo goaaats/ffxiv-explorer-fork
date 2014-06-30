@@ -17,6 +17,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JSplitPane;
+import javax.swing.SwingWorker;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.filechooser.FileFilter;
@@ -25,6 +26,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import ca.fraggergames.ffxivextract.Constants;
 import ca.fraggergames.ffxivextract.gui.components.EXDF_View;
 import ca.fraggergames.ffxivextract.gui.components.Hex_View;
+import ca.fraggergames.ffxivextract.gui.components.Loading_Dialog;
 import ca.fraggergames.ffxivextract.helpers.LERandomAccessFile;
 import ca.fraggergames.ffxivextract.models.EXDF_File;
 import ca.fraggergames.ffxivextract.models.SCD_File;
@@ -164,11 +166,17 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener {
 			}
 			else if (event.getActionCommand().equals("extractc"))
 			{
-				extractConverted();
+				extract(true);
 			}
 			else if (event.getActionCommand().equals("extractr"))
 			{
-				extractRAW();
+				extract(false);
+			}
+			else if (event.getActionCommand().equals("musicswapper"))
+			{
+				MusicSwapperWindow swapper = new MusicSwapperWindow();
+				swapper.setLocationRelativeTo(FileManagerWindow.this);
+				swapper.setVisible(true);
 			}
 			else if (event.getActionCommand().equals("quit"))
 			{
@@ -187,6 +195,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener {
 		
 		//File Menu
 		JMenu file = new JMenu("File");
+		JMenu tools = new JMenu("Tools");
 		JMenu help = new JMenu("Help");
 		JMenuItem file_Open = new JMenuItem("Open");
 		file_Open.setActionCommand("open");
@@ -207,6 +216,10 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener {
 		file_ExtractRaw.addActionListener(menuHandler);
 		file_Quit.addActionListener(menuHandler);
 		
+		JMenuItem tools_musicswapper = new JMenuItem("Music Swapper (EXPERIMENTAL)");
+		tools_musicswapper.setActionCommand("musicswapper");
+		tools_musicswapper.addActionListener(menuHandler);
+		
 		JMenuItem help_About = new JMenuItem("About");
 		help_About.setActionCommand("about");
 		help_About.addActionListener(menuHandler);
@@ -219,10 +232,13 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener {
 		file.addSeparator();
 		file.add(file_Quit);	
 		
+		tools.add(tools_musicswapper);
+		
 		help.add(help_About);
 		
 		//Super Menus
 		menu.add(file);
+		menu.add(tools);
 		menu.add(help);
 		
 		this.setJMenuBar(menu);
@@ -244,7 +260,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener {
 		}
 		
 		try {
-			byte[] data = currentDatFile.extractFile(fileTree.getSelectedFiles().get(0).getOffset());
+			byte[] data = currentDatFile.extractFile(fileTree.getSelectedFiles().get(0).getOffset(), null);
 			
 			if (data[0] == 'E' && data[1] == 'X' && data[2] == 'D' && data[3] == 'F')
 			{
@@ -262,62 +278,17 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener {
 		}
 	}	
 	
-	private void extractRAW() {
+	private void extract(boolean doConvert) {				
 		JFileChooser fileChooser = new JFileChooser(lastOpenedFile);
 		
-		ArrayList<SqPack_File> files = fileTree.getSelectedFiles();
+		ArrayList<SqPack_File> files = fileTree.getSelectedFiles();		
 		
 		if (files.size() > 1)
 			fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 		else
 		{			
 			fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);		
-			fileChooser.setSelectedFile(new File(String.format("%X", files.get(0).getId() & 0xFFFFFFFF)));
-			FileNameExtensionFilter filter = new FileNameExtensionFilter("FFXIV Raw Dat (.dat, .exd, .exh, .scd)", new String[] {".dat",".exd",".exh",".scd"});
-			fileChooser.addChoosableFileFilter(filter);
-			fileChooser.setFileFilter(filter);
-			fileChooser.setAcceptAllFileFilterUsed(false);
-		}
-	
-		int retunval = fileChooser.showSaveDialog(FileManagerWindow.this);
-		if (retunval == JFileChooser.APPROVE_OPTION)
-		{
-			lastOpenedFile = fileChooser.getSelectedFile();
-			lastOpenedFile.getParentFile().mkdirs();
-			
-			
-				for (int i = 0; i < files.size(); i++){
-					try {
-						byte[] data = currentDatFile.extractFile(files.get(i).getOffset());
-						String extension = getExtension(data);
-						
-						String path = lastOpenedFile.getCanonicalPath();
-						if (files.size() > 1)
-							path = lastOpenedFile.getCanonicalPath() + "\\" + String.format("%X", files.get(i).getId() & 0xFFFFFFFF);
-						
-						LERandomAccessFile out = new LERandomAccessFile(path + extension, "rw");
-						out.write(data, 0, data.length);
-						out.close();
-					} catch (FileNotFoundException e) {
-						e.printStackTrace();
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-				}
-		}
-	}
-	
-	private void extractConverted() {
-		JFileChooser fileChooser = new JFileChooser(lastOpenedFile);
-		
-		ArrayList<SqPack_File> files = fileTree.getSelectedFiles();
-		
-		if (files.size() > 1)
-			fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-		else
-		{			
-			fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);		
-			fileChooser.setSelectedFile(new File(String.format("%X", files.get(0).getId() & 0xFFFFFFFF)));			
+			fileChooser.setSelectedFile(new File(String.format("%08X", files.get(0).getId() & 0xFFFFFFFF)));			
 			FileFilter filter = new FileFilter() {
 				
 				@Override
@@ -333,75 +304,109 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener {
 			fileChooser.addChoosableFileFilter(filter);
 			fileChooser.setFileFilter(filter);
 			fileChooser.setAcceptAllFileFilterUsed(false);
-		}
+		}		
 	
 		int retunval = fileChooser.showSaveDialog(FileManagerWindow.this);
+		
 		if (retunval == JFileChooser.APPROVE_OPTION)
 		{
 			lastOpenedFile = fileChooser.getSelectedFile();
 			lastOpenedFile.getParentFile().mkdirs();
-			
-			
-				for (int i = 0; i < files.size(); i++){
-					try {
-						byte[] data = currentDatFile.extractFile(files.get(i).getOffset());
-						byte[] dataToSave;
-						String extension = getExtension(data);
-						
-						if (extension.equals(".exd"))
-						{
-							EXDF_File file = new EXDF_File(data);
-							dataToSave = file.getCSV().getBytes();
-							extension = ".csv";
-						}
-						else if (extension.equals(".scd"))
-						{
-							SCD_File file = new SCD_File(data);
-							dataToSave = file.getData();
-							extension = ".ogg";
-						}
-						else
-						{
-							dataToSave = data;
-						}
-						
-						if (dataToSave == null)
-						{
-							JOptionPane.showMessageDialog(this,
-									String.format("%X", files.get(i).getId() & 0xFFFFFFFF) + " could not be converted to " + extension.substring(1).toUpperCase() + ".",
-								    "Export Error",
-								    JOptionPane.ERROR_MESSAGE);
-							continue;
-						}
-						
-						String path = lastOpenedFile.getCanonicalPath();
-						if (files.size() > 1)
-							path = lastOpenedFile.getCanonicalPath() + "\\" + String.format("%X", files.get(i).getId() & 0xFFFFFFFF);
-						
-						LERandomAccessFile out = new LERandomAccessFile(path + extension, "rw");
-						out.write(dataToSave, 0, dataToSave.length);
-						out.close();
-					} catch (FileNotFoundException e) {
-						e.printStackTrace();
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-				}
-			
+	
+			Loading_Dialog loadingDialog = new Loading_Dialog(FileManagerWindow.this, files.size());
+			loadingDialog.setTitle("Extracting...");
+			ExtractTask task = new ExtractTask(files, loadingDialog, doConvert);
+			task.execute();
+			loadingDialog.setLocationRelativeTo(this);
+			loadingDialog.setVisible(true);		
 		}
+		
 	}
 
 	private String getExtension(byte[] data) {
-		if (data[0] == 'E' && data[1] == 'X' && data[2] == 'D' && data[3] == 'F')
+		if (data.length >= 4 && data[0] == 'E' && data[1] == 'X' && data[2] == 'D' && data[3] == 'F')
 			return ".exd";
-		else if (data[0] == 'E' && data[1] == 'X' && data[2] == 'H' && data[3] == 'F')
+		else if (data.length >= 4 && data[0] == 'E' && data[1] == 'X' && data[2] == 'H' && data[3] == 'F')
 			return ".exh";
-		else if (data[1] == 'L' && data[2] == 'u' && data[3] == 'a' && data[4] == 'Q' )
+		else if (data.length >= 5 && data[1] == 'L' && data[2] == 'u' && data[3] == 'a' && data[4] == 'Q' )
 			return ".luab";
-		else if (data[0] == 'S' && data[1] == 'E' && data[2] == 'D' && data[3] == 'B' )
+		else if (data.length >= 4 && data[0] == 'S' && data[1] == 'E' && data[2] == 'D' && data[3] == 'B' )
 			return ".scd";
 		else
 			return ".dat";
 	}
 
+
+	class ExtractTask extends SwingWorker<Void, Void>{
+
+		ArrayList<SqPack_File> files;
+		Loading_Dialog loadingDialog;
+		boolean doConvert;
+		
+		public ExtractTask(ArrayList<SqPack_File> files, Loading_Dialog loadingDialog, boolean doConvert) {
+			this.files = files;
+			this.loadingDialog = loadingDialog;
+			this.doConvert = doConvert;
+		}
+		
+		@Override
+		protected Void doInBackground() throws Exception {
+			for (int i = 0; i < files.size(); i++){
+				try {
+					byte[] data = currentDatFile.extractFile(files.get(i).getOffset(), loadingDialog);
+					byte[] dataToSave;
+					String extension = getExtension(data);
+					
+					if (extension.equals(".exd") && doConvert)
+					{
+						EXDF_File file = new EXDF_File(data);
+						dataToSave = file.getCSV().getBytes();
+						extension = ".csv";
+					}
+					else if (extension.equals(".scd") && doConvert)
+					{
+						SCD_File file = new SCD_File(data);
+						dataToSave = file.getData();
+						extension = ".ogg";
+					}
+					else
+					{
+						dataToSave = data;
+					}
+					
+					if (dataToSave == null)
+					{
+						JOptionPane.showMessageDialog(FileManagerWindow.this,
+								String.format("%X", files.get(i).getId() & 0xFFFFFFFF) + " could not be converted to " + extension.substring(1).toUpperCase() + ".",
+							    "Export Error",
+							    JOptionPane.ERROR_MESSAGE);
+						continue;
+					}
+					
+					String path = lastOpenedFile.getCanonicalPath();
+					if (files.size() > 1)
+						path = lastOpenedFile.getCanonicalPath() + "\\" + String.format("%X", files.get(i).getId() & 0xFFFFFFFF);
+					
+					LERandomAccessFile out = new LERandomAccessFile(path + extension, "rw");
+					out.write(dataToSave, 0, dataToSave.length);
+					out.close();
+					
+					loadingDialog.nextFile(i+1, path + extension);
+				} catch (FileNotFoundException e) {
+					e.printStackTrace();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+			return null;
+		}
+		
+		@Override
+		protected void done() {
+			loadingDialog.setVisible(false);
+			loadingDialog.dispose();
+		}
+		
+	}
+	
 }

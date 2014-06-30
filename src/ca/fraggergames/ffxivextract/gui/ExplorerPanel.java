@@ -100,7 +100,7 @@ public class ExplorerPanel extends JScrollPane {
 	        else if (node.getUserObject() instanceof SqPack_File) //FILE
 	        {
 	        	SqPack_File file = (SqPack_File) node.getUserObject();
-	        	value =  String.format("%X", file.getId() & 0xFFFFFFFF); 
+	        	value =  String.format("%08X", file.getId() & 0xFFFFFFFF); 
 	        	setLeafIcon(fileIcon);
 	        	setLeafIcon(fileIcon);
 	        }
