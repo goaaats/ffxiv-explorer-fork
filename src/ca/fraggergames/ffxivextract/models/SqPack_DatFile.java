@@ -6,6 +6,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
 import ca.fraggergames.ffxivextract.Constants;
+import ca.fraggergames.ffxivextract.gui.components.Loading_Dialog;
 import ca.fraggergames.ffxivextract.helpers.LERandomAccessFile;
 
 import com.jcraft.jzlib.Inflater;
@@ -19,7 +20,7 @@ public class SqPack_DatFile {
 		currentFilePointer = new LERandomAccessFile(path, "r");
 	}
 
-	public byte[] extractFile(long fileOffset) throws IOException {
+	public byte[] extractFile(long fileOffset, Loading_Dialog loadingDialog) throws IOException {
 		currentFilePointer.seek(fileOffset);
 		int headerLength = currentFilePointer.readInt();
 		int contentType = currentFilePointer.readInt();
@@ -43,6 +44,11 @@ public class SqPack_DatFile {
 
 		byte decompressedFile[] = new byte[fileSize];
 		int currentFileOffset = 0;
+		
+		//If we got a loading dialog
+		if (loadingDialog != null)
+			loadingDialog.setMaxBlocks(blockCount);
+		
 		
 		//Extract File
 		for (int i = 0; i < blockCount; i++)
@@ -68,6 +74,9 @@ public class SqPack_DatFile {
 			
 			System.arraycopy(decompressedBlock, 0, decompressedFile, currentFileOffset, decompressedBlockSize);
 			currentFileOffset+=decompressedBlockSize;
+			
+			if (loadingDialog != null)			
+				loadingDialog.nextBlock(i+1);			
 		}
 		
 		return decompressedFile;

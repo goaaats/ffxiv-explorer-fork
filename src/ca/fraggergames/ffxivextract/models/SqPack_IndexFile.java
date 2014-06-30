@@ -54,7 +54,7 @@ public class SqPack_IndexFile {
 
 	}
 	
-	private int checkSqPackHeader(LERandomAccessFile ref) throws IOException{
+	public static int checkSqPackHeader(LERandomAccessFile ref) throws IOException{
 		// Check SqPack Header
 		byte[] buffer = new byte[6];
 		ref.readFully(buffer, 0, 6);
@@ -166,13 +166,13 @@ public class SqPack_IndexFile {
 		}
 	}
 	
-	public class SqPack_Folder {
+	public static class SqPack_Folder {
 		
 		private int id;
 		private SqPack_File files[];
 		private long fileIndexOffset;
 		
-		protected SqPack_Folder(int id, int numFiles, long fileIndexOffset) {
+		public SqPack_Folder(int id, int numFiles, long fileIndexOffset) {
 			this.id = id;
 			this.files = new SqPack_File[numFiles];
 			this.fileIndexOffset = fileIndexOffset;
@@ -183,11 +183,11 @@ public class SqPack_IndexFile {
 			for (int i = 0; i < files.length; i++)
 			{			
 				int id = ref.readInt();
-				ref.readInt();
+				int id2 = ref.readInt();
 				long dataoffset = ref.readInt() * 8;
 				ref.readInt();
 			
-				files[i] = new SqPack_File(id, dataoffset);			
+				files[i] = new SqPack_File(id, id2, dataoffset);			
 			}
 		}
 		
@@ -203,13 +203,14 @@ public class SqPack_IndexFile {
 		
 	}
 	
-	public class SqPack_File {
-		public int id;
+	public static class SqPack_File {
+		public int id, id2;
 		public long dataoffset;
 		
-		protected SqPack_File(int id, long offset)
+		public SqPack_File(int id, int id2, long offset)
 		{
 			this.id = id;
+			this.id2 = id2;
 			this.dataoffset = offset;
 		}
 		
@@ -221,6 +222,10 @@ public class SqPack_IndexFile {
 		public long getOffset()
 		{
 			return dataoffset;
+		}
+
+		public int getId2() {
+			return id2;
 		}
 	}
 
