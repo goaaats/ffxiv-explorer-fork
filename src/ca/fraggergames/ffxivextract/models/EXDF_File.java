@@ -84,7 +84,7 @@ public class EXDF_File {
 				if (valueSize > 0) {
 					byte[] string2 = new byte[valueSize];
 					buffer.get(string2);
-					stringValue = new String(string2);
+					stringValue = new String(string2, "UTF-8");
 				} else
 					stringValue = "";
 

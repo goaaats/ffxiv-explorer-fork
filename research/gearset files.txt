@@ -1,0 +1,8 @@
+---Gear Set Files---
+
+-Starts with item number, then label name.
+-Actual data is encoded with an XOR (look for the repeating value, decode with this)
+-Before that are three bytes.... first one defines icon, second one seems to be item level, third one defines .
+-Item Values start at 0x32 away from string start
+-Values for each item is little endian. They are Item IDs (FFXIVDB tells you).
+-0x1C from

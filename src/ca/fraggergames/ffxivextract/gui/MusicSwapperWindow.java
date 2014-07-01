@@ -1,5 +1,6 @@
 package ca.fraggergames.ffxivextract.gui;
 
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
@@ -112,6 +113,10 @@ public class MusicSwapperWindow extends JFrame {
 				if (state == ItemEvent.SELECTED && editMusicFile != null)
 				{
 					txtSetTo.setText(String.format("Currently set to offset: %08X", editedFiles[drpOriginal.getSelectedIndex()].getOffset() & 0xFFFFFFFF));
+					if (editedFiles[drpOriginal.getSelectedIndex()].getOffset() != originalMusicFile.getPackFolders()[0].getFiles()[drpOriginal.getSelectedIndex()].dataoffset)
+						txtSetTo.setForeground(Color.RED);
+					else
+						txtSetTo.setForeground(Color.decode("#006400"));
 				}
 			}
 		});
@@ -283,6 +288,7 @@ public class MusicSwapperWindow extends JFrame {
 		txtOriginal.setEnabled(isEnabled);
 		drpOriginal.setEnabled(isEnabled);
 		txtSet.setEnabled(isEnabled);
+		txtSetTo.setEnabled(isEnabled);
 		drpSet.setEnabled(isEnabled);
 		btnSwap.setEnabled(isEnabled);
 		btnRevert.setEnabled(isEnabled);
@@ -318,7 +324,10 @@ public class MusicSwapperWindow extends JFrame {
 				toThisFile.getOffset());
 		
 		txtSetTo.setText(String.format("Currently set to offset: %08X", toThisFile.getOffset() & 0xFFFFFFFF));
-
+		if (toBeChanged.getOffset() != toThisFile.getOffset())
+			txtSetTo.setForeground(Color.RED);
+		else
+			txtSetTo.setForeground(Color.decode("#006400"));
 		try {
 			LERandomAccessFile ref = new LERandomAccessFile(
 					edittingIndexFile.getCanonicalPath(), "rw");
