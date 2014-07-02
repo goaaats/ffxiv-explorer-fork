@@ -112,6 +112,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener {
 		if (Constants.DEBUG)			
 			currentIndexFile.displayIndexInfo();
 		
+		setTitle(Constants.APPNAME + " [" + selectedFile.getName() + "]");
 		fileTree.fileOpened(currentIndexFile);
 		file_Close.setEnabled(true);
 	}
