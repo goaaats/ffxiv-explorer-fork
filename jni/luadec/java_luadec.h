@@ -10,10 +10,10 @@ extern "C" {
 /*
  * Class:     ca_fraggergames_ffxivextract_helpers_LuaDec
  * Method:    decompile
- * Signature: ([BI)V
+ * Signature: ([B)Ljava/lang/String;
  */
-JNIEXPORT void JNICALL Java_ca_fraggergames_ffxivextract_helpers_LuaDec_decompile
-  (JNIEnv *, jclass, jbyteArray, jint);
+JNIEXPORT jstring JNICALL Java_ca_fraggergames_ffxivextract_helpers_LuaDec_decompile
+  (JNIEnv *, jclass, jbyteArray);
 
 #ifdef __cplusplus
 }

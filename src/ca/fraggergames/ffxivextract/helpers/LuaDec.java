@@ -6,6 +6,6 @@ public class LuaDec {
 		System.loadLibrary("luadec");
 	}
 
-	public native static void decompile(byte[] luaByteCode, int isDissassemble);
+	public native static String decompile(byte[] luaByteCode);
 
 }

@@ -23,6 +23,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import ca.fraggergames.ffxivextract.Constants;
 import ca.fraggergames.ffxivextract.gui.components.EXDF_View;
 import ca.fraggergames.ffxivextract.gui.components.Hex_View;
+import ca.fraggergames.ffxivextract.gui.components.Lua_View;
 import ca.fraggergames.ffxivextract.helpers.LERandomAccessFile;
 import ca.fraggergames.ffxivextract.helpers.LuaDec;
 import ca.fraggergames.ffxivextract.helpers.WinRegistry;
@@ -225,8 +226,10 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener {
 				EXDF_View exdfComponent = new EXDF_View(new EXDF_File(data));
 				splitPane.setRightComponent(exdfComponent);
 			}
-			else if (data[1] == 'L' && data[2] == 'u')
-				LuaDec.decompile(data, 0);
+			else if (data[1] == 'L' && data[2] == 'u'){
+				Lua_View luaComponent = new Lua_View(LuaDec.decompile(data).split("\n"));
+				splitPane.setRightComponent(luaComponent);
+			}
 			else				
 			{
 				splitPane.setRightComponent(hexView);

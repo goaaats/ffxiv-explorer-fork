@@ -20,7 +20,7 @@ public class Lua_View extends JScrollPane {
 	JTable luaCodeTable;
 	String[] codeLines;
 
-	public Lua_View() {
+	public Lua_View(String[] strings) {
 		luaCodeTable = new JTable(new LuaCodeTableModel());
 
 		setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
@@ -60,6 +60,9 @@ public class Lua_View extends JScrollPane {
 		luaCodeTable.setShowGrid(false);
 		luaCodeTable.setIntercellSpacing(new Dimension(0, 0));
 		luaCodeTable.setDefaultRenderer(Object.class, cellRender);
+		
+		if (strings != null)
+			codeLines = strings;
 	}
 
 	public void setCode(String[] code){

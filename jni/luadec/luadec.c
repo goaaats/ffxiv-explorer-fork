@@ -42,9 +42,9 @@ static char Output[] = { OUTPUT }; /* default output file name */
 static const char* output = Output; /* output file name */
 static const char* progname = PROGNAME; /* actual program name */
 
-void doLuadec(char * byteCode, int byteCodeSize, int dissemble);
+void doLuadec(char * byteCode, int byteCodeSize, char**);
 
-void luaU_decompile(const Proto * f, int lflag);
+void luaU_decompile(const Proto * f, int lflag, char** code);
 void luaU_decompileFunctions(const Proto * f, int lflag, int functions);
 void luaU_disassemble(const Proto* f, int dflag, int functions, char* name);
 
@@ -335,22 +335,26 @@ static void strip(lua_State* L, Proto* f) {
 
 int luaU_guess_locals(Proto * f, int main);
 
-JNIEXPORT void JNICALL Java_ca_fraggergames_ffxivextract_helpers_LuaDec_decompile(JNIEnv * env, jobject obj, jbyteArray buffer, jint isDissassemble)
+JNIEXPORT jstring JNICALL Java_ca_fraggergames_ffxivextract_helpers_LuaDec_decompile(JNIEnv * env, jobject obj, jbyteArray buffer)
 {
-	printf("TEST\n");
 	jbyte* bufferPtr = (*env)->GetByteArrayElements(env, buffer, 0);
 	jsize size = (*env)->GetArrayLength(env, buffer);
-	doLuadec(bufferPtr, size, isDissassemble);
+	char * outputCode;
+
+	doLuadec(bufferPtr, size, &outputCode);
+	jstring returnCode = (*env)->NewStringUTF(env, outputCode);
+
+	free(outputCode);
 	(*env)->ReleaseByteArrayElements(env, buffer, bufferPtr, 0);
-	return;
+
+	return returnCode;
 }
 
-void doLuadec(char * byteCode, int byteCodeSize, int dissemble) {
-	char tmp[256];
+void doLuadec(char * byteCode, int byteCodeSize, char** output) {
 	lua_State* L;
 	Proto* f;
-	int i;
 	LDS2 = NULL;
+
 	L = lua_open();
 	glstate = L;
 	luaB_opentests(L);
@@ -358,49 +362,37 @@ void doLuadec(char * byteCode, int byteCodeSize, int dissemble) {
 	if (luaL_loadbuffer(L, byteCode, byteCodeSize, "Input") != 0)
 				fatal(lua_tostring(L,-1));
 
-	if (disassemble) {
-		printf(
-				"; This file has been disassembled using luadec " VERSION " by sztupy (http://winmo.sztupy.hu)\n");
-	} else {
-		printf(
-				"-- Decompiled using luadec " VERSION " by sztupy (http://winmo.sztupy.hu)\n");
-	}
+	printf(
+			"-- Decompiled using luadec " VERSION " by sztupy (http://winmo.sztupy.hu)\n");
+
 
 	printf("\n\n");
-	f = combine(L, 1);
-	if (guess_locals) {
-		luaU_guess_locals(f, 0);
-	}
-	if (lds2) {
-		int i, i2;
-		for (i = -1; i < f->sizep; i++) {
-			Proto * x = f;
-			if (i != -1) {
-				x = f->p[i];
+
+		f = combine(L, 1);
+		if (guess_locals) {
+			luaU_guess_locals(f, 0);
+		}
+		if (lds2) {
+			int i, i2;
+			for (i = -1; i < f->sizep; i++) {
+				Proto * x = f;
+				if (i != -1) {
+					x = f->p[i];
+				}
+				for (i2 = 0; i2 < x->sizelocvars; i2++) {
+					if (i2 != 0)
+						printf(",");
+					printf("%d-%d", x->locvars[i2].startpc, x->locvars[i2].endpc);
+				}
+				printf(";");
 			}
-			for (i2 = 0; i2 < x->sizelocvars; i2++) {
-				if (i2 != 0)
-					printf(",");
-				printf("%d-%d", x->locvars[i2].startpc, x->locvars[i2].endpc);
-			}
-			printf(";");
+			return;
 		}
-		return;
-	}
-	if (functions) {
-		if (disassemble) {
-			sprintf(tmp, "%d", functions);
-			luaU_disassemble(f, debugging, functions, tmp);
+		if (functions) {
+				luaU_decompileFunctions(f, debugging, functions);
 		} else {
-			luaU_decompileFunctions(f, debugging, functions);
+				luaU_decompile(f, debugging, output);
 		}
-	} else {
-		if (disassemble) {
-			sprintf(tmp, "");
-			luaU_disassemble(f, debugging, 0, tmp);
-		} else {
-			luaU_decompile(f, debugging);
-		}
-	}
+
 	return;
 }

@@ -2334,14 +2334,11 @@ errorHandler:
    return output;
 }
 
-void luaU_decompile(const Proto * f, int dflag)
+void luaU_decompile(const Proto * f, int dflag, char** code)
 {
-   char* code;
-   debug = dflag;
-	 functionnum = 0;
-   code = ProcessCode(f, 0);
-   printf("%s\n", code);
-   free(code);
+	   debug = dflag;
+		 functionnum = 0;
+	   *code = ProcessCode(f, 0);
 }
 
 void luaU_decompileFunctions(const Proto* f, int dflag, int functions)
