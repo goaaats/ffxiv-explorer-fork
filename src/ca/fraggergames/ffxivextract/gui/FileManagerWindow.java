@@ -270,7 +270,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener {
 						byte[] data = currentDatFile.extractFile(files.get(i).getOffset());
 						String extension = getExtension(data);
 						
-						String path = lastOpenedFile.getCanonicalPath();
+						String path = lastOpenedFile.getCanonicalPath();	
 						if (files.size() > 1)
 							path = lastOpenedFile.getCanonicalPath() + "\\" + String.format("%X", files.get(i).getId() & 0xFFFFFFFF);
 						
