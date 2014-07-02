@@ -64,8 +64,8 @@ public class MusicSwapperWindow extends JFrame {
 
 	JPanel pnlSwapper;
 	JLabel txtOriginal, txtSet;
-	JComboBox<String> drpOriginal;
-	JComboBox<String> drpSet;
+	JComboBox drpOriginal;
+	JComboBox drpSet;
 	JLabel txtSetTo;
 	JButton btnSwap, btnRevert;
 
@@ -106,7 +106,7 @@ public class MusicSwapperWindow extends JFrame {
 
 		txtSet = new JLabel("Set to:", SwingConstants.LEFT);
 		txtOriginal = new JLabel("Original Id:");
-		drpOriginal = new JComboBox<String>();
+		drpOriginal = new JComboBox();
 		drpOriginal.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent itemEvent) {
 				int state = itemEvent.getStateChange();
@@ -120,7 +120,7 @@ public class MusicSwapperWindow extends JFrame {
 				}
 			}
 		});
-		drpSet = new JComboBox<String>();
+		drpSet = new JComboBox();
 
 		txtSetTo = new JLabel("Currently set to: ");
 		
@@ -275,7 +275,7 @@ public class MusicSwapperWindow extends JFrame {
 		edittingIndexFile = file;
 	}
 
-	private void loadDropDown(JComboBox<String> dropdown, SqPack_File[] files,
+	private void loadDropDown(JComboBox dropdown, SqPack_File[] files,
 			int selectedSpot) {
 		dropdown.removeAllItems();
 		for (int i = 0; i < files.length; i++)
