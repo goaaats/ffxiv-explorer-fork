@@ -17,6 +17,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JSplitPane;
+import javax.swing.JTabbedPane;
 import javax.swing.SwingWorker;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
@@ -265,21 +266,20 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener {
 		
 		try {
 			byte[] data = currentDatFile.extractFile(fileTree.getSelectedFiles().get(0).getOffset(), null);
-			
+			JTabbedPane tabs = new JTabbedPane();
 			if (data[0] == 'E' && data[1] == 'X' && data[2] == 'D' && data[3] == 'F')
-			{
+			{								
 				EXDF_View exdfComponent = new EXDF_View(new EXDF_File(data));
-				splitPane.setRightComponent(exdfComponent);
+				tabs.addTab("EXDF File", exdfComponent);
 			}
 			else if (data[1] == 'L' && data[2] == 'u'){
 				Lua_View luaComponent = new Lua_View(LuaDec.decompile(data).split("\n"));
-				splitPane.setRightComponent(luaComponent);
-			}
-			else				
-			{
-				splitPane.setRightComponent(hexView);
-				hexView.setBytes(data);				
-			}
+				tabs.addTab("Decompiled Lua", luaComponent);
+			}		
+			hexView.setBytes(data);
+			
+			tabs.addTab("Raw Hex", hexView);			
+			splitPane.setRightComponent(tabs);
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
