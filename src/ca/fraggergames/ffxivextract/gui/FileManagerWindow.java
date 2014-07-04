@@ -31,6 +31,7 @@ import ca.fraggergames.ffxivextract.gui.components.Loading_Dialog;
 import ca.fraggergames.ffxivextract.gui.components.Lua_View;
 import ca.fraggergames.ffxivextract.helpers.LERandomAccessFile;
 import ca.fraggergames.ffxivextract.helpers.LuaDec;
+import ca.fraggergames.ffxivextract.helpers.OggVorbisPlayer;
 import ca.fraggergames.ffxivextract.helpers.WinRegistry;
 import ca.fraggergames.ffxivextract.models.EXDF_File;
 import ca.fraggergames.ffxivextract.models.SCD_File;
@@ -57,6 +58,8 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener {
 	JMenuItem file_Extract;
 	JMenuItem file_ExtractRaw;
 	JMenuItem file_Close;
+	
+	OggVorbisPlayer player;
 	
 	public FileManagerWindow(String title)
 	{		
@@ -131,6 +134,8 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener {
 		}
 		currentIndexFile = null;
 		currentDatFile = null;
+		
+		setTitle(Constants.APPNAME);
 		hexView.setBytes(null);
 		splitPane.setRightComponent(hexView);
 		file_Close.setEnabled(false);
@@ -273,9 +278,22 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener {
 				tabs.addTab("EXDF File", exdfComponent);
 			}
 			else if (data[1] == 'L' && data[2] == 'u'){
-				Lua_View luaComponent = new Lua_View(LuaDec.decompile(data).split("\n"));
+				Lua_View luaComponent = new Lua_View(("-- Decompiled using luadec 2.0.1 by sztupy (http://winmo.sztupy.hu)\n"+LuaDec.decompile(data)).split("\n"));
 				tabs.addTab("Decompiled Lua", luaComponent);
 			}		
+			else if (data.length >= 4 && data[0] == 'S' && data[1] == 'E' && data[2] == 'D' && data[3] == 'B' )
+			{			
+				if (player == null)
+				{
+					player = new OggVorbisPlayer(-1);
+					player.init();					
+				}
+				else
+					player.reset();
+				player.setSource(new SCD_File(data));
+				player.start();
+				player.playThreaded();
+			}
 			hexView.setBytes(data);
 			
 			tabs.addTab("Raw Hex", hexView);			
