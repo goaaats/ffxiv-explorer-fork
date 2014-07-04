@@ -362,12 +362,6 @@ void doLuadec(char * byteCode, int byteCodeSize, char** output) {
 	if (luaL_loadbuffer(L, byteCode, byteCodeSize, "Input") != 0)
 				fatal(lua_tostring(L,-1));
 
-	printf(
-			"-- Decompiled using luadec " VERSION " by sztupy (http://winmo.sztupy.hu)\n");
-
-
-	printf("\n\n");
-
 		f = combine(L, 1);
 		if (guess_locals) {
 			luaU_guess_locals(f, 0);
@@ -380,11 +374,11 @@ void doLuadec(char * byteCode, int byteCodeSize, char** output) {
 					x = f->p[i];
 				}
 				for (i2 = 0; i2 < x->sizelocvars; i2++) {
-					if (i2 != 0)
-						printf(",");
-					printf("%d-%d", x->locvars[i2].startpc, x->locvars[i2].endpc);
+					//if (i2 != 0)
+						//printf(",");
+					//printf("%d-%d", x->locvars[i2].startpc, x->locvars[i2].endpc);
 				}
-				printf(";");
+				//printf(";");
 			}
 			return;
 		}
