@@ -5,11 +5,11 @@ Current research on EXHF files
 ===EXHF Header===
 
 0x000 Signature    			Int32; EXHF
-0x004 Unknown      			Short; Always 0x03
+0x004 Version???  			Short; Always 0x03
 0x006 Size???      			Short; Seems to be size of the first "page"? In Strings it's 8 (4 byte index, 4 byte offset), in macroicon it's 4 (one entry is 4 bytes).
 0x008 Number of Columns???  Short; In macroicon, there is only 1 column, while strings have 2 (name/value). Items has 0x5E.
 0x00A Unknown     		    Short;
-0x00C Unknown      			Short;
+0x00C Number of EXDs??? 	Short; Seems to be the number of EXD files that pertain to the EXH. String files are usually 0x05 (for each language + 1 ????), while settings/data are 0x01.
 0x00E Unknown   	   		Short;
 0x010 Unknown           	Int32; Always 0x01.
 0x014 Number of entries		Int32; How many entries are in this file
@@ -17,4 +17,9 @@ Current research on EXHF files
 
 ===Some Table???===
 
-0x000 
+0x000
+
+-EXHF files seem to define data about the EXDF files. Specifically it seems the number of columns + sizes of these column is defined here.  
+
+-In items.exh, the table seems to be of either 2 or 4 byte entries.
+-Strings and item.exh files end with 0x100, 0x200, 0x300, 0x400, 0x500
