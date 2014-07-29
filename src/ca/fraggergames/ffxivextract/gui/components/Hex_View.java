@@ -13,6 +13,8 @@ import javax.swing.ScrollPaneConstants;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.JTableHeader;
+import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableColumn;
 
 @SuppressWarnings("serial")
 public class Hex_View extends JScrollPane {
@@ -82,6 +84,35 @@ public class Hex_View extends JScrollPane {
 				return this;
 			}
 		};
+		
+		txtHexData.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+		getViewport().add(txtHexData);
+		
+		for (int column = 0; column < txtHexData.getColumnCount(); column++)
+		{
+		    TableColumn tableColumn = txtHexData.getColumnModel().getColumn(column);
+		    int preferredWidth = tableColumn.getMinWidth();
+		    int maxWidth = tableColumn.getMaxWidth();
+		 
+		    for (int row = 0; row < txtHexData.getRowCount(); row++)
+		    {
+		        TableCellRenderer cellRenderer = txtHexData.getCellRenderer(row, column);
+		        Component c = txtHexData.prepareRenderer(cellRenderer, row, column);
+		        int width = c.getPreferredSize().width + txtHexData.getIntercellSpacing().width;
+		        preferredWidth = Math.max(preferredWidth, width);
+		 
+		        //  We've exceeded the maximum width, no need to check other rows
+		 
+		        if (preferredWidth >= maxWidth)
+		        {
+		            preferredWidth = maxWidth;
+		            break;
+		        }
+		    }
+		 
+		    tableColumn.setPreferredWidth( preferredWidth );
+		}
+		
 		txtHexData.setTableHeader(null);
 		txtHexData.setShowGrid(false);
 		txtHexData.setIntercellSpacing(new Dimension(0, 0));

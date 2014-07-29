@@ -25,6 +25,7 @@ import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import ca.fraggergames.ffxivextract.Constants;
+import ca.fraggergames.ffxivextract.Strings;
 import ca.fraggergames.ffxivextract.gui.components.EXDF_View;
 import ca.fraggergames.ffxivextract.gui.components.Hex_View;
 import ca.fraggergames.ffxivextract.gui.components.Loading_Dialog;
@@ -52,7 +53,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener {
 	//UI
 	ExplorerPanel fileTree = new ExplorerPanel();	
 	JSplitPane splitPane;
-	Hex_View hexView = new Hex_View(32);
+	Hex_View hexView = new Hex_View(16);
 
 	//MENU
 	JMenuItem file_Extract;
@@ -152,7 +153,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener {
 					
 					@Override
 					public String getDescription() {
-						return "FFXIV Index File (.index)";
+						return Strings.FILETYPE_FFXIV_INDEX;
 					}
 					
 					@Override
@@ -204,21 +205,21 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener {
 	private void setupMenu(){		
 		
 		//File Menu
-		JMenu file = new JMenu("File");
-		JMenu tools = new JMenu("Tools");
-		JMenu help = new JMenu("Help");
-		JMenuItem file_Open = new JMenuItem("Open");
+		JMenu file = new JMenu(Strings.MENU_FILE);
+		JMenu tools = new JMenu(Strings.MENU_TOOLS);
+		JMenu help = new JMenu(Strings.MENU_HELP);
+		JMenuItem file_Open = new JMenuItem(Strings.MENUITEM_OPEN);
 		file_Open.setActionCommand("open");
-		file_Close = new JMenuItem("Close");
+		file_Close = new JMenuItem(Strings.MENUITEM_CLOSE);
 		file_Close.setEnabled(false);
 		file_Close.setActionCommand("close");
-		file_Extract = new JMenuItem("Extract");
+		file_Extract = new JMenuItem(Strings.MENUITEM_EXTRACT);
 		file_Extract.setEnabled(false);
-		file_ExtractRaw = new JMenuItem("Extract Raw Dat");
+		file_ExtractRaw = new JMenuItem(Strings.MENUITEM_EXTRACTRAW);
 		file_ExtractRaw.setEnabled(false);
 		file_Extract.setActionCommand("extractc");
 		file_ExtractRaw.setActionCommand("extractr");
-		JMenuItem file_Quit = new JMenuItem("Quit");
+		JMenuItem file_Quit = new JMenuItem(Strings.MENUITEM_QUIT);
 		file_Quit.setActionCommand("quit");
 		file_Open.addActionListener(menuHandler);
 		file_Close.addActionListener(menuHandler);
@@ -226,11 +227,11 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener {
 		file_ExtractRaw.addActionListener(menuHandler);
 		file_Quit.addActionListener(menuHandler);
 		
-		JMenuItem tools_musicswapper = new JMenuItem("Music Swapper (EXPERIMENTAL)");
+		JMenuItem tools_musicswapper = new JMenuItem(Strings.MENUITEM_MUSICSWAPPER);
 		tools_musicswapper.setActionCommand("musicswapper");
 		tools_musicswapper.addActionListener(menuHandler);
 		
-		JMenuItem help_About = new JMenuItem("About");
+		JMenuItem help_About = new JMenuItem(Strings.MENUITEM_ABOUT);
 		help_About.setActionCommand("about");
 		help_About.addActionListener(menuHandler);
 		
@@ -272,16 +273,16 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener {
 		try {
 			byte[] data = currentDatFile.extractFile(fileTree.getSelectedFiles().get(0).getOffset(), null);
 			JTabbedPane tabs = new JTabbedPane();
-			if (data[0] == 'E' && data[1] == 'X' && data[2] == 'D' && data[3] == 'F')
+			if (false && data[0] == 'E' && data[1] == 'X' && data[2] == 'D' && data[3] == 'F')
 			{								
 				EXDF_View exdfComponent = new EXDF_View(new EXDF_File(data));
 				tabs.addTab("EXDF File", exdfComponent);
 			}
-			else if (data[1] == 'L' && data[2] == 'u'){
+			else if (false && data[1] == 'L' && data[2] == 'u'){
 				Lua_View luaComponent = new Lua_View(("-- Decompiled using luadec 2.0.1 by sztupy (http://winmo.sztupy.hu)\n"+LuaDec.decompile(data)).split("\n"));
 				tabs.addTab("Decompiled Lua", luaComponent);
 			}		
-			else if (data.length >= 4 && data[0] == 'S' && data[1] == 'E' && data[2] == 'D' && data[3] == 'B' )
+			else if (false && data.length >= 4 && data[0] == 'S' && data[1] == 'E' && data[2] == 'D' && data[3] == 'B' )
 			{			
 				if (player == null)
 				{

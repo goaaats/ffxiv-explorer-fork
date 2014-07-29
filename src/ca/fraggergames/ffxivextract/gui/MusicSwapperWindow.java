@@ -1,7 +1,6 @@
 package ca.fraggergames.ffxivextract.gui;
 
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -17,31 +16,25 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.channels.FileChannel;
-import java.text.DecimalFormat;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
-import javax.swing.ComboBoxModel;
-import javax.swing.DefaultListCellRenderer;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JList;
 import javax.swing.JMenuBar;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
-import javax.swing.ListCellRenderer;
 import javax.swing.SwingConstants;
-import javax.swing.event.ListDataListener;
 import javax.swing.filechooser.FileFilter;
 
+import ca.fraggergames.ffxivextract.Strings;
 import ca.fraggergames.ffxivextract.helpers.LERandomAccessFile;
 import ca.fraggergames.ffxivextract.models.SqPack_IndexFile;
-import ca.fraggergames.ffxivextract.models.SqPack_IndexFile.SqPack_DataSegment;
 import ca.fraggergames.ffxivextract.models.SqPack_IndexFile.SqPack_File;
 
 @SuppressWarnings("serial")
@@ -70,7 +63,7 @@ public class MusicSwapperWindow extends JFrame {
 	JButton btnSwap, btnRevert;
 
 	public MusicSwapperWindow() {
-		this.setTitle("Music Swap Tool (EXPERIMENTAL)");
+		this.setTitle(Strings.DIALOG_TITLE_MUSICSWAPPER);
 		URL imageURL = getClass().getResource("/res/frameicon.png");
 		ImageIcon image = new ImageIcon(imageURL);
 		this.setIconImage(image.getImage());
@@ -78,15 +71,15 @@ public class MusicSwapperWindow extends JFrame {
 		// ARCHIVE PATH SETUP
 		pnlMainDatFile = new JPanel(new GridBagLayout());
 		pnlMainDatFile.setBorder(BorderFactory
-				.createTitledBorder("Music Archive"));
-		txtDatLabel = new JLabel("Path to music pack: ");
+				.createTitledBorder(Strings.MUSICSWAPPER_FRAMETITLE_ARCHIVE));
+		txtDatLabel = new JLabel(Strings.MUSICSWAPPER_PATHTOFILE);
 		txtDatPath = new JTextField();
 		txtDatPath.setEditable(false);
-		txtDatPath.setText("Point to 0c0000.win32.index");
+		txtDatPath.setText(Strings.MUSICSWAPPER_DEFAULTPATHTEXT);
 		txtDatPath.setPreferredSize(new Dimension(200, txtDatPath
 				.getPreferredSize().height));
 
-		btnBrowse = new JButton("Browse");
+		btnBrowse = new JButton(Strings.BUTTONNAMES_BROWSE);
 		btnBrowse.addActionListener(new ActionListener() {
 
 			@Override
@@ -101,18 +94,18 @@ public class MusicSwapperWindow extends JFrame {
 
 		// SWAPPER SETUP
 		pnlSwapper = new JPanel(new GridBagLayout());
-		pnlSwapper.setBorder(BorderFactory.createTitledBorder("Swapping"));
-		txtOriginal = new JLabel("From Id:", SwingConstants.LEFT);
+		pnlSwapper.setBorder(BorderFactory.createTitledBorder(Strings.MUSICSWAPPER_FRAMETITLE_SWAPPING));
+		txtOriginal = new JLabel(Strings.MUSICSWAPPER_FROMID, SwingConstants.LEFT);
 
-		txtSet = new JLabel("Set to:", SwingConstants.LEFT);
-		txtOriginal = new JLabel("Original Id:");
+		txtSet = new JLabel(Strings.MUSICSWAPPER_TOID, SwingConstants.LEFT);
+		txtOriginal = new JLabel(Strings.MUSICSWAPPER_ORIGINALID);
 		drpOriginal = new JComboBox();
 		drpOriginal.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent itemEvent) {
 				int state = itemEvent.getStateChange();
 				if (state == ItemEvent.SELECTED && editMusicFile != null)
 				{
-					txtSetTo.setText(String.format("Currently set to offset: %08X", editedFiles[drpOriginal.getSelectedIndex()].getOffset() & 0xFFFFFFFF));
+					txtSetTo.setText(String.format(Strings.MUSICSWAPPER_CURRENTOFFSET, editedFiles[drpOriginal.getSelectedIndex()].getOffset() & 0xFFFFFFFF));
 					if (editedFiles[drpOriginal.getSelectedIndex()].getOffset() != originalMusicFile.getPackFolders()[0].getFiles()[drpOriginal.getSelectedIndex()].dataoffset)
 						txtSetTo.setForeground(Color.RED);
 					else
@@ -122,10 +115,10 @@ public class MusicSwapperWindow extends JFrame {
 		});
 		drpSet = new JComboBox();
 
-		txtSetTo = new JLabel("Currently set to: ");
+		txtSetTo = new JLabel(Strings.MUSICSWAPPER_CURRENTSETTO);
 		
-		btnSwap = new JButton("Set");
-		btnRevert = new JButton("Revert");
+		btnSwap = new JButton(Strings.BUTTONNAMES_SET);
+		btnRevert = new JButton(Strings.BUTTONNAMES_REVERT);
 
 		GridBagConstraints gc = new GridBagConstraints();
 		gc.fill = GridBagConstraints.HORIZONTAL;
@@ -199,7 +192,7 @@ public class MusicSwapperWindow extends JFrame {
 
 			@Override
 			public String getDescription() {
-				return "FFXIV Music Archive Index (0c0000.win32.index)";
+				return Strings.FILETYPE_FFXIV_MUSICINDEX;
 			}
 
 			@Override
@@ -323,7 +316,7 @@ public class MusicSwapperWindow extends JFrame {
 		editedFiles[which] = new SqPack_File(toBeChanged.getId(), toBeChanged.getId2(),
 				toThisFile.getOffset());
 		
-		txtSetTo.setText(String.format("Currently set to offset: %08X", toThisFile.getOffset() & 0xFFFFFFFF));
+		txtSetTo.setText(String.format(Strings.MUSICSWAPPER_CURRENTOFFSET, toThisFile.getOffset() & 0xFFFFFFFF));
 		if (toBeChanged.getOffset() != toThisFile.getOffset())
 			txtSetTo.setForeground(Color.RED);
 		else
@@ -357,14 +350,14 @@ public class MusicSwapperWindow extends JFrame {
 			System.out.println("Data changed");
 		} catch (FileNotFoundException e) {
 			JOptionPane.showMessageDialog(MusicSwapperWindow.this,
-					"Could not open index file. Shut off FFXIV if it is running currently.",
-				    "Error",
+					Strings.ERROR_CANNOT_OPEN_INDEX,
+				    Strings.DIALOG_TITLE_ERROR,
 				    JOptionPane.ERROR_MESSAGE);
 			e.printStackTrace();
 		} catch (IOException e) {
 			JOptionPane.showMessageDialog(MusicSwapperWindow.this,
-					"Bad IOException happened. You should replace the edited index file with the backup.",
-				    "Error",
+					Strings.ERROR_EDITIO,
+				    Strings.DIALOG_TITLE_ERROR,
 				    JOptionPane.ERROR_MESSAGE);
 			e.printStackTrace();
 		}

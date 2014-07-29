@@ -17,6 +17,7 @@ import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
 import ca.fraggergames.ffxivextract.Constants;
+import ca.fraggergames.ffxivextract.Strings;
 
 public class AboutWindow extends JFrame {
 
@@ -24,15 +25,15 @@ public class AboutWindow extends JFrame {
 	JPanel container = new JPanel();
 	FancyJLabel appname = new FancyJLabel(Constants.APPNAME);	
 	JLabel author = new FancyJLabel("By Magis");
-	JLabel version = new FancyJLabel("Version: " + Constants.VERSION);
-	JLabel gitcommit = new FancyJLabel("Git Commit: " + Constants.COMMIT.substring(0, 10));
+	JLabel version = new FancyJLabel(Strings.ABOUTDIALOG_VERSION + " " + Constants.VERSION);
+	JLabel gitcommit = new FancyJLabel(Strings.ABOUTDIALOG_GITVERSION + " " + Constants.COMMIT.substring(0, 10));
 	
 	JLabel magisImage = new JLabel();
 	
 	public AboutWindow() {
 		this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		this.setSize(480, 700);
-		this.setTitle("About " + Constants.APPNAME);
+		this.setTitle(Strings.DIALOG_TITLE_ABOUT + " " + Constants.APPNAME);
 		
 		container.setLayout(new BoxLayout(container, BoxLayout.Y_AXIS));
 	
