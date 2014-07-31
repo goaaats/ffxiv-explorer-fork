@@ -1,11 +1,15 @@
 package ca.fraggergames.ffxivextract;
 
+import javax.swing.UIManager;
+
 public class Constants {
 	
 	public static final String APPNAME = "FFXIV 2.0 Data Explorer";
 	public static final String VERSION = "v0.11";
 	public static final String COMMIT = "07735cbbae203569a0cefe006bd6104c71653377";
 	public static boolean DEBUG = false;
+	public static boolean EASTER_EGG = false;
+	
 	public static final String[] iconList = {
 		"000000", "000ED81", "0010235", "0010236" , "0010237",
 		"0010249", "001024A", "001024B", "001025D", "001025E", 
@@ -20,5 +24,14 @@ public class Constants {
 		"001028D", "001028E", "00102FD"
 	};
 	
+	public static void setUIFont (javax.swing.plaf.FontUIResource f){
+	    java.util.Enumeration keys = UIManager.getDefaults().keys();
+	    while (keys.hasMoreElements()) {
+	      Object key = keys.nextElement();
+	      Object value = UIManager.get (key);
+	      if (value != null && value instanceof javax.swing.plaf.FontUIResource)
+	        UIManager.put (key, f);
+	      }
+	    } 
 }
 	

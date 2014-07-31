@@ -26,6 +26,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 
 import ca.fraggergames.ffxivextract.Constants;
 import ca.fraggergames.ffxivextract.gui.components.EXDF_View;
+import ca.fraggergames.ffxivextract.gui.components.ExplorerPanel_View;
 import ca.fraggergames.ffxivextract.gui.components.Hex_View;
 import ca.fraggergames.ffxivextract.gui.components.Loading_Dialog;
 import ca.fraggergames.ffxivextract.gui.components.Lua_View;
@@ -34,13 +35,18 @@ import ca.fraggergames.ffxivextract.helpers.LuaDec;
 import ca.fraggergames.ffxivextract.helpers.OggVorbisPlayer;
 import ca.fraggergames.ffxivextract.helpers.WinRegistry;
 import ca.fraggergames.ffxivextract.models.EXDF_File;
+import ca.fraggergames.ffxivextract.models.Macro_File;
 import ca.fraggergames.ffxivextract.models.SCD_File;
 import ca.fraggergames.ffxivextract.models.SqPack_DatFile;
 import ca.fraggergames.ffxivextract.models.SqPack_IndexFile;
 import ca.fraggergames.ffxivextract.models.SqPack_IndexFile.SqPack_File;
+import ca.fraggergames.ffxivextract.models.SqPack_IndexFile.SqPack_Folder;
 
 @SuppressWarnings("serial")
 public class FileManagerWindow extends JFrame implements TreeSelectionListener {
+
+	//DLLs
+	LuaDec luadec;
 	
 	JMenuBar menu = new JMenuBar();
 	
@@ -50,9 +56,9 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener {
 	SqPack_DatFile currentDatFile;
 	
 	//UI
-	ExplorerPanel fileTree = new ExplorerPanel();	
+	ExplorerPanel_View fileTree = new ExplorerPanel_View();	
 	JSplitPane splitPane;
-	Hex_View hexView = new Hex_View(32);
+	Hex_View hexView = new Hex_View(50);
 
 	//MENU
 	JMenuItem file_Extract;
@@ -99,6 +105,14 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener {
 			lastOpenedFile = new File("F:\\Program Files (x86)\\SquareEnix\\FINAL FANTASY XIV - A Realm Reborn\\game\\sqpack\\ffxiv\\0a0000.win32.index");
 			openFile(lastOpenedFile);
 		}
+		
+		//Init Luadec
+		luadec = LuaDec.initLuaDec();
+		if (luadec == null)
+			JOptionPane.showMessageDialog(FileManagerWindow.this,
+					"Could not load luadec.dll, luab files will not be decompiled.",
+				    "DLL Error",
+				    JOptionPane.ERROR_MESSAGE);		
 	}	
 
 	protected void openFile(File selectedFile) {
@@ -119,6 +133,35 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener {
 		setTitle(Constants.APPNAME + " [" + selectedFile.getName() + "]");
 		fileTree.fileOpened(currentIndexFile);
 		file_Close.setEnabled(true);
+		
+		for (SqPack_Folder f : currentIndexFile.getPackFolders())
+		{
+			for (SqPack_File fi : f.getFiles())
+			{
+				byte[] data;
+				try {
+					data = currentDatFile.extractFile(fi.dataoffset, null);
+					for (int i = 0; i < data.length - 7; i++)
+					{
+						if (data[i] == 'h' && data[i+1] == 'a' && data[i+2] == 'l' && data[i+3] == 'w' && data[i+4] == 'e' && data[i+5] == 's'){
+							System.out.println(String.format("%08X", f.getId() & 0xFFFFFFFF));
+							System.out.println(String.format("%08X", fi.getId() & 0xFFFFFFFF));
+							System.out.println("---");
+							JOptionPane.showMessageDialog(FileManagerWindow.this,
+									"FOUND",
+								    "",
+								    JOptionPane.ERROR_MESSAGE);
+							
+						break;}
+					}
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+			}
+		}
+		
 	}
 
 	protected void closeFile() {
@@ -188,13 +231,19 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener {
 				swapper.setLocationRelativeTo(FileManagerWindow.this);
 				swapper.setVisible(true);
 			}
+			else if (event.getActionCommand().equals("macroeditor"))
+			{
+				MacroEditorWindow macroEditor = new MacroEditorWindow();
+				macroEditor.setLocationRelativeTo(FileManagerWindow.this);
+				macroEditor.setVisible(true);
+			}
 			else if (event.getActionCommand().equals("quit"))
 			{
 				System.exit(0);
 			}
 			else if (event.getActionCommand().equals("about"))
 			{
-				AboutWindow aboutWindow = new AboutWindow();
+				AboutWindow aboutWindow = new AboutWindow(FileManagerWindow.this);
 				aboutWindow.setLocationRelativeTo(FileManagerWindow.this);
 				aboutWindow.setVisible(true);
 			}
@@ -230,6 +279,10 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener {
 		tools_musicswapper.setActionCommand("musicswapper");
 		tools_musicswapper.addActionListener(menuHandler);
 		
+		JMenuItem tools_macroEditor = new JMenuItem("Macro Editor (EXPERIMENTAL)");
+		tools_macroEditor.setActionCommand("macroeditor");
+		tools_macroEditor.addActionListener(menuHandler);
+		
 		JMenuItem help_About = new JMenuItem("About");
 		help_About.setActionCommand("about");
 		help_About.addActionListener(menuHandler);
@@ -243,6 +296,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener {
 		file.add(file_Quit);	
 		
 		tools.add(tools_musicswapper);
+		tools.add(tools_macroEditor);
 		
 		help.add(help_About);
 		
@@ -270,15 +324,16 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener {
 		}
 		
 		try {
-			byte[] data = currentDatFile.extractFile(fileTree.getSelectedFiles().get(0).getOffset(), null);
+			byte[] data = currentDatFile.extractFile(fileTree.getSelectedFiles().get(0).getOffset(), null);			
+			
 			JTabbedPane tabs = new JTabbedPane();
 			if (data[0] == 'E' && data[1] == 'X' && data[2] == 'D' && data[3] == 'F')
 			{								
-				EXDF_View exdfComponent = new EXDF_View(new EXDF_File(data));
-				tabs.addTab("EXDF File", exdfComponent);
+				//EXDF_View exdfComponent = new EXDF_View(new EXDF_File(data));
+				//tabs.addTab("EXDF File", exdfComponent);
 			}
-			else if (data[1] == 'L' && data[2] == 'u'){
-				Lua_View luaComponent = new Lua_View(("-- Decompiled using luadec 2.0.1 by sztupy (http://winmo.sztupy.hu)\n"+LuaDec.decompile(data)).split("\n"));
+			else if (data[1] == 'L' && data[2] == 'u' && luadec != null){						
+				Lua_View luaComponent = new Lua_View(("-- Decompiled using luadec 2.0.1 by sztupy (http://winmo.sztupy.hu)\n"+luadec.decompile(data)).split("\n"));
 				tabs.addTab("Decompiled Lua", luaComponent);
 			}		
 			else if (data.length >= 4 && data[0] == 'S' && data[1] == 'E' && data[2] == 'D' && data[3] == 'B' )
