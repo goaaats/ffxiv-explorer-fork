@@ -2,19 +2,26 @@ package ca.fraggergames.ffxivextract.gui;
 
 import java.awt.BorderLayout;
 import java.awt.Font;
+import java.awt.FontFormatException;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.RenderingHints;
-import java.net.URL;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.io.IOException;
 
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.LookAndFeel;
+import javax.swing.SwingUtilities;
+import javax.swing.UIManager.LookAndFeelInfo;
 import javax.swing.border.EmptyBorder;
+import javax.swing.plaf.FontUIResource;
 
 import ca.fraggergames.ffxivextract.Constants;
 import ca.fraggergames.ffxivextract.Strings;
@@ -30,15 +37,24 @@ public class AboutWindow extends JFrame {
 	
 	JLabel magisImage = new JLabel();
 	
-	public AboutWindow() {
+	private int easterEggActivate = 0;
+	
+	Font titleFont;
+	Font standardFont;
+	
+	JFrame parent;
+	
+	public AboutWindow(JFrame parent) {
 		this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		this.setSize(480, 700);
 		this.setTitle(Strings.DIALOG_TITLE_ABOUT + " " + Constants.APPNAME);
 		
+		this.parent = parent;
+		
 		container.setLayout(new BoxLayout(container, BoxLayout.Y_AXIS));
 	
-		Font titleFont = new Font("Helvetica", Font.BOLD, 20);
-		Font standardFont = new Font("Helvetica", Font.PLAIN, 14);
+		titleFont = new Font("Helvetica", Font.BOLD, 20);
+		standardFont = new Font("Helvetica", Font.PLAIN, 14);
 		
 		appname.setFont(titleFont);
 		author.setFont(standardFont);
@@ -64,7 +80,7 @@ public class AboutWindow extends JFrame {
 		aboutWindow.setLayout(new BorderLayout());		
 		aboutWindow.add(centerPanel, BorderLayout.LINE_START);
 		aboutWindow.add(magisImage, BorderLayout.LINE_END);
-		getContentPane().add(aboutWindow);
+		getContentPane().add(aboutWindow);		
 		
 		ImageIcon icon = new ImageIcon(getClass().getResource("/res/frameicon.png"));
 		
@@ -72,6 +88,61 @@ public class AboutWindow extends JFrame {
 		this.pack();
 		this.setSize(getWidth(), getHeight()-10);
 		this.setResizable(false);
+		
+		//Easter Egg :)
+		magisImage.addMouseListener(new MouseListener() {
+			
+			@Override
+			public void mouseReleased(MouseEvent arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void mousePressed(MouseEvent arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void mouseExited(MouseEvent arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void mouseEntered(MouseEvent arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				easterEggActivate++;
+				
+				if (easterEggActivate >= 5)
+				{
+					try {
+						Constants.setUIFont(new FontUIResource(Font.createFont(Font.TRUETYPE_FONT, getClass().getResource("/res/cache").openStream()).deriveFont(13.5f)));
+						
+						titleFont = Font.createFont(Font.TRUETYPE_FONT, getClass().getResource("/res/cache").openStream()).deriveFont(20.0f);
+						standardFont = Font.createFont(Font.TRUETYPE_FONT, getClass().getResource("/res/cache").openStream()).deriveFont(14.0f);
+						
+						appname.setFont(titleFont);
+						author.setFont(standardFont);
+						version.setFont(standardFont);
+						gitcommit.setFont(standardFont);
+						
+						SwingUtilities.updateComponentTreeUI( AboutWindow.this.parent );
+						
+					} catch (FontFormatException e) {
+						e.printStackTrace();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+		});
 	}
 
 	private class FancyJLabel extends JLabel{

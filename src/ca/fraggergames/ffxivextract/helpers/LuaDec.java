@@ -2,10 +2,19 @@ package ca.fraggergames.ffxivextract.helpers;
 
 public class LuaDec {
 
-	static {
-		System.loadLibrary("luadec");
+	private LuaDec() {
+	}
+	
+	public static LuaDec initLuaDec(){
+		try{
+			System.loadLibrary("luadec");
+		}catch (UnsatisfiedLinkError e)
+		{
+			return null;
+		}
+		return new LuaDec();
 	}
 
-	public native static String decompile(byte[] luaByteCode);
+	public native String decompile(byte[] luaByteCode);
 
 }
