@@ -1,4 +1,4 @@
-package ca.fraggergames.ffxivextract.gui;
+package ca.fraggergames.ffxivextract.gui.components;
 
 import java.awt.Color;
 import java.awt.Component;
@@ -19,13 +19,13 @@ import ca.fraggergames.ffxivextract.models.SqPack_IndexFile.SqPack_File;
 import ca.fraggergames.ffxivextract.models.SqPack_IndexFile.SqPack_Folder;
 
 @SuppressWarnings("serial")
-public class ExplorerPanel extends JScrollPane {
+public class ExplorerPanel_View extends JScrollPane {
 
 	JTree fileTree;
 	DefaultMutableTreeNode root = new DefaultMutableTreeNode("Root");
 	JScrollPane scroller;
 
-	public ExplorerPanel() {
+	public ExplorerPanel_View() {
 		setBackground(Color.WHITE);
 		fileTree = new JTree(root) {
 			
