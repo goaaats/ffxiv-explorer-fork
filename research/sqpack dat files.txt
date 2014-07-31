@@ -28,7 +28,7 @@ Current research on SqPack Dat files
 
 ===FILE ENTRY HEADER=== (Minimum size is 0x80) !!!Use Index to find entry!!!
 0x000: Header Length     Int32; 
-0x004: Content Type      Int32; 0x04 - Texture, 0x02 - Everything else?
+0x004: Content Type      Int32; 0x02 - Binary, 0x03 - Model, 0x04 - Texture
 0x008: Uncompressed Size Int32;
 0x00c: ~~Unknown~~       Int32;
 0x010: Block Buffer Size Int32; Buffer size need to read largest block
