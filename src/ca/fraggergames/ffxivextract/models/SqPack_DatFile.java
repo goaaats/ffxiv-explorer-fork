@@ -40,6 +40,16 @@ public class SqPack_DatFile {
 			System.out.println("Num Blocks: " + blockCount);
 		}
 		
+		//Special Cases
+		if (contentType == 4)
+		{
+			return null;
+		}
+		else if (contentType == 3)
+		{
+			return null;
+		}
+		
 		Data_Block[] dataBlocks = getBlockList(blockCount);
 
 		byte decompressedFile[] = new byte[fileSize];
@@ -48,7 +58,6 @@ public class SqPack_DatFile {
 		//If we got a loading dialog
 		if (loadingDialog != null)
 			loadingDialog.setMaxBlocks(blockCount);
-		
 		
 		//Extract File
 		for (int i = 0; i < blockCount; i++)

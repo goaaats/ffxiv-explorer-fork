@@ -121,6 +121,14 @@ public class Hex_View extends JScrollPane {
 	}
 
 	public void setBytes(byte[] byteArray) {
+		
+		if (byteArray == null)
+		{
+			bytes = new byte[1];
+			bytes[0] = 0x00;
+			return;
+		}
+		
 		bytes = byteArray;
 		((AbstractTableModel) txtHexData.getModel()).fireTableDataChanged();
 

@@ -18,3 +18,4 @@ bin/
 .settings/org.eclipse.cdt.managedbuilder.core.prefs
 *.o
 *.jar
+execonfig.xml

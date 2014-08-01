@@ -134,7 +134,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener {
 		setTitle(Constants.APPNAME + " [" + selectedFile.getName() + "]");
 		fileTree.fileOpened(currentIndexFile);
 		file_Close.setEnabled(true);
-		
+		/*
 		for (SqPack_Folder f : currentIndexFile.getPackFolders())
 		{
 			for (SqPack_File fi : f.getFiles())
@@ -162,7 +162,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener {
 				
 			}
 		}
-		
+		*/
 	}
 
 	protected void closeFile() {
@@ -329,6 +329,15 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener {
 			byte[] data = currentDatFile.extractFile(fileTree.getSelectedFiles().get(0).getOffset(), null);			
 			
 			JTabbedPane tabs = new JTabbedPane();
+			
+			if (data == null)
+			{				
+				hexView.setBytes(null);			
+				tabs.addTab("Raw Hex", hexView);			
+				splitPane.setRightComponent(tabs);
+				return;
+			}
+						
 			if (false && data[0] == 'E' && data[1] == 'X' && data[2] == 'D' && data[3] == 'F')
 			{								
 				//EXDF_View exdfComponent = new EXDF_View(new EXDF_File(data));
@@ -341,19 +350,10 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener {
 			}		
 			else if (false && data.length >= 4 && data[0] == 'S' && data[1] == 'E' && data[2] == 'D' && data[3] == 'B' )
 			{			
-				if (player == null)
-				{
-					player = new OggVorbisPlayer(-1);
-					player.init();					
-				}
-				else
-					player.reset();
-				player.setSource(new SCD_File(data));
-				player.start();
-				player.playThreaded();
+				
 			}
-			hexView.setBytes(data);
 			
+			hexView.setBytes(data);			
 			tabs.addTab("Raw Hex", hexView);			
 			splitPane.setRightComponent(tabs);
 		} catch (IOException e1) {
