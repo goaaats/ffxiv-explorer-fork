@@ -3,6 +3,7 @@ package ca.fraggergames.ffxivextract.models;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
+import ca.fraggergames.ffxivextract.Constants;
 import ca.fraggergames.ffxivextract.helpers.LERandomAccessFile;
 
 public class Log_File {
@@ -17,8 +18,9 @@ public class Log_File {
 		int fileSize = file.readInt();
 		
 		//Read in size table
-		int numOffsets = fileSize - bodySize / 4;
+		int numOffsets = (fileSize - bodySize);
 		int offsets[] = new int[numOffsets];
+		entries = new Log_Entry[numOffsets];
 		
 		int maxBufferSize = 0;
 		
@@ -35,11 +37,14 @@ public class Log_File {
 		byte buffer[] = new byte[maxBufferSize];
 		for (int i = 0; i < offsets.length; i++)
 		{			
-			file.read(buffer, 0, offsets[i]);
-			String data = new String(buffer, 0, offsets[i]);
+			file.read(buffer, 0, offsets[i] - (i == 0 ? 0 : offsets[i-1]));
+			String data = new String(buffer, 0, offsets[i] - (i == 0 ? 0 : offsets[i-1]));
 			
 			String[] splitData = data.split(":");
 						
+			if (Constants.DEBUG)
+				System.out.println("Loading entry: " + data);
+			
 			String info = splitData[0];
 			String sender = splitData[1];
 			String message = splitData[2];
@@ -72,6 +77,11 @@ public class Log_File {
 			this.channel = channel;
 			this.sender = sender;
 			this.message = message;
+		}
+		
+		@Override
+		public String toString() {
+			return message;
 		}
 	}
 }

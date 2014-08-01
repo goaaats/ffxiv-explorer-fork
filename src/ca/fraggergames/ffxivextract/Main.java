@@ -21,9 +21,9 @@ public class Main {
 		fileMan.setVisible(true);		
 		
 		try{
-			Log_File log = new Log_File("C:\\Users\\Filip\\Documents\\my games\\FINAL FANTASY XIV - A Realm Reborn\\FFXIV_CHR00400000009B1AC9\\log\\00000003.log");
+			Log_File log = new Log_File("C:\\Users\\Filip\\Documents\\my games\\FINAL FANTASY XIV - A Realm Reborn\\FFXIV_CHR00400000009B1AC9\\log\\0000007f.log");
 			}
-			catch (Exception e){}
+			catch (Exception e){e.printStackTrace();}
 	}
 
 	
