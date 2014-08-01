@@ -43,10 +43,12 @@ public class SqPack_DatFile {
 		//Special Cases
 		if (contentType == 4)
 		{
-			currentFilePointer.seek(fileOffset + headerLength);
+			return null;
 		}
 		else if (contentType == 3)
+		{
 			return null;
+		}
 		
 		Data_Block[] dataBlocks = getBlockList(blockCount);
 

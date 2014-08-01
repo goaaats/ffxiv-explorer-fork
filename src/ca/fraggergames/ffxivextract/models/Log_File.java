@@ -38,11 +38,17 @@ public class Log_File {
 			file.read(buffer, 0, offsets[i]);
 			String data = new String(buffer, 0, offsets[i]);
 			
-			long time = Long.parseLong(data.substring(0, 8), 16);
-			int eventId = Integer.parseInt(data.substring(8, 12), 16);
-			String message = new String(data.substring(14).getBytes(), "UTF-8");
+			String[] splitData = data.split(":");
+						
+			String info = splitData[0];
+			String sender = splitData[1];
+			String message = splitData[2];
 			
-			entries[i] = new Log_Entry(time, eventId, message);
+			long time = Long.parseLong(info.substring(0, 8), 16);			
+			int filter = Integer.parseInt(info.substring(8, 10), 16);
+			int channel = Integer.parseInt(info.substring(10, 12), 16);			
+			
+			entries[i] = new Log_Entry(time, filter, channel, new String(sender.getBytes(), "UTF-8"), new String(message.getBytes(), "UTF-8"));
 		}
 		
 		file.close();
@@ -55,12 +61,16 @@ public class Log_File {
 	
 	public static class Log_Entry{
 		final public long time;
-		final public int eventId;
+		final public int channel;
+		final public int filter;
+		final public String sender;
 		final public String message;
 		
-		public Log_Entry(long time, int eventId, String message) {
+		public Log_Entry(long time, int filter, int channel, String sender, String message) {
 			this.time = time;
-			this.eventId = eventId;
+			this.filter = filter;
+			this.channel = channel;
+			this.sender = sender;
 			this.message = message;
 		}
 	}
