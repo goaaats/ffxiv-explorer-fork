@@ -38,6 +38,8 @@ public class Strings {
 	public static final String MENUITEM_EXTRACT = "Extract";
 	public static final String MENUITEM_EXTRACTRAW = "Extract Raw";
 	public static final String MENUITEM_MUSICSWAPPER = "Music Swapper (EXPERIMENTAL)";
+	public static final String MENUITEM_MACROEDITOR = "Macro Editor (NOT DONE)";
+	public static final String MENUITEM_LOGVIEWER = "Log Viewer (NOT DONE)";
 	public static final String MENUITEM_QUIT = "Quit";
 	public static final String MENUITEM_ABOUT = "About";
 	

@@ -142,9 +142,9 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener {
 				byte[] data;
 				try {
 					data = currentDatFile.extractFile(fi.dataoffset, null);
-					for (int i = 0; i < data.length - 7; i++)
+					for (int i = 0; i < data.length - 10; i++)
 					{
-						if (data[i] == 'h' && data[i+1] == 'a' && data[i+2] == 'l' && data[i+3] == 'w' && data[i+4] == 'e' && data[i+5] == 's'){
+						if (data[i] == 'C' && data[i+1] == 'h' && data[i+2] == 'o' && data[i+3] == 'c' && data[i+4] == 'o' && data[i+5] == 'b' && data[i+6] == 'o' && data[i+7] == ' ' && data[i+8] == 'Y' && data[i+9] == 'e'){
 							System.out.println(String.format("%08X", f.getId() & 0xFFFFFFFF));
 							System.out.println(String.format("%08X", fi.getId() & 0xFFFFFFFF));
 							System.out.println("---");
@@ -161,8 +161,8 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener {
 				}
 				
 			}
-		}
-		*/
+		}*/
+		
 	}
 
 	protected void closeFile() {
@@ -238,6 +238,12 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener {
 				macroEditor.setLocationRelativeTo(FileManagerWindow.this);
 				macroEditor.setVisible(true);
 			}
+			else if (event.getActionCommand().equals("logviewer"))
+			{
+				LogViewerWindow logViewer = new LogViewerWindow();
+				logViewer.setLocationRelativeTo(FileManagerWindow.this);
+				logViewer.setVisible(true);
+			}
 			else if (event.getActionCommand().equals("quit"))
 			{
 				System.exit(0);
@@ -280,9 +286,13 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener {
 		tools_musicswapper.setActionCommand("musicswapper");
 		tools_musicswapper.addActionListener(menuHandler);
 		
-		JMenuItem tools_macroEditor = new JMenuItem("Macro Editor (EXPERIMENTAL)");
+		JMenuItem tools_macroEditor = new JMenuItem(Strings.MENUITEM_MACROEDITOR);
 		tools_macroEditor.setActionCommand("macroeditor");
 		tools_macroEditor.addActionListener(menuHandler);
+		
+		JMenuItem tools_logViewer = new JMenuItem(Strings.MENUITEM_LOGVIEWER);
+		tools_logViewer.setActionCommand("logviewer");
+		tools_logViewer.addActionListener(menuHandler);
 		
 		JMenuItem help_About = new JMenuItem("About");
 
@@ -299,6 +309,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener {
 		
 		tools.add(tools_musicswapper);
 		tools.add(tools_macroEditor);
+		tools.add(tools_logViewer);
 		
 		help.add(help_About);
 		
@@ -338,7 +349,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener {
 				return;
 			}
 						
-			if (false && data[0] == 'E' && data[1] == 'X' && data[2] == 'D' && data[3] == 'F')
+			if (data[0] == 'E' && data[1] == 'X' && data[2] == 'D' && data[3] == 'F')
 			{								
 				//EXDF_View exdfComponent = new EXDF_View(new EXDF_File(data));
 				//tabs.addTab("EXDF File", exdfComponent);

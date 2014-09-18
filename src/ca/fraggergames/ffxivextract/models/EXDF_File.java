@@ -8,6 +8,8 @@ import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 
+import ca.fraggergames.ffxivextract.helpers.FFXIV_String;
+
 public class EXDF_File {
 
 	private static String quoteCommaQuote = "\",\"";
@@ -61,8 +63,8 @@ public class EXDF_File {
 				buffer.rewind();
 				buffer.position(offsets[i].offset);
 
-				String stringName;
-				String stringValue;
+				FFXIV_String stringName;
+				FFXIV_String stringValue;
 
 				int entrySize = buffer.getInt();
 
@@ -76,19 +78,19 @@ public class EXDF_File {
 				if (nameSize > 0) {
 					byte[] string1 = new byte[nameSize];
 					buffer.get(string1);
-					stringName = new String(string1);
+					stringName = new FFXIV_String(string1);
 				} else
-					stringName = "";
+					stringName = new FFXIV_String("");
 
 				// Get Value
 				if (valueSize > 0) {
 					byte[] string2 = new byte[valueSize];
 					buffer.get(string2);
-					stringValue = new String(string2, "UTF-8");
+					stringValue = new FFXIV_String(string2);
 				} else
-					stringValue = "";
+					stringValue = new FFXIV_String("");
 
-				strings[i] = new EXDF_StringEntry(stringName, stringValue);
+				strings[i] = new EXDF_StringEntry(stringName.toString(), stringValue.toString());
 			}
 		} 
 		catch (BufferUnderflowException underflowException) {} 

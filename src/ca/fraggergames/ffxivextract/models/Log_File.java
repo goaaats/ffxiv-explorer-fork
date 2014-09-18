@@ -4,6 +4,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import ca.fraggergames.ffxivextract.Constants;
+import ca.fraggergames.ffxivextract.helpers.FFXIV_String;
 import ca.fraggergames.ffxivextract.helpers.LERandomAccessFile;
 
 public class Log_File {
@@ -40,10 +41,7 @@ public class Log_File {
 			file.read(buffer, 0, offsets[i] - (i == 0 ? 0 : offsets[i-1]));
 			String data = new String(buffer, 0, offsets[i] - (i == 0 ? 0 : offsets[i-1]));
 			
-			String[] splitData = data.split(":");
-						
-			if (Constants.DEBUG)
-				System.out.println("Loading entry: " + data);
+			String[] splitData = data.split(":");							
 			
 			String info = splitData[0];
 			String sender = splitData[1];
@@ -53,7 +51,14 @@ public class Log_File {
 			int filter = Integer.parseInt(info.substring(8, 10), 16);
 			int channel = Integer.parseInt(info.substring(10, 12), 16);			
 			
-			entries[i] = new Log_Entry(time, filter, channel, new String(sender.getBytes(), "UTF-8"), new String(message.getBytes(), "UTF-8"));
+			entries[i] = new Log_Entry(time, filter, channel, new FFXIV_String(sender), new FFXIV_String(message));
+			
+			if (Constants.DEBUG)
+			{
+				if (!entries[i].sender.toString().isEmpty())
+					System.out.print(entries[i].sender.toString() + ": ");
+				System.out.println(entries[i].message.toString());
+			}
 		}
 		
 		file.close();
@@ -68,10 +73,10 @@ public class Log_File {
 		final public long time;
 		final public int channel;
 		final public int filter;
-		final public String sender;
-		final public String message;
+		final public FFXIV_String sender;
+		final public FFXIV_String message;
 		
-		public Log_Entry(long time, int filter, int channel, String sender, String message) {
+		public Log_Entry(long time, int filter, int channel, FFXIV_String sender, FFXIV_String message) {
 			this.time = time;
 			this.filter = filter;
 			this.channel = channel;
@@ -81,7 +86,7 @@ public class Log_File {
 		
 		@Override
 		public String toString() {
-			return message;
+			return message.toString();
 		}
 	}
 }
