@@ -14,6 +14,7 @@ import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 
+import ca.fraggergames.ffxivextract.Constants;
 import ca.fraggergames.ffxivextract.models.SqPack_IndexFile;
 import ca.fraggergames.ffxivextract.models.SqPack_IndexFile.SqPack_File;
 import ca.fraggergames.ffxivextract.models.SqPack_IndexFile.SqPack_Folder;
@@ -93,14 +94,24 @@ public class ExplorerPanel_View extends JScrollPane {
 	        if (node.getUserObject() instanceof SqPack_Folder) //FOLDER
 	        {
 	        	SqPack_Folder folder = (SqPack_Folder) node.getUserObject();
-	        	value = String.format("%08X", folder.getId() & 0xFFFFFFFF);
+	        	
+	        	if (Constants.hashDatabase.getFileName(folder.getId()) != null)
+	        		value = Constants.hashDatabase.getFolder(folder.getId());
+	        	else
+	        		value = String.format("%08X", folder.getId() & 0xFFFFFFFF);
+	        	
+	        	
 	        	setOpenIcon(getDefaultOpenIcon());
 	            setClosedIcon(getDefaultClosedIcon());
 	        }
 	        else if (node.getUserObject() instanceof SqPack_File) //FILE
 	        {
 	        	SqPack_File file = (SqPack_File) node.getUserObject();
-	        	value =  String.format("%08X", file.getId() & 0xFFFFFFFF); 
+	        		        	
+	        	if (Constants.hashDatabase.getFileName(file.getId()) != null)
+	        		value = Constants.hashDatabase.getFileName(file.getId());
+	        	else
+	        		value =  String.format("%08X", file.getId() & 0xFFFFFFFF); 
 	        	setLeafIcon(fileIcon);
 	        	setLeafIcon(fileIcon);
 	        }

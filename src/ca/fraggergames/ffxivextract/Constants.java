@@ -2,14 +2,18 @@ package ca.fraggergames.ffxivextract;
 
 import javax.swing.UIManager;
 
+import ca.fraggergames.ffxivextract.helpers.PathHashList;
+
 public class Constants {
 
 	public static final String APPNAME = "FFXIV 2.0 Data Explorer";
 	public static final String VERSION = "v0.4";
 	public static final String COMMIT = "80c37cd841cfd2998fa72bc20e15cbedaa21b65d";
-	public static boolean DEBUG = false;
+	public static boolean DEBUG = true;
 	public static boolean EASTER_EGG = false;
 
+	public static PathHashList hashDatabase;
+	
 	public static final String[] iconList = {
 		"000000", "000ED81", "0010235", "0010236" , "0010237",
 		"0010249", "001024A", "001024B", "001025D", "001025E",
