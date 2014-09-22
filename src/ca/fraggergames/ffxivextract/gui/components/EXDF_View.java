@@ -55,7 +55,7 @@ public class EXDF_View extends JScrollPane{
 		
 		public EXDFTableModel(EXDF_File file)
 		{
-			entries = file.strings;			
+			//entries = file.strings;			
 		}
 		
 		@Override

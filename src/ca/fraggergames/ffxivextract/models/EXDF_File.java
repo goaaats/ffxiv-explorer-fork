@@ -16,7 +16,7 @@ public class EXDF_File {
 	private static String quoteNewLine = "\"\r\n";
 	
 	public EXDF_Offset[] offsets;
-	public EXDF_StringEntry[] strings;
+	public EXDF_Entry[] entries;
 
 	public EXDF_File(byte[] data) throws IOException {
 		loadEXDF(data);
@@ -57,7 +57,21 @@ public class EXDF_File {
 				offsets[i] = new EXDF_Offset(offset, x);
 			}
 
+			entries = new EXDF_Entry[offsets.length];
+			
+			for (int i = 0; i < offsets.length; i++) {
+				buffer.rewind();
+				buffer.position(offsets[i].offset);
+
+				byte dataEntry[] = new byte[i == offsets.length-1 ? data.length-offsets[i].offset : (offsets[i+1].offset-offsets[i].offset)];
+
+				buffer.get(dataEntry);
+				
+				entries[i] = new EXDF_Entry(dataEntry);
+			}
+			
 			// Data
+			/*
 			strings = new EXDF_StringEntry[offsetSize / 0x08];
 			for (int i = 0; i < offsets.length; i++) {
 				buffer.rewind();
@@ -91,14 +105,14 @@ public class EXDF_File {
 					stringValue = new FFXIV_String("");
 
 				strings[i] = new EXDF_StringEntry(stringName.toString(), stringValue.toString());
-			}
+			}*/
 		} 
 		catch (BufferUnderflowException underflowException) {} 
 		catch (BufferOverflowException overflowException) {}
 	}
 
 	public String getCSV() {
-		
+		/*
 		StringBuilder sb = new StringBuilder();
 		
 		for (int i = 0; i < strings.length; i++)
@@ -110,7 +124,8 @@ public class EXDF_File {
 			sb.append(quoteNewLine);			
 		}
 		
-		return sb.toString();
+		return sb.toString();*/
+		return "";
 	}
 
 }

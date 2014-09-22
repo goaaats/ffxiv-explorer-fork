@@ -7,6 +7,7 @@ public class Strings {
 	//Dialog Titles
 	public static final String DIALOG_TITLE_ABOUT = "About";
 	public static final String DIALOG_TITLE_MUSICSWAPPER = "Music Swap Tool (EXPERIMENTAL)";
+	public static final String DIALOG_TITLE_SEARCH = "Search";
 	public static final String DIALOG_TITLE_ERROR = "Error";
 	
 	//About Dialog
@@ -24,12 +25,18 @@ public class Strings {
 	public static final String MUSICSWAPPER_CURRENTOFFSET = "Currently set to offset: %08X";
 	public static final String MUSICSWAPPER_CURRENTSETTO = "Currently set to: ";
 	
+	//Search Window
+	public static final String SEARCH_FRAMETITLE_BYSTRING = "Search for String";
+	public static final String SEARCH_FRAMETITLE_BYBYTES = "Search for Bytes";
+	public static final String SEARCH_SEARCH = "Search: ";
+	
 	//File Types
 	public static final String FILETYPE_FFXIV_INDEX = "FFXIV Index File (.index)";
 	public static final String FILETYPE_FFXIV_MUSICINDEX = "FFXIV Music Archive Index (0c0000.win32.index)";
 	
 	//Menu and Menu Items
 	public static final String MENU_FILE = "File";
+	public static final String MENU_SEARCH = "Search";
 	public static final String MENU_TOOLS = "Tools";
 	public static final String MENU_HELP = "Help";
 	
@@ -37,6 +44,8 @@ public class Strings {
 	public static final String MENUITEM_CLOSE = "Close";
 	public static final String MENUITEM_EXTRACT = "Extract";
 	public static final String MENUITEM_EXTRACTRAW = "Extract Raw";
+	public static final String MENUITEM_SEARCH = "Search";
+	public static final String MENUITEM_SEARCHAGAIN = "Search Again";
 	public static final String MENUITEM_MUSICSWAPPER = "Music Swapper (EXPERIMENTAL)";
 	public static final String MENUITEM_MACROEDITOR = "Macro Editor (NOT DONE)";
 	public static final String MENUITEM_LOGVIEWER = "Log Viewer (NOT DONE)";
@@ -46,11 +55,14 @@ public class Strings {
 	//Buttons
 	public static final String BUTTONNAMES_BROWSE = "Browse";
 	public static final String BUTTONNAMES_SET = "Set";
-	public static final String BUTTONNAMES_REVERT = "Revert";	
+	public static final String BUTTONNAMES_REVERT = "Revert";
+	public static final String BUTTONNAMES_SEARCH = "Search";
+	public static final String BUTTONNAMES_CLOSE = "Close";
 	
 	//Errors
 	public static final String ERROR_CANNOT_OPEN_INDEX = "Could not open index file. Shut off FFXIV if it is running currently.";
 	public static final String ERROR_EDITIO = "Bad IOException happened. You should replace the edited index file with the backup.";
+	
 	
 	
 }

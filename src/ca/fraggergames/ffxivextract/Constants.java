@@ -5,9 +5,9 @@ import javax.swing.UIManager;
 public class Constants {
 
 	public static final String APPNAME = "FFXIV 2.0 Data Explorer";
-	public static final String VERSION = "v0.3";
-	public static final String COMMIT = "0a6d135317176b3e0a6530a06525bd0bab310751";
-	public static boolean DEBUG = true;
+	public static final String VERSION = "v0.4";
+	public static final String COMMIT = "80c37cd841cfd2998fa72bc20e15cbedaa21b65d";
+	public static boolean DEBUG = false;
 	public static boolean EASTER_EGG = false;
 
 	public static final String[] iconList = {

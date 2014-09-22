@@ -22,11 +22,10 @@ import javax.swing.SwingWorker;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.filechooser.FileFilter;
-import javax.swing.filechooser.FileNameExtensionFilter;
 
 import ca.fraggergames.ffxivextract.Constants;
 import ca.fraggergames.ffxivextract.Strings;
-import ca.fraggergames.ffxivextract.gui.components.EXDF_View;
+import ca.fraggergames.ffxivextract.gui.SearchWindow.ISearchComplete;
 import ca.fraggergames.ffxivextract.gui.components.ExplorerPanel_View;
 import ca.fraggergames.ffxivextract.gui.components.Hex_View;
 import ca.fraggergames.ffxivextract.gui.components.Loading_Dialog;
@@ -34,17 +33,14 @@ import ca.fraggergames.ffxivextract.gui.components.Lua_View;
 import ca.fraggergames.ffxivextract.helpers.LERandomAccessFile;
 import ca.fraggergames.ffxivextract.helpers.LuaDec;
 import ca.fraggergames.ffxivextract.helpers.OggVorbisPlayer;
-import ca.fraggergames.ffxivextract.helpers.WinRegistry;
 import ca.fraggergames.ffxivextract.models.EXDF_File;
-import ca.fraggergames.ffxivextract.models.Macro_File;
 import ca.fraggergames.ffxivextract.models.SCD_File;
 import ca.fraggergames.ffxivextract.models.SqPack_DatFile;
 import ca.fraggergames.ffxivextract.models.SqPack_IndexFile;
 import ca.fraggergames.ffxivextract.models.SqPack_IndexFile.SqPack_File;
-import ca.fraggergames.ffxivextract.models.SqPack_IndexFile.SqPack_Folder;
 
 @SuppressWarnings("serial")
-public class FileManagerWindow extends JFrame implements TreeSelectionListener {
+public class FileManagerWindow extends JFrame implements TreeSelectionListener, ISearchComplete {
 
 	//DLLs
 	LuaDec luadec;
@@ -57,6 +53,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener {
 	SqPack_DatFile currentDatFile;
 	
 	//UI
+	SearchWindow searchWindow;
 	ExplorerPanel_View fileTree = new ExplorerPanel_View();	
 	JSplitPane splitPane;
 	Hex_View hexView = new Hex_View(16);
@@ -65,11 +62,67 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener {
 	JMenuItem file_Extract;
 	JMenuItem file_ExtractRaw;
 	JMenuItem file_Close;
+	JMenuItem search_search;
+	JMenuItem search_searchAgain;
 	
 	OggVorbisPlayer player;
 	
 	public FileManagerWindow(String title)
-	{		
+	{		/*
+		EXDF_File file;
+		Writer writer = null;		
+		try {
+			
+			writer = new BufferedWriter(new OutputStreamWriter(
+			          new FileOutputStream("C:\\Users\\Filip\\Desktop\\colors.csv"), "utf-8"));
+			
+			file = new EXDF_File("C:\\Users\\Filip\\Desktop\\Colors.exd");
+			for (int i = 1; i < file.entries.length; i++)
+			{
+				ByteBuffer buffer = ByteBuffer.allocateDirect(file.entries[i].data.length);
+				buffer.order(ByteOrder.BIG_ENDIAN);
+				buffer.put(file.entries[i].data);
+				buffer.rewind();
+				
+				buffer.position(2);
+				int X = buffer.getInt();
+				buffer.getInt();
+				buffer.get();
+				int R = buffer.get();
+				int G = buffer.get();
+				int B = buffer.get();
+				buffer.get();
+				buffer.get();
+				int X1 = buffer.get();
+				int Y1 = buffer.get();
+				int Z1 = buffer.get();
+				buffer.get();
+				buffer.get();
+				buffer.get();
+				byte[] string = new byte[buffer.remaining()];
+				buffer.get(string, 0, buffer.remaining());
+				String colorName = new String(string);
+				
+				writer.write(colorName + "," + String.format("%02X", R & 0xFF) + String.format("%02X", G & 0xFF) + String.format("%02X", B & 0xFF) + "," + String.format("%08X", X & 0xFFFFFFFF) + "," + String.format("%02X", X1 & 0xFF) + String.format("%02X", Y1 & 0xFF) + String.format("%02X", Z1 & 0xFF)+"\r\n");
+			}			
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		finally
+		{
+			if (writer!=null)
+				try {
+					writer.close();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+		}*/
+		
 		splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
 			                           fileTree, hexView);
 		
@@ -134,35 +187,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener {
 		setTitle(Constants.APPNAME + " [" + selectedFile.getName() + "]");
 		fileTree.fileOpened(currentIndexFile);
 		file_Close.setEnabled(true);
-		/*
-		for (SqPack_Folder f : currentIndexFile.getPackFolders())
-		{
-			for (SqPack_File fi : f.getFiles())
-			{
-				byte[] data;
-				try {
-					data = currentDatFile.extractFile(fi.dataoffset, null);
-					for (int i = 0; i < data.length - 10; i++)
-					{
-						if (data[i] == 'C' && data[i+1] == 'h' && data[i+2] == 'o' && data[i+3] == 'c' && data[i+4] == 'o' && data[i+5] == 'b' && data[i+6] == 'o' && data[i+7] == ' ' && data[i+8] == 'Y' && data[i+9] == 'e'){
-							System.out.println(String.format("%08X", f.getId() & 0xFFFFFFFF));
-							System.out.println(String.format("%08X", fi.getId() & 0xFFFFFFFF));
-							System.out.println("---");
-							JOptionPane.showMessageDialog(FileManagerWindow.this,
-									"FOUND",
-								    "",
-								    JOptionPane.ERROR_MESSAGE);
-							
-						break;}
-					}
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				
-			}
-		}*/
-		
+		search_search.setEnabled(true);		
 	}
 
 	protected void closeFile() {
@@ -183,6 +208,8 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener {
 		hexView.setBytes(null);
 		splitPane.setRightComponent(hexView);
 		file_Close.setEnabled(false);
+		search_search.setEnabled(false);
+		search_searchAgain.setEnabled(false);
 	}
 	
 	ActionListener menuHandler = new ActionListener() {
@@ -226,6 +253,16 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener {
 			{
 				extract(false);
 			}
+			else if (event.getActionCommand().equals("search"))
+			{
+				searchWindow = new SearchWindow(currentIndexFile, currentDatFile, FileManagerWindow.this);
+				searchWindow.setLocationRelativeTo(FileManagerWindow.this);
+				searchWindow.setVisible(true);
+			}
+			else if (event.getActionCommand().equals("searchagain"))
+			{
+				searchWindow.searchAgain();
+			}
 			else if (event.getActionCommand().equals("musicswapper"))
 			{
 				MusicSwapperWindow swapper = new MusicSwapperWindow();
@@ -261,6 +298,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener {
 		
 		//File Menu
 		JMenu file = new JMenu(Strings.MENU_FILE);
+		JMenu search = new JMenu(Strings.MENU_SEARCH);
 		JMenu tools = new JMenu(Strings.MENU_TOOLS);
 		JMenu help = new JMenu(Strings.MENU_HELP);
 		JMenuItem file_Open = new JMenuItem(Strings.MENUITEM_OPEN);
@@ -281,6 +319,16 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener {
 		file_Extract.addActionListener(menuHandler);
 		file_ExtractRaw.addActionListener(menuHandler);
 		file_Quit.addActionListener(menuHandler);
+		
+		search_search = new JMenuItem(Strings.MENUITEM_SEARCH);
+		search_search.setEnabled(false);
+		search_search.setActionCommand("search");
+		search_search.addActionListener(menuHandler);
+
+		search_searchAgain = new JMenuItem(Strings.MENUITEM_SEARCHAGAIN);
+		search_searchAgain.setEnabled(false);
+		search_searchAgain.setActionCommand("searchagain");
+		search_searchAgain.addActionListener(menuHandler);		
 		
 		JMenuItem tools_musicswapper = new JMenuItem(Strings.MENUITEM_MUSICSWAPPER);
 		tools_musicswapper.setActionCommand("musicswapper");
@@ -307,6 +355,9 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener {
 		file.addSeparator();
 		file.add(file_Quit);	
 		
+		search.add(search_search);
+		search.add(search_searchAgain);
+		
 		tools.add(tools_musicswapper);
 		tools.add(tools_macroEditor);
 		tools.add(tools_logViewer);
@@ -315,6 +366,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener {
 		
 		//Super Menus
 		menu.add(file);
+		menu.add(search);
 		menu.add(tools);
 		menu.add(help);
 		
@@ -327,7 +379,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener {
 		if (fileTree.getSelectedFiles().size() == 0)
 		{
 			file_Extract.setEnabled(false);
-			file_ExtractRaw.setEnabled(false);
+			file_ExtractRaw.setEnabled(false);			
 			return;
 		}
 		else
@@ -336,43 +388,46 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener {
 			file_ExtractRaw.setEnabled(true);
 		}
 		
-		try {
-			byte[] data = currentDatFile.extractFile(fileTree.getSelectedFiles().get(0).getOffset(), null);			
-			
-			JTabbedPane tabs = new JTabbedPane();
-			
-			if (data == null)
-			{				
-				hexView.setBytes(null);			
-				tabs.addTab("Raw Hex", hexView);			
-				splitPane.setRightComponent(tabs);
-				return;
-			}
-						
-			if (data[0] == 'E' && data[1] == 'X' && data[2] == 'D' && data[3] == 'F')
-			{								
-				//EXDF_View exdfComponent = new EXDF_View(new EXDF_File(data));
-				//tabs.addTab("EXDF File", exdfComponent);
-			}
-			else if (data[1] == 'L' && data[2] == 'u' && luadec != null){						
-				Lua_View luaComponent = new Lua_View(("-- Decompiled using luadec 2.0.1 by sztupy (http://winmo.sztupy.hu)\n"+luadec.decompile(data)).split("\n"));
-
-				tabs.addTab("Decompiled Lua", luaComponent);
-			}		
-			else if (false && data.length >= 4 && data[0] == 'S' && data[1] == 'E' && data[2] == 'D' && data[3] == 'B' )
-			{			
-				
-			}
-			
-			hexView.setBytes(data);			
-			tabs.addTab("Raw Hex", hexView);			
-			splitPane.setRightComponent(tabs);
+		try {			
+			byte[] data = currentDatFile.extractFile(fileTree.getSelectedFiles().get(0).getOffset(), null);									
+			openData(data);
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
 	}	
 	
+	private void openData(byte[] data) {
+		JTabbedPane tabs = new JTabbedPane();
+		
+		if (data == null)
+		{				
+			hexView.setBytes(null);			
+			tabs.addTab("Raw Hex", hexView);			
+			splitPane.setRightComponent(tabs);
+			return;
+		}
+					
+		if (data[0] == 'E' && data[1] == 'X' && data[2] == 'D' && data[3] == 'F')
+		{								
+			//EXDF_View exdfComponent = new EXDF_View(new EXDF_File(data));
+			//tabs.addTab("EXDF File", exdfComponent);
+		}
+		else if (data[1] == 'L' && data[2] == 'u' && luadec != null){						
+			Lua_View luaComponent = new Lua_View(("-- Decompiled using luadec 2.0.1 by sztupy (http://winmo.sztupy.hu)\n"+luadec.decompile(data)).split("\n"));
+
+			tabs.addTab("Decompiled Lua", luaComponent);
+		}		
+		else if (false && data.length >= 4 && data[0] == 'S' && data[1] == 'E' && data[2] == 'D' && data[3] == 'B' )
+		{			
+			
+		}
+		
+		hexView.setBytes(data);			
+		tabs.addTab("Raw Hex", hexView);			
+		splitPane.setRightComponent(tabs);
+	}
+
 	private void extract(boolean doConvert) {				
 		JFileChooser fileChooser = new JFileChooser(lastOpenedFile);
 		
@@ -503,6 +558,27 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener {
 			loadingDialog.dispose();
 		}
 		
+	}
+
+
+	@Override
+	public void onSearchChosen(long offset) {
+		
+		if (offset == -1)
+		{
+			search_searchAgain.setEnabled(false);
+			return;
+		}
+		
+		byte[] data;
+		try {
+			data = currentDatFile.extractFile(offset, null);
+			openData(data);
+			search_searchAgain.setEnabled(true);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 }

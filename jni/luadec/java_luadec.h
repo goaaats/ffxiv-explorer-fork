@@ -13,7 +13,7 @@ extern "C" {
  * Signature: ([B)Ljava/lang/String;
  */
 JNIEXPORT jstring JNICALL Java_ca_fraggergames_ffxivextract_helpers_LuaDec_decompile
-  (JNIEnv *, jclass, jbyteArray);
+  (JNIEnv *, jobject, jbyteArray);
 
 #ifdef __cplusplus
 }
