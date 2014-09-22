@@ -6,20 +6,53 @@ Current research on EXHF files
 
 0x000 Signature    			Int32; EXHF
 0x004 Version???  			Short; Always 0x03
-0x006 Size???      			Short; Seems to be size of the first "page"? In Strings it's 8 (4 byte index, 4 byte offset), in macroicon it's 4 (one entry is 4 bytes).
-0x008 Number of Columns???  Short; In macroicon, there is only 1 column, while strings have 2 (name/value). Items has 0x5E.
-0x00A Unknown     		    Short;
-0x00C Number of EXDs??? 	Short; Seems to be the number of EXD files that pertain to the EXH. String files are usually 0x05 (for each language + 1 ????), while settings/data are 0x01.
+0x006 Number of Columns???	Short; Seems to be size of the first "page"? In Strings and Items it's 8 (4 byte index, 4 byte offset), in macroicon it's 4 (one entry is 4 bytes... a offset).
+0x008 Number of TABLE1      Short; In Item.EXH, the first groupings are 4 * 0x5E (which is here), in strings files... it's 4 * 0x02. Seems to be size of TABLE1. 
+0x00A Number of Pages?      Short; The size of the page table below.
+0x00C Number of EXDs??? 	Short; Seems to be the number of EXD languages?. String files are usually 0x05, while settings/data are 0x01.
 0x00E Unknown   	   		Short;
-0x010 Unknown           	Int32; Always 0x01.
-0x014 Number of entries		Int32; How many entries are in this file
+0x010 Unknown           	Int32; Always 0x010000.
+0x014 Number of entries		Int32; How many total entries are in this file
 0x018 Padding?                   ; Padded to 0x1F
 
-===Some Table???===
+===TABLE 1=== (Size of Number of TABLE1. Each entry most likely 4 bytes)
 
-0x000
+0x000 ????					Short; This number is usually small... under 0x7 most of the time, but got a 0xB once. Item Type?
+0x002 ????					Short; All over the place but usually under 0xFF. Offset maybe? Goes up by one sometimes... wouldn't be surprised if some data was a byte.
+
+===Page Table=== (Size of num pages) 
+
+0x000 Page Entry          Int32; Page Entry Name. See Items Page entry names.
+0x004 Page Entry Size     Int32; Number of entries in a page. For example Item_0.exd has 500 entries... 0x1F4, with item_500.exd being the next file.  
+
+===SOMETHING HERE==== 
+
+Usually 01, 00, 02, 00, 03, 00, 04, 00, 05, 00
+
+-----------------------NOTES---------------------
+
+0, 2, 0, 2, 2, 2, 2, 2, 0, 0, 5, 3, 3, 1, 7, 3, 7
 
 -EXHF files seem to define data about the EXDF files. Specifically it seems the number of columns + sizes of these column is defined here.  
+
+-The items.exd files span multiple pages. Start at items_0, then items__500, then items__1000, etc.
+
+-Item Page Entry Names
+0
+500
+1000
+1500
+2000
+2500
+3000
+3500
+4000
+4500
+5000
+5500
+6000
+6221 --STOPS HERE... hmmm
+6231
 
 -In items.exh, the table seems to be of either 2 or 4 byte entries.
 -Strings and item.exh files end with 0x100, 0x200, 0x300, 0x400, 0x500
