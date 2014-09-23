@@ -3,6 +3,7 @@ package ca.fraggergames.ffxivextract.gui.components;
 import java.awt.Color;
 import java.awt.Component;
 import java.util.ArrayList;
+import java.util.Enumeration;
 
 import javax.swing.Icon;
 import javax.swing.JScrollPane;
@@ -54,8 +55,11 @@ public class ExplorerPanel_View extends JScrollPane {
 		{
 			SqPack_Folder fakefolder = index.getPackFolders()[0];
 			
-			for (int j = 0; j < fakefolder.getFiles().length; j++) 				
-				root.add(new DefaultMutableTreeNode(fakefolder.getFiles()[j]));			
+			for (int j = 0; j < fakefolder.getFiles().length; j++)
+			{
+				
+				root.add(new DefaultMutableTreeNode(fakefolder.getFiles()[j]));	
+			}
 			
 		}
 		else
@@ -71,6 +75,7 @@ public class ExplorerPanel_View extends JScrollPane {
 				root.add(folderNode);
 			}
 		}
+
 		((DefaultTreeModel) fileTree.getModel()).reload();
 	}
 
@@ -95,7 +100,7 @@ public class ExplorerPanel_View extends JScrollPane {
 	        {
 	        	SqPack_Folder folder = (SqPack_Folder) node.getUserObject();
 	        	
-	        	if (Constants.hashDatabase.getFileName(folder.getId()) != null)
+	        	if (Constants.hashDatabase != null && Constants.hashDatabase.getFolder(folder.getId()) != null)
 	        		value = Constants.hashDatabase.getFolder(folder.getId());
 	        	else
 	        		value = String.format("%08X", folder.getId() & 0xFFFFFFFF);
@@ -108,7 +113,7 @@ public class ExplorerPanel_View extends JScrollPane {
 	        {
 	        	SqPack_File file = (SqPack_File) node.getUserObject();
 	        		        	
-	        	if (Constants.hashDatabase.getFileName(file.getId()) != null)
+	        	if (Constants.hashDatabase != null && Constants.hashDatabase.getFileName(file.getId()) != null)
 	        		value = Constants.hashDatabase.getFileName(file.getId());
 	        	else
 	        		value =  String.format("%08X", file.getId() & 0xFFFFFFFF); 
@@ -147,4 +152,81 @@ public class ExplorerPanel_View extends JScrollPane {
 		
 		return selectedFiles;
 	}
+	
+	public void select(long offset)
+	{		
+		DefaultMutableTreeNode root = (DefaultMutableTreeNode) fileTree.getModel().getRoot();		
+		Enumeration<DefaultMutableTreeNode> e = root.depthFirstEnumeration();
+	    while (e.hasMoreElements()) {
+	        DefaultMutableTreeNode node = e.nextElement();
+	        if (node.getUserObject() instanceof SqPack_File)
+	        {
+	        	SqPack_File file = (SqPack_File)node.getUserObject();
+		        if (offset == file.getOffset()) {
+		            fileTree.setSelectionPath(new TreePath(node.getPath()));
+		        }
+	        }
+	    }
+	}
+	
+	public DefaultMutableTreeNode sort(DefaultMutableTreeNode node) {
+
+	    //sort alphabetically
+	    for(int i = 0; i < node.getChildCount() - 1; i++) {
+	        DefaultMutableTreeNode child = (DefaultMutableTreeNode) node.getChildAt(i);
+	        String nt;
+	        
+	        if (child.getUserObject() instanceof SqPack_Folder)
+	        {
+	        	SqPack_Folder folder = (SqPack_Folder) child.getUserObject();
+	        	if (Constants.hashDatabase != null && Constants.hashDatabase.getFolder(folder.getId())!=null)
+	        		nt = Constants.hashDatabase.getFolder(folder.getId());
+	        	else
+	        		nt = String.format("%08X", folder.getId() & 0xFFFFFFFF);
+	        }
+	        else
+	        {
+	        	SqPack_File file = (SqPack_File) child.getUserObject();
+	        	if (Constants.hashDatabase != null && Constants.hashDatabase.getFileName(file.getId())!=null)
+	        		nt = Constants.hashDatabase.getFileName(file.getId());
+	        	else
+	        		nt = String.format("%08X", file.getId() & 0xFFFFFFFF);
+	        }
+	        	
+
+	        for(int j = i + 1; j <= node.getChildCount() - 1; j++) {
+	            DefaultMutableTreeNode prevNode = (DefaultMutableTreeNode) node.getChildAt(j);
+	            String np;
+	           
+	            if (prevNode.getUserObject() instanceof SqPack_Folder)
+		        {
+		        	SqPack_Folder folder = (SqPack_Folder) prevNode.getUserObject();
+		        	if (Constants.hashDatabase != null && Constants.hashDatabase.getFolder(folder.getId())!=null)
+		        		np = Constants.hashDatabase.getFolder(folder.getId());
+		        	else
+		        		np = "~"+String.format("%08X", folder.getId() & 0xFFFFFFFF);
+		        }
+		        else
+		        {
+		        	SqPack_File file = (SqPack_File) prevNode.getUserObject();
+		        	if (Constants.hashDatabase != null && Constants.hashDatabase.getFileName(file.getId())!=null)
+		        		np = Constants.hashDatabase.getFileName(file.getId());
+		        	else
+		        		np = "~"+String.format("%08X", file.getId() & 0xFFFFFFFF);
+		        }
+	            
+	            if(nt.compareToIgnoreCase(np) > 0) {
+	                node.insert(child, j);
+	                node.insert(prevNode, i);
+	            }
+	        }
+	        if(child.getChildCount() > 0) {
+	            sort(child);
+	        }
+	    }	   
+
+	    return node;
+
+	}
 }
+

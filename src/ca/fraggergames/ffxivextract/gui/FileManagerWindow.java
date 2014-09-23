@@ -439,7 +439,14 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 		{			
 			fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);		
 
-			fileChooser.setSelectedFile(new File(String.format("%08X", files.get(0).getId() & 0xFFFFFFFF)));			
+			String filename;
+			
+			if (Constants.hashDatabase != null && Constants.hashDatabase.getFileName(files.get(0).getId()) != null)
+				filename = Constants.hashDatabase.getFileName(files.get(0).getId());
+			else
+				filename = String.format("%08X", files.get(0).getId() & 0xFFFFFFFF);
+			
+			fileChooser.setSelectedFile(new File(filename));			
 			FileFilter filter = new FileFilter() {
 				
 				@Override
@@ -574,6 +581,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 		try {
 			data = currentDatFile.extractFile(offset, null);
 			openData(data);
+			fileTree.select(offset);
 			search_searchAgain.setEnabled(true);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block

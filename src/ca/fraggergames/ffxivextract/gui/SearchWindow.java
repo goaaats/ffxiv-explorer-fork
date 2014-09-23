@@ -20,6 +20,7 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 
+import ca.fraggergames.ffxivextract.Constants;
 import ca.fraggergames.ffxivextract.Strings;
 import ca.fraggergames.ffxivextract.models.SqPack_DatFile;
 import ca.fraggergames.ffxivextract.models.SqPack_IndexFile;
@@ -163,6 +164,9 @@ public class SearchWindow extends JFrame {
 				byte[] data;
 				try {
 					data = currentDatFile.extractFile(fi.dataoffset, null);
+					if (data == null)
+						continue;
+					
 					boolean breakOutOfFile = false;
 					for (int i2 = 0; i2 < data.length - string.length(); i2++) {
 						for (int j2 = 0; j2 < string.length(); j2++) {
@@ -176,17 +180,23 @@ public class SearchWindow extends JFrame {
 
 									Object[] options = { "Continue",
 											"Open", "Stop Search" };
+									
+									String folder= null, file = null;
+									
+									if (Constants.hashDatabase != null && Constants.hashDatabase.getFolder(f.getId()) != null)
+										folder = Constants.hashDatabase.getFolder(f.getId());
+									else
+										folder = String.format("%08X", f.getId() & 0xFFFFFFFF);
+									
+									if (Constants.hashDatabase != null && Constants.hashDatabase.getFileName(fi.getId()) != null)
+										file = Constants.hashDatabase.getFileName(fi.getId());
+									else
+										file = String.format("%08X", fi.getId() & 0xFFFFFFFF);
+									
 									int n = JOptionPane
 											.showOptionDialog(
 													this,
-													"Found result in folder: "
-															+ String.format(
-																	"%08X",
-																	f.getId() & 0xFFFFFFFF)
-															+ ", file: "
-															+ String.format(
-																	"%08X",
-																	fi.getId() & 0xFFFFFFFF),
+													"Found result in folder: " + folder + ", file: " + file,
 													"Searching through DAT...",
 													JOptionPane.YES_NO_CANCEL_OPTION,
 													JOptionPane.QUESTION_MESSAGE,
