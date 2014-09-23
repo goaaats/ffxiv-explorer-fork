@@ -51,7 +51,7 @@ public class Log_File {
 			int filter = Integer.parseInt(info.substring(8, 10), 16);
 			int channel = Integer.parseInt(info.substring(10, 12), 16);			
 			
-			entries[i] = new Log_Entry(time, filter, channel, new FFXIV_String(sender), new FFXIV_String(message));
+			entries[i] = new Log_Entry(time, filter, channel, FFXIV_String.parseFFXIVString(sender), FFXIV_String.parseFFXIVString(message));
 			
 			if (Constants.DEBUG)
 			{
@@ -73,14 +73,14 @@ public class Log_File {
 		final public long time;
 		final public int channel;
 		final public int filter;
-		final public FFXIV_String sender;
-		final public FFXIV_String message;
+		final public String sender;
+		final public String message;
 		
-		public Log_Entry(long time, int filter, int channel, FFXIV_String sender, FFXIV_String message) {
+		public Log_Entry(long time, int filter, int channel, String string, String message) {
 			this.time = time;
 			this.filter = filter;
 			this.channel = channel;
-			this.sender = sender;
+			this.sender = string;
 			this.message = message;
 		}
 		

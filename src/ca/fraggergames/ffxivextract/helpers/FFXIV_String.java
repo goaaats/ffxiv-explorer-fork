@@ -5,9 +5,9 @@ import java.io.UnsupportedEncodingException;
 public class FFXIV_String {
 
 	String original, parsed;
-	public FFXIV_String(String string) {
+	public static String parseFFXIVString(String string) {
 		
-		original = string;
+		String original = string;
 		try {
 			StringBuilder builder = new StringBuilder(original);
 			byte[] chars = string.getBytes();
@@ -55,23 +55,18 @@ public class FFXIV_String {
 				}
 			}
 			
-			parsed = new String(builder.toString().getBytes(), "UTF-8");
+			return new String(builder.toString().getBytes(), "UTF-8");
 		} catch (UnsupportedEncodingException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	}
-	
-	public FFXIV_String(byte[] string) {
-		this(new String(string));
-	}
+		
+		return null;
+	}	
 
-	private void processToken(int tokenType, byte[] tokenBuffer) {
+	private static void processToken(int tokenType, byte[] tokenBuffer) {
 		
 	}
 
-	@Override
-	public String toString() {
-		return parsed;
-	}
+	
 }
