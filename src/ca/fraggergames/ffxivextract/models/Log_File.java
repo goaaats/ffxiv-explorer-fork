@@ -75,6 +75,7 @@ public class Log_File {
 		final public int filter;
 		final public String sender;
 		final public String message;
+		final public String formattedTime;
 		
 		public Log_Entry(long time, int filter, int channel, String string, String message) {
 			this.time = time;
@@ -82,6 +83,8 @@ public class Log_File {
 			this.channel = channel;
 			this.sender = string;
 			this.message = message;
+			
+			formattedTime = "";
 		}
 		
 		@Override
