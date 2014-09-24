@@ -9,6 +9,8 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 
 import javax.swing.BoxLayout;
@@ -142,9 +144,20 @@ public class LogViewerWindow extends JFrame {
 
 		// Load all logs into memory
 		logList.add(new Log_Entry(0, 0, 0, "Filip", "Hello"));
-		logList.add(new Log_Entry(0, 0, 0, "", "Hello"));
-		logList.add(new Log_Entry(0, 0, 0, "Filip", "Hello"));
-		logList.add(new Log_Entry(0, 0, 0, "", "Hello"));
+		logList.add(new Log_Entry(3, 0, 0, "", "Hello"));
+		logList.add(new Log_Entry(1, 0, 0, "Filip", "Hello"));
+		logList.add(new Log_Entry(3, 0, 0, "", "Hello"));
+		
+		// Open Filechooser dialog		
+		// Get file list
+		// Load each file and throw into above array list
+		
+		// Sort by time
+		Collections.sort(logList, new Comparator<Log_Entry>() {
+			public int compare(Log_Entry o1, Log_Entry o2) {
+				return o1.time > o2.time ? 1 : (o1.time == o2.time ? 0 : -1);
+			};
+		});
 		
 		// Setup and load table
 		table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
