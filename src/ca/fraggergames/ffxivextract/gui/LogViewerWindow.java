@@ -35,7 +35,7 @@ public class LogViewerWindow extends JFrame {
 
 	private JPanel contentPane;
 	private JTable table;
-	private JScrollPane scrollPane;
+
 	private ArrayList<Log_Entry> logList = new ArrayList<Log_Entry>();
 
 	public LogViewerWindow() {
@@ -62,7 +62,7 @@ public class LogViewerWindow extends JFrame {
 		contentPane.add(panel_1, BorderLayout.CENTER);
 		panel_1.setLayout(new BoxLayout(panel_1, BoxLayout.X_AXIS));
 
-		scrollPane = new JScrollPane();
+		JScrollPane scrollPane = new JScrollPane();
 		panel_1.add(scrollPane);
 
 		table = new JTable();

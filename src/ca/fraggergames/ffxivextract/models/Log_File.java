@@ -2,6 +2,10 @@ package ca.fraggergames.ffxivextract.models;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.TimeZone;
 
 import ca.fraggergames.ffxivextract.Constants;
 import ca.fraggergames.ffxivextract.helpers.FFXIV_String;
@@ -84,7 +88,12 @@ public class Log_File {
 			this.sender = string;
 			this.message = message;
 			
-			formattedTime = "";
+			Date date = new Date(time);
+	        DateFormat format = new SimpleDateFormat("dd/MM/yy HH:mm:ss");
+	        format.setTimeZone(TimeZone.getTimeZone("Etc/UTC"));
+	        String formatted = format.format(date);
+	        
+			formattedTime = formatted;
 		}
 		
 		@Override
