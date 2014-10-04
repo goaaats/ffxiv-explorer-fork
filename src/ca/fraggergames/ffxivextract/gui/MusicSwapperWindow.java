@@ -32,6 +32,7 @@ import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.filechooser.FileFilter;
 
+import ca.fraggergames.ffxivextract.Constants;
 import ca.fraggergames.ffxivextract.Strings;
 import ca.fraggergames.ffxivextract.helpers.LERandomAccessFile;
 import ca.fraggergames.ffxivextract.models.SqPack_IndexFile;
@@ -272,7 +273,13 @@ public class MusicSwapperWindow extends JFrame {
 			int selectedSpot) {
 		dropdown.removeAllItems();
 		for (int i = 0; i < files.length; i++)
-			dropdown.addItem(String.format("%08X (%08X)", files[i].id & 0xFFFFFFFF, files[i].getOffset() & 0xFFFFFFFF));
+		{
+			if (Constants.hashDatabase != null && Constants.hashDatabase.getFileName(files[i].id)!=null)
+				dropdown.addItem(String.format("%s (%08X)", Constants.hashDatabase.getFileName(files[i].id), files[i].getOffset() & 0xFFFFFFFF));
+			else
+				dropdown.addItem(String.format("%08X (%08X)", files[i].id & 0xFFFFFFFF, files[i].getOffset() & 0xFFFFFFFF));
+		}
+			
 		dropdown.setSelectedIndex(selectedSpot);
 	}
 

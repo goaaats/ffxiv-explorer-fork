@@ -542,8 +542,14 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 					}
 					
 					String path = lastOpenedFile.getCanonicalPath();
+					String fileName;
+					if (Constants.hashDatabase != null && Constants.hashDatabase.getFileName(files.get(i).getId()) != null)
+						fileName =Constants.hashDatabase.getFileName(files.get(i).getId());
+					else
+						fileName =String.format("%X", files.get(i).getId() & 0xFFFFFFFF);
+					
 					if (files.size() > 1)
-						path = lastOpenedFile.getCanonicalPath() + "\\" + String.format("%X", files.get(i).getId() & 0xFFFFFFFF);
+						path = lastOpenedFile.getCanonicalPath() + "\\" + fileName;
 					
 					LERandomAccessFile out = new LERandomAccessFile(path + extension, "rw");
 					out.write(dataToSave, 0, dataToSave.length);

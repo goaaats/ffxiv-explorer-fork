@@ -6,6 +6,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -19,6 +20,7 @@ import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -28,6 +30,7 @@ import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 
+import ca.fraggergames.ffxivextract.models.Log_File;
 import ca.fraggergames.ffxivextract.models.Log_File.Log_Entry;
 
 public class LogViewerWindow extends JFrame {
@@ -141,16 +144,53 @@ public class LogViewerWindow extends JFrame {
 	}
 
 	private void loadLog() {
-
-		// Load all logs into memory
-		logList.add(new Log_Entry(0, 0, 0, "Filip", "Hello"));
-		logList.add(new Log_Entry(3, 0, 0, "", "Hello"));
-		logList.add(new Log_Entry(1, 0, 0, "Filip", "Hello"));
-		logList.add(new Log_Entry(3, 0, 0, "", "Hello"));
 		
-		// Open Filechooser dialog		
-		// Get file list
-		// Load each file and throw into above array list
+		JFileChooser fileChooser = new JFileChooser();
+		fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+		int retVal = fileChooser.showOpenDialog(this);
+		
+		Log_File logs[];
+		
+		if (retVal == JFileChooser.APPROVE_OPTION)
+		{
+			if (!fileChooser.getSelectedFile().getName().equals("log"))
+			{
+				JOptionPane.showMessageDialog(this, "This is not a valid log folder.", "Error opening logs",
+					    JOptionPane.ERROR_MESSAGE);
+				dispose();
+				return;
+			}
+			
+			File directory = fileChooser.getSelectedFile();
+			File list[] = directory.listFiles();
+			logs = new Log_File[list.length];
+			
+			for (int i = 0; i < logs.length; i++){
+				try {
+					logs[i] = new Log_File(list[i].getAbsolutePath());
+					Log_Entry entries[] = logs[i].getEntries();
+					
+					for (int j = 0; j < entries.length; j++)
+					{
+						Log_Entry toAdd = entries[j];
+						if (toAdd.filter == 0)
+						logList.add(toAdd);
+					}
+					
+				} catch (FileNotFoundException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
+		else
+		{
+			dispose();
+			return;
+		}		
 		
 		// Sort by time
 		Collections.sort(logList, new Comparator<Log_Entry>() {
@@ -240,9 +280,9 @@ public class LogViewerWindow extends JFrame {
 		@Override
 		public Object getValueAt(int rowIndex, int columnIndex) {
 			if (columnIndex == 0)
-				return entries.get(rowIndex).time;
+				return entries.get(rowIndex).formattedTime;
 			else if (columnIndex == 1)
-				return entries.get(rowIndex).channel;
+				return entries.get(rowIndex).filter;
 			else if (columnIndex == 2)
 				return entries.get(rowIndex).message.toString();
 			else

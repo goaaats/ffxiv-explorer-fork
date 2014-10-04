@@ -55,7 +55,7 @@ public class Log_File {
 			int filter = Integer.parseInt(info.substring(8, 10), 16);
 			int channel = Integer.parseInt(info.substring(10, 12), 16);			
 			
-			entries[i] = new Log_Entry(time, filter, channel, FFXIV_String.parseFFXIVString(sender), FFXIV_String.parseFFXIVString(message));
+			entries[i] = new Log_Entry(time, filter, channel, sender, message);
 			
 			if (Constants.DEBUG)
 			{
@@ -88,7 +88,7 @@ public class Log_File {
 			this.sender = string;
 			this.message = message;
 			
-			Date date = new Date(time);
+			Date date = new Date(time*1000);			
 	        DateFormat format = new SimpleDateFormat("dd/MM/yy HH:mm:ss");
 	        format.setTimeZone(TimeZone.getTimeZone("Etc/UTC"));
 	        String formatted = format.format(date);
