@@ -7,9 +7,9 @@ import ca.fraggergames.ffxivextract.helpers.PathHashList;
 public class Constants {
 
 	public static final String APPNAME = "FFXIV 2.0 Data Explorer";
-	public static final String VERSION = "v0.4";
+	public static final String VERSION = "v0.41";
 	public static final String COMMIT = "80c37cd841cfd2998fa72bc20e15cbedaa21b65d";
-	public static boolean DEBUG = true;
+	public static boolean DEBUG = false;
 	public static boolean EASTER_EGG = false;
 
 	public static PathHashList hashDatabase;
