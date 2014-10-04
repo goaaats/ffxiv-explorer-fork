@@ -1,19 +1,25 @@
 package ca.fraggergames.ffxivextract.helpers;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Enumeration;
 import java.util.Hashtable;
 
 import javax.swing.JOptionPane;
-import javax.swing.Box.Filler;
 
 import ca.fraggergames.ffxivextract.Constants;
-import ca.fraggergames.ffxivextract.gui.FileManagerWindow;
+
+import com.esotericsoftware.kryo.Kryo;
+import com.esotericsoftware.kryo.io.Input;
+import com.esotericsoftware.kryo.io.Output;
 
 public class PathHashList {
 
@@ -148,6 +154,11 @@ static int[] crc_table_0f091d0 = new int[]{
 		0xCCB0A91F, 0x740CCE7A, 0x66B96194, 0xDE0506F1
 };
 
+	public PathHashList(InputStream stream) throws IOException {	
+		folders = new Hashtable<Long, String>();
+		fileFullPath = new Hashtable<Long, String>();
+		loadHashesFromStream(stream);
+	}
 
 	public PathHashList(String pathDB) throws IOException {
 		folders = new Hashtable<Long, String>();
@@ -160,8 +171,8 @@ static int[] crc_table_0f091d0 = new int[]{
 			if (Constants.DEBUG)
 				System.out.println("Hash DB loaded. Found " + folders.keySet().size() + " folders and " + fileFullPath.keySet().size() + " files.");
 			
-			loadPathsFromTXT("C:\\Users\\Filip\\Desktop\\exds.txt");
-			saveHashes(pathDB);	
+			//loadPathsFromTXT("C:\\Users\\Filip\\Desktop\\exds.txt");
+			//saveHashes(pathDB);	
 			
 			JOptionPane.showMessageDialog(null,
 					"Hash DB loaded and ready! (Sorry, too lazy to do a progress dialog >.>)",
@@ -200,6 +211,70 @@ static int[] crc_table_0f091d0 = new int[]{
 				    JOptionPane.ERROR_MESSAGE);
 		}
 		
+	}
+	
+	public void saveKryo(String path) throws FileNotFoundException
+	{
+		Kryo kryo = new Kryo();
+		Output out = new Output(new FileOutputStream(new File(path)));
+		kryo.writeObject(out, this);
+		out.close();
+	}
+	
+	public static PathHashList loadKryo(String path) throws FileNotFoundException
+	{
+		Kryo kryo = new Kryo();
+		Input in = new Input(new FileInputStream(new File(path)));
+		PathHashList obj = kryo.readObject(in, PathHashList.class);
+		in.close();
+		return obj;
+	}
+	
+	private void loadHashesFromStream(InputStream is) throws IOException
+	{
+		LittleEndianInputStream in = new LittleEndianInputStream(is);
+		
+		if (in.readInt() != 1213481296) //PATH
+		{
+			if (Constants.DEBUG)
+				System.out.println("Hash DB is invalid");
+			throw new IOException("Invalid Signature");
+		}
+		
+		long numFolders = in.readLong();
+		long numFiles = in.readLong();
+		
+		for (long i = 0; i < numFolders; i++)
+		{
+			long hash = in.readLong();
+			String folder = "";
+			
+			while (true) {
+				int c = in.readUnsignedByte();
+				if (c == 0)
+					break;
+				else
+					folder += (char) c;
+			}
+			
+			folders.put(hash, folder);
+		}
+		for (long i = 0; i < numFiles; i++)
+		{
+			long hash = in.readLong();
+			String fullPath = "";
+			
+			while (true) {
+				int c = in.readUnsignedByte();
+				if (c == 0)
+					break;
+				else
+					fullPath += (char) c;
+			}
+			
+			fileFullPath.put(hash, fullPath);
+		}
+		in.close();
 	}
 
 	private void loadHashes(String path) throws IOException {
@@ -437,4 +512,11 @@ static int[] crc_table_0f091d0 = new int[]{
 		return dwCRC;
 	}
 
+	public int getNumFiles() {
+		return fileFullPath.size();
+	}
+
+	public int getNumFolders() {
+		return folders.size();
+	}
 }

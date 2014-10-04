@@ -24,7 +24,8 @@ public class Main {
 		fileMan.setVisible(true);						
 		
 		try {
-			Constants.hashDatabase = new PathHashList("C:\\Users\\Filip\\Desktop\\filelist.db");
+			Constants.hashDatabase = PathHashList.loadKryo("C:\\Users\\Filip\\Desktop\\filelist2.db");			
+			System.out.println("Loaded: " + Constants.hashDatabase.getNumFiles() + " files and " + Constants.hashDatabase.getNumFolders() + " folders.");
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
