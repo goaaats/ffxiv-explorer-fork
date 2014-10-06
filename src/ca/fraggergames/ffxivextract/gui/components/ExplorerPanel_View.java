@@ -19,6 +19,7 @@ import ca.fraggergames.ffxivextract.Constants;
 import ca.fraggergames.ffxivextract.models.SqPack_IndexFile;
 import ca.fraggergames.ffxivextract.models.SqPack_IndexFile.SqPack_File;
 import ca.fraggergames.ffxivextract.models.SqPack_IndexFile.SqPack_Folder;
+import ca.fraggergames.ffxivextract.storage.CompareFile;
 
 @SuppressWarnings("serial")
 public class ExplorerPanel_View extends JScrollPane {
@@ -27,6 +28,8 @@ public class ExplorerPanel_View extends JScrollPane {
 	DefaultMutableTreeNode root = new DefaultMutableTreeNode("Root");
 	JScrollPane scroller;
 
+	CompareFile currentCompareFile;
+	
 	public ExplorerPanel_View() {
 		setBackground(Color.WHITE);
 		fileTree = new JTree(root) {
@@ -49,7 +52,9 @@ public class ExplorerPanel_View extends JScrollPane {
 		fileTree.addTreeSelectionListener(l);
 	}
 	
-	public void fileOpened(SqPack_IndexFile index) {
+	public void fileOpened(SqPack_IndexFile index, CompareFile compareFile) {		
+		
+		currentCompareFile = compareFile;
 		
 		if (index.hasNoFolders())
 		{
@@ -84,12 +89,12 @@ public class ExplorerPanel_View extends JScrollPane {
 		((DefaultTreeModel) fileTree.getModel()).reload();
 	}
 	
-	private static class TreeRenderer extends DefaultTreeCellRenderer {
+	private class TreeRenderer extends DefaultTreeCellRenderer {
 
-	    private static final Icon fileIcon =
+	    private final Icon fileIcon =
 	        (Icon) UIManager.get("FileView.fileIcon");
-	    private static final Icon folderIcon =
-		        (Icon) UIManager.get("FileView.directoryIcon");
+	    private final Icon folderIcon =
+		        (Icon) UIManager.get("FileView.directoryIcon");	    
 	    
 	    @Override
 	    public Component getTreeCellRendererComponent(JTree tree, Object value,
@@ -103,8 +108,7 @@ public class ExplorerPanel_View extends JScrollPane {
 	        	if (Constants.hashDatabase != null && Constants.hashDatabase.getFolder(folder.getId()) != null)
 	        		value = Constants.hashDatabase.getFolder(folder.getId());
 	        	else
-	        		value = String.format("%08X", folder.getId() & 0xFFFFFFFF);
-	        	
+	        		value = String.format("%08X", folder.getId() & 0xFFFFFFFF);	     
 	        	
 	        	setOpenIcon(getDefaultOpenIcon());
 	            setClosedIcon(getDefaultClosedIcon());
@@ -112,7 +116,12 @@ public class ExplorerPanel_View extends JScrollPane {
 	        else if (node.getUserObject() instanceof SqPack_File) //FILE
 	        {
 	        	SqPack_File file = (SqPack_File) node.getUserObject();
-	        		        	
+	        	
+	        	if (currentCompareFile != null && currentCompareFile.isNewFile(file.getId()))
+	        		setTextNonSelectionColor(new Color(0,150,0));
+	        	else
+	        		setTextNonSelectionColor(Color.BLACK);
+	        	
 	        	if (Constants.hashDatabase != null && Constants.hashDatabase.getFileName(file.getId()) != null)
 	        		value = Constants.hashDatabase.getFileName(file.getId());
 	        	else

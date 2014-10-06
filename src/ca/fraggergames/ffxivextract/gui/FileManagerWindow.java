@@ -38,6 +38,7 @@ import ca.fraggergames.ffxivextract.models.SCD_File;
 import ca.fraggergames.ffxivextract.models.SqPack_DatFile;
 import ca.fraggergames.ffxivextract.models.SqPack_IndexFile;
 import ca.fraggergames.ffxivextract.models.SqPack_IndexFile.SqPack_File;
+import ca.fraggergames.ffxivextract.storage.CompareFile;
 
 @SuppressWarnings("serial")
 public class FileManagerWindow extends JFrame implements TreeSelectionListener, ISearchComplete {
@@ -51,6 +52,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 	File lastOpenedFile = null;
 	SqPack_IndexFile currentIndexFile;
 	SqPack_DatFile currentDatFile;
+	CompareFile currentCompareFile;
 	
 	//UI
 	SearchWindow searchWindow;
@@ -177,6 +179,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 		try {
 			currentIndexFile = new SqPack_IndexFile(selectedFile.getAbsolutePath());			
 			currentDatFile = new SqPack_DatFile(selectedFile.getAbsolutePath().replace(".index", ".dat0"));
+			currentCompareFile = CompareFile.getCompareFile(selectedFile.getName().substring(0, selectedFile.getName().lastIndexOf('.')));
 		} catch (Exception e) {
 			return;
 		}
@@ -185,7 +188,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 			currentIndexFile.displayIndexInfo();
 		
 		setTitle(Constants.APPNAME + " [" + selectedFile.getName() + "]");
-		fileTree.fileOpened(currentIndexFile);
+		fileTree.fileOpened(currentIndexFile, currentCompareFile);
 		file_Close.setEnabled(true);
 		search_search.setEnabled(true);		
 	}
@@ -203,6 +206,13 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 		}
 		currentIndexFile = null;
 		currentDatFile = null;
+		try {
+			currentCompareFile.save();
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		currentCompareFile = null;
 		
 		setTitle(Constants.APPNAME);
 		hexView.setBytes(null);
