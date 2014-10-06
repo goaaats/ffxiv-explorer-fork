@@ -2,7 +2,7 @@ package ca.fraggergames.ffxivextract;
 
 import javax.swing.UIManager;
 
-import ca.fraggergames.ffxivextract.helpers.PathHashList;
+import ca.fraggergames.ffxivextract.storage.PathHashList;
 
 public class Constants {
 

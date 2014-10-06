@@ -1,4 +1,4 @@
-package ca.fraggergames.ffxivextract.helpers;
+package ca.fraggergames.ffxivextract.storage;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -8,6 +8,7 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Enumeration;
@@ -16,16 +17,19 @@ import java.util.Hashtable;
 import javax.swing.JOptionPane;
 
 import ca.fraggergames.ffxivextract.Constants;
+import ca.fraggergames.ffxivextract.helpers.LERandomAccessFile;
 
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
 
+//Stores known file/folder names to reference against the file hashes.
+
 public class PathHashList {
 
 	// Storage
 	Hashtable<Long, String> folders;
-	Hashtable<Long, String> fileFullPath;
+	Hashtable<Long, String> fileFullPath;	
 
 	// Hashing
 	static int[] crc_table_0f085d0 = new int[]{
@@ -154,74 +158,13 @@ static int[] crc_table_0f091d0 = new int[]{
 		0xCCB0A91F, 0x740CCE7A, 0x66B96194, 0xDE0506F1
 };
 
-	public PathHashList(InputStream stream) throws IOException {	
+	public PathHashList() {	
 		folders = new Hashtable<Long, String>();
 		fileFullPath = new Hashtable<Long, String>();
-		loadHashesFromStream(stream);
-	}
-
-	public PathHashList(String pathDB) throws IOException {
-		folders = new Hashtable<Long, String>();
-		fileFullPath = new Hashtable<Long, String>();
-		
-		try{
-			if (Constants.DEBUG)
-				System.out.println("Loading hash DB.");
-			loadHashes(pathDB);			
-			if (Constants.DEBUG)
-				System.out.println("Hash DB loaded. Found " + folders.keySet().size() + " folders and " + fileFullPath.keySet().size() + " files.");
-			
-			//loadPathsFromTXT("C:\\Users\\Filip\\Desktop\\exds.txt");
-			//saveHashes(pathDB);	
-			
-			JOptionPane.showMessageDialog(null,
-					"Hash DB loaded and ready! (Sorry, too lazy to do a progress dialog >.>)",
-				    "Hash DB Loaded",
-				    JOptionPane.INFORMATION_MESSAGE);		
-		}
-		catch (FileNotFoundException e)
-		{
-			if (Constants.DEBUG)
-				System.out.println("No hash db found, creating one.");
-			/*loadPathsFromSQDB("C:\\Users\\Filip\\FFXIV_BENCH\\game\\sqpack\\ffxiv\\_0c0000.win32.sqdb");			
-			loadPathsFromSQDB("C:\\Users\\Filip\\FFXIV_BENCH\\game\\sqpack\\ffxiv\\_000000.win32.sqdb");
-			loadPathsFromSQDB("C:\\Users\\Filip\\FFXIV_BENCH\\game\\sqpack\\ffxiv\\_0a0000.win32.sqdb");
-			loadPathsFromSQDB("C:\\Users\\Filip\\FFXIV_BENCH\\game\\sqpack\\ffxiv\\_0b0000.win32.sqdb");
-			loadPathsFromSQDB("C:\\Users\\Filip\\FFXIV_BENCH\\game\\sqpack\\ffxiv\\_0c0000.win32.sqdb");
-			loadPathsFromSQDB("C:\\Users\\Filip\\FFXIV_BENCH\\game\\sqpack\\ffxiv\\_010000.win32.sqdb");
-			loadPathsFromSQDB("C:\\Users\\Filip\\FFXIV_BENCH\\game\\sqpack\\ffxiv\\_020000.win32.sqdb");
-			loadPathsFromSQDB("C:\\Users\\Filip\\FFXIV_BENCH\\game\\sqpack\\ffxiv\\_030000.win32.sqdb");
-			loadPathsFromSQDB("C:\\Users\\Filip\\FFXIV_BENCH\\game\\sqpack\\ffxiv\\_040000.win32.sqdb");
-			loadPathsFromSQDB("C:\\Users\\Filip\\FFXIV_BENCH\\game\\sqpack\\ffxiv\\_050000.win32.sqdb");
-			loadPathsFromSQDB("C:\\Users\\Filip\\FFXIV_BENCH\\game\\sqpack\\ffxiv\\_060000.win32.sqdb");
-			loadPathsFromSQDB("C:\\Users\\Filip\\FFXIV_BENCH\\game\\sqpack\\ffxiv\\_070000.win32.sqdb");
-			loadPathsFromSQDB("C:\\Users\\Filip\\FFXIV_BENCH\\game\\sqpack\\ffxiv\\_080000.win32.sqdb");
-			//loadPathsFromSQDB("C:\\Users\\Filip\\FFXIV_BENCH\\game\\sqpack\\ffxiv\\_120000.win32.sqdb");
-			//loadPathsFromSQDB("C:\\Users\\Filip\\FFXIV_BENCH\\game\\sqpack\\ffxiv\\_130000.win32.sqdb");
-			loadPathsFromTXT("C:\\Users\\Filip\\Desktop\\strings.txt");
-			loadPathsFromTXT("C:\\Users\\Filip\\Desktop\\music.txt");
-			saveHashes(pathDB);	
-			*/
-			if (Constants.DEBUG)
-				System.out.println("DB saved. Found " + folders.keySet().size() + " folders and " + fileFullPath.keySet().size() + " files.");
-			
-			JOptionPane.showMessageDialog(null,
-					"Hash DB could not be found... is it beside the exe?)",
-				    "Hash DB Load Failed",
-				    JOptionPane.ERROR_MESSAGE);
-		}
-		
+		newLoad();
 	}
 	
-	public void saveKryo(String path) throws FileNotFoundException
-	{
-		Kryo kryo = new Kryo();
-		Output out = new Output(new FileOutputStream(new File(path)));
-		kryo.writeObject(out, this);
-		out.close();
-	}
-	
-	public static PathHashList loadKryo(String path) throws FileNotFoundException
+	public static PathHashList loadDB(String path) throws FileNotFoundException
 	{
 		Kryo kryo = new Kryo();
 		Input in = new Input(new FileInputStream(new File(path)));
@@ -230,125 +173,59 @@ static int[] crc_table_0f091d0 = new int[]{
 		return obj;
 	}
 	
-	private void loadHashesFromStream(InputStream is) throws IOException
+	public static PathHashList loadDB(InputStream inputStream)
 	{
-		LittleEndianInputStream in = new LittleEndianInputStream(is);
-		
-		if (in.readInt() != 1213481296) //PATH
-		{
-			if (Constants.DEBUG)
-				System.out.println("Hash DB is invalid");
-			throw new IOException("Invalid Signature");
-		}
-		
-		long numFolders = in.readLong();
-		long numFiles = in.readLong();
-		
-		for (long i = 0; i < numFolders; i++)
-		{
-			long hash = in.readLong();
-			String folder = "";
-			
-			while (true) {
-				int c = in.readUnsignedByte();
-				if (c == 0)
-					break;
-				else
-					folder += (char) c;
-			}
-			
-			folders.put(hash, folder);
-		}
-		for (long i = 0; i < numFiles; i++)
-		{
-			long hash = in.readLong();
-			String fullPath = "";
-			
-			while (true) {
-				int c = in.readUnsignedByte();
-				if (c == 0)
-					break;
-				else
-					fullPath += (char) c;
-			}
-			
-			fileFullPath.put(hash, fullPath);
-		}
+		Kryo kryo = new Kryo();
+		Input in = new Input(inputStream);
+		PathHashList obj = kryo.readObject(in, PathHashList.class);
 		in.close();
+		return obj;
+	}
+	
+	public void saveDB(String path) throws FileNotFoundException
+	{
+		Kryo kryo = new Kryo();
+		Output out = new Output(new FileOutputStream(new File(path)));
+		kryo.writeObject(out, this);
+		out.close();
+	}
+	
+	public void saveDB(OutputStream outputStream)
+	{
+		Kryo kryo = new Kryo();
+		Output out = new Output(outputStream);
+		kryo.writeObject(out, this);
+		out.close();
 	}
 
-	private void loadHashes(String path) throws IOException {
-		LERandomAccessFile file = new LERandomAccessFile(path, "r");
-		
-		if (file.readInt() != 1213481296) //PATH
-		{
-			if (Constants.DEBUG)
-				System.out.println("Hash DB is invalid");
-			throw new IOException("Invalid Signature");
-		}
-		
-		long numFolders = file.readLong();
-		long numFiles = file.readLong();
-		
-		for (long i = 0; i < numFolders; i++)
-		{
-			long hash = file.readLong();
-			String folder = "";
-			
-			while (true) {
-				byte c = file.readByte();
-				if (c == 0)
-					break;
-				else
-					folder += (char) c;
-			}
-			
-			folders.put(hash, folder);
-		}
-		for (long i = 0; i < numFiles; i++)
-		{
-			long hash = file.readLong();
-			String fullPath = "";
-			
-			while (true) {
-				byte c = file.readByte();
-				if (c == 0)
-					break;
-				else
-					fullPath += (char) c;
-			}
-			
-			fileFullPath.put(hash, fullPath);
-		}
-		file.close();
-	}
-
-	public void saveHashes(String path) throws IOException {
-
-		LERandomAccessFile file = new LERandomAccessFile(path, "rw");
-		file.writeBytes("PATH");
-		file.writeLong(folders.keySet().size());
-		file.writeLong(fileFullPath.keySet().size());
-		Enumeration<Long> keys = folders.keys();
-		while (keys.hasMoreElements())
-		{
-			long hash = keys.nextElement();
-			String folder = folders.get(hash);
-			file.writeLong(hash);
-			file.writeBytes(folder+"\0");			
-		}
-		Enumeration<Long> keys2 = fileFullPath.keys();
-		while (keys2.hasMoreElements())
-		{
-			long hash = keys2.nextElement();
-			String filename = fileFullPath.get(hash);
-			file.writeLong(hash);
-			file.writeBytes(filename+"\0");			
-		}
-		file.close();
+	//Used by me to load what I have
+	public void newLoad()
+	{		
+		/*loadPathsFromSQDB("C:\\Users\\Filip\\FFXIV_BENCH\\game\\sqpack\\ffxiv\\_0c0000.win32.sqdb");			
+		loadPathsFromSQDB("C:\\Users\\Filip\\FFXIV_BENCH\\game\\sqpack\\ffxiv\\_000000.win32.sqdb");
+		loadPathsFromSQDB("C:\\Users\\Filip\\FFXIV_BENCH\\game\\sqpack\\ffxiv\\_0a0000.win32.sqdb");
+		loadPathsFromSQDB("C:\\Users\\Filip\\FFXIV_BENCH\\game\\sqpack\\ffxiv\\_0b0000.win32.sqdb");
+		loadPathsFromSQDB("C:\\Users\\Filip\\FFXIV_BENCH\\game\\sqpack\\ffxiv\\_0c0000.win32.sqdb");
+		loadPathsFromSQDB("C:\\Users\\Filip\\FFXIV_BENCH\\game\\sqpack\\ffxiv\\_010000.win32.sqdb");
+		loadPathsFromSQDB("C:\\Users\\Filip\\FFXIV_BENCH\\game\\sqpack\\ffxiv\\_020000.win32.sqdb");
+		loadPathsFromSQDB("C:\\Users\\Filip\\FFXIV_BENCH\\game\\sqpack\\ffxiv\\_030000.win32.sqdb");
+		loadPathsFromSQDB("C:\\Users\\Filip\\FFXIV_BENCH\\game\\sqpack\\ffxiv\\_040000.win32.sqdb");
+		loadPathsFromSQDB("C:\\Users\\Filip\\FFXIV_BENCH\\game\\sqpack\\ffxiv\\_050000.win32.sqdb");
+		loadPathsFromSQDB("C:\\Users\\Filip\\FFXIV_BENCH\\game\\sqpack\\ffxiv\\_060000.win32.sqdb");
+		loadPathsFromSQDB("C:\\Users\\Filip\\FFXIV_BENCH\\game\\sqpack\\ffxiv\\_070000.win32.sqdb");
+		loadPathsFromSQDB("C:\\Users\\Filip\\FFXIV_BENCH\\game\\sqpack\\ffxiv\\_080000.win32.sqdb");
+		//loadPathsFromSQDB("C:\\Users\\Filip\\FFXIV_BENCH\\game\\sqpack\\ffxiv\\_120000.win32.sqdb");
+		//loadPathsFromSQDB("C:\\Users\\Filip\\FFXIV_BENCH\\game\\sqpack\\ffxiv\\_130000.win32.sqdb");
+		loadPathsFromTXT("C:\\Users\\Filip\\Desktop\\strings.txt");
+		loadPathsFromTXT("C:\\Users\\Filip\\Desktop\\music.txt");
+		saveHashes(pathDB);	
+		*/
+		if (Constants.DEBUG)
+			System.out.println("DB saved. Found " + folders.keySet().size() + " folders and " + fileFullPath.keySet().size() + " files.");
 		
 	}
-
+	
+	//Used to add a string to the db. Automatically hashes and splits it.
 	public void addPathToDB(String fullPath) {
 		long folderHash = 0;
 		long fileHash = 0;
