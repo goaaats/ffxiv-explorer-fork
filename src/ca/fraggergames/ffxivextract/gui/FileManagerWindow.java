@@ -3,6 +3,8 @@ package ca.fraggergames.ffxivextract.gui;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -41,7 +43,7 @@ import ca.fraggergames.ffxivextract.models.SqPack_IndexFile.SqPack_File;
 import ca.fraggergames.ffxivextract.storage.CompareFile;
 
 @SuppressWarnings("serial")
-public class FileManagerWindow extends JFrame implements TreeSelectionListener, ISearchComplete {
+public class FileManagerWindow extends JFrame implements TreeSelectionListener, ISearchComplete, WindowListener {
 
 	//DLLs
 	LuaDec luadec;
@@ -125,6 +127,8 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 				}
 		}*/
 		
+		addWindowListener(this);
+		
 		splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
 			                           fileTree, hexView);
 		
@@ -163,12 +167,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 		}
 		
 		//Init Luadec
-		luadec = LuaDec.initLuaDec();
-		if (luadec == null)
-			JOptionPane.showMessageDialog(FileManagerWindow.this,
-					"Could not load luadec.dll, luab files will not be decompiled.",
-				    "DLL Error",
-				    JOptionPane.ERROR_MESSAGE);		
+		luadec = LuaDec.initLuaDec();		
 	}	
 
 	protected void openFile(File selectedFile) {
@@ -423,10 +422,17 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 			//EXDF_View exdfComponent = new EXDF_View(new EXDF_File(data));
 			//tabs.addTab("EXDF File", exdfComponent);
 		}
-		else if (data[1] == 'L' && data[2] == 'u' && luadec != null){						
-			Lua_View luaComponent = new Lua_View(("-- Decompiled using luadec 2.0.1 by sztupy (http://winmo.sztupy.hu)\n"+luadec.decompile(data)).split("\n"));
-
-			tabs.addTab("Decompiled Lua", luaComponent);
+		else if (data[1] == 'L' && data[2] == 'u'){
+			
+			if (luadec != null)			
+			{
+				Lua_View luaComponent = new Lua_View(("-- Decompiled using luadec 2.0.1 by sztupy (http://winmo.sztupy.hu)\n"+luadec.decompile(data)).split("\n"));
+				tabs.addTab("Decompiled Lua", luaComponent);
+			}
+			else
+			{
+				
+			}
 		}		
 		else if (false && data.length >= 4 && data[0] == 'S' && data[1] == 'E' && data[2] == 'D' && data[3] == 'B' )
 		{			
@@ -604,5 +610,45 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 			e.printStackTrace();
 		}
 	}
+
+	@Override
+	public void windowActivated(WindowEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void windowClosed(WindowEvent arg0) {		
+	}
+
+	@Override
+	public void windowClosing(WindowEvent arg0) {
+		closeFile();
+	}
+
+	@Override
+	public void windowDeactivated(WindowEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void windowDeiconified(WindowEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void windowIconified(WindowEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void windowOpened(WindowEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
 	
 }
