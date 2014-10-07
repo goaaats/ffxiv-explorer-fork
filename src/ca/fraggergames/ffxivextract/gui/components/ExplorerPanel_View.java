@@ -25,7 +25,7 @@ import ca.fraggergames.ffxivextract.storage.CompareFile;
 public class ExplorerPanel_View extends JScrollPane {
 
 	JTree fileTree;
-	DefaultMutableTreeNode root = new DefaultMutableTreeNode("Root");
+	DefaultMutableTreeNode root = new DefaultMutableTreeNode("No File Loaded");
 	JScrollPane scroller;
 
 	CompareFile currentCompareFile;
@@ -43,7 +43,8 @@ public class ExplorerPanel_View extends JScrollPane {
 		};
 		
 		fileTree.setCellRenderer(new TreeRenderer());
-
+		fileTree.setShowsRootHandles(false);
+		
 		this.getViewport().add(fileTree);		
 	}
 
@@ -132,6 +133,10 @@ public class ExplorerPanel_View extends JScrollPane {
 	        }
 	        else //ROOT
 	        {
+	        	if (tree.getModel().getChildCount(node) == 0)
+	        		value = "No File Loaded";
+	        	else
+	        		value = "Dat File";
 	        	setOpenIcon(folderIcon);
 	            setClosedIcon(folderIcon);
 	        }
