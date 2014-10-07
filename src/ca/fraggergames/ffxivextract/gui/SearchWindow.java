@@ -172,12 +172,14 @@ public class SearchWindow extends JFrame {
 						for (int j2 = 0; j2 < string.length(); j2++) {
 							if (data[i2 + j2] == string.charAt(j2)) {
 								if (j2 == string.length() - 1) {
-									System.out.println(String.format("%08X",
+									
+									if (Constants.DEBUG){
+									System.out.println(String.format("Folder: %08X",
 											f.getId() & 0xFFFFFFFF));
-									System.out.println(String.format("%08X",
+									System.out.println(String.format("File: %08X",
 											fi.getId() & 0xFFFFFFFF));
 									System.out.println("---");
-
+									}
 									Object[] options = { "Continue",
 											"Open", "Stop Search" };
 									
