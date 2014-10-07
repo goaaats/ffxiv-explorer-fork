@@ -13,7 +13,7 @@ public class SqPack_IndexFile {
 	long offset;
 	int size;
 
-	public SqPack_IndexFile(String pathToIndex) throws Exception {
+	public SqPack_IndexFile(String pathToIndex) throws IOException {
 
 		LERandomAccessFile ref = new LERandomAccessFile(pathToIndex, "r");
 

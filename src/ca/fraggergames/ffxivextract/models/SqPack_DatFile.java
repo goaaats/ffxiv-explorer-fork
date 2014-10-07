@@ -41,14 +41,15 @@ public class SqPack_DatFile {
 		}
 		
 		//Special Cases
-		if (contentType == 4)
+		if (contentType == 4) //Texture
 		{
 			return null;
 		}
-		else if (contentType == 3)
+		else if (contentType == 3) //Model
 		{
 			return null;
 		}
+
 		
 		Data_Block[] dataBlocks = getBlockList(blockCount);
 
@@ -214,5 +215,11 @@ public class SqPack_DatFile {
 			this.padding = padding;
 			this.decompressedSize = decompressedSize;
 		}
+	}
+
+	public int getContentType(long offset) throws IOException {
+		currentFilePointer.seek(offset);
+		currentFilePointer.readInt(); //Header Length
+		return currentFilePointer.readInt();
 	}
 }

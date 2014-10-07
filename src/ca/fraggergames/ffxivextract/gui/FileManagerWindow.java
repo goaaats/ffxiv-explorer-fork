@@ -41,6 +41,19 @@ import ca.fraggergames.ffxivextract.models.SqPack_DatFile;
 import ca.fraggergames.ffxivextract.models.SqPack_IndexFile;
 import ca.fraggergames.ffxivextract.models.SqPack_IndexFile.SqPack_File;
 import ca.fraggergames.ffxivextract.storage.CompareFile;
+import javax.swing.JPanel;
+import java.awt.BorderLayout;
+import javax.swing.BoxLayout;
+import javax.swing.JLabel;
+import javax.swing.border.BevelBorder;
+import javax.swing.JSeparator;
+import java.awt.FlowLayout;
+import javax.swing.SwingConstants;
+import net.miginfocom.swing.MigLayout;
+import javax.swing.border.CompoundBorder;
+import javax.swing.border.LineBorder;
+import java.awt.Color;
+import javax.swing.JProgressBar;
 
 @SuppressWarnings("serial")
 public class FileManagerWindow extends JFrame implements TreeSelectionListener, ISearchComplete, WindowListener {
@@ -60,6 +73,9 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 	SearchWindow searchWindow;
 	ExplorerPanel_View fileTree = new ExplorerPanel_View();	
 	JSplitPane splitPane;
+	JLabel lblOffsetValue;
+	JLabel lblHashValue ;
+	JLabel lblContentTypeValue;
 	Hex_View hexView = new Hex_View(16);
 
 	//MENU
@@ -128,18 +144,9 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 		}*/
 		
 		addWindowListener(this);
-		
-		splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
-			                           fileTree, hexView);
-		
-		splitPane.setDividerLocation(150);
 
 		//Provide minimum sizes for the two components in the split pane
 		Dimension minimumSize = new Dimension(100, 50);
-		fileTree.setMinimumSize(minimumSize);
-		//pictureScrollPane.setMinimumSize(minimumSize);
-		
-		fileTree.addTreeSelectionListener(this);
 		
 		setupMenu();
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -149,7 +156,68 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 		URL imageURL = getClass().getResource("/res/frameicon.png");
 		ImageIcon image = new ImageIcon(imageURL);
 		this.setIconImage(image.getImage());
-		this.getContentPane().add(splitPane);	
+		
+		JPanel pnlContent = new JPanel();
+		getContentPane().add(pnlContent, BorderLayout.CENTER);
+		pnlContent.setLayout(new BoxLayout(pnlContent, BoxLayout.X_AXIS));
+		
+		splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
+			                           fileTree, hexView);
+		pnlContent.add(splitPane);
+		
+		splitPane.setDividerLocation(150);
+		fileTree.setMinimumSize(minimumSize);
+		//pictureScrollPane.setMinimumSize(minimumSize);
+		
+		fileTree.addTreeSelectionListener(this);
+		
+		JPanel pnlStatusBar = new JPanel();
+		getContentPane().add(pnlStatusBar, BorderLayout.SOUTH);
+		pnlStatusBar.setLayout(new BorderLayout(0, 0));
+		
+		JSeparator separator = new JSeparator();
+		pnlStatusBar.add(separator, BorderLayout.NORTH);
+		
+		JPanel pnlInfo = new JPanel();
+		FlowLayout fl_pnlInfo = (FlowLayout) pnlInfo.getLayout();
+		fl_pnlInfo.setVgap(4);
+		pnlInfo.setBorder(null);
+		pnlStatusBar.add(pnlInfo, BorderLayout.WEST);
+		
+		JLabel lblOffset = new JLabel("Offset: ");
+		pnlInfo.add(lblOffset);
+		lblOffset.setHorizontalAlignment(SwingConstants.LEFT);
+		
+		lblOffsetValue = new JLabel("*");
+		pnlInfo.add(lblOffsetValue);
+		
+		JSeparator separator_1 = new JSeparator();
+		separator_1.setPreferredSize(new Dimension(1, 16));
+		separator_1.setOrientation(SwingConstants.VERTICAL);
+		pnlInfo.add(separator_1);
+		
+		JLabel lblHash = new JLabel("Hash: ");
+		pnlInfo.add(lblHash);
+		
+		lblHashValue = new JLabel("*");
+		pnlInfo.add(lblHashValue);
+		
+		JSeparator separator_2 = new JSeparator();
+		separator_2.setPreferredSize(new Dimension(1, 16));
+		separator_2.setOrientation(SwingConstants.VERTICAL);
+		pnlInfo.add(separator_2);
+		
+		JLabel lblContentType = new JLabel("Content Type: ");
+		pnlInfo.add(lblContentType);
+		
+		lblContentTypeValue = new JLabel("*");
+		pnlInfo.add(lblContentTypeValue);
+		
+		JPanel pnlProgBar = new JPanel();
+		pnlStatusBar.add(pnlProgBar, BorderLayout.EAST);
+		
+		JProgressBar prgLoadingBar = new JProgressBar();
+		pnlProgBar.add(prgLoadingBar);
 		setLocationRelativeTo(null);	
 		
 		//Check Windows registry for a FFXIV folder
@@ -175,11 +243,15 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 		if (currentIndexFile != null || currentDatFile != null)
 			closeFile();
 		
-		try {
+		try {	
 			currentIndexFile = new SqPack_IndexFile(selectedFile.getAbsolutePath());			
 			currentDatFile = new SqPack_DatFile(selectedFile.getAbsolutePath().replace(".index", ".dat0"));
 			currentCompareFile = CompareFile.getCompareFile(selectedFile.getName().substring(0, selectedFile.getName().lastIndexOf('.')));
 		} catch (Exception e) {
+			JOptionPane.showMessageDialog(this,
+					"There was an error opening this index file.",
+				    "File Open Error",
+				    JOptionPane.ERROR_MESSAGE);		
 			return;
 		}
 		
@@ -206,7 +278,8 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 		currentIndexFile = null;
 		currentDatFile = null;
 		try {
-			currentCompareFile.save();
+			if (currentCompareFile != null)
+				currentCompareFile.save();
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -395,6 +468,25 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 		{
 			file_Extract.setEnabled(true);
 			file_ExtractRaw.setEnabled(true);
+		}
+
+		if (fileTree.getSelectedFiles().size() > 1)
+		{
+			lblOffsetValue.setText("*");
+			lblHashValue.setText("*");
+			lblContentTypeValue.setText("*");
+		}
+		else
+		{
+			lblOffsetValue.setText(String.format("0x%08X",fileTree.getSelectedFiles().get(0).getOffset()));
+			lblHashValue.setText(String.format("0x%08X",fileTree.getSelectedFiles().get(0).getId()));
+			try{
+				lblContentTypeValue.setText(""+currentDatFile.getContentType(fileTree.getSelectedFiles().get(0).getOffset()));
+			}
+			catch (IOException ioe)
+			{
+				lblContentTypeValue.setText("Content Type Error");
+			}
 		}
 		
 		try {			
