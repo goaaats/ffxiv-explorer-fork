@@ -100,6 +100,7 @@ public class ExplorerPanel_View extends JScrollPane {
 	    public Component getTreeCellRendererComponent(JTree tree, Object value,
 	        boolean sel, boolean exp, boolean leaf, int row, boolean hasFocus) {
 	        DefaultMutableTreeNode node = (DefaultMutableTreeNode) value;
+	        setTextNonSelectionColor(Color.BLACK);
 	        
 	        if (node.getUserObject() instanceof SqPack_Folder) //FOLDER
 	        {
@@ -109,7 +110,7 @@ public class ExplorerPanel_View extends JScrollPane {
 	        		value = Constants.hashDatabase.getFolder(folder.getId());
 	        	else
 	        		value = String.format("%08X", folder.getId() & 0xFFFFFFFF);	     
-	        	
+	        		        	
 	        	setOpenIcon(getDefaultOpenIcon());
 	            setClosedIcon(getDefaultClosedIcon());
 	        }

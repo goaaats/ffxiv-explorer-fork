@@ -21,15 +21,23 @@ public class CompareFile {
 	Hashtable<Integer, String> files; //File Hash -> Patch Date
 	
 	String loadedIndexName;
+
+	private boolean newFilesFound = false;
 	
 	public CompareFile(String indexPath) {
 		
 		files = new Hashtable<Integer, String>();
 		Calendar c = Calendar.getInstance();
-		currentPatchDate = c.get(Calendar.YEAR)+""+c.get(Calendar.DAY_OF_YEAR)+""+c.get(Calendar.HOUR)+""+c.get(Calendar.MINUTE)+"2";
+		currentPatchDate = c.get(Calendar.YEAR)+""+c.get(Calendar.DAY_OF_YEAR)+""+c.get(Calendar.HOUR)+""+c.get(Calendar.MINUTE)+""+c.get(Calendar.SECOND);
 		loadedIndexName = indexPath;
 	}
 
+	public void updateDate()
+	{
+		Calendar c = Calendar.getInstance();
+		currentPatchDate = c.get(Calendar.YEAR)+""+c.get(Calendar.DAY_OF_YEAR)+""+c.get(Calendar.HOUR)+""+c.get(Calendar.MINUTE)+""+c.get(Calendar.SECOND);
+	}
+	
 	public static CompareFile getCompareFile(String indexName)
 	{		
 		File file = new File("./" + indexName + ".cmp");
@@ -52,11 +60,27 @@ public class CompareFile {
 	
 	public boolean isNewFile(int hash)
 	{
-		if ((files.get(hash) == null) && lastPatchDate!=null&&!lastPatchDate.equals(currentPatchDate)) //New File
+		if (files.get(hash) == null && lastPatchDate==null) //Init file
 		{
-			lastPatchDate = currentPatchDate;
-			Calendar c = Calendar.getInstance();
-			currentPatchDate = c.get(Calendar.YEAR)+""+c.get(Calendar.DAY_OF_YEAR)+""+c.get(Calendar.HOUR)+""+c.get(Calendar.MINUTE);
+			if (!newFilesFound)
+			{
+				Calendar c = Calendar.getInstance();
+				currentPatchDate = c.get(Calendar.YEAR)+""+c.get(Calendar.DAY_OF_YEAR)+""+c.get(Calendar.HOUR)+""+c.get(Calendar.MINUTE)+""+c.get(Calendar.SECOND);				
+				newFilesFound = true;
+				lastPatchDate = currentPatchDate;
+			}			
+			files.put(hash, currentPatchDate);
+			return false;
+		}
+		else if ((files.get(hash) == null) && lastPatchDate!=null) //New File
+		{
+			if (!newFilesFound)
+			{
+				lastPatchDate = currentPatchDate;
+				Calendar c = Calendar.getInstance();
+				currentPatchDate = c.get(Calendar.YEAR)+""+c.get(Calendar.DAY_OF_YEAR)+""+c.get(Calendar.HOUR)+""+c.get(Calendar.MINUTE)+""+c.get(Calendar.SECOND);
+				newFilesFound = true;
+			}						
 			files.put(hash, currentPatchDate);
 			return true;
 		}
@@ -67,6 +91,7 @@ public class CompareFile {
 	}
 	
 	public void save() throws FileNotFoundException{
+		newFilesFound = false;
 		Kryo kryo = new Kryo();
 		Output out = new Output(new FileOutputStream(new File("./" + loadedIndexName + ".cmp")));
 		kryo.writeObject(out, this);

@@ -157,13 +157,13 @@ static int[] crc_table_0f091d0 = new int[]{
 		0x94D3B949, 0x090481F0, 0xB1B8E695, 0xA30D497B, 0x1BB12E1E, 0x43D23E48, 0xFB6E592D, 0xE9DBF6C3, 0x516791A6,
 		0xCCB0A91F, 0x740CCE7A, 0x66B96194, 0xDE0506F1
 };
-
+/*
 	public PathHashList() {	
 		folders = new Hashtable<Long, String>();
 		fileFullPath = new Hashtable<Long, String>();
 		newLoad();
 	}
-	
+	*/
 	public static PathHashList loadDB(String path) throws FileNotFoundException
 	{
 		Kryo kryo = new Kryo();
