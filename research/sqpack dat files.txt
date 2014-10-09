@@ -49,7 +49,7 @@ Current research on SqPack Dat files
 0x000: Size of block table  Int32; From the first block, to the last blow + length.
 0x000: ~~~Unkown~~~         Int32; Seems to be similar to the block table size.
 0x000: NULL
-0x000: Num Block Lengths    Int32; Number of lengths in the block table below.  
+0x000: Num Block Lengths    Int32; Number of lengths in the block table below.  ;
 0x000: Block Length Table   Short; 2 byte values, size of each block. 
 
 

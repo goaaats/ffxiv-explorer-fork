@@ -30,6 +30,7 @@ import ca.fraggergames.ffxivextract.Strings;
 import ca.fraggergames.ffxivextract.gui.SearchWindow.ISearchComplete;
 import ca.fraggergames.ffxivextract.gui.components.ExplorerPanel_View;
 import ca.fraggergames.ffxivextract.gui.components.Hex_View;
+import ca.fraggergames.ffxivextract.gui.components.Image_View;
 import ca.fraggergames.ffxivextract.gui.components.Loading_Dialog;
 import ca.fraggergames.ffxivextract.gui.components.Lua_View;
 import ca.fraggergames.ffxivextract.helpers.LERandomAccessFile;
@@ -39,6 +40,7 @@ import ca.fraggergames.ffxivextract.models.EXDF_File;
 import ca.fraggergames.ffxivextract.models.SCD_File;
 import ca.fraggergames.ffxivextract.models.SqPack_DatFile;
 import ca.fraggergames.ffxivextract.models.SqPack_IndexFile;
+import ca.fraggergames.ffxivextract.models.Texture_File;
 import ca.fraggergames.ffxivextract.models.SqPack_IndexFile.SqPack_File;
 import ca.fraggergames.ffxivextract.storage.CompareFile;
 import javax.swing.JPanel;
@@ -491,14 +493,14 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 		
 		try {			
 			byte[] data = currentDatFile.extractFile(fileTree.getSelectedFiles().get(0).getOffset(), null);									
-			openData(data);
+			openData(currentDatFile.getContentType(fileTree.getSelectedFiles().get(0).getOffset()),data);
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
 	}	
 	
-	private void openData(byte[] data) {
+	private void openData(int contentType, byte[] data) {
 		JTabbedPane tabs = new JTabbedPane();
 		
 		if (data == null)
@@ -513,6 +515,11 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 		{								
 			//EXDF_View exdfComponent = new EXDF_View(new EXDF_File(data));
 			//tabs.addTab("EXDF File", exdfComponent);
+		}
+		else if (contentType == 4)
+		{
+			Image_View imageComponent = new Image_View(new Texture_File(data));
+			tabs.addTab("Texture", imageComponent);
 		}
 		else if (data[1] == 'L' && data[2] == 'u'){
 			
@@ -694,7 +701,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 		byte[] data;
 		try {
 			data = currentDatFile.extractFile(offset, null);
-			openData(data);
+			openData(currentDatFile.getContentType(offset),data);
 			fileTree.select(offset);
 			search_searchAgain.setEnabled(true);
 		} catch (IOException e) {
