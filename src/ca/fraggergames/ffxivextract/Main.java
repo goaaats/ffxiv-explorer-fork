@@ -8,30 +8,31 @@ import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 
 import ca.fraggergames.ffxivextract.gui.FileManagerWindow;
-import ca.fraggergames.ffxivextract.helpers.LERandomAccessFile;
-import ca.fraggergames.ffxivextract.helpers.LuaDec;
 import ca.fraggergames.ffxivextract.helpers.PathSearcher;
-import ca.fraggergames.ffxivextract.models.Log_File;
-import ca.fraggergames.ffxivextract.models.SCD_File;
+import ca.fraggergames.ffxivextract.storage.HashDatabase;
 import ca.fraggergames.ffxivextract.storage.PathHashList;
 
 public class Main {
 
 	public static void main(String[] args) {		
 		
-		//Load in the hash database
-		try {						
-			long oldTime = System.currentTimeMillis();
-			Constants.hashDatabase = PathHashList.loadDB("C:\\Users\\Filip\\Desktop\\filelist_notcompressed.db");
-			long newTime = System.currentTimeMillis();
-			if (Constants.DEBUG)
-				System.out.println("Loaded: " + Constants.hashDatabase.getNumFiles() + " files and " + Constants.hashDatabase.getNumFolders() + " folders in " + (newTime-oldTime) + "ms.");
-		} catch (FileNotFoundException e) {
-			JOptionPane.showMessageDialog(null,
-						"Filelist.db is missing. No file or folder names will be shown... instead the file's hashes will be displayed.",
-					    "Hash DB Load Error",
-					    JOptionPane.ERROR_MESSAGE);		
-		}	
+		//Init the hash database
+		try {
+			HashDatabase.init();			
+			/*JOptionPane.showMessageDialog(null,
+					"Filelist.db is missing. No file or folder names will be shown... instead the file's hashes will be displayed.",
+				    "Hash DB Load Error",
+				    JOptionPane.ERROR_MESSAGE);		*/
+		} catch (ClassNotFoundException e1) {			
+			e1.printStackTrace();
+		}
+		
+		//Set to windows UI
+		try {
+			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		
 		//Arguments
 		if (args.length>0)
@@ -65,7 +66,7 @@ public class Main {
 				}
 				else
 				{
-					File file = new File(args[1] + "game/sqpack/ffxiv/");
+					File file = new File(args[1].replace("\"", "") + "/game/sqpack/ffxiv/");
 					File fileList[] = file.listFiles();
 					
 					for (File f : fileList)
@@ -74,6 +75,7 @@ public class Main {
 						{
 							try {
 								PathSearcher.doPathSearch(f.getAbsolutePath());
+								System.gc();
 							} catch (IOException e) {
 								System.out.println("There was an error searching. Stacktrace: ");
 								e.printStackTrace();
@@ -82,24 +84,9 @@ public class Main {
 					}
 				}
 				
-				System.out.println("Path Searcher complete, saving database.");
-				try {
-					Constants.hashDatabase.saveDB("./filelist.db");
-				} catch (FileNotFoundException e) {
-					System.out.println("There was an error saving the database. Stacktrace: ");
-					e.printStackTrace();
-				}
-				
 				return;
 			}
-		}
-				
-		//Set to windows UI
-		try {
-			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		}		
 		
 		//Open up the main window
 		FileManagerWindow fileMan = new FileManagerWindow(Constants.APPNAME);

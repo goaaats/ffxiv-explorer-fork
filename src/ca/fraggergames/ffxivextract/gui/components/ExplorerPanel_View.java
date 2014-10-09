@@ -20,6 +20,7 @@ import ca.fraggergames.ffxivextract.models.SqPack_IndexFile;
 import ca.fraggergames.ffxivextract.models.SqPack_IndexFile.SqPack_File;
 import ca.fraggergames.ffxivextract.models.SqPack_IndexFile.SqPack_Folder;
 import ca.fraggergames.ffxivextract.storage.CompareFile;
+import ca.fraggergames.ffxivextract.storage.HashDatabase;
 
 @SuppressWarnings("serial")
 public class ExplorerPanel_View extends JScrollPane {
@@ -107,8 +108,10 @@ public class ExplorerPanel_View extends JScrollPane {
 	        {
 	        	SqPack_Folder folder = (SqPack_Folder) node.getUserObject();
 	        	
-	        	if (Constants.hashDatabase != null && Constants.hashDatabase.getFolder(folder.getId()) != null)
-	        		value = Constants.hashDatabase.getFolder(folder.getId());
+	        	String folderName = HashDatabase.getFolder(folder.getId());
+	        	
+	        	if (folderName != null)
+	        		value = folderName;
 	        	else
 	        		value = String.format("%08X", folder.getId() & 0xFFFFFFFF);	     
 	        		        	
@@ -124,10 +127,13 @@ public class ExplorerPanel_View extends JScrollPane {
 	        	else
 	        		setTextNonSelectionColor(Color.BLACK);
 	        	
-	        	if (Constants.hashDatabase != null && Constants.hashDatabase.getFileName(file.getId()) != null)
-	        		value = Constants.hashDatabase.getFileName(file.getId());
+	        	String fileName = HashDatabase.getFileName(file.getId());
+	        	
+	        	if (fileName != null)
+	        		value = fileName;
 	        	else
 	        		value =  String.format("%08X", file.getId() & 0xFFFFFFFF); 
+	        	
 	        	setLeafIcon(fileIcon);
 	        	setLeafIcon(fileIcon);
 	        }
@@ -194,18 +200,22 @@ public class ExplorerPanel_View extends JScrollPane {
 	        if (child.getUserObject() instanceof SqPack_Folder)
 	        {
 	        	SqPack_Folder folder = (SqPack_Folder) child.getUserObject();
-	        	if (Constants.hashDatabase != null && Constants.hashDatabase.getFolder(folder.getId())!=null)
-	        		nt = Constants.hashDatabase.getFolder(folder.getId());
+	        	String folderName = HashDatabase.getFolder(folder.getId());
+	        	
+	        	if (folderName != null)
+	        		nt = folderName;
 	        	else
-	        		nt = String.format("%08X", folder.getId() & 0xFFFFFFFF);
+	        		nt = String.format("%08X", folder.getId() & 0xFFFFFFFF);	     	        	
 	        }
 	        else
 	        {
 	        	SqPack_File file = (SqPack_File) child.getUserObject();
-	        	if (Constants.hashDatabase != null && Constants.hashDatabase.getFileName(file.getId())!=null)
-	        		nt = Constants.hashDatabase.getFileName(file.getId());
+	        	String fileName = HashDatabase.getFileName(file.getId());
+	        	
+	        	if (fileName != null)
+	        		nt = fileName;
 	        	else
-	        		nt = String.format("%08X", file.getId() & 0xFFFFFFFF);
+	        		nt =  String.format("%08X", file.getId() & 0xFFFFFFFF); 
 	        }
 	        	
 
@@ -216,18 +226,22 @@ public class ExplorerPanel_View extends JScrollPane {
 	            if (prevNode.getUserObject() instanceof SqPack_Folder)
 		        {
 		        	SqPack_Folder folder = (SqPack_Folder) prevNode.getUserObject();
-		        	if (Constants.hashDatabase != null && Constants.hashDatabase.getFolder(folder.getId())!=null)
-		        		np = Constants.hashDatabase.getFolder(folder.getId());
+		        	String folderName = HashDatabase.getFolder(folder.getId());
+		        	
+		        	if (folderName != null)
+		        		np = folderName;
 		        	else
-		        		np = "~"+String.format("%08X", folder.getId() & 0xFFFFFFFF);
+		        		np = String.format("%08X", folder.getId() & 0xFFFFFFFF);	
 		        }
 		        else
 		        {
 		        	SqPack_File file = (SqPack_File) prevNode.getUserObject();
-		        	if (Constants.hashDatabase != null && Constants.hashDatabase.getFileName(file.getId())!=null)
-		        		np = Constants.hashDatabase.getFileName(file.getId());
+		        	String fileName = HashDatabase.getFileName(file.getId());
+		        	
+		        	if (fileName != null)
+		        		np = fileName;
 		        	else
-		        		np = "~"+String.format("%08X", file.getId() & 0xFFFFFFFF);
+		        		np =  String.format("%08X", file.getId() & 0xFFFFFFFF); 
 		        }
 	            
 	            if(nt.compareToIgnoreCase(np) > 0) {

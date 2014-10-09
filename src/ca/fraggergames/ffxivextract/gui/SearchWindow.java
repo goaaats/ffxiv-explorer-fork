@@ -26,6 +26,7 @@ import ca.fraggergames.ffxivextract.models.SqPack_DatFile;
 import ca.fraggergames.ffxivextract.models.SqPack_IndexFile;
 import ca.fraggergames.ffxivextract.models.SqPack_IndexFile.SqPack_File;
 import ca.fraggergames.ffxivextract.models.SqPack_IndexFile.SqPack_Folder;
+import ca.fraggergames.ffxivextract.storage.HashDatabase;
 
 @SuppressWarnings("serial")
 public class SearchWindow extends JFrame {
@@ -183,16 +184,12 @@ public class SearchWindow extends JFrame {
 									Object[] options = { "Continue",
 											"Open", "Stop Search" };
 									
-									String folder= null, file = null;
+									String folder= HashDatabase.getFolder(f.getId()), file = HashDatabase.getFileName(fi.getId());
 									
-									if (Constants.hashDatabase != null && Constants.hashDatabase.getFolder(f.getId()) != null)
-										folder = Constants.hashDatabase.getFolder(f.getId());
-									else
+									if (folder == null)
 										folder = String.format("%08X", f.getId() & 0xFFFFFFFF);
 									
-									if (Constants.hashDatabase != null && Constants.hashDatabase.getFileName(fi.getId()) != null)
-										file = Constants.hashDatabase.getFileName(fi.getId());
-									else
+									if (file == null)										
 										file = String.format("%08X", fi.getId() & 0xFFFFFFFF);
 									
 									int n = JOptionPane

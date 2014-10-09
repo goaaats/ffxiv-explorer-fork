@@ -12,7 +12,7 @@ public class Constants {
 	public static boolean DEBUG = false;
 	public static boolean EASTER_EGG = false;
 
-	public static PathHashList hashDatabase;
+	//public static PathHashList hashDatabase;
 	
 	public static final String[] iconList = {
 		"000000", "000ED81", "0010235", "0010236" , "0010237",
