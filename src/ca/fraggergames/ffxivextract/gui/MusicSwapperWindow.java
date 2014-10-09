@@ -37,6 +37,7 @@ import ca.fraggergames.ffxivextract.Strings;
 import ca.fraggergames.ffxivextract.helpers.LERandomAccessFile;
 import ca.fraggergames.ffxivextract.models.SqPack_IndexFile;
 import ca.fraggergames.ffxivextract.models.SqPack_IndexFile.SqPack_File;
+import ca.fraggergames.ffxivextract.storage.HashDatabase;
 
 @SuppressWarnings("serial")
 public class MusicSwapperWindow extends JFrame {
@@ -274,8 +275,10 @@ public class MusicSwapperWindow extends JFrame {
 		dropdown.removeAllItems();
 		for (int i = 0; i < files.length; i++)
 		{
-			if (Constants.hashDatabase != null && Constants.hashDatabase.getFileName(files[i].id)!=null)
-				dropdown.addItem(String.format("%s (%08X)", Constants.hashDatabase.getFileName(files[i].id), files[i].getOffset() & 0xFFFFFFFF));
+			String fileName = HashDatabase.getFileName(files[i].id);
+			
+			if (fileName !=null)
+				dropdown.addItem(String.format("%s (%08X)", fileName, files[i].getOffset() & 0xFFFFFFFF));
 			else
 				dropdown.addItem(String.format("%08X (%08X)", files[i].id & 0xFFFFFFFF, files[i].getOffset() & 0xFFFFFFFF));
 		}

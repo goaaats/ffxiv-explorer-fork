@@ -1,6 +1,8 @@
 package ca.fraggergames.ffxivextract.gui;
 
+import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
@@ -11,15 +13,21 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 
+import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JProgressBar;
+import javax.swing.JSeparator;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
+import javax.swing.SwingConstants;
 import javax.swing.SwingWorker;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
@@ -43,19 +51,7 @@ import ca.fraggergames.ffxivextract.models.SqPack_IndexFile;
 import ca.fraggergames.ffxivextract.models.Texture_File;
 import ca.fraggergames.ffxivextract.models.SqPack_IndexFile.SqPack_File;
 import ca.fraggergames.ffxivextract.storage.CompareFile;
-import javax.swing.JPanel;
-import java.awt.BorderLayout;
-import javax.swing.BoxLayout;
-import javax.swing.JLabel;
-import javax.swing.border.BevelBorder;
-import javax.swing.JSeparator;
-import java.awt.FlowLayout;
-import javax.swing.SwingConstants;
-import net.miginfocom.swing.MigLayout;
-import javax.swing.border.CompoundBorder;
-import javax.swing.border.LineBorder;
-import java.awt.Color;
-import javax.swing.JProgressBar;
+import ca.fraggergames.ffxivextract.storage.HashDatabase;
 
 @SuppressWarnings("serial")
 public class FileManagerWindow extends JFrame implements TreeSelectionListener, ISearchComplete, WindowListener {
@@ -232,8 +228,8 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 		} catch (Exception e){}
 		*/
 		if (Constants.DEBUG){
-			lastOpenedFile = new File("F:\\Program Files (x86)\\SquareEnix\\FINAL FANTASY XIV - A Realm Reborn\\game\\sqpack\\ffxiv\\0a0000.win32.index");
-			openFile(lastOpenedFile);
+			//lastOpenedFile = new File("E:\\Program Files (x86)\\SquareEnix\\FINAL FANTASY XIV - A Realm Reborn\\game\\sqpack\\ffxiv\\0a0000.win32.index");
+			//openFile(lastOpenedFile);
 		}
 		
 		//Init Luadec
@@ -554,14 +550,12 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 		{			
 			fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);		
 
-			String filename;
+			String fileName = HashDatabase.getFileName(files.get(0).getId());
 			
-			if (Constants.hashDatabase != null && Constants.hashDatabase.getFileName(files.get(0).getId()) != null)
-				filename = Constants.hashDatabase.getFileName(files.get(0).getId());
-			else
-				filename = String.format("%08X", files.get(0).getId() & 0xFFFFFFFF);
+			if (fileName == null)
+				fileName = String.format("%08X", files.get(0).getId() & 0xFFFFFFFF);
 			
-			fileChooser.setSelectedFile(new File(filename));			
+			fileChooser.setSelectedFile(new File(fileName));			
 			FileFilter filter = new FileFilter() {
 				
 				@Override
@@ -657,11 +651,10 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 					}
 					
 					String path = lastOpenedFile.getCanonicalPath();
-					String fileName;
-					if (Constants.hashDatabase != null && Constants.hashDatabase.getFileName(files.get(i).getId()) != null)
-						fileName =Constants.hashDatabase.getFileName(files.get(i).getId());
-					else
-						fileName =String.format("%X", files.get(i).getId() & 0xFFFFFFFF);
+					String fileName = HashDatabase.getFileName(files.get(i).getId());
+					
+					if (fileName == null)						
+						fileName = String.format("%X", files.get(i).getId() & 0xFFFFFFFF);
 					
 					if (files.size() > 1)
 						path = lastOpenedFile.getCanonicalPath() + "\\" + fileName;

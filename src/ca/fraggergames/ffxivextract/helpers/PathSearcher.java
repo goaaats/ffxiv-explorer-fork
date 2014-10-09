@@ -6,6 +6,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.net.URL;
+import java.sql.Connection;
+import java.sql.SQLException;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -26,6 +28,7 @@ import ca.fraggergames.ffxivextract.models.SqPack_DatFile;
 import ca.fraggergames.ffxivextract.models.SqPack_IndexFile;
 import ca.fraggergames.ffxivextract.models.SqPack_IndexFile.SqPack_File;
 import ca.fraggergames.ffxivextract.models.SqPack_IndexFile.SqPack_Folder;
+import ca.fraggergames.ffxivextract.storage.HashDatabase;
 
 @SuppressWarnings("serial")
 public class PathSearcher extends JFrame {
@@ -67,6 +70,12 @@ public class PathSearcher extends JFrame {
 			
 			String string = folders[folderIndex];
 			for (int i = 0; i < currentIndexFile.getPackFolders().length; i++) {
+				Connection conn = HashDatabase.getConnection();
+				try {
+					conn.setAutoCommit(false);
+				} catch (SQLException e1) {
+					e1.printStackTrace();
+				}
 				SqPack_Folder f = currentIndexFile.getPackFolders()[i];
 				for (int j = 0; j < f.getFiles().length; j++) {
 					SqPack_File fi = f.getFiles()[j];
@@ -104,12 +113,12 @@ public class PathSearcher extends JFrame {
 										String fullpath = new String(data, i2, endString-i2);
 																				
 										//Add to list
-										if (Constants.hashDatabase != null && Constants.hashDatabase.getFolder(f.getId()) == null)
+										if (HashDatabase.getFolder(f.getId()) == null)
 										{						
 											System.out.println("NEW->"+fullpath);
 											numNewFound++;
 											numNewFoundFolder++;
-											Constants.hashDatabase.addPathToDB(fullpath);										
+											HashDatabase.addPathToDB(fullpath, conn);										
 										}
 										else
 										{
@@ -124,11 +133,16 @@ public class PathSearcher extends JFrame {
 							}						
 						}
 					} catch (IOException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 	
 				}
+				try {
+					conn.commit();
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+				HashDatabase.closeConnection(conn);
 			}
 			System.out.println("Found " + numFoundFolder + " paths, " + numNewFoundFolder + " were new.");
 			numFoundFolder = 0;

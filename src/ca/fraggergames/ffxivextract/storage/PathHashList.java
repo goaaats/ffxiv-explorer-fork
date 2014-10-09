@@ -28,8 +28,8 @@ import com.esotericsoftware.kryo.io.Output;
 public class PathHashList {
 
 	// Storage
-	Hashtable<Long, String> folders;
-	Hashtable<Long, String> fileFullPath;	
+	public Hashtable<Long, String> folders;
+	public Hashtable<Long, String> fileFullPath;	
 
 	// Hashing
 	static int[] crc_table_0f085d0 = new int[]{
