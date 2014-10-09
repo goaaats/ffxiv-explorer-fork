@@ -5,7 +5,7 @@ Current research on SqPack Dat files
 ===SQPACK HEADER=== (0x400 in size)
 0x000: Signature        Int32; "SqPack", followed by 0's (12 bytes)
 0x00c: Header Length    Int32;  
-0x010: ~~Unknown~~             Int32; Unknown but repeated in other header
+0x010: ~~Unknown~~      Int32; Unknown but repeated in other header
 0x014: SqPack Type      Int32; Type 0: SQDB, Type 1: Data, Type 2: Index
 0x018: ~~Unknown~~             A lot of 0s, but 0xFFFF at 0x20
 0x3c0: SHA-1 of Header  20B;   SHA-1 of bytes 0x000-0x3BF, starts 64bytes before end of header
@@ -24,22 +24,47 @@ Current research on SqPack Dat files
 0x3c0: SHA1 of Header   20B;   Starts 64bytes before end of header
 ~~~~~~~~~~Padding~~~~~~~       Padding of 0's till [Header Length]
 
------DATA IS BELOW THIS LINE------
+-----DATA IS BELOW THIS LINE------ !!!Use Index to find entries!!!
 
-===FILE ENTRY HEADER=== (Minimum size is 0x80) !!!Use Index to find entry!!!
+~~~~~~~~~~~~~~
+
+===TYPE-2 ENTRY HEADER=== (Minimum size is 0x80) 
 0x000: Header Length     Int32; 
 0x004: Content Type      Int32; 0x02 - Binary, 0x03 - Model, 0x04 - Texture
 0x008: Uncompressed Size Int32;
 0x00c: ~~Unknown~~       Int32;
 0x010: Block Buffer Size Int32; Buffer size need to read largest block
-0x014: Num Blocks        Int32;    
+0x014: Num Blocks        Int32;  
 
----This part repeats per Num Blocks---
+===BLOCK TABLE=== (Size of Num blocks)
 0x000: Offset                  Int32; From end of this header (Check [File Entry Offset] + [Header Length])
 0x004: Block Size              Short; Total Block Size, from beginning of header to end of padding.
 0x006: Decompressed Data Size  Short;
 
----Zlib compressed data here----
+~~~~~~~~~~~~~~
+
+===TYPE-4 ENTRY HEADER=== 
+0x000: Num Indexes?         Int32; Seems to be always 1. From other Data Extractor it seems you can have multiples? 
+0x000: Size of Extra header Int32; Size of the header below.
+0x000: Size of block table  Int32; From the first block, to the last blow + length.
+0x000: ~~~Unkown~~~         Int32; Seems to be similar to the block table size.
+0x000: NULL
+0x000: Num Block Lengths    Int32; Number of lengths in the block table below.  
+0x000: Block Length Table   Short; 2 byte values, size of each block. 
+
+
+Different block found:
+OFFSET
+SIZE
+UNKNOWN
+INDEX
+UNKNOWN (3/1)
+
+~~~~~~~~~~~~~~
+
+~~~EXTRACTED FILE HEADER MAY BE HERE, PREPEND TO EXTRACT FILE~~~
+
+-----Zlib compressed data starts here------- !!!Used Block table to find each block!!!
 
 ===BLOCK HEADER===
 0x000: Header Size         Int32; Seems to be always 0x10bytes
