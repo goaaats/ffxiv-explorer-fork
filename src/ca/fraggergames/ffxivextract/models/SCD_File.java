@@ -11,7 +11,7 @@ import java.nio.ByteOrder;
 public class SCD_File {
 	
 	SCD_Sound_Info soundInfo;
-	private byte[] oggVorbisFile;
+	private byte[] dataFile;
 	
 	public SCD_File(String path) throws IOException{
 		File file = new File(path);
@@ -106,13 +106,14 @@ public class SCD_File {
 				byte[] oggData = new byte[oggDataLength];
 				buffer.get(oggData);
 							
-				oggVorbisFile = new byte[vorbisHeaderSize + oggDataLength];
-				System.arraycopy(vorbisHeader, 0, oggVorbisFile, 0, vorbisHeaderSize);
-				System.arraycopy(oggData, 0, oggVorbisFile, vorbisHeaderSize, oggData.length);
+				dataFile = new byte[vorbisHeaderSize + oggDataLength];
+				System.arraycopy(vorbisHeader, 0, dataFile, 0, vorbisHeaderSize);
+				System.arraycopy(oggData, 0, dataFile, vorbisHeaderSize, oggData.length);
 			}
 			else if (dataType == 0xC)
 			{
-				
+				dataFile = new byte[oggDataLength];				
+				buffer.get(dataFile);				
 			}
 		}
 		catch (BufferUnderflowException underflowException) {} 
@@ -125,8 +126,8 @@ public class SCD_File {
 			vorbisHeader[i] ^= encodeByte;
 	}
 	
-	public byte[] getData(){
-		return oggVorbisFile;
+	public byte[] getData(){		
+		return dataFile;
 	}
 	
 	public SCD_Sound_Info getSoundInfo()

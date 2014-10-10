@@ -11,9 +11,9 @@ public class MSADPCM {
 	private int HI = 1;
 	
 	byte predictor;
-	int scale;
-	byte sample1;
-	byte sample2;
+	short scale;
+	short sample1;
+	short sample2;
 	int coeff1, coeff2;
 	
 	/* used to compute next scale */
