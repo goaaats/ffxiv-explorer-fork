@@ -1,24 +1,27 @@
 #### SCD FILE RESEARCH ####
 
-Current research on SCD music/sound files
+Current research on SCD music/sound files. Sorry it's a mess.
 
 Structure (based on 0c0000.win32.index):
 
 ===SEDBSSCF HEADER===
 0x00 Signature         Int64; SEDBSSCF
 0x08 Version           Int32; For FFXIV should be 3;
-0x0C ???               Short; Seems to be always 0x00, 0x04
+0x0C Meta Offset's Loc Short; Seems to be always 0x00, 0x04
 0x0E Header Size       Short; Points to the address where the next header is (also size of this header). Seems to be always 0x30.
 0x10 File Size         Int32; Total File size (filesize - 1 should equal the last byte).
 ~~~~~~~~Padding~~~~~~~~       Padded to fill 48bytes
 
-===OFFSET HEADER?===   (Seems to contain a lot of offsets)
+===OFFSET LIST HEADER===   (Seems to contain a lot of offsets)
 0x00 ~~Unknown~~       Short;
 0x02 ~~Unknown~~       Short; 
 0x04 Num Sound Files   Short; 
-0x06 ~~Unknown~~       Int32;
+0x06 ~~Unknown~~       Short;
+0x08 ~~Unknown~~       Int32;
+0x0C Meta Offset Loc   Int32;
+0x06 ~~Unknown~~       Short;
   
-===META DATA HEADER=== (32byte header)
+===META DATA HEADER=== (32 byte header)
 0x00 Music File Length Int32; 
 0x04 Num Channels      Int32; 0x01: Mono, 0x02: Stereo, FFXIV is usually 0x02 channels
 0x08 Frequency         Int32; FFXIV is usually 44100HZ (AC440000)
@@ -26,9 +29,13 @@ Structure (based on 0c0000.win32.index):
 0x10 Loop Start        Int32; Not known for sure, but is what vgmstream says? ||| 703,593 (0xABC69)
 0x14 Loop End          Int32; Ditto ||| 1,756,597 (0x1ACDB5)
 0x18 First Frame Pos   Int32; First OggS after (possibly, not always) encrypted header.
-~~~~~~~~Padding~~~~~~~~       Padded to fill 32bytes
+0x1C !Aux Chunk Count  Int32; Number of Aux Chunks !Possibly Wrong!
 
-===SEEK TABLE HEADER=== (32 bytes)
+===IF MS-ADPCM===
+WAVEFORMATEX           See: http://msdn.microsoft.com/en-us/library/windows/desktop/dd390970%28v=vs.85%29.aspx
+ADPCMCOEFSET           Int32; * 7
+
+===IF OGG SEEK TABLE HEADER=== (32 bytes)
 0x00 
 0x02 Encode Byte        Short; If not 0x00, XOR the header with this byte
 0x04 

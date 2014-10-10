@@ -81,33 +81,39 @@ public class SCD_File {
 			
 			soundInfo = new SCD_Sound_Info(numChannels, frequency, dataType, loopStart, loopEnd);
 			
-			//Seek Table Header			
-			buffer.getShort();
-			int encodeByte = buffer.getShort();
-			buffer.getInt();
-			buffer.getInt();
-			buffer.getInt();
-			int seekTableSize = buffer.getInt();
-			int vorbisHeaderSize = buffer.getInt();
-			buffer.getInt();
-			
-			//Vorbis Header + Data
-			buffer.rewind();
-			buffer.position(metaHeaderOffset + 0x40 + seekTableSize);
-			
-			//Read in Vorbis header, decode if
-			byte[] vorbisHeader = new byte[vorbisHeaderSize];
-			buffer.get(vorbisHeader);
-			if (encodeByte != 0x00) //Decode if need to
-				xorDecode(vorbisHeader, encodeByte);
-			
-			//Read in the rest of the music
-			byte[] oggData = new byte[oggDataLength];
-			buffer.get(oggData);
-						
-			oggVorbisFile = new byte[vorbisHeaderSize + oggDataLength];
-			System.arraycopy(vorbisHeader, 0, oggVorbisFile, 0, vorbisHeaderSize);
-			System.arraycopy(oggData, 0, oggVorbisFile, vorbisHeaderSize, oggData.length);
+			if (dataType == 0x6){
+				//Seek Table Header			
+				buffer.getShort();
+				int encodeByte = buffer.getShort();
+				buffer.getInt();
+				buffer.getInt();
+				buffer.getInt();
+				int seekTableSize = buffer.getInt();
+				int vorbisHeaderSize = buffer.getInt();
+				buffer.getInt();
+				
+				//Vorbis Header + Data
+				buffer.rewind();
+				buffer.position(metaHeaderOffset + 0x40 + seekTableSize);
+				
+				//Read in Vorbis header, decode if
+				byte[] vorbisHeader = new byte[vorbisHeaderSize];
+				buffer.get(vorbisHeader);
+				if (encodeByte != 0x00) //Decode if need to
+					xorDecode(vorbisHeader, encodeByte);
+				
+				//Read in the rest of the music
+				byte[] oggData = new byte[oggDataLength];
+				buffer.get(oggData);
+							
+				oggVorbisFile = new byte[vorbisHeaderSize + oggDataLength];
+				System.arraycopy(vorbisHeader, 0, oggVorbisFile, 0, vorbisHeaderSize);
+				System.arraycopy(oggData, 0, oggVorbisFile, vorbisHeaderSize, oggData.length);
+			}
+			else if (dataType == 0xC)
+			{
+				
+			}
 		}
 		catch (BufferUnderflowException underflowException) {} 
 		catch (BufferOverflowException overflowException) {}
