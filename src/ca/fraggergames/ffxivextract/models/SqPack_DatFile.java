@@ -31,6 +31,8 @@ public class SqPack_DatFile {
 		int fileSize = currentFilePointer.readInt();
 		currentFilePointer.readInt(); // UNKNOWN
 		int blockBufferSize = currentFilePointer.readInt() * 0x80;
+		
+		byte extraHeader[] = null;
 		int extraHeaderSize = 0;
 
 		if (Constants.DEBUG){
@@ -72,9 +74,12 @@ public class SqPack_DatFile {
 					System.out.println("Offset: " + String.format("%X", dataBlocks[i].offset));					
 				}
 			}
-
-			return null;
-		//	break;
+			
+			extraHeader = new byte[extraHeaderSize];
+			currentFilePointer.seek(fileOffset + headerLength);
+			currentFilePointer.read(extraHeader, 0, extraHeaderSize);
+			
+			break;
 		case TYPE_MODEL:
 			return null;
 		case TYPE_BINARY: 
@@ -99,8 +104,8 @@ public class SqPack_DatFile {
 			}		
 			break;
 		}
-		byte decompressedFile[] = new byte[fileSize];
-		int currentFileOffset = 0;
+		byte decompressedFile[] = new byte[fileSize + extraHeaderSize];
+		int currentFileOffset = extraHeaderSize;
 		
 		//If we got a loading dialog
 		if (loadingDialog != null)
@@ -134,6 +139,9 @@ public class SqPack_DatFile {
 			if (loadingDialog != null)			
 				loadingDialog.nextBlock(i+1);			
 		}
+		
+		if (extraHeader != null)
+			System.arraycopy(extraHeader, 0, decompressedFile, 0, extraHeaderSize);
 		
 		return decompressedFile;
 	}
