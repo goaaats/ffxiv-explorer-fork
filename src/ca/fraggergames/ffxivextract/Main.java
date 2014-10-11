@@ -70,8 +70,8 @@ public class Main {
 					File fileList[] = file.listFiles();
 					
 					for (File f : fileList)
-					{
-						if (f.getName().endsWith(".index"))
+					{												
+						if ((!f.getName().contains("02") && !f.getName().contains("04") && !f.getName().contains("07")) && f.getName().endsWith(".index"))
 						{
 							try {
 								PathSearcher.doPathSearch(f.getAbsolutePath());

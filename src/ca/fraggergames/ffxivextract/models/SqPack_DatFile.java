@@ -72,8 +72,9 @@ public class SqPack_DatFile {
 					System.out.println("Offset: " + String.format("%X", dataBlocks[i].offset));					
 				}
 			}
-			
-			break;
+
+			return null;
+		//	break;
 		case TYPE_MODEL:
 			return null;
 		case TYPE_BINARY: 
@@ -119,7 +120,7 @@ public class SqPack_DatFile {
 				System.out.println("Decompressing block " + i + " @ file offset: " + currentFilePointer.getFilePointer() + " @ block offset: " + String.format("%X", dataBlocks[i].offset) + ". Compressed Size: " + compressedBlockSize + " and Decompressed Size: " + decompressedBlockSize + ". Block Size: " + dataBlocks[i].padding);
 			
 			byte[] decompressedBlock = null;			
-			if (compressedBlockSize == 32000) //Not actually compressed, just read decompressed size
+			if (compressedBlockSize == 32000 || decompressedBlockSize == 1) //Not actually compressed, just read decompressed size
 			{
 				decompressedBlock = new byte[decompressedBlockSize];
 				currentFilePointer.readFully(decompressedBlock);

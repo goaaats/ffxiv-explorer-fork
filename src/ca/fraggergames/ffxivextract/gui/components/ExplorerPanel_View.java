@@ -3,7 +3,11 @@ package ca.fraggergames.ffxivextract.gui.components;
 import java.awt.Color;
 import java.awt.Component;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.List;
 
 import javax.swing.Icon;
 import javax.swing.JScrollPane;
@@ -71,11 +75,45 @@ public class ExplorerPanel_View extends JScrollPane {
 		}
 		else
 		{
+			Arrays.sort(index.getPackFolders(), new Comparator<SqPack_Folder>() {
+				
+				@Override
+				public int compare(SqPack_Folder o1, SqPack_Folder o2) {
+					
+					String o1Name = HashDatabase.getFolder(o1.getId());
+					if (o1Name == null)
+						o1Name = String.format("%X", o1.getId());
+					
+					String o2Name = HashDatabase.getFolder(o2.getId());
+					if (o2Name == null)
+						o2Name = String.format("%X", o2.getId());
+					
+					return o1Name.compareTo(o2Name);
+				}
+			});
+			
 			for (int i = 0; i < index.getPackFolders().length; i++) {
 				SqPack_Folder folder = index.getPackFolders()[i];
 		
 				DefaultMutableTreeNode folderNode = new DefaultMutableTreeNode(folder);
 		
+				Arrays.sort(folder.getFiles(), new Comparator<SqPack_File>() {
+		
+					@Override
+					public int compare(SqPack_File o1, SqPack_File o2) {
+						
+						String o1Name = HashDatabase.getFileName(o1.id);
+						if (o1Name == null)
+							o1Name = String.format("%X", o1.id);
+						
+						String o2Name = HashDatabase.getFileName(o2.id);
+						if (o2Name == null)
+							o2Name = String.format("%X", o2.id);
+						
+						return o1Name.compareTo(o2Name);
+					}
+				});
+				
 				for (int j = 0; j < folder.getFiles().length; j++) 				
 					folderNode.add(new DefaultMutableTreeNode(folder.getFiles()[j]));			
 		
