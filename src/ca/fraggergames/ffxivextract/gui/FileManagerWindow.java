@@ -621,7 +621,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 			for (int i = 0; i < files.size(); i++){
 				try {
 					byte[] data = currentDatFile.extractFile(files.get(i).getOffset(), loadingDialog);
-					byte[] dataToSave;
+					byte[] dataToSave = null;
 					String extension = getExtension(data);
 					
 					if (extension.equals(".exd") && doConvert)
@@ -633,8 +633,22 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 					else if (extension.equals(".scd") && doConvert)
 					{
 						SCD_File file = new SCD_File(data);
-						dataToSave = file.getData();
-						extension = ".ogg";
+						
+						if (file.getSoundInfo(38).dataType == 0x06)
+						{
+							dataToSave = file.getRawData();
+							extension = ".ogg";
+						}
+						else if (file.getSoundInfo(38).dataType == 0x0C)
+						{
+							dataToSave = file.getConverted(38);
+							extension = ".wav";
+						}
+						else
+						{
+							dataToSave = data;
+							extension = ".scd";
+						}
 					}
 					else
 					{

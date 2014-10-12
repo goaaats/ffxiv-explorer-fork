@@ -9,9 +9,10 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
 public class SCD_File {
-	
+		
 	SCD_Sound_Info soundInfo;
-	private byte[] dataFile;
+	private int soundEntryOffsets[];
+	private byte[] scdFile;
 	
 	public SCD_File(String path) throws IOException{
 		File file = new File(path);
@@ -27,6 +28,8 @@ public class SCD_File {
 	}
 	
 	private void loadSCD(byte[] data) throws IOException {
+		
+		scdFile = data;
 		
 		ByteBuffer buffer = ByteBuffer.allocateDirect(data.length);
 		buffer.order(ByteOrder.LITTLE_ENDIAN);
@@ -56,83 +59,148 @@ public class SCD_File {
 			buffer.rewind();
 			buffer.position(sizeOfSCDHeader);
 			
-			int val1 = buffer.getShort();
-			int val2 = buffer.getShort();
-			int numFiles = buffer.getShort();
+			int sizeofTable0 = buffer.getShort();
+			int sizeofTable1 = buffer.getShort();
+			int sizeofSoundTable = buffer.getShort();
 			int val3 = buffer.getShort();
-			int address1 = buffer.getInt();
-			int metaHeaderOffset_Offset = buffer.getInt();
-			
-			//Meta Header			
-			buffer.rewind();
-			buffer.position(metaHeaderOffset_Offset);
-			int metaHeaderOffset = buffer.getInt();
-			buffer.rewind();
-			buffer.position(metaHeaderOffset);
-			
-			int oggDataLength = buffer.getInt();
-			int numChannels = buffer.getInt();
-			int frequency = buffer.getInt();
-			int dataType = buffer.getInt();
-			int loopStart = buffer.getInt();
-			int loopEnd = buffer.getInt();			
-			int firstFramePosition = buffer.getInt(); //Add to after header for first frame
+			int table0Offset = buffer.getInt();
+			int soundEntryOffsetTable_Offset = buffer.getInt();
+			int table1Offset = buffer.getInt();
 			buffer.getInt();
+			int unknownOffset1 = buffer.getInt();
 			
-			soundInfo = new SCD_Sound_Info(numChannels, frequency, dataType, loopStart, loopEnd);
-			
-			if (dataType == 0x6){
-				//Seek Table Header			
-				buffer.getShort();
-				int encodeByte = buffer.getShort();
-				buffer.getInt();
-				buffer.getInt();
-				buffer.getInt();
-				int seekTableSize = buffer.getInt();
-				int vorbisHeaderSize = buffer.getInt();
-				buffer.getInt();
-				
-				//Vorbis Header + Data
-				buffer.rewind();
-				buffer.position(metaHeaderOffset + 0x40 + seekTableSize);
-				
-				//Read in Vorbis header, decode if
-				byte[] vorbisHeader = new byte[vorbisHeaderSize];
-				buffer.get(vorbisHeader);
-				if (encodeByte != 0x00) //Decode if need to
-					xorDecode(vorbisHeader, encodeByte);
-				
-				//Read in the rest of the music
-				byte[] oggData = new byte[oggDataLength];
-				buffer.get(oggData);
-							
-				dataFile = new byte[vorbisHeaderSize + oggDataLength];
-				System.arraycopy(vorbisHeader, 0, dataFile, 0, vorbisHeaderSize);
-				System.arraycopy(oggData, 0, dataFile, vorbisHeaderSize, oggData.length);
-			}
-			else if (dataType == 0xC)
-			{
-				dataFile = new byte[oggDataLength];				
-				buffer.get(dataFile);				
-			}
+			//Load Sound Entry Offsets
+			soundEntryOffsets = new int[sizeofSoundTable];
+			buffer.rewind();
+			buffer.position(soundEntryOffsetTable_Offset);
+			for (int i = 0; i < sizeofSoundTable; i++)
+				soundEntryOffsets[i] = buffer.getInt();
+						
 		}
 		catch (BufferUnderflowException underflowException) {} 
 		catch (BufferOverflowException overflowException) {}
 		
-	}
+	}	
 
 	private void xorDecode(byte[] vorbisHeader, int encodeByte) {
 		for (int i = 0; i < vorbisHeader.length; i++)
 			vorbisHeader[i] ^= encodeByte;
 	}
 	
-	public byte[] getData(){		
-		return dataFile;
+	public byte[] getRawData(){		
+		return scdFile;
 	}
 	
-	public SCD_Sound_Info getSoundInfo()
+	public SCD_Sound_Info getSoundInfo(int index)
 	{
+		if (index > soundEntryOffsets.length-1)
+			return null;
+		
+		//Get to Sound Entry Header	
+		ByteBuffer buffer = ByteBuffer.wrap(scdFile);
+		buffer.order(ByteOrder.LITTLE_ENDIAN);		
+		buffer.position(soundEntryOffsets[index]);
+		
+		//Read in Entry header
+		int dataLength = buffer.getInt();
+		
+		//Exception for placeholders
+		if (dataLength == 0)
+			return null;
+		
+		int numChannels = buffer.getInt();
+		int frequency = buffer.getInt();
+		int dataType = buffer.getInt();
+		int loopStart = buffer.getInt();
+		int loopEnd = buffer.getInt();			
+		int firstFramePosition = buffer.getInt(); //Add to after header for first frame
+		buffer.getInt();
+		SCD_Sound_Info soundInfo = new SCD_Sound_Info(numChannels, frequency, dataType, loopStart, loopEnd, firstFramePosition);
 		return soundInfo;
+	}
+	
+	public byte[] getConverted(int index)
+	{
+		if (index > soundEntryOffsets.length-1)
+			return null;
+		
+		//Get to Sound Entry Header	
+		ByteBuffer buffer = ByteBuffer.wrap(scdFile);
+		buffer.order(ByteOrder.LITTLE_ENDIAN);		
+		buffer.position(soundEntryOffsets[index]);
+		
+		//Read in Entry header
+		int dataLength = buffer.getInt();
+		
+		//Exception for placeholders
+		if (dataLength == 0)
+			return null;
+		
+		int numChannels = buffer.getInt();
+		int frequency = buffer.getInt();
+		int dataType = buffer.getInt();
+		int loopStart = buffer.getInt();
+		int loopEnd = buffer.getInt();			
+		int firstFramePosition = buffer.getInt(); //Add to after header for first frame
+		buffer.getInt();
+		
+		if (dataType == 0x06){
+			//Seek Table Header			
+			buffer.getShort();
+			int encodeByte = buffer.getShort();
+			buffer.getInt();
+			buffer.getInt();
+			buffer.getInt();
+			int seekTableSize = buffer.getInt();
+			int vorbisHeaderSize = buffer.getInt();
+			buffer.getInt();
+			//1c6c
+			//Vorbis Header + Data
+			buffer.rewind();
+			buffer.position(soundEntryOffsets[index] + 0x40 + seekTableSize);
+			
+			//Read in Vorbis header, decode if
+			byte[] vorbisHeader = new byte[vorbisHeaderSize];
+			buffer.get(vorbisHeader);
+			if (encodeByte != 0x00) //Decode if need to
+				xorDecode(vorbisHeader, encodeByte);
+			
+			//Read in the rest of the music
+			byte[] oggData = new byte[dataLength];
+			buffer.get(oggData);
+						
+			byte[] dataFile = new byte[vorbisHeaderSize + dataLength];
+			System.arraycopy(vorbisHeader, 0, dataFile, 0, vorbisHeaderSize);
+			System.arraycopy(oggData, 0, dataFile, vorbisHeaderSize, oggData.length);
+			return dataFile;
+		}
+		else if (dataType == 0x0C)
+		{
+			byte waveHeader[] = new byte[16];
+			byte data[] = new byte[dataLength];
+			int fileStartPosition = buffer.position();
+			buffer.get(waveHeader);
+			buffer.position(fileStartPosition+firstFramePosition);
+			buffer.get(data);
+			
+			byte waveFile[] = new byte[8+36+data.length];
+			ByteBuffer out = ByteBuffer.wrap(waveFile);
+			out.order(ByteOrder.LITTLE_ENDIAN);
+			out.putInt(0x46464952); //"RIFF"
+			out.putInt(36 + data.length);
+			out.putInt(0x45564157); //"WAVE"
+			out.putInt(0x20746D66); //"fmt "
+			out.putInt(waveHeader.length);
+			out.put(waveHeader);
+			out.putInt(0x61746164); //"data"
+			out.putInt(data.length);
+			
+			out.put(data);
+
+			return waveFile;					
+		}
+		else
+			return null;
 	}
 	
 	public static class SCD_Sound_Info{
@@ -141,14 +209,16 @@ public class SCD_File {
 		public final int dataType; //0x0C: MS-ADPCM, 0x06: OGG
 		public final int loopStart;
 		public final int loopEnd;
+		public final int firstFrame;
 		
-		public SCD_Sound_Info(int numChannels, int frequency, int dataType, int loopStart, int loopEnd)
+		public SCD_Sound_Info(int numChannels, int frequency, int dataType, int loopStart, int loopEnd, int firstFrame)
 		{
 			this.numChannels = numChannels;
 			this.frequency = frequency;
 			this.dataType = dataType;
 			this.loopStart = loopStart;
 			this.loopEnd = loopEnd;
+			this.firstFrame = firstFrame;
 		}
 	}	
 }
