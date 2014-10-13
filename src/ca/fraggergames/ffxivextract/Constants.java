@@ -7,12 +7,12 @@ import ca.fraggergames.ffxivextract.storage.PathHashList;
 public class Constants {
 
 	public static final String APPNAME = "FFXIV 2.0 Data Explorer";
-	public static final String VERSION = "v0.41";
-	public static final String COMMIT = "80c37cd841cfd2998fa72bc20e15cbedaa21b65d";
+	public static final String VERSION = "v0.5";
+	public static final String COMMIT = "fc92a429023d6ea9e146789a5b89f1a266fabfd3";
 	public static boolean DEBUG = false;
 	public static boolean EASTER_EGG = false;
 
-	//public static PathHashList hashDatabase;
+	public static final String DBFILE_NAME = "hashlist.db";
 	
 	public static final String[] iconList = {
 		"000000", "000ED81", "0010235", "0010236" , "0010237",
@@ -27,6 +27,7 @@ public class Constants {
 		"0010288", "0010289", "001028A", "001028B", "001028C",
 		"001028D", "001028E", "00102FD"
 	};
+	
 
 	public static void setUIFont (javax.swing.plaf.FontUIResource f){
 	    java.util.Enumeration keys = UIManager.getDefaults().keys();
