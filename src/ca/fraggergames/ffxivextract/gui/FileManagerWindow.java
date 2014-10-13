@@ -529,7 +529,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 			Image_View imageComponent = new Image_View(new Texture_File(data));
 			tabs.addTab("TEX File", imageComponent);
 		}
-		else if (data[1] == 'L' && data[2] == 'u'){
+		else if (data.length >= 3 && data[1] == 'L' && data[2] == 'u'){
 			
 			if (luadec != null)			
 			{
