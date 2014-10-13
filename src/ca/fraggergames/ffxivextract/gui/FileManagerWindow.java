@@ -41,11 +41,13 @@ import ca.fraggergames.ffxivextract.gui.components.Hex_View;
 import ca.fraggergames.ffxivextract.gui.components.Image_View;
 import ca.fraggergames.ffxivextract.gui.components.Loading_Dialog;
 import ca.fraggergames.ffxivextract.gui.components.Lua_View;
+import ca.fraggergames.ffxivextract.gui.components.Sound_View;
 import ca.fraggergames.ffxivextract.helpers.LERandomAccessFile;
 import ca.fraggergames.ffxivextract.helpers.LuaDec;
 import ca.fraggergames.ffxivextract.helpers.OggVorbisPlayer;
 import ca.fraggergames.ffxivextract.models.EXDF_File;
 import ca.fraggergames.ffxivextract.models.SCD_File;
+import ca.fraggergames.ffxivextract.models.SCD_File.SCD_Sound_Info;
 import ca.fraggergames.ffxivextract.models.SqPack_DatFile;
 import ca.fraggergames.ffxivextract.models.SqPack_IndexFile;
 import ca.fraggergames.ffxivextract.models.Texture_File;
@@ -507,15 +509,25 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 			return;
 		}
 					
-		if (data[0] == 'E' && data[1] == 'X' && data[2] == 'D' && data[3] == 'F')
+		if (data.length >= 3 && data[0] == 'E' && data[1] == 'X' && data[2] == 'D' && data[3] == 'F')
 		{								
 			//EXDF_View exdfComponent = new EXDF_View(new EXDF_File(data));
 			//tabs.addTab("EXDF File", exdfComponent);
 		}
+		else if (data.length >= 8 && data[0] == 'S' && data[1] == 'E' && data[2] == 'D' && data[3] == 'B' && data[4] == 'S' && data[5] == 'S' && data[6] == 'C' && data[7] == 'F')
+		{								
+			Sound_View scdComponent;
+			try {
+				scdComponent = new Sound_View(new SCD_File(data));
+				tabs.addTab("SCD File", scdComponent);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
 		else if (contentType == 4)
 		{
 			Image_View imageComponent = new Image_View(new Texture_File(data));
-			tabs.addTab("Texture", imageComponent);
+			tabs.addTab("TEX File", imageComponent);
 		}
 		else if (data[1] == 'L' && data[2] == 'u'){
 			
@@ -528,11 +540,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 			{
 				
 			}
-		}		
-		else if (false && data.length >= 4 && data[0] == 'S' && data[1] == 'E' && data[2] == 'D' && data[3] == 'B' )
-		{			
-			
-		}
+		}	
 		
 		hexView.setBytes(data);			
 		tabs.addTab("Raw Hex", hexView);			
@@ -634,21 +642,38 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 					{
 						SCD_File file = new SCD_File(data);
 						
-						if (file.getSoundInfo(38).dataType == 0x06)
+						for (int s = 0; s < file.getNumEntries(); s++)
 						{
-							dataToSave = file.getRawData();
-							extension = ".ogg";
+							SCD_Sound_Info info = file.getSoundInfo(s);
+							if (info == null)
+								continue;
+							if (info.dataType == 0x06)
+							{
+								dataToSave = file.getConverted(s);
+								extension = ".ogg";
+							}
+							else if (info.dataType == 0x0C)
+							{
+								dataToSave = file.getConverted(s);
+								extension = ".wav";
+							}
+							else							
+								continue;
+														
+							String path = lastOpenedFile.getCanonicalPath();
+							String fileName = HashDatabase.getFileName(files.get(i).getId());
+							
+							if (fileName == null)						
+								fileName = String.format("%X", files.get(i).getId() & 0xFFFFFFFF);
+							
+							if (files.size() > 1)
+								path = lastOpenedFile.getCanonicalPath() + "\\" + fileName;														
+							
+							LERandomAccessFile out = new LERandomAccessFile(path + (file.getNumEntries()==1 ? "" : "_" + s) + extension, "rw");
+							out.write(dataToSave, 0, dataToSave.length);
+							out.close();
 						}
-						else if (file.getSoundInfo(38).dataType == 0x0C)
-						{
-							dataToSave = file.getConverted(38);
-							extension = ".wav";
-						}
-						else
-						{
-							dataToSave = data;
-							extension = ".scd";
-						}
+												
 					}
 					else
 					{

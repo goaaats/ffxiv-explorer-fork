@@ -115,7 +115,7 @@ public class SCD_File {
 		int loopEnd = buffer.getInt();			
 		int firstFramePosition = buffer.getInt(); //Add to after header for first frame
 		buffer.getInt();
-		SCD_Sound_Info soundInfo = new SCD_Sound_Info(numChannels, frequency, dataType, loopStart, loopEnd, firstFramePosition);
+		SCD_Sound_Info soundInfo = new SCD_Sound_Info(dataLength, numChannels, frequency, dataType, loopStart, loopEnd, firstFramePosition);
 		return soundInfo;
 	}
 	
@@ -210,9 +210,11 @@ public class SCD_File {
 		public final int loopStart;
 		public final int loopEnd;
 		public final int firstFrame;
+		public final int fileSize;
 		
-		public SCD_Sound_Info(int numChannels, int frequency, int dataType, int loopStart, int loopEnd, int firstFrame)
+		public SCD_Sound_Info(int fileSize, int numChannels, int frequency, int dataType, int loopStart, int loopEnd, int firstFrame)
 		{
+			this.fileSize = fileSize;
 			this.numChannels = numChannels;
 			this.frequency = frequency;
 			this.dataType = dataType;
@@ -220,5 +222,9 @@ public class SCD_File {
 			this.loopEnd = loopEnd;
 			this.firstFrame = firstFrame;
 		}
+	}
+
+	public int getNumEntries() {
+		return soundEntryOffsets.length;
 	}	
 }

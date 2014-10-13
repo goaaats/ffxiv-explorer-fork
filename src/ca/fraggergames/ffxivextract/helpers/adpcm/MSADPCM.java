@@ -47,12 +47,12 @@ public class MSADPCM {
 	{		
 		if (fileStream.position() == 0)
 		{
-			predictor = fileStream.get();
+			predictor = fileStream.get();	
 			scale = fileStream.getShort();
 			sample1 = fileStream.get();
 			sample2 = fileStream.get();
-			oBuffer[0] = sample2;
-			oBuffer[1] = sample1;
+			//oBuffer[0] = sample2;
+		//	oBuffer[1] = sample1;
 			out.write(oBuffer, 0, 2);
 		}
 		else
@@ -63,15 +63,15 @@ public class MSADPCM {
 			byte nibble = nibbleToRead == LO ? (byte) (lastReadSample & 0xF) : (byte) ((lastReadSample >> 4) & 0xF);
 			
 			
-			predictor = ((sample1 * ADPCMCoeffs[0]) + (sample2 * ADPCMCoeffs[1]))/256;
+		//	predictor = ((sample1 * ADPCMCoeffs[0]) + (sample2 * ADPCMCoeffs[1]))/256;
 			predictor += nibble & scale;
-			predictor = clamp16(predictor);
-			byte sample = predictor;
-			oBuffer[0] = sample;
+		//	predictor = clamp16(predictor);
+		//	byte sample = predictor;
+			//oBuffer[0] = sample;
 			out.write(oBuffer, 0, 1);
 			sample2 = sample1;
-			sample1 = sample;
-			scale = (ADPCMTable[nibble]*scale)/256;			
+			//sample1 = sample;
+			//scale = (ADPCMTable[nibble]*scale)/256;			
 			if (scale < 0x10) scale = 0x10;
 			
 			if (nibbleToRead == LO)			

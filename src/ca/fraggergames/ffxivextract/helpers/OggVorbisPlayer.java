@@ -62,7 +62,7 @@ public class OggVorbisPlayer {
 	}
 
 	public void setSource(SCD_File file) {
-		inStream = new ByteArrayInputStream(file.getData());
+		//inStream = new ByteArrayInputStream(file.getConverted()());
 	}
 	
 	public void start()
