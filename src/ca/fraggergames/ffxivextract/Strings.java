@@ -38,6 +38,7 @@ public class Strings {
 	public static final String MENU_FILE = "File";
 	public static final String MENU_SEARCH = "Search";
 	public static final String MENU_TOOLS = "Tools";
+	public static final String MENU_OPTIONS = "Options";
 	public static final String MENU_HELP = "Help";
 	
 	public static final String MENUITEM_OPEN = "Open";
@@ -49,6 +50,7 @@ public class Strings {
 	public static final String MENUITEM_MUSICSWAPPER = "Music Swapper (EXPERIMENTAL)";
 	public static final String MENUITEM_MACROEDITOR = "Macro Editor (NOT DONE)";
 	public static final String MENUITEM_LOGVIEWER = "Log Viewer (NOT DONE)";
+	public static final String MENUITEM_ENABLESORT = "Sort Files Alphabetically";
 	public static final String MENUITEM_QUIT = "Quit";
 	public static final String MENUITEM_ABOUT = "About";
 	
@@ -62,6 +64,7 @@ public class Strings {
 	//Errors
 	public static final String ERROR_CANNOT_OPEN_INDEX = "Could not open index file. Shut off FFXIV if it is running currently.";
 	public static final String ERROR_EDITIO = "Bad IOException happened. You should replace the edited index file with the backup.";
+	
 	
 	
 	

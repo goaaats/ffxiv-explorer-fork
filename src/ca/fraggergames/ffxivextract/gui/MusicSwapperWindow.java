@@ -275,7 +275,7 @@ public class MusicSwapperWindow extends JFrame {
 		dropdown.removeAllItems();
 		for (int i = 0; i < files.length; i++)
 		{
-			String fileName = HashDatabase.getFileName(files[i].id);
+			String fileName = files[i].getName();
 			
 			if (fileName !=null)
 				dropdown.addItem(String.format("%s (%08X)", fileName, files[i].getOffset() & 0xFFFFFFFF));

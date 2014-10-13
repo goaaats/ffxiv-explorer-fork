@@ -83,66 +83,12 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 	JMenuItem file_ExtractRaw;
 	JMenuItem file_Close;
 	JMenuItem search_search;
-	JMenuItem search_searchAgain;
+	JMenuItem search_searchAgain;	
 	
 	OggVorbisPlayer player;
 	
 	public FileManagerWindow(String title)
-	{		/*
-		EXDF_File file;
-		Writer writer = null;		
-		try {
-			
-			writer = new BufferedWriter(new OutputStreamWriter(
-			          new FileOutputStream("C:\\Users\\Filip\\Desktop\\colors.csv"), "utf-8"));
-			
-			file = new EXDF_File("C:\\Users\\Filip\\Desktop\\Colors.exd");
-			for (int i = 1; i < file.entries.length; i++)
-			{
-				ByteBuffer buffer = ByteBuffer.allocateDirect(file.entries[i].data.length);
-				buffer.order(ByteOrder.BIG_ENDIAN);
-				buffer.put(file.entries[i].data);
-				buffer.rewind();
-				
-				buffer.position(2);
-				int X = buffer.getInt();
-				buffer.getInt();
-				buffer.get();
-				int R = buffer.get();
-				int G = buffer.get();
-				int B = buffer.get();
-				buffer.get();
-				buffer.get();
-				int X1 = buffer.get();
-				int Y1 = buffer.get();
-				int Z1 = buffer.get();
-				buffer.get();
-				buffer.get();
-				buffer.get();
-				byte[] string = new byte[buffer.remaining()];
-				buffer.get(string, 0, buffer.remaining());
-				String colorName = new String(string);
-				
-				writer.write(colorName + "," + String.format("%02X", R & 0xFF) + String.format("%02X", G & 0xFF) + String.format("%02X", B & 0xFF) + "," + String.format("%08X", X & 0xFFFFFFFF) + "," + String.format("%02X", X1 & 0xFF) + String.format("%02X", Y1 & 0xFF) + String.format("%02X", Z1 & 0xFF)+"\r\n");
-			}			
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		finally
-		{
-			if (writer!=null)
-				try {
-					writer.close();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-		}*/
-		
+	{	
 		addWindowListener(this);
 
 		//Provide minimum sizes for the two components in the split pane
@@ -363,6 +309,10 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 				logViewer.setLocationRelativeTo(FileManagerWindow.this);
 				logViewer.setVisible(true);
 			}
+			else if (event.getActionCommand().equals("options_sort"))
+			{
+				 
+			}
 			else if (event.getActionCommand().equals("quit"))
 			{
 				System.exit(0);
@@ -382,6 +332,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 		JMenu file = new JMenu(Strings.MENU_FILE);
 		JMenu search = new JMenu(Strings.MENU_SEARCH);
 		JMenu tools = new JMenu(Strings.MENU_TOOLS);
+		JMenu options = new JMenu(Strings.MENU_OPTIONS);
 		JMenu help = new JMenu(Strings.MENU_HELP);
 		JMenuItem file_Open = new JMenuItem(Strings.MENUITEM_OPEN);
 		file_Open.setActionCommand("open");
@@ -424,6 +375,10 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 		tools_logViewer.setActionCommand("logviewer");
 		tools_logViewer.addActionListener(menuHandler);
 		
+		JMenuItem options_enableSort = new JMenuItem(Strings.MENUITEM_ENABLESORT);
+		options_enableSort.setActionCommand("options_sort");
+		options_enableSort.addActionListener(menuHandler);
+		
 		JMenuItem help_About = new JMenuItem("About");
 
 		help_About.setActionCommand("about");
@@ -444,12 +399,15 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 		tools.add(tools_macroEditor);
 		tools.add(tools_logViewer);
 		
+		options.add(options_enableSort);
+		
 		help.add(help_About);
 		
 		//Super Menus
 		menu.add(file);
 		menu.add(search);
 		menu.add(tools);
+		//menu.add(options);
 		menu.add(help);
 		
 		this.setJMenuBar(menu);
@@ -661,7 +619,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 								continue;
 														
 							String path = lastOpenedFile.getCanonicalPath();
-							String fileName = HashDatabase.getFileName(files.get(i).getId());
+							String fileName = files.get(i).getName();
 							
 							if (fileName == null)						
 								fileName = String.format("%X", files.get(i).getId() & 0xFFFFFFFF);

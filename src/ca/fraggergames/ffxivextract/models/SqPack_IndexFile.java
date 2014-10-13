@@ -3,6 +3,7 @@ package ca.fraggergames.ffxivextract.models;
 import java.io.IOException;
 
 import ca.fraggergames.ffxivextract.helpers.LERandomAccessFile;
+import ca.fraggergames.ffxivextract.storage.HashDatabase;
 
 public class SqPack_IndexFile {
 
@@ -171,11 +172,15 @@ public class SqPack_IndexFile {
 		private int id;
 		private SqPack_File files[];
 		private long fileIndexOffset;
+		private String name;
 		
 		public SqPack_Folder(int id, int numFiles, long fileIndexOffset) {
 			this.id = id;
 			this.files = new SqPack_File[numFiles];
 			this.fileIndexOffset = fileIndexOffset;
+			this.name = HashDatabase.getFolder(id);
+			if (this.name == null)
+				this.name = String.format("%x", id);
 		}
 
 		protected void readFiles(LERandomAccessFile ref) throws IOException{
@@ -201,17 +206,26 @@ public class SqPack_IndexFile {
 			return files;
 		}
 		
+		public String getName()
+		{
+			return name;
+		}
+		
 	}
 	
 	public static class SqPack_File {
 		public int id, id2;
 		public long dataoffset;
+		private String name;
 		
 		public SqPack_File(int id, int id2, long offset)
 		{
 			this.id = id;
 			this.id2 = id2;
 			this.dataoffset = offset;
+			this.name = HashDatabase.getFileName(id);
+			if (this.name == null)
+				this.name = String.format("%x", id);
 		}
 		
 		public int getId()
@@ -226,6 +240,10 @@ public class SqPack_IndexFile {
 
 		public int getId2() {
 			return id2;
+		}
+		
+		public String getName(){
+			return name;
 		}
 	}
 

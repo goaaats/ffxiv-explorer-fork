@@ -184,18 +184,10 @@ public class SearchWindow extends JFrame {
 									Object[] options = { "Continue",
 											"Open", "Stop Search" };
 									
-									String folder= HashDatabase.getFolder(f.getId()), file = HashDatabase.getFileName(fi.getId());
-									
-									if (folder == null)
-										folder = String.format("%08X", f.getId() & 0xFFFFFFFF);
-									
-									if (file == null)										
-										file = String.format("%08X", fi.getId() & 0xFFFFFFFF);
-									
 									int n = JOptionPane
 											.showOptionDialog(
 													this,
-													"Found result in folder: " + folder + ", file: " + file,
+													"Found result in folder: " + f.getName() + ", file: " + fi.getName(),
 													"Searching through DAT...",
 													JOptionPane.YES_NO_CANCEL_OPTION,
 													JOptionPane.QUESTION_MESSAGE,

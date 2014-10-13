@@ -75,44 +75,14 @@ public class ExplorerPanel_View extends JScrollPane {
 		}
 		else
 		{
-			Arrays.sort(index.getPackFolders(), new Comparator<SqPack_Folder>() {
-				
-				@Override
-				public int compare(SqPack_Folder o1, SqPack_Folder o2) {
-					
-					String o1Name = HashDatabase.getFolder(o1.getId());
-					if (o1Name == null)
-						o1Name = String.format("%X", o1.getId());
-					
-					String o2Name = HashDatabase.getFolder(o2.getId());
-					if (o2Name == null)
-						o2Name = String.format("%X", o2.getId());
-					
-					return o1Name.compareTo(o2Name);
-				}
-			});
+			Arrays.sort(index.getPackFolders(), folderComparator);
 			
 			for (int i = 0; i < index.getPackFolders().length; i++) {
 				SqPack_Folder folder = index.getPackFolders()[i];
 		
 				DefaultMutableTreeNode folderNode = new DefaultMutableTreeNode(folder);
 		
-				Arrays.sort(folder.getFiles(), new Comparator<SqPack_File>() {
-		
-					@Override
-					public int compare(SqPack_File o1, SqPack_File o2) {
-						
-						String o1Name = HashDatabase.getFileName(o1.id);
-						if (o1Name == null)
-							o1Name = String.format("%X", o1.id);
-						
-						String o2Name = HashDatabase.getFileName(o2.id);
-						if (o2Name == null)
-							o2Name = String.format("%X", o2.id);
-						
-						return o1Name.compareTo(o2Name);
-					}
-				});
+				Arrays.sort(folder.getFiles(), fileComparator);
 				
 				for (int j = 0; j < folder.getFiles().length; j++) 				
 					folderNode.add(new DefaultMutableTreeNode(folder.getFiles()[j]));			
@@ -146,12 +116,7 @@ public class ExplorerPanel_View extends JScrollPane {
 	        {
 	        	SqPack_Folder folder = (SqPack_Folder) node.getUserObject();
 	        	
-	        	String folderName = HashDatabase.getFolder(folder.getId());
-	        	
-	        	if (folderName != null)
-	        		value = folderName;
-	        	else
-	        		value = String.format("%08X", folder.getId() & 0xFFFFFFFF);	     
+	        	value = folder.getName();  
 	        		        	
 	        	setOpenIcon(getDefaultOpenIcon());
 	            setClosedIcon(getDefaultClosedIcon());
@@ -165,12 +130,7 @@ public class ExplorerPanel_View extends JScrollPane {
 	        	else
 	        		setTextNonSelectionColor(Color.BLACK);
 	        	
-	        	String fileName = HashDatabase.getFileName(file.getId());
-	        	
-	        	if (fileName != null)
-	        		value = fileName;
-	        	else
-	        		value =  String.format("%08X", file.getId() & 0xFFFFFFFF); 
+	        	value = file.getName();
 	        	
 	        	setLeafIcon(fileIcon);
 	        	setLeafIcon(fileIcon);
@@ -228,72 +188,22 @@ public class ExplorerPanel_View extends JScrollPane {
 	    }
 	}
 	
-	public DefaultMutableTreeNode sort(DefaultMutableTreeNode node) {
-
-	    //sort alphabetically
-	    for(int i = 0; i < node.getChildCount() - 1; i++) {
-	        DefaultMutableTreeNode child = (DefaultMutableTreeNode) node.getChildAt(i);
-	        String nt;
-	        
-	        if (child.getUserObject() instanceof SqPack_Folder)
-	        {
-	        	SqPack_Folder folder = (SqPack_Folder) child.getUserObject();
-	        	String folderName = HashDatabase.getFolder(folder.getId());
-	        	
-	        	if (folderName != null)
-	        		nt = folderName;
-	        	else
-	        		nt = String.format("%08X", folder.getId() & 0xFFFFFFFF);	     	        	
-	        }
-	        else
-	        {
-	        	SqPack_File file = (SqPack_File) child.getUserObject();
-	        	String fileName = HashDatabase.getFileName(file.getId());
-	        	
-	        	if (fileName != null)
-	        		nt = fileName;
-	        	else
-	        		nt =  String.format("%08X", file.getId() & 0xFFFFFFFF); 
-	        }
-	        	
-
-	        for(int j = i + 1; j <= node.getChildCount() - 1; j++) {
-	            DefaultMutableTreeNode prevNode = (DefaultMutableTreeNode) node.getChildAt(j);
-	            String np;
-	           
-	            if (prevNode.getUserObject() instanceof SqPack_Folder)
-		        {
-		        	SqPack_Folder folder = (SqPack_Folder) prevNode.getUserObject();
-		        	String folderName = HashDatabase.getFolder(folder.getId());
-		        	
-		        	if (folderName != null)
-		        		np = folderName;
-		        	else
-		        		np = String.format("%08X", folder.getId() & 0xFFFFFFFF);	
-		        }
-		        else
-		        {
-		        	SqPack_File file = (SqPack_File) prevNode.getUserObject();
-		        	String fileName = HashDatabase.getFileName(file.getId());
-		        	
-		        	if (fileName != null)
-		        		np = fileName;
-		        	else
-		        		np =  String.format("%08X", file.getId() & 0xFFFFFFFF); 
-		        }
-	            
-	            if(nt.compareToIgnoreCase(np) > 0) {
-	                node.insert(child, j);
-	                node.insert(prevNode, i);
-	            }
-	        }
-	        if(child.getChildCount() > 0) {
-	            sort(child);
-	        }
-	    }	   
-
-	    return node;
-
-	}
+	Comparator<SqPack_Folder> folderComparator =  new Comparator<SqPack_Folder>() {
+		
+		@Override
+		public int compare(SqPack_Folder o1, SqPack_Folder o2) {
+		
+			return o1.getName().compareTo(o2.getName());
+		}
+	};
+	
+	Comparator<SqPack_File> fileComparator = new Comparator<SqPack_File>() {
+		
+		@Override
+		public int compare(SqPack_File o1, SqPack_File o2) {
+			
+			return o1.getName().compareTo(o2.getName());
+		}
+	};
 }
 
