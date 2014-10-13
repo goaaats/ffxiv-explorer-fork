@@ -150,11 +150,12 @@ public class SCD_File {
 
 		//Skip any aux chunks
 		int chunkStartPos = buffer.position();
+		int chunkEndPos = chunkStartPos;
 		for (int i = 0; i < numAuxChunks; i++)
 		{
 			buffer.getInt();
-			chunkStartPos += buffer.getInt();
-			buffer.position(chunkStartPos);
+			chunkEndPos += buffer.getInt();
+			buffer.position(chunkEndPos);
 		}
 		
 		if (dataType == 0x06){
@@ -169,8 +170,7 @@ public class SCD_File {
 			buffer.getInt();
 			//1c6c
 			//Vorbis Header + Data
-			buffer.rewind();
-			buffer.position(soundEntryOffsets[index] + 0x40 + seekTableSize);
+			buffer.position(chunkEndPos + 0x20 + seekTableSize);
 			
 			//Read in Vorbis header, decode if
 			byte[] vorbisHeader = new byte[vorbisHeaderSize];
@@ -191,9 +191,8 @@ public class SCD_File {
 		{
 			byte waveHeader[] = new byte[16];
 			byte data[] = new byte[dataLength];
-			int fileStartPosition = buffer.position();
 			buffer.get(waveHeader);
-			buffer.position(fileStartPosition+firstFramePosition);
+			buffer.position(chunkStartPos+firstFramePosition);
 			buffer.get(data);
 			
 			byte waveFile[] = new byte[8+36+data.length];
@@ -265,16 +264,16 @@ public class SCD_File {
 		
 		//Skip any aux chunks
 		int chunkStartPos = buffer.position();
+		int chunkEndPos = chunkStartPos;
 		for (int i = 0; i < numAuxChunks; i++)
 		{
 			buffer.getInt();
-			chunkStartPos += buffer.getInt();
-			buffer.position(chunkStartPos);
+			chunkEndPos += buffer.getInt();
+			buffer.position(chunkEndPos);
 		}
 		
 		byte data[] = new byte[dataLength];
-		int fileStartPosition = buffer.position();
-		buffer.position(fileStartPosition+firstFramePosition);
+		buffer.position(chunkStartPos+firstFramePosition);
 		buffer.get(data);
 		return data;
 	}
@@ -292,7 +291,24 @@ public class SCD_File {
 		if (dataLength == 0)
 			return null;
 		
-		buffer.position(soundEntryOffsets[index]+0x20);
+		int numChannels = buffer.getInt();
+		int frequency = buffer.getInt();
+		int dataType = buffer.getInt();
+		int loopStart = buffer.getInt();
+		int loopEnd = buffer.getInt();			
+		int firstFramePosition = buffer.getInt(); //Add to after header for first frame		
+		int numAuxChunks = buffer.getShort();
+		buffer.getShort();
+		
+		//Skip any aux chunks
+		int chunkStartPos = buffer.position();
+		int chunkEndPos = chunkStartPos;
+		for (int i = 0; i < numAuxChunks; i++)
+		{
+			buffer.getInt();
+			chunkEndPos += buffer.getInt();
+			buffer.position(chunkEndPos);
+		}		
 		byte[] header = new byte[0x10];
 		buffer.get(header);
 		return header;
