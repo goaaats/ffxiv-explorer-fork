@@ -114,8 +114,11 @@ public class SCD_File {
 		int loopStart = buffer.getInt();
 		int loopEnd = buffer.getInt();			
 		int firstFramePosition = buffer.getInt(); //Add to after header for first frame
-		buffer.getInt();
+		int numAuxChunks = buffer.getShort();
+		buffer.getShort();
+		
 		SCD_Sound_Info soundInfo = new SCD_Sound_Info(dataLength, numChannels, frequency, dataType, loopStart, loopEnd, firstFramePosition);
+		
 		return soundInfo;
 	}
 	
@@ -142,7 +145,17 @@ public class SCD_File {
 		int loopStart = buffer.getInt();
 		int loopEnd = buffer.getInt();			
 		int firstFramePosition = buffer.getInt(); //Add to after header for first frame
-		buffer.getInt();
+		int numAuxChunks = buffer.getShort();
+		buffer.getShort();
+
+		//Skip any aux chunks
+		int chunkStartPos = buffer.position();
+		for (int i = 0; i < numAuxChunks; i++)
+		{
+			buffer.getInt();
+			chunkStartPos += buffer.getInt();
+			buffer.position(chunkStartPos);
+		}
 		
 		if (dataType == 0x06){
 			//Seek Table Header			
@@ -226,5 +239,62 @@ public class SCD_File {
 
 	public int getNumEntries() {
 		return soundEntryOffsets.length;
+	}
+
+	public byte[] getADPCMData(int index) {
+		//Get to Sound Entry Header	
+		ByteBuffer buffer = ByteBuffer.wrap(scdFile);
+		buffer.order(ByteOrder.LITTLE_ENDIAN);		
+		buffer.position(soundEntryOffsets[index]);
+		
+		//Read in Entry header
+		int dataLength = buffer.getInt();
+		
+		//Exception for placeholders
+		if (dataLength == 0)
+			return null;
+		
+		int numChannels = buffer.getInt();
+		int frequency = buffer.getInt();
+		int dataType = buffer.getInt();
+		int loopStart = buffer.getInt();
+		int loopEnd = buffer.getInt();			
+		int firstFramePosition = buffer.getInt(); //Add to after header for first frame		
+		int numAuxChunks = buffer.getShort();
+		buffer.getShort();
+		
+		//Skip any aux chunks
+		int chunkStartPos = buffer.position();
+		for (int i = 0; i < numAuxChunks; i++)
+		{
+			buffer.getInt();
+			chunkStartPos += buffer.getInt();
+			buffer.position(chunkStartPos);
+		}
+		
+		byte data[] = new byte[dataLength];
+		int fileStartPosition = buffer.position();
+		buffer.position(fileStartPosition+firstFramePosition);
+		buffer.get(data);
+		return data;
+	}
+
+	public byte[] getADPCMHeader(int index) {
+		//Get to Sound Entry Header	
+		ByteBuffer buffer = ByteBuffer.wrap(scdFile);
+		buffer.order(ByteOrder.LITTLE_ENDIAN);		
+		buffer.position(soundEntryOffsets[index]);
+		
+		//Read in Entry header
+		int dataLength = buffer.getInt();
+		
+		//Exception for placeholders
+		if (dataLength == 0)
+			return null;
+		
+		buffer.position(soundEntryOffsets[index]+0x20);
+		byte[] header = new byte[0x10];
+		buffer.get(header);
+		return header;
 	}	
 }

@@ -42,7 +42,13 @@ Structure (based on 0c0000.win32.index):
 0x10 Loop Start        Int32; Not known for sure, but is what vgmstream says? ||| 703,593 (0xABC69)
 0x14 Loop End          Int32; Ditto ||| 1,756,597 (0x1ACDB5)
 0x18 First Frame Pos   Int32; First OggS after (possibly, not always) encrypted header.
-0x1C !Aux Chunk Count  Int32; Number of Aux Chunks !Possibly Wrong!
+0x1C Aux Chunk Count   Short; Number of Aux Chunks
+
+===AUX CHUNKS===
+-----MARK----
+0x00 ID                Int32; ASCII MARK Id
+0x04 Chunk Size        Int32; Size of this chunk, from start to end.
+0x08 Mark Table        ;Chunk Size / 4 entries.
 
 ===IF MS-ADPCM===
 WAVEFORMATEX           See: http://msdn.microsoft.com/en-us/library/windows/desktop/dd390970%28v=vs.85%29.aspx
@@ -54,7 +60,7 @@ ADPCMCOEFSET           Int32; * 7
 0x04 
 0x08 
 0x0c 
-0x10 Num Seek Table     Int32; How many seek table entries there are.	
+0x10 Size of Seek Table     Int32; How many seek table entries there are.	
 0x14 Vorbis Header Size Int32; Size of the Ogg Vorbis header (for decoding purpose).
 0x18 
 ~~~~~~~~~Padding~~~~~~~~       Padded to fill 32bytes 

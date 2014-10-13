@@ -1,23 +1,37 @@
 package ca.fraggergames.ffxivextract.gui.components;
 
 import java.awt.BorderLayout;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 
+import javax.sound.sampled.AudioFormat;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.DataLine;
+import javax.sound.sampled.LineUnavailableException;
+import javax.sound.sampled.SourceDataLine;
 import javax.swing.BoxLayout;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.ListSelectionModel;
 import javax.swing.border.TitledBorder;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.table.AbstractTableModel;
 
+import ca.fraggergames.ffxivextract.helpers.MSADPCM_Decode;
 import ca.fraggergames.ffxivextract.models.SCD_File;
 import ca.fraggergames.ffxivextract.models.SCD_File.SCD_Sound_Info;
-import javax.swing.JScrollPane;
 
 public class Sound_View extends JPanel {
 	private JTable tblSoundEntyList;
-
+	SCD_File file;
+	
 	public Sound_View(SCD_File scdFile) {
 		setLayout(new BorderLayout(0, 0));
-
+		
+		file = scdFile;
+		
 		JPanel pnlFileList = new JPanel();
 		pnlFileList.setBorder(new TitledBorder(null, "SCD Contents",
 				TitledBorder.LEADING, TitledBorder.TOP, null, null));
@@ -32,6 +46,36 @@ public class Sound_View extends JPanel {
 		scrollPane.setViewportView(tblSoundEntyList);
 		tblSoundEntyList.setModel(new SCDTableModel(scdFile));
 		tblSoundEntyList.getColumnModel().getColumn(4).setPreferredWidth(79);
+		tblSoundEntyList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		tblSoundEntyList.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+			
+			@Override
+			public void valueChanged(ListSelectionEvent e) {
+				
+				
+				if (!e.getValueIsAdjusting()){
+			
+				
+					SCD_Sound_Info info = file.getSoundInfo(e.getLastIndex());
+					if (info != null)
+					{
+						if (info.dataType == 0x0C){
+							final byte[] header = file.getADPCMHeader(e.getLastIndex());
+							final byte[] body = file.getADPCMData(e.getLastIndex());
+							new Thread() {
+								
+								@Override
+								public void run() {
+									play(header, body);
+								}
+							}.start();						
+						}
+					}
+				}
+			}
+		});
+
+		
 	}
 
 	class SCDTableModel extends AbstractTableModel {
@@ -98,6 +142,75 @@ public class Sound_View extends JPanel {
 			return "";
 		}
 
-	}
+	}	
+	
 
+	public void play(byte[] header, byte[] body)
+	{
+		if (header == null || body == null)
+			return;
+		
+		ByteBuffer bb = ByteBuffer.wrap(header);
+		bb.order(ByteOrder.LITTLE_ENDIAN);
+		bb.getShort();		
+		int channels = bb.getShort();
+		int rate = bb.getInt();
+		bb.getInt();
+		int blockAlign = bb.getShort();
+		int bitsPerSample = bb.getShort();
+		
+		// Creates an AudioFormat object and a DataLine.Info object.
+		AudioFormat audioFormat = new AudioFormat((float) rate, 16, channels,
+				true, false);
+		DataLine.Info datalineInfo = new DataLine.Info(SourceDataLine.class,
+				audioFormat, AudioSystem.NOT_SPECIFIED);
+
+		SourceDataLine outputLine;
+		
+		// Check if the line is supported.
+		if (!AudioSystem.isLineSupported(datalineInfo)) {
+			System.err.println("Audio output line is not supported.");
+			return;
+		}
+
+		/*
+		 * Everything seems to be alright. Let's try to open a line with the
+		 * specified format and start the source data line.
+		 */
+		try {
+			outputLine = (SourceDataLine) AudioSystem.getLine(datalineInfo);
+			outputLine.open(audioFormat);
+		} catch (LineUnavailableException exception) {
+			System.out.println("The audio output line could not be opened due "
+					+ "to resource restrictions.");
+			System.err.println(exception);
+			return;
+		} catch (IllegalStateException exception) {
+			System.out.println("The audio output line is already open.");
+			System.err.println(exception);
+			return;
+		} catch (SecurityException exception) {
+			System.out.println("The audio output line could not be opened due "
+					+ "to security restrictions.");
+			System.err.println(exception);
+			return;
+		}
+
+		// Start it.
+		outputLine.start();
+		
+		int bufferSize = MSADPCM_Decode.getBufferSize(body.length, channels, blockAlign, bitsPerSample);
+		
+		if (bufferSize % 2 != 0)
+			bufferSize+=1;
+		
+		byte outputBuffer[] = new byte[bufferSize];
+		
+		MSADPCM_Decode.decode(body, outputBuffer, body.length, channels, blockAlign);
+		
+		outputLine.write(outputBuffer, 0, outputBuffer.length);	
+		
+		outputLine.close();
+	}
+	
 }
