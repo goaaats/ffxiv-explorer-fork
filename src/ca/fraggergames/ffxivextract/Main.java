@@ -16,22 +16,25 @@ public class Main {
 
 	public static void main(String[] args) {		
 		
-		//Init the hash database
-		try {
-			HashDatabase.init();			
-			/*JOptionPane.showMessageDialog(null,
-					"Filelist.db is missing. No file or folder names will be shown... instead the file's hashes will be displayed.",
-				    "Hash DB Load Error",
-				    JOptionPane.ERROR_MESSAGE);		*/
-		} catch (ClassNotFoundException e1) {			
-			e1.printStackTrace();
-		}
-		
 		//Set to windows UI
 		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		} catch (Exception e) {
 			e.printStackTrace();
+		}
+		
+		//Init the hash database
+		try {
+			File dbFile = new File("./" + Constants.DBFILE_NAME);
+			if (dbFile.exists())
+				HashDatabase.init();
+			else
+				JOptionPane.showMessageDialog(null,
+						Constants.DBFILE_NAME + " is missing. No file or folder names will be shown... instead the file's hashes will be displayed.",
+					    "Hash DB Load Error",
+					    JOptionPane.ERROR_MESSAGE);		
+		} catch (ClassNotFoundException e1) {			
+			e1.printStackTrace();
 		}
 		
 		//Arguments
