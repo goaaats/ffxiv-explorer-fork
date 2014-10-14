@@ -21,7 +21,7 @@ Structure:
 
 0x000: Size of chunk (after this header) Int32;
 0x004: Unknown                           Short;
-
+	
 ~~~~~DEFINED IN EXH FILE~~~~~~~~~~~~
 
 ------Variables------

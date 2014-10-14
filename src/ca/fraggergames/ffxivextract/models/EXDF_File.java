@@ -8,16 +8,11 @@ import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 
-import ca.fraggergames.ffxivextract.helpers.FFXIV_String;
-
 public class EXDF_File {
 
-	private static String quoteCommaQuote = "\",\"";
-	private static String quoteNewLine = "\"\r\n";
+	private byte data[];
+	private byte entryOffsets[];
 	
-	public EXDF_Offset[] offsets;
-	public EXDF_Entry[] entries;
-
 	public EXDF_File(byte[] data) throws IOException {
 		loadEXDF(data);
 	}
@@ -33,99 +28,50 @@ public class EXDF_File {
 	}
 
 	private void loadEXDF(byte[] data) throws IOException {
-		ByteBuffer buffer = ByteBuffer.allocateDirect(data.length);
-		buffer.put(data);
-		buffer.rewind();
+		this.data = data;
+		ByteBuffer buffer = ByteBuffer.wrap(data);
 
 		try {
-			// EXDF Header
-			int signature = buffer.getInt();
-			if (signature != 0x45584446) // Should be EXDF or 0x45584446
-				throw new IOException("Not a EXDF");
-			int version = buffer.getInt(); // I assume, always 0x00200000
-			int offsetSize = buffer.getInt();
-			int dataSize = buffer.getInt();
-
-			buffer.rewind();
-			buffer.position(0x20);
-
-			// Offsets
-			offsets = new EXDF_Offset[offsetSize / 0x08];
-			for (int i = 0; i < offsets.length; i++) {
-				int x = buffer.getInt();
-				int offset = buffer.getInt();
-				offsets[i] = new EXDF_Offset(offset, x);
-			}
-
-			entries = new EXDF_Entry[offsets.length];
 			
-			for (int i = 0; i < offsets.length; i++) {
-				buffer.rewind();
-				buffer.position(offsets[i].offset);
-
-				byte dataEntry[] = new byte[i == offsets.length-1 ? data.length-offsets[i].offset : (offsets[i+1].offset-offsets[i].offset)];
-
-				buffer.get(dataEntry);
-				
-				entries[i] = new EXDF_Entry(dataEntry);
-			}
-			
-			// Data
-			/*
-			strings = new EXDF_StringEntry[offsetSize / 0x08];
-			for (int i = 0; i < offsets.length; i++) {
-				buffer.rewind();
-				buffer.position(offsets[i].offset);
-
-				FFXIV_String stringName;
-				FFXIV_String stringValue;
-
-				int entrySize = buffer.getInt();
-
-				buffer.getShort(); // Skip 2 bytes (marker?
-				buffer.getInt(); // Will be null
-				int nameSize = buffer.getInt();
-
-				int valueSize = entrySize - nameSize - 0x09;
-
-				// Get Name
-				if (nameSize > 0) {
-					byte[] string1 = new byte[nameSize];
-					buffer.get(string1);
-					stringName = new FFXIV_String(string1);
-				} else
-					stringName = new FFXIV_String("");
-
-				// Get Value
-				if (valueSize > 0) {
-					byte[] string2 = new byte[valueSize];
-					buffer.get(string2);
-					stringValue = new FFXIV_String(string2);
-				} else
-					stringValue = new FFXIV_String("");
-
-				strings[i] = new EXDF_StringEntry(stringName.toString(), stringValue.toString());
-			}*/
 		} 
+		
 		catch (BufferUnderflowException underflowException) {} 
 		catch (BufferOverflowException overflowException) {}
 	}
-
-	public String getCSV() {
-		/*
-		StringBuilder sb = new StringBuilder();
+	
+	public EXDF_Entry getEntry(int index)
+	{
+		if (index >= entryOffsets.length)
+			return null;
 		
-		for (int i = 0; i < strings.length; i++)
-		{
-			sb.append('\"');
-			sb.append(strings[i].name);
-			sb.append(quoteCommaQuote);			
-			sb.append(strings[i].value);
-			sb.append(quoteNewLine);			
+		return null;
+	}
+	
+	public static class EXDF_DataBlock{		
+		private byte data[];
+		
+		public EXDF_DataBlock(byte[] dataBlock){
+			this.data = dataBlock;
 		}
 		
-		return sb.toString();*/
-		return "";
+		public byte[] getData(){
+			return data;
+		}
+		
 	}
 
+	public static class EXDF_Offset{
+		public final int index;
+		public final int offset;
+		
+		public EXDF_Offset(int index, int offset)
+		{
+			this.index = index;
+			this.offset = offset;
+		}
+	}
+	
+	public static class EXDF_Entry{
+		
+	}
 }

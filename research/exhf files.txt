@@ -7,8 +7,8 @@ Current research on EXHF files
 0x000 Signature    			Int32; EXHF
 0x004 Version???  			Short; Always 0x03
 0x006 Number of Columns???	Short; Seems to be size of the first "page"? In Strings and Items it's 8 (4 byte index, 4 byte offset), in macroicon it's 4 (one entry is 4 bytes... a offset).
-0x008 Number of TABLE1      Short; In Item.EXH, the first groupings are 4 * 0x5E (which is here), in strings files... it's 4 * 0x02. Seems to be size of TABLE1. 
-0x00A Number of Pages?      Short; The size of the page table below.
+0x008 Number of Datasets    Short; Size of Dataset table; 
+0x00A Number of Pages       Short; The size of the page table below.
 0x00C Number of EXDs??? 	Short; Seems to be the number of EXD languages?. String files are usually 0x05, while settings/data are 0x01.
 0x00E Unknown   	   		Short;
 0x010 Unknown           	Int32; Always 0x010000.
