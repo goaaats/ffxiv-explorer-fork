@@ -4,23 +4,22 @@ Current research on EXDF files
 
 !!!NOTE: FILE IS IN BIG ENDIAN FORM!!!
 
-Structure:
-
-===HEADER=== (Header is 32 bytes, padded with 0's)
-0x000: Signature         Int32; "EXDF"
-0x004: Version???        Int32; Int32; Seems to be always 00 02 00 00  
-0x008: Offset Table Size Int32; Size of the offset table (below) 
-0x00C: Data Section Size Int32; Size of the string data section
-0x00F: Padding                  Up to 0x1F
+===HEADER=== (Header is 32 bytes, padded with 0s)
+0x000: Signature            Int32; "EXDF"
+0x004: Version              Short; Seems to be always 0x0002
+0x006: Unknown              Short;
+0x008: Offset Table Size    Int32; Size of the offset table (below) 
+0x00C: Data Section Size    Int32; Size of the string data section
+0x00F: Padding                   ;Up to 0x1F
 
 ===OFFSET TABLE=== (starts 0x1F(32) bytes from 0x00)
-0x000: Index             Int32; Strings is just 0-X, items is the item id.
-0x004: Offset            Int32; Points to a string segment in the data section  
+0x000: Index                Int32; These continue on from page to page, not starting at 0 in every file.
+0x004: Offset               Int32; Points to a string segment in the data section  
 
 ===DATA SECTION=== (starts after [Offset Table] or [Offset Table Size] * 0x08 + 0x1F) THIS IS MOST LIKELY DEFINED IN EXH file.
-
-0x000: Size of chunk (after this header) Int32;
-0x004: Unknown                           Short;
+0x000: Size of chunk        Int32; Starting after this header
+0x004: Unknown              Short;
+0x006: Data Chunk
 	
 ~~~~~DEFINED IN EXH FILE~~~~~~~~~~~~
 

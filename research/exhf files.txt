@@ -2,61 +2,34 @@
 
 Current research on EXHF files
 
-===EXHF Header===
+!!!NOTE: FILE IS IN BIG ENDIAN FORM!!!
 
+===EXHF Header===
 0x000 Signature    			Int32; EXHF
-0x004 Version???  			Short; Always 0x03
+0x004 Version	  			Short; Always 0x03
 0x006 Number of Columns???	Short; Seems to be size of the first "page"? In Strings and Items it's 8 (4 byte index, 4 byte offset), in macroicon it's 4 (one entry is 4 bytes... a offset).
 0x008 Number of Datasets    Short; Size of Dataset table; 
-0x00A Number of Pages       Short; The size of the page table below.
+0x00A Number of Pages       Short; The size of the Page table below.
 0x00C Number of EXDs??? 	Short; Seems to be the number of EXD languages?. String files are usually 0x05, while settings/data are 0x01.
 0x00E Unknown   	   		Short;
 0x010 Unknown           	Int32; Always 0x010000.
-0x014 Number of entries		Int32; How many total entries are in this file
-0x018 Padding?                   ; Padded to 0x1F
+0x014 Number of entries		Int32; How many total entries are in this file (spanning multiple EXDFs)
+0x018 Padding                    ; Padded to 0x1F
 
-===Dataset Table=== (Size of Number of TABLE1. Each entry most likely 4 bytes)
-
+===Dataset Table=== (Size of Number of Datasets)
 0x000 Data Type				Short; Most likely the data type. 2 - Byte, 3 - Byte, 4 - Short, 19 - String
 0x002 Data Offset			Short; Where in the data chunk this byte is (offset is after 01 and the chunk size variables).
 
-===Page Table=== (Size of num pages) 
-
-0x000 Page Entry          Int32; Page Entry Name. See Items Page entry names.
-0x004 Page Entry Size     Int32; Number of entries in a page. For example Item_0.exd has 500 entries... 0x1F4, with item_500.exd being the next file.  
+===Page Table=== (Size of Number of Pages) 
+0x000 Page Entry            Int32; Page Entry Name. See Items Page entry names.
+0x004 Page Entry Size       Int32; Number of entries in a page. For example Item_0.exd has 500 entries... 0x1F4, with item_500.exd being the next file.  
 
 ===SOMETHING HERE==== 
 
 Usually 01, 00, 02, 00, 03, 00, 04, 00, 05, 00
 
 -----------------------NOTES---------------------
-
-0, 2, 0, 2, 
-2, 2, 2, 2, 
-0, 0, 5, 3, 
-3, 1, 7, 3, 
-7, 3, 3, 3, 
-1, 1, 1, 1, 
-6, 3, 1, 1, 
-3, B, B, 5, 
-6, 4, 6, 3, 
-6, 4, 6, 3, 
-6, 4, 6, 4, 
-3, 6, 2, 6, 
-2, 6, 2 ,6, 
-2, 6, 2, 6, 
-2, 6, 6, 3, 
-3, 5, 5, 5, 
-3, 5, 5, 5, 
-5, 3, 5, 5, 
-1, 1, 1, 7, 
-7, 7, 1, 1, 
-1, 1, 1, 1, 
-1, 1, 1, 3, 
-7, 3, 3, 
-3, 3
-
--EXHF files seem to define data about the EXDF files. Specifically it seems the number of columns + sizes of these column is defined here.  
+  
 
 -The items.exd files span multiple pages. Start at items_0, then items__500, then items__1000, etc.
 
