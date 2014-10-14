@@ -15,10 +15,10 @@ Current research on EXHF files
 0x014 Number of entries		Int32; How many total entries are in this file
 0x018 Padding?                   ; Padded to 0x1F
 
-===TABLE 1=== (Size of Number of TABLE1. Each entry most likely 4 bytes)
+===Dataset Table=== (Size of Number of TABLE1. Each entry most likely 4 bytes)
 
-0x000 ????					Short; This number is usually small... under 0x7 most of the time, but got a 0xB once. Item Type?
-0x002 ????					Short; All over the place but usually under 0xFF. Offset maybe? Goes up by one sometimes... wouldn't be surprised if some data was a byte.
+0x000 Data Type				Short; Most likely the data type. 2 - Byte, 3 - Byte, 4 - Short, 19 - String
+0x002 Data Offset			Short; Where in the data chunk this byte is (offset is after 01 and the chunk size variables).
 
 ===Page Table=== (Size of num pages) 
 

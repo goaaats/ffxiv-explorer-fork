@@ -19,6 +19,9 @@ Structure:
 
 ===DATA SECTION=== (starts after [Offset Table] or [Offset Table Size] * 0x08 + 0x1F) THIS IS MOST LIKELY DEFINED IN EXH file.
 
+0x000: Size of chunk (after this header) Int32;
+0x004: Unknown                           Short;
+
 ~~~~~DEFINED IN EXH FILE~~~~~~~~~~~~
 
 ------Variables------

@@ -329,9 +329,11 @@ public class HashDatabase {
 	// This is used to read a list of paths from a string (IE: extracted from
 	// the exe or memory)
 	public static void loadPathsFromTXT(String path) throws SQLException {
+		int numAdded = 0;
 		try {
 			BufferedReader br = new BufferedReader(new FileReader(path));
 			String line;
+			
 			while ((line = br.readLine()) != null) {
 
 				String folder = line.substring(0, line.lastIndexOf('/'))
@@ -345,6 +347,9 @@ public class HashDatabase {
 				long folderHash = computeCRC(folder.getBytes(), 0,
 						folder.getBytes().length);
 
+				if (HashDatabase.getFileFullPathName(fileHash) != null)
+					continue;
+				
 				if (Constants.DEBUG)
 					System.out.println("Adding Entry: " + line);
 
@@ -366,12 +371,14 @@ public class HashDatabase {
 						System.err.println(e);
 					}
 				}
-
+				numAdded++;
 			}
 			br.close();
 		} catch (IOException e) {
 
 		}
+		
+		System.out.println("Added " + numAdded +" new entries.");
 	}
 
 	// This is a quick n dirty SQDB reader. Skip 0x800 bytes of header, the
