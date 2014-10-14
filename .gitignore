@@ -19,3 +19,4 @@ bin/
 *.o
 *.jar
 execonfig.xml
+*.cmp
