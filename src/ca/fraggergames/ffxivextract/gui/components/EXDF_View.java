@@ -443,6 +443,8 @@ public class EXDF_View extends JScrollPane implements ItemListener{
 					return ""+entry.getInt(dataset.offset);
 				case 0x00: //String; Points to offset from end of dataset part. Read until 0x0.
 					return entry.getString(exhFile.getDatasetChunkSize(), dataset.offset);
+				default:
+					return "?";
 				}
 			}
 			catch (Exception e)
@@ -450,7 +452,6 @@ public class EXDF_View extends JScrollPane implements ItemListener{
 				e.printStackTrace();
 				return "";
 			}
-			return "";
 		}
 
 	}
