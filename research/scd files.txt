@@ -4,7 +4,7 @@ Current research on SCD music/sound files. Sorry it's a mess.
 
 Structure (based on 0c0000.win32.index):
 
-===SEDBSSCF HEADER===
+===SEDB SSCF HEADER===
 0x00 Signature         Int64; SEDBSSCF
 0x08 Version           Int32; For FFXIV should be 3;
 0x0C ~~Unknown~~       Short; Seems to be always 0x0400

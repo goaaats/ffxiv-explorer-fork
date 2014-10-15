@@ -68,7 +68,7 @@ public class ExplorerPanel_View extends JScrollPane {
 			
 			for (int j = 0; j < fakefolder.getFiles().length; j++)
 			{
-				
+				Arrays.sort(fakefolder.getFiles(), fileComparator);
 				root.add(new DefaultMutableTreeNode(fakefolder.getFiles()[j]));	
 			}
 			

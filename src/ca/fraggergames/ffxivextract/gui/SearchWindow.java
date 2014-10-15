@@ -200,11 +200,11 @@ public class SearchWindow extends JFrame {
 									case 1:
 										lastFolder = i+1;
 										lastFile = j+1;
-										searchCallback.onSearchChosen(fi.getOffset());
+										searchCallback.onSearchChosen(fi);
 										this.setVisible(false);										
 										return;
 									case 2:
-										searchCallback.onSearchChosen(-1);
+										searchCallback.onSearchChosen(null);
 										this.dispose();
 										return;
 									}
@@ -230,7 +230,7 @@ public class SearchWindow extends JFrame {
 				"Search completed.",
 			    "Search Finished",
 			    JOptionPane.QUESTION_MESSAGE);
-		searchCallback.onSearchChosen(-1);
+		searchCallback.onSearchChosen(null);
 		this.dispose();
 	}
 
@@ -243,7 +243,7 @@ public class SearchWindow extends JFrame {
 	}
 	
 	public interface ISearchComplete{
-		public void onSearchChosen(long offset);		
+		public void onSearchChosen(SqPack_File fi);		
 	}
 
 	

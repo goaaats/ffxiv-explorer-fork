@@ -13,10 +13,11 @@ import ca.fraggergames.ffxivextract.helpers.FFXIV_String;
 
 public class EXHF_File {	
 
-	int numEntries;
-	
 	private EXDF_Dataset datasetTable[];
 	private EXDF_Page pageTable[];
+	private int datasetChunkSize = 0;
+	private int numLangs = 0;
+	private int numEntries = 0;
 	
 	public EXHF_File(byte[] data) throws IOException {
 		loadEXHF(data);
@@ -41,7 +42,7 @@ public class EXHF_File {
 			//Header
 			int magicNum = buffer.getInt();
 			
-			if (magicNum != 0x45574846) //EXHF
+			if (magicNum != 0x45584846) //EXHF
 				throw new IOException("Not a EXHF");
 			
 			int version = buffer.getShort();
@@ -49,9 +50,10 @@ public class EXHF_File {
 			if (version != 0x3)
 				throw new IOException("Not a EXHF");
 			
-			buffer.getShort();
+			datasetChunkSize = buffer.getShort();
 			int numDataSetTable = buffer.getShort();
 			int numPageTable = buffer.getShort();
+			numLangs = buffer.getShort();
 			buffer.getShort();
 			buffer.getShort();
 			buffer.getShort();
@@ -96,5 +98,29 @@ public class EXHF_File {
 			this.numEntries = numEntries;
 		}
 	}
-	
+
+	public int getNumPages() {
+		return pageTable.length;
+	}
+
+	public int getNumLanguages() {
+		return numLangs;
+	}
+
+	public EXDF_Page[] getPageTable() {
+		return pageTable;
+	}
+
+	public int getNumEntries() {
+		return numEntries;
+	}
+
+	public EXDF_Dataset[] getDatasetTable() {
+		return datasetTable;
+	}
+
+	public int getDatasetChunkSize()
+	{
+		return datasetChunkSize;
+	}
 }

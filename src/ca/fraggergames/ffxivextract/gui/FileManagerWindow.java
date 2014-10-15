@@ -36,6 +36,7 @@ import javax.swing.filechooser.FileFilter;
 import ca.fraggergames.ffxivextract.Constants;
 import ca.fraggergames.ffxivextract.Strings;
 import ca.fraggergames.ffxivextract.gui.SearchWindow.ISearchComplete;
+import ca.fraggergames.ffxivextract.gui.components.EXDF_View;
 import ca.fraggergames.ffxivextract.gui.components.ExplorerPanel_View;
 import ca.fraggergames.ffxivextract.gui.components.Hex_View;
 import ca.fraggergames.ffxivextract.gui.components.Image_View;
@@ -46,6 +47,7 @@ import ca.fraggergames.ffxivextract.helpers.LERandomAccessFile;
 import ca.fraggergames.ffxivextract.helpers.LuaDec;
 import ca.fraggergames.ffxivextract.helpers.OggVorbisPlayer;
 import ca.fraggergames.ffxivextract.models.EXDF_File;
+import ca.fraggergames.ffxivextract.models.EXHF_File;
 import ca.fraggergames.ffxivextract.models.SCD_File;
 import ca.fraggergames.ffxivextract.models.SCD_File.SCD_Sound_Info;
 import ca.fraggergames.ffxivextract.models.SqPack_DatFile;
@@ -96,7 +98,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 		
 		setupMenu();
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		this.setSize(900, 600);
+		this.setSize(1200, 800);
 		this.setTitle(title);
 		ClassLoader cldr = this.getClass().getClassLoader();
 		URL imageURL = getClass().getResource("/res/frameicon.png");
@@ -446,18 +448,22 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 				lblContentTypeValue.setText("Content Type Error");
 			}
 		}
-		
-		try {			
-			byte[] data = currentDatFile.extractFile(fileTree.getSelectedFiles().get(0).getOffset(), null);									
-			openData(currentDatFile.getContentType(fileTree.getSelectedFiles().get(0).getOffset()),data);
-		} catch (IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
+												
+		openData(fileTree.getSelectedFiles().get(0));
 	}	
 	
-	private void openData(int contentType, byte[] data) {
+	private void openData(SqPack_File file) {
 		JTabbedPane tabs = new JTabbedPane();
+		
+		int contentType = -1; 
+		byte data[] = null;		
+		
+		try {
+			data = currentDatFile.extractFile(file.dataoffset, null);
+			currentDatFile.getContentType(file.getOffset());
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
 		
 		if (data == null)
 		{				
@@ -467,10 +473,27 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 			return;
 		}
 					
-		if (data.length >= 3 && data[0] == 'E' && data[1] == 'X' && data[2] == 'D' && data[3] == 'F')
+		if (data.length >= 3 && data[0] == 'E' && data[1] == 'X' && data[2] == 'H' && data[3] == 'F')
 		{								
-			//EXDF_View exdfComponent = new EXDF_View(new EXDF_File(data));
-			//tabs.addTab("EXDF File", exdfComponent);
+			EXDF_View exhfComponent;
+			try {
+				exhfComponent = new EXDF_View(currentIndexFile, currentDatFile, HashDatabase.getFolder(file.getId2()) + "/" + file.getName(), new EXHF_File(data));
+				tabs.addTab("EXDF File", exhfComponent);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		else if (data.length >= 3 && data[0] == 'E' && data[1] == 'X' && data[2] == 'D' && data[3] == 'F')
+		{								
+			EXDF_View exdfComponent;
+			try {
+				exdfComponent = new EXDF_View(currentIndexFile, currentDatFile, HashDatabase.getFolder(file.getId2()) + "/" + file.getName(), new EXDF_File(data));
+				tabs.addTab("EXHF File", exdfComponent);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}			
 		}
 		else if (data.length >= 8 && data[0] == 'S' && data[1] == 'E' && data[2] == 'D' && data[3] == 'B' && data[4] == 'S' && data[5] == 'S' && data[6] == 'C' && data[7] == 'F')
 		{								
@@ -593,7 +616,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 					if (extension.equals(".exd") && doConvert)
 					{
 						EXDF_File file = new EXDF_File(data);
-						dataToSave = file.getCSV().getBytes();
+						//dataToSave = file.getCSV().getBytes();
 						extension = ".csv";
 					}
 					else if (extension.equals(".scd") && doConvert)
@@ -680,24 +703,18 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 
 
 	@Override
-	public void onSearchChosen(long offset) {
+	public void onSearchChosen(SqPack_File file) {
 		
-		if (offset == -1)
+		if (file == null)
 		{
 			search_searchAgain.setEnabled(false);
 			return;
 		}
 		
-		byte[] data;
-		try {
-			data = currentDatFile.extractFile(offset, null);
-			openData(currentDatFile.getContentType(offset),data);
-			fileTree.select(offset);
-			search_searchAgain.setEnabled(true);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		openData(file);
+		fileTree.select(file.getOffset());
+		search_searchAgain.setEnabled(true);
+
 	}
 
 	@Override
