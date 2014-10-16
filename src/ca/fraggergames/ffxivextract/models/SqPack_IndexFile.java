@@ -225,7 +225,7 @@ public class SqPack_IndexFile {
 			this.dataoffset = offset;
 			this.name = HashDatabase.getFileName(id);
 			if (this.name == null)
-				this.name = String.format("%x", id);
+				this.name = String.format("~%x", id);
 		}
 		
 		public int getId()

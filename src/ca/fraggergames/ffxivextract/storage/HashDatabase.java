@@ -375,7 +375,7 @@ public class HashDatabase {
 			}
 			br.close();
 		} catch (IOException e) {
-
+			e.printStackTrace();
 		}
 		
 		System.out.println("Added " + numAdded +" new entries.");

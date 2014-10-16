@@ -3,12 +3,16 @@ package ca.fraggergames.ffxivextract;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.sql.SQLException;
 
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 
 import ca.fraggergames.ffxivextract.gui.FileManagerWindow;
+import ca.fraggergames.ffxivextract.helpers.EXD_Searcher;
 import ca.fraggergames.ffxivextract.helpers.PathSearcher;
+import ca.fraggergames.ffxivextract.models.SqPack_DatFile;
+import ca.fraggergames.ffxivextract.models.SqPack_IndexFile;
 import ca.fraggergames.ffxivextract.storage.HashDatabase;
 import ca.fraggergames.ffxivextract.storage.PathHashList;
 
@@ -36,6 +40,29 @@ public class Main {
 		} catch (ClassNotFoundException e1) {			
 			e1.printStackTrace();
 		}
+		
+		EXD_Searcher.createEXDFiles("C:\\Users\\Filip\\Desktop\\blah.txt");
+		
+
+		try {
+			HashDatabase.loadPathsFromTXT("C:\\Users\\Filip\\Desktop\\blah.txtout.txt");
+			//return;
+		} catch (SQLException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		
+		/*
+		SqPack_IndexFile index;
+		try {
+			index = new SqPack_IndexFile("E:\\Program Files (x86)\\SquareEnix\\FINAL FANTASY XIV - A Realm Reborn\\game\\sqpack\\ffxiv\\0a0000.win32.index");
+		
+		SqPack_DatFile dat = new SqPack_DatFile("E:\\Program Files (x86)\\SquareEnix\\FINAL FANTASY XIV - A Realm Reborn\\game\\sqpack\\ffxiv\\0a0000.win32.dat0");
+		EXD_Searcher.saveEXDNames(index, dat);
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}*/
 		
 		//Arguments
 		if (args.length>0)

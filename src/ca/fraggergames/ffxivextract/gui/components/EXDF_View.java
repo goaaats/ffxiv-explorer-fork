@@ -70,6 +70,8 @@ public class EXDF_View extends JScrollPane implements ItemListener{
 		this.currentIndex = currentIndex;
 		this.currentDat = currentDat;
 		
+		fullPath = fullPath.toLowerCase();
+		
 		String exhName;
 		
 		//If the name is unknown, don't bother
@@ -149,6 +151,8 @@ public class EXDF_View extends JScrollPane implements ItemListener{
 	public EXDF_View(SqPack_IndexFile currentIndex, SqPack_DatFile currentDat, String fullPath, EXHF_File file) {		
 		
 		this();
+		
+		fullPath = fullPath.toLowerCase();
 		
 		this.currentIndex = currentIndex;
 		this.currentDat = currentDat;
