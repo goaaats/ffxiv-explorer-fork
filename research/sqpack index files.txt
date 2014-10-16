@@ -13,10 +13,12 @@ Current research on SqPack Index files
 
 ===SEGMENT HEADER=== (starts after SQPACK HEADER)
 0x000: Header Length    Int32;
-0x004: Data Archive #   Int32; This seems to be 0x01 sometimes, however it was 0x02 in 040000.win32.index, a pack with 2 dat files.
-0x008: Segment Offset   Int32; Offset to the segment
-0x00b: Segment Size     Int32; How large a segment is
-0x010: SHA-1 of Segment 20B;   Hash of the segment... [Segment Offset] to [Segment Offset] + [Segment Size]
+
+Each Segment follows this (starting right after header length):
+0x000: Unknown          Int32; This seems to be 0x01 sometimes, however it was 0x02 in 040000.win32.index, a pack with 2 dat files.
+0x004: Segment Offset   Int32; Offset to the segment
+0x008: Segment Size     Int32; How large a segment is
+0x00c: SHA-1 of Segment 20B;   Hash of the segment... [Segment Offset] to [Segment Offset] + [Segment Size]
 
 Notes: 
 -Segment 1 is usually files, Segment 2 is unknown, Segment 3 is folders.
