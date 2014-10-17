@@ -211,6 +211,10 @@ public class SqPack_IndexFile {
 			return name;
 		}
 		
+		@Override
+		public String toString() {
+			return name;
+		}
 	}
 	
 	public static class SqPack_File {
@@ -243,6 +247,11 @@ public class SqPack_IndexFile {
 		}
 		
 		public String getName(){
+			return name;
+		}
+		
+		@Override
+		public String toString() {
 			return name;
 		}
 	}

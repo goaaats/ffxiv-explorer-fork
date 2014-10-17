@@ -79,14 +79,15 @@ public class EXDF_View extends JScrollPane implements ItemListener{
 		{
 			setupUI_noExhFile();
 			return;
-		}
+		}		
 		
 		//Create the path to EXH				
 		exhName = fullPath;
-		exhName = exhName.replace(".exd", "");		
-		exhName = exhName.substring(0, exhName.indexOf('_'));
-		exhName = exhName.substring(exhName.lastIndexOf("/")+1, exhName.length());
-		exhName += ".exh";
+		exhName = exhName.replace("_en.exd", "");
+		exhName = exhName.replace("_ja.exd", "");
+		exhName = exhName.replace("_de.exd", "");
+		exhName = exhName.replace("_fr.exd", "");
+		exhName = exhName.substring(0, exhName.lastIndexOf("_")) +".exh";
 		
 		//Find this thing
 		String folderName = fullPath.substring(0, fullPath.lastIndexOf("/"));
@@ -322,6 +323,15 @@ public class EXDF_View extends JScrollPane implements ItemListener{
 					if (currentIndex.getPackFolders()[folderIndex].getFiles()[j2].getId() == fileHash)
 					{
 						try {
+							
+							//Hey we accidently found something
+							if (HashDatabase.getFileName(fileHash) == null){
+								System.out.println("Adding: " + formattedExdName);
+								if (numLanguages > 1)					
+									HashDatabase.addPathToDB(String.format(exdName, exhFile.getPageTable()[i].pageNum, "_"+langs[j]));
+								else
+									HashDatabase.addPathToDB(String.format(exdName, exhFile.getPageTable()[i].pageNum, ""));
+							}
 							byte[] data = currentDat.extractFile(currentIndex.getPackFolders()[folderIndex].getFiles()[j2].getOffset(), null);
 							exdFile[(i*(numLanguages-1))+j] = new EXDF_File(data);
 						} catch (IOException e) {
@@ -392,7 +402,7 @@ public class EXDF_View extends JScrollPane implements ItemListener{
 			if (column == 0)
 				return "Index";
 			else
-				return (column-1) + " ["+String.format("0x%x",exhFile.getDatasetTable()[column-1].type)+"]";
+				return (column-1) + " ["+String.format("0x%x",exhFile.getDatasetTable()[column-1].type)+"]" + "["+String.format("0x%x",exhFile.getDatasetTable()[column-1].offset)+"]";
 		}
 
 		@Override
@@ -402,6 +412,8 @@ public class EXDF_View extends JScrollPane implements ItemListener{
 					return ""+rowIndex;
 				
 				int page = 0;
+				
+				rowIndex += exhFile.getPageTable()[0].pageNum;
 				
 				//Find Page
 				if (numPages != 1)
@@ -440,11 +452,12 @@ public class EXDF_View extends JScrollPane implements ItemListener{
 					return ""+entry.getShort(dataset.offset);
 				case 0x03:				
 				case 0x02:
-					return ""+entry.getByte(dataset.offset);
-				case 0x19:
+					return ""+entry.getByte(dataset.offset);				
 				case 0x07:
-				case 0x06:
+				case 0x06: //Icon Id
 					return ""+entry.getInt(dataset.offset);
+				case 0x01:
+					return ""+entry.getByte(dataset.offset);
 				case 0x00: //String; Points to offset from end of dataset part. Read until 0x0.
 					return entry.getString(exhFile.getDatasetChunkSize(), dataset.offset);
 				default:
@@ -465,6 +478,20 @@ public class EXDF_View extends JScrollPane implements ItemListener{
 		if (event.getStateChange() == ItemEvent.SELECTED) {
 	          ((EXDTableModel)table.getModel()).fireTableDataChanged();
 	       }
+	}
+
+	public boolean isSame(String name) {
+		if (exhName == null || name == null)
+			return false;
+		if (name.contains(".exh"))
+			return exhName.equals(name);
+		String checkString = name; 
+		checkString = checkString.replace("_en.exd", "");
+		checkString = checkString.replace("_ja.exd", "");
+		checkString = checkString.replace("_de.exd", "");
+		checkString = checkString.replace("_fr.exd", "");
+		checkString = checkString.substring(0, checkString.lastIndexOf("_")) +".exh";
+		return exhName.equals(checkString);			
 	}
 	
 }

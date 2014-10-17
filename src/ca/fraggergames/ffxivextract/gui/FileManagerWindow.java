@@ -79,7 +79,8 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 	JLabel lblHashValue ;
 	JLabel lblContentTypeValue;
 	Hex_View hexView = new Hex_View(16);
-
+	EXDF_View exhfComponent;
+	
 	//MENU
 	JMenuItem file_Extract;
 	JMenuItem file_ExtractRaw;
@@ -474,11 +475,11 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 		}
 					
 		if (data.length >= 3 && data[0] == 'E' && data[1] == 'X' && data[2] == 'H' && data[3] == 'F')
-		{								
-			EXDF_View exhfComponent;
+		{							
 			try {
-				exhfComponent = new EXDF_View(currentIndexFile, currentDatFile, HashDatabase.getFolder(file.getId2()) + "/" + file.getName(), new EXHF_File(data));
-				tabs.addTab("EXDF File", exhfComponent);
+				if (exhfComponent == null || !exhfComponent.isSame(file.getName()))				
+					exhfComponent = new EXDF_View(currentIndexFile, currentDatFile, HashDatabase.getFolder(file.getId2()) + "/" + file.getName(), new EXHF_File(data));				
+				tabs.addTab("EXDF File", exhfComponent);			
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -486,10 +487,11 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 		}
 		else if (data.length >= 3 && data[0] == 'E' && data[1] == 'X' && data[2] == 'D' && data[3] == 'F')
 		{								
-			EXDF_View exdfComponent;
 			try {
-				exdfComponent = new EXDF_View(currentIndexFile, currentDatFile, HashDatabase.getFolder(file.getId2()) + "/" + file.getName(), new EXDF_File(data));
-				tabs.addTab("EXHF File", exdfComponent);
+				if (exhfComponent == null || !exhfComponent.isSame(file.getName()))				
+					exhfComponent = new EXDF_View(currentIndexFile, currentDatFile, HashDatabase.getFolder(file.getId2()) + "/" + file.getName(), new EXDF_File(data));
+				tabs.addTab("EXHF File", exhfComponent);
+				
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

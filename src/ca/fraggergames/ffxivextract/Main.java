@@ -41,17 +41,17 @@ public class Main {
 			e1.printStackTrace();
 		}
 		
-		EXD_Searcher.createEXDFiles("C:\\Users\\Filip\\Desktop\\blah.txt");
+		//EXD_Searcher.createEXDFiles("E:\\Coding\\workspace3\\FFXIV_Extractor\\exddump2.txt");
 		
-
+/*
 		try {
-			HashDatabase.loadPathsFromTXT("C:\\Users\\Filip\\Desktop\\blah.txtout.txt");
+			HashDatabase.loadPathsFromTXT("E:\\Coding\\workspace3\\FFXIV_Extractor\\exddump2.txtout.txt");
 			//return;
 		} catch (SQLException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-		
+	*/
 		/*
 		SqPack_IndexFile index;
 		try {
@@ -63,6 +63,8 @@ public class Main {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}*/
+		
+		//EXD_Searcher.saveEXL();
 		
 		//Arguments
 		if (args.length>0)

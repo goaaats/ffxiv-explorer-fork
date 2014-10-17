@@ -334,6 +334,10 @@ public class HashDatabase {
 			BufferedReader br = new BufferedReader(new FileReader(path));
 			String line;
 			
+			Connection connection = DriverManager
+					.getConnection("jdbc:sqlite:./hashlist.db");
+			connection.setAutoCommit(false);
+			
 			while ((line = br.readLine()) != null) {
 
 				String folder = line.substring(0, line.lastIndexOf('/'))
@@ -353,27 +357,25 @@ public class HashDatabase {
 				if (Constants.DEBUG)
 					System.out.println("Adding Entry: " + line);
 
-				Connection connection = null;
-				try{
-					connection = DriverManager
-							.getConnection("jdbc:sqlite:./hashlist.db");
+				
+				try{					
 					Statement statement = connection.createStatement();
 					statement.setQueryTimeout(30); // set timeout to 30 sec.
 					statement.executeUpdate("insert or ignore into folders values("+ folderHash + ", '" + folder + "')");
 					statement.executeUpdate("insert or ignore into fullpaths values("+ fileHash + ", '" + line + "')");
 				} catch (SQLException e) {
 					System.err.println(e.getMessage());
-				} finally {
-					try {
-						if (connection != null)
-							connection.close();
-					} catch (SQLException e) {
-						System.err.println(e);
-					}
 				}
 				numAdded++;
 			}
-			br.close();
+			connection.commit();
+			try {
+				if (connection != null)
+					connection.close();
+			} catch (SQLException e) {
+				System.err.println(e);
+			}
+			br.close();			
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -538,7 +540,7 @@ public class HashDatabase {
 		if (fullPath == null)
 			return null;
 		return fullPath.substring(fullPath.lastIndexOf('/') + 1,
-				fullPath.length());
+				fullPath.length()).toLowerCase();
 	}
 
 	public static String getFileFullPathName(long hash) {
