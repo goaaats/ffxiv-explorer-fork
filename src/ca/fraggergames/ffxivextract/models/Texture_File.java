@@ -1,10 +1,14 @@
 package ca.fraggergames.ffxivextract.models;
 
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.security.InvalidParameterException;
 import java.util.Map;
+
+import javax.imageio.ImageIO;
 
 import ca.fraggergames.ffxivextract.helpers.ImageDecoding;
 import ca.fraggergames.ffxivextract.helpers.ImageDecoding.ImageDecodingException;
@@ -117,4 +121,12 @@ public class Texture_File {
 				+ compressionType);
 	}
 
+	public byte[] getImage(String type) throws IOException, ImageDecodingException
+	{
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		ImageIO.write(decode(null), "png", baos);
+		byte[] bytes = baos.toByteArray();
+		return bytes;		
+	}
+	
 }
