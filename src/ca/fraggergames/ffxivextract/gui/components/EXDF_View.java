@@ -115,7 +115,7 @@ public class EXDF_View extends JScrollPane implements ItemListener{
 			if (currentIndex.getPackFolders()[folderIndex].getFiles()[j].getId() == fullPathHash)
 			{
 				try {
-					byte[] data = currentDat.extractFile(currentIndex.getPackFolders()[folderIndex].getFiles()[j].getOffset(), 0,  null);
+					byte[] data = currentDat.extractFile(currentIndex.getPackFolders()[folderIndex].getFiles()[j].getOffset(),  null);
 					exhFile = new EXHF_File(data);
 					break;
 				} catch (IOException e) {
@@ -332,7 +332,7 @@ public class EXDF_View extends JScrollPane implements ItemListener{
 								else
 									HashDatabase.addPathToDB(String.format(exdName, exhFile.getPageTable()[i].pageNum, ""));
 							}
-							byte[] data = currentDat.extractFile(currentIndex.getPackFolders()[folderIndex].getFiles()[j2].getOffset(), 0, null);
+							byte[] data = currentDat.extractFile(currentIndex.getPackFolders()[folderIndex].getFiles()[j2].getOffset(), null);
 							exdFile[(i*(numLanguages-1))+j] = new EXDF_File(data);
 						} catch (IOException e) {
 							e.printStackTrace();
