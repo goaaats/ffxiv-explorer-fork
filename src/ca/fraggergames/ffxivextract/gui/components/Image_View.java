@@ -1,22 +1,28 @@
 package ca.fraggergames.ffxivextract.gui.components;
 
+import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 import javax.swing.BoxLayout;
 import javax.swing.JLabel;
+import javax.swing.SwingConstants;
+
 import java.awt.BorderLayout;
 import javax.swing.border.TitledBorder;
 import javax.swing.JScrollPane;
 import javax.swing.JList;
 import javax.swing.AbstractListModel;
 
+import ca.fraggergames.ffxivextract.helpers.ImageDecoding.ImageDecodingException;
 import ca.fraggergames.ffxivextract.models.Texture_File;
 
 import java.awt.FlowLayout;
 import java.awt.Dimension;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
 
 public class Image_View extends JPanel {
 
-	JPanel imgPreviewCanvas;
+	NavigableImagePanel imgPreviewCanvas;
 
 	public Image_View(Texture_File texture) {
 		setLayout(new BorderLayout(0, 0));
@@ -33,7 +39,7 @@ public class Image_View extends JPanel {
 		list.setAutoscrolls(false);
 		list.setEnabled(false);
 		
-		final String[] values = new String[] {"Compression Type: " + texture.compressionType, "Width: " + texture.width, "Height: " + texture.height};
+		final String[] values = new String[] {"Compression Type: " + texture.compressionType, "Width: " + texture.uncompressedWidth, "Height: " + texture.uncompressedHeight};
 		
 		list.setModel(new AbstractListModel() {
 			
@@ -52,10 +58,19 @@ public class Image_View extends JPanel {
 		pnlTexPreview.setLayout(new BoxLayout(pnlTexPreview, BoxLayout.X_AXIS));
 		
 		JScrollPane scrollPane = new JScrollPane();
-		pnlTexPreview.add(scrollPane);
+		pnlTexPreview.add(scrollPane);		
 		
-		imgPreviewCanvas = new JPanel();
-		scrollPane.setViewportView(imgPreviewCanvas);
+		try {
+			BufferedImage preview = texture.decode(null);
+			imgPreviewCanvas = new NavigableImagePanel(preview);		
+			scrollPane.setViewportView(imgPreviewCanvas);
+		} catch (ImageDecodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
 	}
 	

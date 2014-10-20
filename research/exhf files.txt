@@ -27,28 +27,9 @@ Current research on EXHF files
 ===SOMETHING HERE==== 
 
 Usually 01, 00, 02, 00, 03, 00, 04, 00, 05, 00
+Has something to do with strings?
 
 -----------------------NOTES---------------------
   
-
 -The items.exd files span multiple pages. Start at items_0, then items__500, then items__1000, etc.
-
--Item Page Entry Names
-0
-500
-1000
-1500
-2000
-2500
-3000
-3500
-4000
-4500
-5000
-5500
-6000
-6221 --STOPS HERE... hmmm
-6231
-
--In items.exh, the table seems to be of either 2 or 4 byte entries.
 -Strings and item.exh files end with 0x100, 0x200, 0x300, 0x400, 0x500

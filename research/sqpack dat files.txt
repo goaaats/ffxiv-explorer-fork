@@ -28,7 +28,7 @@ Current research on SqPack Dat files
 
 ~~~~~~~~~~~~~~
 
-===TYPE-2 ENTRY HEADER=== (Minimum size is 0x80) 
+===DATA ENTRY HEADER=== (Minimum size is 0x80) 
 0x000: Header Length     Int32; 
 0x004: Content Type      Int32; 0x02 - Binary, 0x03 - Model, 0x04 - Texture
 0x008: Uncompressed Size Int32;
@@ -36,29 +36,21 @@ Current research on SqPack Dat files
 0x010: Block Buffer Size Int32; Buffer size need to read largest block
 0x014: Num Blocks        Int32;  
 
-===BLOCK TABLE=== (Size of Num blocks)
+===TYPE-2 BLOCK TABLE=== (Size of Num blocks)
 0x000: Offset                  Int32; From end of this header (Check [File Entry Offset] + [Header Length])
 0x004: Block Size              Short; Total Block Size, from beginning of header to end of padding.
 0x006: Decompressed Data Size  Short;
 
-~~~~~~~~~~~~~~
+===TYPE-3 BLOCK TABLE=== (Size of Num blocks)
 
-===TYPE-4 ENTRY HEADER=== 
-0x000: Num Indexes?         Int32; Seems to be always 1. From other Data Extractor it seems you can have multiples? 
-0x000: Size of Extra header Int32; Size of the header below.
-0x000: Size of block table  Int32; From the first block, to the last blow + length.
-0x000: ~~~Unkown~~~         Int32; Seems to be similar to the block table size.
-0x000: NULL
-0x000: Num Block Lengths    Int32; Number of lengths in the block table below.  ;
-0x000: Block Length Table   Short; 2 byte values, size of each block. 
+===TYPE-4 BLOCK TABLE=== (Size of Num blocks)
+0x000: Frame Offset				Int32; Starting block for this frame.
+0x004: Frame Size				Int32; This is the total size of the whole frame.
+0x008: Unknown				    Int32;
+0x00C: Frame Blocksize Offset  	Int32; Offset starting from the end of the block table, to the first size.
+0x010: Frame Blocksize Count	Int32; How many blocks this frame contains.
 
-
-Different block found:
-OFFSET
-SIZE
-UNKNOWN
-INDEX
-UNKNOWN (3/1)
+0x000: Frame Block Size         Short; The size of the block in this frame. 
 
 ~~~~~~~~~~~~~~
 

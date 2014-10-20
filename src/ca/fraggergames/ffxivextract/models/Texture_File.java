@@ -1,35 +1,120 @@
 package ca.fraggergames.ffxivextract.models;
 
+import java.awt.image.BufferedImage;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.security.InvalidParameterException;
+import java.util.Map;
+
+import ca.fraggergames.ffxivextract.helpers.ImageDecoding;
+import ca.fraggergames.ffxivextract.helpers.ImageDecoding.ImageDecodingException;
 
 public class Texture_File {
 
-	public int compressionType;
-	
-	public int numMipMaps;
-	
-	public int width;
-	public int height;
-	
-	public int dataStart;
-	
-	public int compressedWidth;
-	public int compressedHeight;
-		
+	final public int compressionType;
+
+	final public int numMipMaps;
+
+	final public int dataStart;
+
+	final public int uncompressedWidth;
+	final public int uncompressedHeight;
+
+	final public byte data[];
+
 	public Texture_File(byte data[]) {
-		
+
+		this.data = data;
+
 		ByteBuffer bb = ByteBuffer.wrap(data);
 		bb.order(ByteOrder.LITTLE_ENDIAN);
-		bb.getInt(); //Uknown
+		bb.getInt(); // Uknown
 		compressionType = bb.get();
-		numMipMaps = bb.get();
+		numMipMaps = bb.get();		
 		bb.getShort();
-		width = bb.getShort();
-		height = bb.getShort();
-		dataStart = bb.getInt();
-		compressedWidth = bb.getInt();
-		compressedHeight = bb.getInt();
+		uncompressedWidth = bb.getShort();
+		uncompressedHeight = bb.getShort();
+		bb.getShort();
+		bb.getShort();
+		
+		bb.position(0x1c);
+		dataStart = bb.getInt(); 
+	}
+
+	public final BufferedImage decode(
+			final Map<String, Object> parameters) throws ImageDecodingException {
+
+		if (data == null) {
+			throw new NullPointerException("Data is null");
+		}
+		switch (compressionType) {
+		case 32: {
+			return ImageDecoding.decodeImageDX1(data,
+					dataStart,
+					uncompressedWidth,
+					uncompressedHeight,
+					uncompressedWidth / 4,
+					uncompressedHeight / 4);
+		}
+		case 48: {
+			return ImageDecoding.decodeImageRaw(data,
+					dataStart,
+					uncompressedWidth,
+					uncompressedHeight, 0, 0);
+		}
+		case 49: {
+			return ImageDecoding.decodeImageDX5(data,
+					dataStart,
+					uncompressedWidth,
+					uncompressedHeight,
+					uncompressedWidth / 4,
+					uncompressedHeight / 4);
+		}
+		case 64: {
+			if (parameters != null) {
+				if (parameters.containsKey("4444.channel")) {
+					Object q = parameters.get("4444.channel");
+					return ImageDecoding.decodeImage4444split1channel(data,
+							dataStart,
+							uncompressedWidth,
+							uncompressedHeight, 0, 0,
+							(q instanceof Integer ? (Integer) q : 0));
+				}
+				if (parameters.containsKey("1008.4444.mergedSplit")
+						&& parameters.get("1008.4444.mergedSplit").equals(
+								ImageDecoding.ON_VALUE)) {
+					return ImageDecoding.decodeImage4444split(data,
+							dataStart,
+							uncompressedWidth,
+							uncompressedHeight, 0, 0);
+				}
+			}
+			return ImageDecoding.decodeImage4444(data,
+					dataStart,
+					uncompressedWidth,
+					uncompressedHeight, 0, 0);
+		}
+		case 65: {
+			return ImageDecoding.decodeImage5551(data,
+					dataStart,
+					uncompressedWidth,
+					uncompressedHeight, 0, 0, parameters);
+		}
+		case 80: {
+			return ImageDecoding.decodeImageRGBA(data,
+					dataStart,
+					uncompressedWidth,
+					uncompressedHeight, 0, 0);
+		}
+		case 81: {
+			return ImageDecoding.decodeImageRGBA(data,
+					dataStart,
+					uncompressedWidth,
+					uncompressedHeight, 0, 0);
+		}
+		}
+		throw new ImageDecodingException("Unsupported format: "
+				+ compressionType);
 	}
 
 }

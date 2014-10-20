@@ -115,7 +115,7 @@ public class EXDF_View extends JScrollPane implements ItemListener{
 			if (currentIndex.getPackFolders()[folderIndex].getFiles()[j].getId() == fullPathHash)
 			{
 				try {
-					byte[] data = currentDat.extractFile(currentIndex.getPackFolders()[folderIndex].getFiles()[j].getOffset(), null);
+					byte[] data = currentDat.extractFile(currentIndex.getPackFolders()[folderIndex].getFiles()[j].getOffset(), 0,  null);
 					exhFile = new EXHF_File(data);
 					break;
 				} catch (IOException e) {
@@ -332,7 +332,7 @@ public class EXDF_View extends JScrollPane implements ItemListener{
 								else
 									HashDatabase.addPathToDB(String.format(exdName, exhFile.getPageTable()[i].pageNum, ""));
 							}
-							byte[] data = currentDat.extractFile(currentIndex.getPackFolders()[folderIndex].getFiles()[j2].getOffset(), null);
+							byte[] data = currentDat.extractFile(currentIndex.getPackFolders()[folderIndex].getFiles()[j2].getOffset(), 0, null);
 							exdFile[(i*(numLanguages-1))+j] = new EXDF_File(data);
 						} catch (IOException e) {
 							e.printStackTrace();
@@ -447,19 +447,28 @@ public class EXDF_View extends JScrollPane implements ItemListener{
 				EXDF_Dataset dataset = exhFile.getDatasetTable()[columnIndex-1];			
 							
 				switch (dataset.type)
-				{
+				{					
+				case 0x05:
 				case 0x04:
-					return ""+entry.getShort(dataset.offset);
-				case 0x03:				
-				case 0x02:
+					return ""+((int)entry.getShort(dataset.offset) & 0xFFFF);
+				case 0x1f:
+				case 0x1e:
+				case 0x1d:
+				case 0x1c:
+				case 0x1b:
+				case 0x1a:
+				case 0x19:
+					return ((int)entry.getByte(dataset.offset)&0xFF) + "["+String.format("%x",entry.getByte(dataset.offset))+"] ?";
+				case 0x03:	//Level
+				case 0x02:  
 					return ""+entry.getByte(dataset.offset);				
-				case 0x07:
-				case 0x06: //Icon Id
+				case 0x07: //Also Item Id
+				case 0x06: //Icon Id, Item Id 
 					return ""+entry.getInt(dataset.offset);
 				case 0x01:
-					return ""+entry.getByte(dataset.offset);
+					return ""+entry.getBoolean(dataset.offset);
 				case 0x00: //String; Points to offset from end of dataset part. Read until 0x0.
-					return entry.getString(exhFile.getDatasetChunkSize(), dataset.offset);
+					return entry.getString(exhFile.getDatasetChunkSize(), dataset.offset);				
 				default:
 					return "?";
 				}
@@ -493,5 +502,105 @@ public class EXDF_View extends JScrollPane implements ItemListener{
 		checkString = checkString.substring(0, checkString.lastIndexOf("_")) +".exh";
 		return exhName.equals(checkString);			
 	}
-	
+
+	public String getCSV() throws IOException
+	{
+		StringBuffer sbuff = new StringBuffer();
+		for (int i = 0; i < exhFile.getDatasetTable().length + 1; i++)
+		{
+			if (i == 0)
+				sbuff.append("Index");
+			else
+				sbuff.append(i-1);
+			
+			if (i <= exhFile.getDatasetTable().length)
+				sbuff.append(",");
+		}
+		
+		sbuff.append("\r\n");
+		
+		for (int y = exhFile.getPageTable()[0].pageNum; y < exhFile.getNumEntries(); y++)
+		{
+			sbuff.append(y + ",");
+			for (int x = 0; x < exhFile.getDatasetTable().length; x++)
+			{
+				try{					
+					int page = 0;
+					
+					//Find Page
+					if (numPages != 1)
+					{
+						for (int i = 0; i <= exhFile.getPageTable().length; i++)
+						{
+							if (i == exhFile.getPageTable().length)
+							{
+								if (i <= exhFile.getPageTable()[i-1].pageNum + exhFile.getPageTable()[i-1].numEntries)
+								{
+									page = i-1;
+									break;
+								}
+								else
+									sbuff.append("ERROR");
+							}
+								
+							
+							if (y >= exhFile.getPageTable()[i].pageNum)
+								continue;
+							else
+							{
+								page = i-1;
+								break;
+							}
+						}
+					}
+					
+					//Grab Data
+					EXDF_Entry entry = exdFile[((numLanguages == 1? 1 : numLanguages-1)*page) + cmbLanguage.getSelectedIndex()].getEntry(y);			
+					EXDF_Dataset dataset = exhFile.getDatasetTable()[x];			
+								
+					switch (dataset.type)
+					{					
+					case 0x05:
+					case 0x04:
+						sbuff.append(""+((int)entry.getShort(dataset.offset) & 0xFFFF));
+						break;
+					case 0x1f:
+					case 0x1e:
+					case 0x1d:
+					case 0x1c:
+					case 0x1b:
+					case 0x1a:
+					case 0x19:
+						sbuff.append(((int)entry.getByte(dataset.offset)&0xFF) + "["+String.format("%x",entry.getByte(dataset.offset))+"] ?");
+						break;
+					case 0x03:	//Level
+					case 0x02:  
+						sbuff.append(""+entry.getByte(dataset.offset));
+						break;
+					case 0x07: //Also Item Id
+					case 0x06: //Icon Id, Item Id 
+						sbuff.append(""+entry.getInt(dataset.offset));
+						break;
+					case 0x01:
+						sbuff.append(""+entry.getBoolean(dataset.offset));
+						break;
+					case 0x00: //String; Points to offset from end of dataset part. Read until 0x0.
+						sbuff.append("\""+entry.getString(exhFile.getDatasetChunkSize(), dataset.offset)+"\"");		
+						break;
+					default:
+						sbuff.append("?");
+					}
+				}
+				catch (Exception e)
+				{
+					e.printStackTrace();
+					sbuff.append("");
+				}
+				if (x != exhFile.getDatasetTable().length-1)
+					sbuff.append(",");
+			}
+			sbuff.append("\r\n");
+		}
+		return sbuff.toString();
+	}	
 }

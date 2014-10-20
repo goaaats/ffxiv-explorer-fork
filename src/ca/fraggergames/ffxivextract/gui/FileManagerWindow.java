@@ -455,15 +455,18 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 	
 	private void openData(SqPack_File file) {
 		JTabbedPane tabs = new JTabbedPane();
-		
-		int contentType = -1; 
+				
 		byte data[] = null;		
-		
+		int contentType = -1;
 		try {
+			 contentType = currentDatFile.getContentType(file.getOffset()); 
 			data = currentDatFile.extractFile(file.dataoffset, null);
-			currentDatFile.getContentType(file.getOffset());
-		} catch (IOException e1) {
+		} catch (Exception e1) {
 			e1.printStackTrace();
+			JOptionPane.showMessageDialog(FileManagerWindow.this,
+					"There was an error unpacking " + file.getName() + ".",					
+				    "File Unpack Error",
+				    JOptionPane.ERROR_MESSAGE);
 		}
 		
 		if (data == null)
@@ -484,7 +487,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-		}
+		}		
 		else if (data.length >= 3 && data[0] == 'E' && data[1] == 'X' && data[2] == 'D' && data[3] == 'F')
 		{								
 			try {
@@ -507,7 +510,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 				e.printStackTrace();
 			}
 		}
-		else if (contentType == 4)
+		else if (contentType == 4 || file.getName().endsWith("atex"))
 		{
 			Image_View imageComponent = new Image_View(new Texture_File(data));
 			tabs.addTab("TEX File", imageComponent);
@@ -615,10 +618,12 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 					byte[] dataToSave = null;
 					String extension = getExtension(data);
 					
-					if (extension.equals(".exd") && doConvert)
+					if (extension.equals(".exh") && doConvert)
 					{
-						EXDF_File file = new EXDF_File(data);
-						//dataToSave = file.getCSV().getBytes();
+						EXHF_File file = new EXHF_File(data);
+						
+						EXDF_View view = new EXDF_View(currentIndexFile, currentDatFile,  HashDatabase.getFolder(fileTree.getSelectedFiles().get(0).getId2()) + "/" + fileTree.getSelectedFiles().get(0).getName(), file);						
+						dataToSave = view.getCSV().getBytes();
 						extension = ".csv";
 					}
 					else if (extension.equals(".scd") && doConvert)

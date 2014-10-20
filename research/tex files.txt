@@ -1,0 +1,17 @@
+#### TEXT FILE RESEARCH ####
+
+Current research on TEX texture files.
+
+===HEADER===
+
+0x000:
+0x002:
+0x004: Compression Type     Byte;
+0x006:
+0x008: Uncompressed Width   Short; 
+0x00a: Uncompressed Height  Short;
+0x00c: Unknown              Short;
+0x00e: Unknown              Short;
+0x01c: Data Start           Int32;
+
+===Rest of data is a compressed image.===

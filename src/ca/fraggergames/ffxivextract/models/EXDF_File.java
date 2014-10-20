@@ -171,5 +171,10 @@ public class EXDF_File {
 			
 			return "";
 		}
+
+		public boolean getBoolean(short offset) {
+			byte b = getByte(offset);
+			return b == 1;
+		}
 	}
 }

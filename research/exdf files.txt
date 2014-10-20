@@ -20,6 +20,7 @@ Current research on EXDF files
 0x000: Size of chunk        Int32; Starting after this header
 0x004: Unknown              Short;
 0x006: Data Chunk
+       String Chunk              ;After Data Chunk, look in EXH for size of data chunk to skip
 	
 ~~~~~DEFINED IN EXH FILE~~~~~~~~~~~~
 
