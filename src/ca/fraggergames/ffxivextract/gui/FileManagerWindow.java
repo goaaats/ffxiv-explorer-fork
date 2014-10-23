@@ -554,12 +554,12 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 				
 				@Override
 				public String getDescription() {
-					return "FFXIV Converted (.csv, .ogg)";
+					return "FFXIV Converted";
 				}
 				
 				@Override
 				public boolean accept(File f) {
-					return f.getName().endsWith(".csv") || f.getName().endsWith(".ogg") || f.isDirectory();
+					return f.getName().endsWith(".csv") || f.getName().endsWith(".ogg") || f.getName().endsWith(".wav") ||f.getName().endsWith(".png") || f.isDirectory();
 				}				
 			};
 			fileChooser.addChoosableFileFilter(filter);
@@ -584,7 +584,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 		
 	}
 
-	private String getExtension(byte[] data) {
+	private String getExtension(int contentType, byte[] data) {
 		if (data.length >= 4 && data[0] == 'E' && data[1] == 'X' && data[2] == 'D' && data[3] == 'F')
 			return ".exd";
 		else if (data.length >= 4 && data[0] == 'E' && data[1] == 'X' && data[2] == 'H' && data[3] == 'F')
@@ -593,6 +593,10 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 			return ".luab";
 		else if (data.length >= 4 && data[0] == 'S' && data[1] == 'E' && data[2] == 'D' && data[3] == 'B' )
 			return ".scd";
+		else if (contentType == 4)
+		{
+			return ".png";
+		}
 		else
 			return ".dat";
 	}
@@ -616,7 +620,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 				try {
 					byte[] data = currentDatFile.extractFile(files.get(i).getOffset(), loadingDialog);
 					byte[] dataToSave = null;
-					String extension = getExtension(data);
+					String extension = getExtension(currentDatFile.getContentType(files.get(i).getOffset()), data);
 					
 					if (extension.equals(".exh") && doConvert)
 					{
@@ -625,6 +629,12 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 						EXDF_View view = new EXDF_View(currentIndexFile, currentDatFile,  HashDatabase.getFolder(fileTree.getSelectedFiles().get(0).getId2()) + "/" + fileTree.getSelectedFiles().get(0).getName(), file);						
 						dataToSave = view.getCSV().getBytes();
 						extension = ".csv";
+					}
+					else if (extension.equals(".png") && doConvert)
+					{
+						Texture_File tex = new Texture_File(data);
+						dataToSave = tex.getImage("png");
+						extension = ".png";
 					}
 					else if (extension.equals(".scd") && doConvert)
 					{

@@ -1,6 +1,6 @@
 ===FFXIV Archive Files===
 
-000000.win32.index: TEX files as well as VulgarWordsFilter.dic
+000000.win32.index: TEX files as well as VulgarWordsFilter.dic 
 0a0000.win32.index: EXD and EXH files... contains quest and interface tex
 0b0000.win32.index: LUAB files... bunch of lua byte code
 0c0000.win32.index: SCD files, specifically music
@@ -14,3 +14,22 @@
 080000.win32.index: ATEX and AVFX files... skill/magic gfx?
 120000.win32.index: EMPTY
 130000.win32.index: EMPTY
+
+Known Types:
+
+TEX -Partial, know some parts of the data
+EXD, EXH, EXL -Done for the most part
+LUAB -Done, basic lua bytecode, decompiled
+SCD -Done
+MDL -Model Files
+MTRL -Material Files
+SKLB -Skeleton Files
+PAP -Animation Files
+SHCD -Shaders 
+ATEX
+AVFX
+CUT
+OBSB 
+ENVB
+PCB
+SGB
