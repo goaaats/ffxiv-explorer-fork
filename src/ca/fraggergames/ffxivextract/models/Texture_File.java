@@ -129,7 +129,7 @@ public class Texture_File {
 	public byte[] getImage(String type) throws IOException, ImageDecodingException
 	{
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		ImageIO.write(decode(null), "png", baos);
+		ImageIO.write(decode(0, null), "png", baos);
 		byte[] bytes = baos.toByteArray();
 		return bytes;		
 	}

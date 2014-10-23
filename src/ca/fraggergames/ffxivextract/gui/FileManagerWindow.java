@@ -80,6 +80,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 	JLabel lblContentTypeValue;
 	Hex_View hexView = new Hex_View(16);
 	EXDF_View exhfComponent;
+	JProgressBar prgLoadingBar;
 	
 	//MENU
 	JMenuItem file_Extract;
@@ -165,7 +166,8 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 		JPanel pnlProgBar = new JPanel();
 		pnlStatusBar.add(pnlProgBar, BorderLayout.EAST);
 		
-		JProgressBar prgLoadingBar = new JProgressBar();
+		prgLoadingBar = new JProgressBar();
+		prgLoadingBar.setVisible(false);
 		pnlProgBar.add(prgLoadingBar);
 		setLocationRelativeTo(null);	
 		
@@ -192,25 +194,8 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 		if (currentIndexFile != null || currentDatFile != null)
 			closeFile();
 		
-		try {	
-			currentIndexFile = new SqPack_IndexFile(selectedFile.getAbsolutePath());			
-			currentDatFile = new SqPack_DatFile(selectedFile.getAbsolutePath().replace(".index", ".dat0"));
-			currentCompareFile = CompareFile.getCompareFile(selectedFile.getName().substring(0, selectedFile.getName().lastIndexOf('.')));
-		} catch (Exception e) {
-			JOptionPane.showMessageDialog(this,
-					"There was an error opening this index file.",
-				    "File Open Error",
-				    JOptionPane.ERROR_MESSAGE);		
-			return;
-		}
-		
-		if (Constants.DEBUG)			
-			currentIndexFile.displayIndexInfo();
-		
-		setTitle(Constants.APPNAME + " [" + selectedFile.getName() + "]");
-		fileTree.fileOpened(currentIndexFile, currentCompareFile);
-		file_Close.setEnabled(true);
-		search_search.setEnabled(true);		
+		OpenIndexTask openTask = new OpenIndexTask(selectedFile);
+		openTask.execute();
 	}
 
 	protected void closeFile() {
@@ -601,6 +586,47 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 			return ".dat";
 	}
 
+	class OpenIndexTask extends SwingWorker<Void, Void>{
+		
+		File selectedFile;
+		
+		public OpenIndexTask(File selectedFile) {
+			this.selectedFile = selectedFile;
+			FileManagerWindow.this.setEnabled(false);
+			prgLoadingBar.setVisible(true);
+			prgLoadingBar.setValue(0);
+		}
+
+		@Override
+		protected Void doInBackground() throws Exception {
+			try {				
+				currentIndexFile = new SqPack_IndexFile(selectedFile.getAbsolutePath(), prgLoadingBar);			
+				currentDatFile = new SqPack_DatFile(selectedFile.getAbsolutePath().replace(".index", ".dat0"));
+				currentCompareFile = CompareFile.getCompareFile(selectedFile.getName().substring(0, selectedFile.getName().lastIndexOf('.')));
+			} catch (Exception e) {
+				JOptionPane.showMessageDialog(FileManagerWindow.this,
+						"There was an error opening this index file.",
+					    "File Open Error",
+					    JOptionPane.ERROR_MESSAGE);		
+				return null;
+			}			
+			return null;		
+		}
+		
+		@Override
+		protected void done() {
+			if (Constants.DEBUG)			
+				currentIndexFile.displayIndexInfo();
+			
+			setTitle(Constants.APPNAME + " [" + selectedFile.getName() + "]");
+			fileTree.fileOpened(currentIndexFile, currentCompareFile);
+			file_Close.setEnabled(true);
+			search_search.setEnabled(true);
+			FileManagerWindow.this.setEnabled(true);
+			prgLoadingBar.setValue(0);
+			prgLoadingBar.setVisible(false);
+		}
+	}
 
 	class ExtractTask extends SwingWorker<Void, Void>{
 

@@ -2,6 +2,8 @@ package ca.fraggergames.ffxivextract.models;
 
 import java.io.IOException;
 
+import javax.swing.JProgressBar;
+
 import ca.fraggergames.ffxivextract.helpers.LERandomAccessFile;
 import ca.fraggergames.ffxivextract.storage.HashDatabase;
 
@@ -14,6 +16,50 @@ public class SqPack_IndexFile {
 	long offset;
 	int size;
 
+	public SqPack_IndexFile(String pathToIndex, JProgressBar prgLoadingBar) throws IOException {
+
+		LERandomAccessFile ref = new LERandomAccessFile(pathToIndex, "r");
+
+		int sqpackHeaderLength = checkSqPackHeader(ref);	
+		getSegments(ref, sqpackHeaderLength);
+
+		// Check if we have a folder segment, if not... load files only
+		if (segments[3] != null) {			
+			int offset = segments[3].getOffset();
+			int size = segments[3].getSize();
+			int numFolders = size / 0x10;
+
+			prgLoadingBar.setMaximum(numFolders);
+			
+			packFolders = new SqPack_Folder[numFolders];
+
+			for (int i = 0; i < numFolders; i++) {
+				ref.seek(offset + (i * 16)); // Every folder offset header is 16
+												// bytes
+
+				int id = ref.readInt();
+				int fileIndexOffset = ref.readInt();
+				int folderSize = ref.readInt();
+				int numFiles = folderSize / 0x10;
+				ref.readInt(); // Skip
+
+				packFolders[i] = new SqPack_Folder(id, numFiles,
+						fileIndexOffset);
+
+				packFolders[i].readFiles(ref);
+				prgLoadingBar.setValue(prgLoadingBar.getValue()+1);
+			}
+		} else {
+			noFolder = true;
+			packFolders = new SqPack_Folder[1];
+			packFolders[0] = new SqPack_Folder(0, segments[0].getSize()/0x10, segments[0].getOffset());
+			packFolders[0].readFiles(ref);
+		}
+
+		ref.close();
+
+	}
+	
 	public SqPack_IndexFile(String pathToIndex) throws IOException {
 
 		LERandomAccessFile ref = new LERandomAccessFile(pathToIndex, "r");
