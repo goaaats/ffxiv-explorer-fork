@@ -137,6 +137,12 @@ public class EXDF_File {
 			buffer.position(offset);
 			return buffer.getInt();
 		}
+		
+		public float getFloat(short offset) {
+			ByteBuffer buffer = ByteBuffer.wrap(dataChunk);
+			buffer.position(offset);
+			return buffer.getFloat();
+		}
 
 		public String getString(int datasetChunkSize, short offset) {
 			ByteBuffer buffer = ByteBuffer.wrap(dataChunk);
@@ -173,11 +179,11 @@ public class EXDF_File {
 		public boolean getBoolean(short offset) {
 			byte b = getByte(offset);
 			return b == 1;
-		}
-
+		}		
+		
 		public int getIndex() {
 			return index;
-		}
+		}		
 	}
 
 	public EXDF_Offset[] getIndexOffsetTable()
