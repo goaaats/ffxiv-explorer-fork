@@ -3,6 +3,7 @@ package ca.fraggergames.ffxivextract;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.sql.Connection;
 import java.sql.SQLException;
 
 import javax.swing.JOptionPane;
@@ -39,19 +40,31 @@ public class Main {
 					    JOptionPane.ERROR_MESSAGE);		
 		} catch (ClassNotFoundException e1) {			
 			e1.printStackTrace();
-		}
+		}/*
 		
+		try{
+			for (int i = 127000; i < 128000; i+= 1000)
+			{
+				Connection conn = HashDatabase.getConnection();
+				conn.setAutoCommit(false);
+				for (int i2 = i; i2 < i+1000; i2++)
+					HashDatabase.addPathToDB("ui/icon/" + String.format("%06d", i) + "/de/" + String.format("%06d", i2) + ".tex", conn);
+				System.out.println(i);
+				conn.commit();
+				HashDatabase.closeConnection(conn);
+			}
+		}		
+		catch (Exception e){}*/
 		//EXD_Searcher.createEXDFiles("E:\\Coding\\workspace3\\FFXIV_Extractor\\exddump2.txt");
 		
-/*
-		try {
+	/*	try {
 			HashDatabase.loadPathsFromTXT("E:\\Coding\\workspace3\\FFXIV_Extractor\\exddump2.txtout.txt");
 			//return;
 		} catch (SQLException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-	*/
+	
 		/*
 		SqPack_IndexFile index;
 		try {
