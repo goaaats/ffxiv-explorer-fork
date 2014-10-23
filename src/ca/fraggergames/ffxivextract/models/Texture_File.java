@@ -15,13 +15,15 @@ public class Texture_File {
 
 	final public int numMipMaps;
 
-	final public int dataStart;
+	final public int dataStart[];
 
 	final public int uncompressedWidth;
 	final public int uncompressedHeight;
 
 	final public byte data[];
 
+	final public short numFrames;
+	
 	public Texture_File(byte data[]) {
 
 		this.data = data;
@@ -35,13 +37,16 @@ public class Texture_File {
 		uncompressedWidth = bb.getShort();
 		uncompressedHeight = bb.getShort();
 		bb.getShort();
-		bb.getShort();
+		numFrames = bb.getShort();
 		
 		bb.position(0x1c);
-		dataStart = bb.getInt(); 
+		
+		dataStart = new int[numFrames];		
+		for (int i = 0; i < numFrames; i++)
+			dataStart[i] = bb.getInt(); 
 	}
 
-	public final BufferedImage decode(
+	public final BufferedImage decode(int index, 
 			final Map<String, Object> parameters) throws ImageDecodingException {
 
 		if (data == null) {
@@ -50,7 +55,7 @@ public class Texture_File {
 		switch (compressionType) {
 		case 32: {
 			return ImageDecoding.decodeImageDX1(data,
-					dataStart,
+					dataStart[index],
 					uncompressedWidth,
 					uncompressedHeight,
 					uncompressedWidth / 4,
@@ -58,13 +63,13 @@ public class Texture_File {
 		}
 		case 48: {
 			return ImageDecoding.decodeImageRaw(data,
-					dataStart,
+					dataStart[index],
 					uncompressedWidth,
 					uncompressedHeight, 0, 0);
 		}
 		case 49: {
 			return ImageDecoding.decodeImageDX5(data,
-					dataStart,
+					dataStart[index],
 					uncompressedWidth,
 					uncompressedHeight,
 					uncompressedWidth / 4,
@@ -75,7 +80,7 @@ public class Texture_File {
 				if (parameters.containsKey("4444.channel")) {
 					Object q = parameters.get("4444.channel");
 					return ImageDecoding.decodeImage4444split1channel(data,
-							dataStart,
+							dataStart[index],
 							uncompressedWidth,
 							uncompressedHeight, 0, 0,
 							(q instanceof Integer ? (Integer) q : 0));
@@ -84,31 +89,31 @@ public class Texture_File {
 						&& parameters.get("1008.4444.mergedSplit").equals(
 								ImageDecoding.ON_VALUE)) {
 					return ImageDecoding.decodeImage4444split(data,
-							dataStart,
+							dataStart[index],
 							uncompressedWidth,
 							uncompressedHeight, 0, 0);
 				}
 			}
 			return ImageDecoding.decodeImage4444(data,
-					dataStart,
+					dataStart[index],
 					uncompressedWidth,
 					uncompressedHeight, 0, 0);
 		}
 		case 65: {
 			return ImageDecoding.decodeImage5551(data,
-					dataStart,
+					dataStart[index],
 					uncompressedWidth,
 					uncompressedHeight, 0, 0, parameters);
 		}
 		case 80: {
 			return ImageDecoding.decodeImageRGBA(data,
-					dataStart,
+					dataStart[index],
 					uncompressedWidth,
 					uncompressedHeight, 0, 0);
 		}
 		case 81: {
 			return ImageDecoding.decodeImageRGBA(data,
-					dataStart,
+					dataStart[index],
 					uncompressedWidth,
 					uncompressedHeight, 0, 0);
 		}

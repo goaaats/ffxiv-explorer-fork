@@ -180,7 +180,7 @@ public class SqPack_IndexFile {
 			this.fileIndexOffset = fileIndexOffset;
 			this.name = HashDatabase.getFolder(id);
 			if (this.name == null)
-				this.name = String.format("%x", id);
+				this.name = String.format("~%x", id);
 		}
 
 		protected void readFiles(LERandomAccessFile ref) throws IOException{

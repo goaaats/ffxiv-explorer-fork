@@ -34,7 +34,7 @@ import ca.fraggergames.ffxivextract.storage.HashDatabase;
 public class PathSearcher extends JFrame {
 	public PathSearcher() {
 	}
-
+/*
 	static String folders[] = {
 			"common/",
 			"bgcommon/",
@@ -49,8 +49,13 @@ public class PathSearcher extends JFrame {
 			"shader/",
 			"vfx/",
 	};
+	*/
 	
-	public static void doPathSearch(String path) throws IOException {
+	static String folders[] = {
+		"ui/"
+	};
+	
+ 	public static void doPathSearch(String path) throws IOException {
 		
 		SqPack_IndexFile currentIndexFile = new SqPack_IndexFile(path);
 		SqPack_DatFile currentDatFile = new SqPack_DatFile(path.replace(".index", ".dat0"));
@@ -81,6 +86,8 @@ public class PathSearcher extends JFrame {
 					SqPack_File fi = f.getFiles()[j];
 					byte[] data;
 					try {
+						if (currentDatFile.getContentType(fi.dataoffset) == 4)
+							continue;
 						data = currentDatFile.extractFile(fi.dataoffset, null);
 						if (data == null)
 							continue;

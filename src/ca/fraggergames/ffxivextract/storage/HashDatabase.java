@@ -242,7 +242,7 @@ public class HashDatabase {
 			statement
 					.executeUpdate("create table if not exists folders (hash integer NOT NULL, path string, PRIMARY KEY (hash))");
 			statement
-					.executeUpdate("create table if not exists fullpaths (hash integer NOT NULL, path string, PRIMARY KEY (hash))");
+					.executeUpdate("create table if not exists filenames (hash integer NOT NULL, path string, PRIMARY KEY (hash))");
 
 		} catch (SQLException e) {
 			// if the error message is "out of memory",
@@ -282,8 +282,8 @@ public class HashDatabase {
 					.getConnection("jdbc:sqlite:./hashlist.db");
 			Statement statement = connection.createStatement();
 			statement.setQueryTimeout(30); // set timeout to 30 sec.
-			statement.executeUpdate("insert or ignore into folders values(" + folderHash + ", '" + folder + "')");
-			statement.executeUpdate("insert or ignore into fullpaths values(" + fileHash + ", '" + filename + "')");
+			statement.executeUpdate("insert or ignore into folders values(" + folderHash + ", '" + folder + "', '0')");
+			statement.executeUpdate("insert or ignore into filenames values(" + fileHash + ", '" + filename + "', '0')");
 		} catch (SQLException e) {
 			System.err.println(e.getMessage());
 			return false;
@@ -316,8 +316,8 @@ public class HashDatabase {
 		try{		
 			Statement statement = conn.createStatement();
 			statement.setQueryTimeout(30); // set timeout to 30 sec.
-			statement.executeUpdate("insert or ignore into folders values(" + folderHash + ", '" + folder + "')");
-			statement.executeUpdate("insert or ignore into fullpaths values(" + fileHash + ", '" + filename + "')");
+			statement.executeUpdate("insert or ignore into folders values(" + folderHash + ", '" + folder + "', 0)");
+			statement.executeUpdate("insert or ignore into filenames values(" + fileHash + ", '" + filename + "', 0)");
 		} catch (SQLException e) {
 			System.err.println(e.getMessage());
 			return false;
@@ -361,8 +361,8 @@ public class HashDatabase {
 				try{					
 					Statement statement = connection.createStatement();
 					statement.setQueryTimeout(30); // set timeout to 30 sec.
-					statement.executeUpdate("insert or ignore into folders values("+ folderHash + ", '" + folder + "')");
-					statement.executeUpdate("insert or ignore into fullpaths values("+ fileHash + ", '" + line + "')");
+					statement.executeUpdate("insert or ignore into folders values("+ folderHash + ", '" + folder + "','0')");
+					statement.executeUpdate("insert or ignore into filenames values("+ fileHash + ", '" + line + "','0')");
 				} catch (SQLException e) {
 					System.err.println(e.getMessage());
 				}
@@ -439,7 +439,7 @@ public class HashDatabase {
 					Statement statement = connection.createStatement();
 					statement.setQueryTimeout(30); // set timeout to 30 sec.
 					statement.executeUpdate("insert or ignore into folders values("+ folderHash + ", '" + folder + "')");
-					statement.executeUpdate("insert or ignore into fullpaths values("+ fileHash + ", '" + fullPath + "')");
+					statement.executeUpdate("insert or ignore into filenames values("+ fileHash + ", '" + fullPath + "')");
 				} catch (SQLException e) {
 					System.err.println(e.getMessage());
 				} finally {
@@ -516,6 +516,7 @@ public class HashDatabase {
 			connection = DriverManager
 					.getConnection("jdbc:sqlite:./hashlist.db");
 			Statement statement = connection.createStatement();
+			//statement.executeUpdate("UPDATE `folders` SET `used`= 1 WHERE hash="+hash+";");
 			ResultSet rs = statement
 					.executeQuery("select * from folders where hash = " + hash);
 						
@@ -551,8 +552,9 @@ public class HashDatabase {
 			connection = DriverManager
 					.getConnection("jdbc:sqlite:./hashlist.db");
 			Statement statement = connection.createStatement();
+			//statement.executeUpdate("UPDATE `filenames` SET `used`= 1 WHERE hash="+hash+";");
 			ResultSet rs = statement
-					.executeQuery("select * from fullpaths where hash = " + hash);						
+					.executeQuery("select * from filenames where hash = " + hash);						
 			while (rs.next())
 				path = rs.getString("path");
 		} catch (SQLException e) {

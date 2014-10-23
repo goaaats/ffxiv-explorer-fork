@@ -61,7 +61,7 @@ public class Image_View extends JPanel {
 		pnlTexPreview.add(scrollPane);		
 		
 		try {
-			BufferedImage preview = texture.decode(null);
+			BufferedImage preview = texture.decode(0, null);
 			imgPreviewCanvas = new NavigableImagePanel(preview);		
 			scrollPane.setViewportView(imgPreviewCanvas);
 		} catch (ImageDecodingException e) {

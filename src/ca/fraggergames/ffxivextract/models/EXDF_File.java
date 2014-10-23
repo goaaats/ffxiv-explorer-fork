@@ -63,13 +63,7 @@ public class EXDF_File {
 	
 	public EXDF_Entry getEntry(int index)
 	{
-		for (int i = 0; i < entryOffsets.length; i++)
-		{
-			if (index == entryOffsets[i].index)
-				return new EXDF_Entry(data, entryOffsets[i].offset);
-		}
-		
-		return null;
+		return new EXDF_Entry(data, entryOffsets[index].index, entryOffsets[index].offset);	
 	}
 	
 	public static class EXDF_DataBlock{		
@@ -103,9 +97,13 @@ public class EXDF_File {
 	
 	public static class EXDF_Entry{
 
+		int index;
+		int offset;
 		private byte dataChunk[];
 		
-		public EXDF_Entry(byte[] data, int offset) {
+		public EXDF_Entry(byte[] data, int index, int offset) {
+			this.index = index;
+			this.offset = offset;
 			ByteBuffer buffer = ByteBuffer.wrap(data);
 			buffer.position(offset);
 			int size = buffer.getInt();
@@ -176,5 +174,18 @@ public class EXDF_File {
 			byte b = getByte(offset);
 			return b == 1;
 		}
+
+		public int getIndex() {
+			return index;
+		}
+	}
+
+	public EXDF_Offset[] getIndexOffsetTable()
+	{
+		return entryOffsets;
+	}
+	
+	public int getNumEntries() {
+		return entryOffsets.length;
 	}
 }
