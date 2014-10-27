@@ -171,7 +171,7 @@ public class SearchWindow extends JFrame {
 					boolean breakOutOfFile = false;
 					for (int i2 = 0; i2 < data.length - string.length(); i2++) {
 						for (int j2 = 0; j2 < string.length(); j2++) {
-							if (data[i2 + j2] == string.charAt(j2)) {
+							if (Character.toLowerCase(data[i2 + j2]) == Character.toLowerCase(string.charAt(j2))) {
 								if (j2 == string.length() - 1) {
 									
 									if (Constants.DEBUG){
@@ -235,7 +235,7 @@ public class SearchWindow extends JFrame {
 	}
 
 	private void doBytesSearch(String bytes) {
-
+		
 	}
 	
 	public void searchAgain() {		
