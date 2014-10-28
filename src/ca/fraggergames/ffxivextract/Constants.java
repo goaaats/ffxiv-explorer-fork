@@ -8,11 +8,21 @@ public class Constants {
 
 	public static final String APPNAME = "FFXIV 2.0 Data Explorer";
 	public static final String VERSION = "v0.5";
+	public static final int APP_VERSION_CODE = 0;
+	public static final int DB_VERSION_CODE = 0;
 	public static final String COMMIT = "fc92a429023d6ea9e146789a5b89f1a266fabfd3";
 	public static boolean DEBUG = false;
 	public static boolean EASTER_EGG = false;
 
+	public static final String URL_WEBSITE = "http://141.117.162.99:8080/";
+	public static final String URL_VERSION_CHECK = "http://141.117.162.99:8080/version_check.json";
+	public static final String URL_HASHLIST_FILE = "http://141.117.162.99:8080/downloads/hashlist.db";
+	
 	public static final String DBFILE_NAME = "hashlist.db";
+	
+	public static final String PREF_FIRSTRUN = "pref_firstrun";
+	public static final String PREF_DO_APP_UPDATE = "pref_appupdate";
+	public static final String PREF_DO_DB_UPDATE = "pref_dbupdate";
 	
 	public static final String[] iconList = {
 		"000000", "000ED81", "0010235", "0010236" , "0010237",
@@ -28,7 +38,8 @@ public class Constants {
 		"001028D", "001028E", "00102FD"
 	};
 	
-
+	
+	
 	public static void setUIFont (javax.swing.plaf.FontUIResource f){
 	    java.util.Enumeration keys = UIManager.getDefaults().keys();
 	    while (keys.hasMoreElements()) {
