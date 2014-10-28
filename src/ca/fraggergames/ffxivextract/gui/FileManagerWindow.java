@@ -5,6 +5,7 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.File;
@@ -27,6 +28,7 @@ import javax.swing.JProgressBar;
 import javax.swing.JSeparator;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
+import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
 import javax.swing.SwingWorker;
 import javax.swing.event.TreeSelectionEvent;
@@ -329,8 +331,10 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 		file_Close.setActionCommand("close");
 		file_Extract = new JMenuItem(Strings.MENUITEM_EXTRACT);
 		file_Extract.setEnabled(false);
+		file_Extract.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_E, KeyEvent.CTRL_MASK));
 		file_ExtractRaw = new JMenuItem(Strings.MENUITEM_EXTRACTRAW);
 		file_ExtractRaw.setEnabled(false);
+		file_ExtractRaw.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_E, KeyEvent.SHIFT_MASK|KeyEvent.CTRL_MASK));
 		file_Extract.setActionCommand("extractc");
 		file_ExtractRaw.setActionCommand("extractr");
 		JMenuItem file_Quit = new JMenuItem(Strings.MENUITEM_QUIT);
@@ -344,11 +348,13 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 		search_search = new JMenuItem(Strings.MENUITEM_SEARCH);
 		search_search.setEnabled(false);
 		search_search.setActionCommand("search");
+		search_search.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F, KeyEvent.CTRL_MASK));
 		search_search.addActionListener(menuHandler);
 
 		search_searchAgain = new JMenuItem(Strings.MENUITEM_SEARCHAGAIN);
 		search_searchAgain.setEnabled(false);
 		search_searchAgain.setActionCommand("searchagain");
+		search_searchAgain.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F3,0));
 		search_searchAgain.addActionListener(menuHandler);		
 		
 		JMenuItem tools_musicswapper = new JMenuItem(Strings.MENUITEM_MUSICSWAPPER);
@@ -456,8 +462,9 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 		
 		if (data == null)
 		{				
-			hexView.setBytes(null);			
-			tabs.addTab("Raw Hex", hexView);			
+			JLabel lbl3DModelError = new JLabel(contentType == 3 ? "Content Type 3 files are currently not supported. I am still figuring out how they are stored." : "Something went terribly wrong extracting this file.");
+			tabs.addTab("3D Model", lbl3DModelError);
+			hexView.setBytes(null);							
 			splitPane.setRightComponent(tabs);
 			return;
 		}
@@ -513,8 +520,9 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 			}
 		}	
 		
-		hexView.setBytes(data);			
-		tabs.addTab("Raw Hex", hexView);			
+		hexView.setBytes(data);	
+		if (contentType != 3)
+			tabs.addTab("Raw Hex", hexView);			
 		splitPane.setRightComponent(tabs);
 	}
 
@@ -593,6 +601,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 		public OpenIndexTask(File selectedFile) {
 			this.selectedFile = selectedFile;
 			FileManagerWindow.this.setEnabled(false);
+			menu.setEnabled(false);
 			prgLoadingBar.setVisible(true);
 			prgLoadingBar.setValue(0);
 		}

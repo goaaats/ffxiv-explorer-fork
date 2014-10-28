@@ -29,7 +29,8 @@ public class SqPack_IndexFile {
 			int size = segments[3].getSize();
 			int numFolders = size / 0x10;
 
-			prgLoadingBar.setMaximum(numFolders);
+			if (prgLoadingBar != null)
+				prgLoadingBar.setMaximum(numFolders);
 			
 			packFolders = new SqPack_Folder[numFolders];
 
@@ -46,14 +47,15 @@ public class SqPack_IndexFile {
 				packFolders[i] = new SqPack_Folder(id, numFiles,
 						fileIndexOffset);
 
-				packFolders[i].readFiles(ref);
-				prgLoadingBar.setValue(prgLoadingBar.getValue()+1);
+				packFolders[i].readFiles(ref, prgLoadingBar);
+				if (prgLoadingBar != null)
+					prgLoadingBar.setValue(prgLoadingBar.getValue()+1);
 			}
 		} else {
 			noFolder = true;
 			packFolders = new SqPack_Folder[1];
 			packFolders[0] = new SqPack_Folder(0, segments[0].getSize()/0x10, segments[0].getOffset());
-			packFolders[0].readFiles(ref);
+			packFolders[0].readFiles(ref, prgLoadingBar);
 		}
 
 		ref.close();
@@ -229,8 +231,12 @@ public class SqPack_IndexFile {
 				this.name = String.format("~%x", id);
 		}
 
-		protected void readFiles(LERandomAccessFile ref) throws IOException{
+		protected void readFiles(LERandomAccessFile ref, JProgressBar prgLoadingBar) throws IOException{
 			ref.seek(fileIndexOffset);
+			
+			if (prgLoadingBar != null)
+				prgLoadingBar.setMaximum(prgLoadingBar.getMaximum()+files.length);
+			
 			for (int i = 0; i < files.length; i++)
 			{			
 				int id = ref.readInt();
@@ -238,7 +244,25 @@ public class SqPack_IndexFile {
 				long dataoffset = ref.readInt() * 8;
 				ref.readInt();
 			
-				files[i] = new SqPack_File(id, id2, dataoffset);			
+				files[i] = new SqPack_File(id, id2, dataoffset);
+				
+				if (prgLoadingBar != null)
+					prgLoadingBar.setValue(prgLoadingBar.getValue()+1);
+			}
+		}
+		
+		protected void readFiles(LERandomAccessFile ref) throws IOException{
+			ref.seek(fileIndexOffset);
+			
+			for (int i = 0; i < files.length; i++)
+			{			
+				int id = ref.readInt();
+				int id2 = ref.readInt();
+				long dataoffset = ref.readInt() * 8;
+				ref.readInt();
+			
+				files[i] = new SqPack_File(id, id2, dataoffset);
+								
 			}
 		}
 		
