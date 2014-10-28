@@ -350,9 +350,7 @@ public class HashDatabase {
 						filename.getBytes().length);
 				long folderHash = computeCRC(folder.getBytes(), 0,
 						folder.getBytes().length);
-
-				if (HashDatabase.getFileFullPathName(fileHash) != null)
-					continue;
+				
 				
 				if (Constants.DEBUG)
 					System.out.println("Adding Entry: " + line);

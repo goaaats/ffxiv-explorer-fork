@@ -642,6 +642,8 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 		
 		@Override
 		protected Void doInBackground() throws Exception {
+			EXDF_View tempView = null;
+			
 			for (int i = 0; i < files.size(); i++){
 				try {
 					byte[] data = currentDatFile.extractFile(files.get(i).getOffset(), loadingDialog);
@@ -650,10 +652,22 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 					
 					if (extension.equals(".exh") && doConvert)
 					{
+						if (tempView != null && tempView.isSame(files.get(i).getName()))
+							continue;
 						EXHF_File file = new EXHF_File(data);
 						
-						EXDF_View view = new EXDF_View(currentIndexFile, currentDatFile,  HashDatabase.getFolder(fileTree.getSelectedFiles().get(0).getId2()) + "/" + fileTree.getSelectedFiles().get(0).getName(), file);						
-						dataToSave = view.getCSV().getBytes();
+						tempView = new EXDF_View(currentIndexFile, currentDatFile,  HashDatabase.getFolder(fileTree.getSelectedFiles().get(0).getId2()) + "/" + fileTree.getSelectedFiles().get(0).getName(), file);						
+						dataToSave = tempView.getCSV().getBytes();
+						extension = ".csv";
+					}
+					else if (tempView != null && extension.equals(".exd") && doConvert)
+					{
+						if (tempView.isSame(files.get(i).getName()))
+							continue;
+						EXDF_File file = new EXDF_File(data);
+						
+						tempView = new EXDF_View(currentIndexFile, currentDatFile,  HashDatabase.getFolder(fileTree.getSelectedFiles().get(0).getId2()) + "/" + fileTree.getSelectedFiles().get(0).getName(), file);						
+						dataToSave = tempView.getCSV().getBytes();
 						extension = ".csv";
 					}
 					else if (extension.equals(".png") && doConvert)

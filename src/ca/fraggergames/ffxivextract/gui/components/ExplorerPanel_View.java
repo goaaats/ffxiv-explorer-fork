@@ -165,6 +165,16 @@ public class ExplorerPanel_View extends JScrollPane {
 			Object obj = ((DefaultMutableTreeNode) tp.getLastPathComponent()).getUserObject();
 			if (obj == null)
 				continue;
+			if (obj instanceof SqPack_Folder)
+			{
+				int children = ((DefaultMutableTreeNode) tp.getLastPathComponent()).getChildCount();
+				for (int i = 0; i < children; i++)
+				{
+					SqPack_File file = (SqPack_File) ((DefaultMutableTreeNode)((DefaultMutableTreeNode) tp.getLastPathComponent()).getChildAt(i)).getUserObject();
+					if (!selectedFiles.contains(file))
+						selectedFiles.add(file);
+				}
+			}
 			if (obj instanceof SqPack_File)
 				selectedFiles.add((SqPack_File)obj);
 		}
