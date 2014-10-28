@@ -170,17 +170,9 @@ public class Main {
 	private static void checkForNewDb(FileManagerWindow fileMan){
 		VersionCheckObject checkObj = VersionUpdater.checkForUpdates();
 		
-		if (Constants.APP_VERSION_CODE < checkObj.currentAppVer)
-		{
-			JOptionPane.showMessageDialog(null,
-					"There is a new version of FFXIV Extractor on " + Constants.URL_WEBSITE + ".",
-				    "New Version Available",
-				    JOptionPane.INFORMATION_MESSAGE);	
-		}
-		
 		if (Constants.DB_VERSION_CODE < checkObj.currentDbVer)
 		{
-			int n = JOptionPane.showConfirmDialog(fileMan,  "A new DB was found updated on " + checkObj.dbUpdateDate + ", want to download?", "New DB Found",				    
+			int n = JOptionPane.showConfirmDialog(fileMan,  "A new DB was found updated on " + checkObj.dbUpdateDate + ", want to download? " + (Constants.APP_VERSION_CODE < checkObj.currentAppVer ? "\nBTW, a new app version is up at " + Constants.URL_WEBSITE + "!" : ""), "New DB Found",				    
 				    JOptionPane.YES_NO_OPTION);
 			if (n == JOptionPane.YES_OPTION)
 			{
@@ -193,14 +185,11 @@ public class Main {
 					FileOutputStream fos;				
 					fos = new FileOutputStream("./hashlist.db");								
 					fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
-				} catch (FileNotFoundException e) {
-					// TODO Auto-generated catch block
+				} catch (FileNotFoundException e) {				
 					e.printStackTrace();
 				} catch (MalformedURLException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 				
@@ -216,7 +205,7 @@ public class Main {
 							    JOptionPane.ERROR_MESSAGE);		
 				} catch (ClassNotFoundException e1) {			
 					e1.printStackTrace();
-				}		
+				}
 			}
 		}
 		
