@@ -32,7 +32,7 @@ public class VersionUpdater {
 	public static class VersionCheckObject{
 		public Integer currentAppVer;
 		public Integer currentDbVer;
-		public Long appUpdateDate;
-		public Long dbUpdateDate;		
+		public String appUpdateDate;
+		public String dbUpdateDate;		
 	}
 }
