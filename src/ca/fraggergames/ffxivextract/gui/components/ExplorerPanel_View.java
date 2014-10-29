@@ -39,12 +39,6 @@ public class ExplorerPanel_View extends JScrollPane {
 		setBackground(Color.WHITE);
 		fileTree = new JTree(root) {
 			
-			public boolean getScrollableTracksViewportWidth() {
-				return getPreferredSize().width < getParent().getWidth();
-			}
-			public boolean getScrollableTracksViewportHeight() {
-				return getPreferredSize().height < getParent().getHeight();
-			}
 		};
 		
 		fileTree.setCellRenderer(new TreeRenderer());
@@ -152,6 +146,20 @@ public class ExplorerPanel_View extends JScrollPane {
 	    }
 	}
 	
+	public boolean isOnlyFolder() {
+		TreePath[] selectedPaths = fileTree.getSelectionPaths();
+		
+		if (selectedPaths == null)
+			return true;
+		
+		if (selectedPaths.length != 1)
+			return false;
+		
+		Object obj = ((DefaultMutableTreeNode) selectedPaths[0].getLastPathComponent()).getUserObject();
+		
+		return !(obj instanceof SqPack_File);
+	}
+	
 	public ArrayList<SqPack_File> getSelectedFiles()
 	{
 		ArrayList<SqPack_File> selectedFiles = new ArrayList<SqPack_File>();
@@ -198,6 +206,8 @@ public class ExplorerPanel_View extends JScrollPane {
 	    }
 	}
 	
+	
+	
 	Comparator<SqPack_Folder> folderComparator =  new Comparator<SqPack_Folder>() {
 		
 		@Override
@@ -215,5 +225,7 @@ public class ExplorerPanel_View extends JScrollPane {
 			return o1.getName().compareTo(o2.getName());
 		}
 	};
+
+	
 }
 

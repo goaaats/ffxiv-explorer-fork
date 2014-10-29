@@ -25,6 +25,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
+import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
@@ -114,12 +115,12 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 		pnlContent.setLayout(new BoxLayout(pnlContent, BoxLayout.X_AXIS));
 		
 		splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
-			                           fileTree, hexView);
+			                           fileTree, new JScrollPane()){
+			
+		};
 		pnlContent.add(splitPane);
 		
 		splitPane.setDividerLocation(150);
-		fileTree.setMinimumSize(minimumSize);
-		//pictureScrollPane.setMinimumSize(minimumSize);
 		
 		fileTree.addTreeSelectionListener(this);
 		
@@ -224,10 +225,14 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 		
 		setTitle(Constants.APPNAME);
 		hexView.setBytes(null);
-		splitPane.setRightComponent(hexView);
+		splitPane.setRightComponent(new JScrollPane());
 		file_Close.setEnabled(false);
 		search_search.setEnabled(false);
 		search_searchAgain.setEnabled(false);
+		
+		lblOffsetValue.setText("*");
+		lblHashValue.setText("*");
+		lblContentTypeValue.setText("*");
 	}
 	
 	ActionListener menuHandler = new ActionListener() {
@@ -304,7 +309,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 				 
 			}
 			else if (event.getActionCommand().equals("quit"))
-			{
+			{				
 				System.exit(0);
 			}
 			else if (event.getActionCommand().equals("about"))
@@ -410,6 +415,11 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 	@Override
 	public void valueChanged(TreeSelectionEvent e) {
 		
+		if (fileTree.isOnlyFolder())
+		{
+			splitPane.setRightComponent(new JScrollPane());
+		}
+		
 		if (fileTree.getSelectedFiles().size() == 0)
 		{
 			file_Extract.setEnabled(false);
@@ -507,12 +517,15 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 			Image_View imageComponent = new Image_View(new Texture_File(data));
 			tabs.addTab("TEX File", imageComponent);
 		}
-		else if (data.length >= 3 && data[1] == 'L' && data[2] == 'u'){
+		else if (data.length >= 5 && data[0] == 0x1B && data[1] == 'L' && data[2] == 'u' && data[3] == 'a' && data[4] == 'Q'){
 			
 			if (luadec != null)			
 			{
+				try{
 				Lua_View luaComponent = new Lua_View(("-- Decompiled using luadec 2.0.1 by sztupy (http://winmo.sztupy.hu)\n"+luadec.decompile(data)).split("\n"));
 				tabs.addTab("Decompiled Lua", luaComponent);
+				}
+				catch (Exception e){}
 			}
 			else
 			{

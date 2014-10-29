@@ -1,13 +1,12 @@
 package ca.fraggergames.ffxivextract;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.nio.channels.Channels;
-import java.nio.channels.ReadableByteChannel;
 import java.util.prefs.Preferences;
 
 import javax.swing.JOptionPane;
@@ -179,19 +178,27 @@ public class Main {
 				File file = new File("./hashlist.db");
 				file.delete();
 				
-				try {
-					URL website = new URL(Constants.URL_HASHLIST_FILE);
-					ReadableByteChannel rbc = Channels.newChannel(website.openStream());
-					FileOutputStream fos;				
-					fos = new FileOutputStream("./hashlist.db");								
-					fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
-				} catch (FileNotFoundException e) {				
+				BufferedInputStream in = null;
+			    FileOutputStream fout = null;
+			    try {
+			        in = new BufferedInputStream(new URL(Constants.URL_HASHLIST_FILE).openStream());
+			        fout = new FileOutputStream("./hashlist.db");
+
+			        final byte data[] = new byte[1024];
+			        int count;
+			        while ((count = in.read(data, 0, 1024)) != -1) {
+			            fout.write(data, 0, count);
+			        }
+			    } catch (FileNotFoundException e) {
+					// TODO Auto-generated catch block
 					e.printStackTrace();
 				} catch (MalformedURLException e) {
+					// TODO Auto-generated catch block
 					e.printStackTrace();
 				} catch (IOException e) {
+					// TODO Auto-generated catch block
 					e.printStackTrace();
-				}
+				} 
 				
 				//Init DB Again				
 				try {
