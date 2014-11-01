@@ -20,3 +20,5 @@ bin/
 *.jar
 execonfig.xml
 *.cmp
+
+!/luadec.dll
