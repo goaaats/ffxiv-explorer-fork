@@ -581,36 +581,40 @@ public class EXDF_View extends JScrollPane implements ItemListener{
 					EXDF_Dataset dataset = exhFile.getDatasetTable()[x];			
 								
 					switch (dataset.type)
-					{					
-					case 0x05:
-					case 0x04:
-						sbuff.append(""+((int)entry.getShort(dataset.offset) & 0xFFFF));
-						break;
+					{									
 					case 0x1f:
 					case 0x1e:
 					case 0x1d:
 					case 0x1c:
 					case 0x1b:
 					case 0x1a:
-					case 0x19:
-						sbuff.append(((int)entry.getByte(dataset.offset)&0xFF) + "["+String.format("%x",entry.getByte(dataset.offset))+"] ?");
+					case 0x19:					
+						sbuff.append(((int)entry.getByte(dataset.offset)&0xFF));
 						break;
-					case 0x03:	//Level
-					case 0x02:  
-						sbuff.append(""+entry.getByte(dataset.offset));
+					case 0x09: // FLOAT
+					case 0x08:
+						sbuff.append(""+entry.getFloat(dataset.offset));
 						break;
-					case 0x07: //Also Item Id
-					case 0x06: //Icon Id, Item Id 
+					case 0x07: // INT
+					case 0x06:  
 						sbuff.append(""+entry.getInt(dataset.offset));
 						break;
-					case 0x01:
+					case 0x05: // SHORT
+					case 0x04:
+						sbuff.append(""+((int)entry.getShort(dataset.offset) & 0xFFFF));
+						break;
+					case 0x03: // BYTE
+					case 0x02:  
+						sbuff.append(""+entry.getByte(dataset.offset));	
+						break;
+					case 0x01: // BOOL
 						sbuff.append(""+entry.getBoolean(dataset.offset));
 						break;
-					case 0x00: //String; Points to offset from end of dataset part. Read until 0x0.
-						sbuff.append("\""+entry.getString(exhFile.getDatasetChunkSize(), dataset.offset)+"\"");		
+					case 0x00: // STRING; Points to offset from end of dataset part. Read until 0x0.
+						sbuff.append("\""+entry.getString(exhFile.getDatasetChunkSize(), dataset.offset)+"\"");
 						break;
 					default:
-						sbuff.append("?");
+						return "?";
 					}
 				}
 				catch (Exception e)
@@ -623,6 +627,6 @@ public class EXDF_View extends JScrollPane implements ItemListener{
 			}
 			sbuff.append("\r\n");
 		}
-		return sbuff.toString();
+		return new String((new String(sbuff)).getBytes(), "UTF-8");
 	}	
 }

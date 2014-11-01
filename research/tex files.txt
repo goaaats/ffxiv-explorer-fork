@@ -5,7 +5,7 @@ Current research on TEX texture files.
 ===HEADER===
 
 0x000:
-0x002:
+0x002: Header Size			Short;
 0x004: Compression Type     Byte;
 0x006:
 0x008: Uncompressed Width   Short; 

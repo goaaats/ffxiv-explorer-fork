@@ -152,6 +152,17 @@ public class ExplorerPanel_View extends JScrollPane {
 	    }
 	}
 	
+	public boolean folderOnlySelected()
+	{
+		ArrayList<SqPack_File> selectedFiles = new ArrayList<SqPack_File>();
+		TreePath[] selectedPaths = fileTree.getSelectionPaths();
+		
+		if (selectedPaths == null)
+			return false;
+		
+		return selectedPaths.length == 1 && ((DefaultMutableTreeNode) selectedPaths[0].getLastPathComponent()).getUserObject() instanceof SqPack_Folder;
+	}
+	
 	public ArrayList<SqPack_File> getSelectedFiles()
 	{
 		ArrayList<SqPack_File> selectedFiles = new ArrayList<SqPack_File>();
