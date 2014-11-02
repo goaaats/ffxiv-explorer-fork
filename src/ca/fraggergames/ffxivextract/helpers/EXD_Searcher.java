@@ -9,6 +9,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 
+import javax.swing.text.NumberFormatter;
+
 import ca.fraggergames.ffxivextract.models.SqPack_DatFile;
 import ca.fraggergames.ffxivextract.models.SqPack_IndexFile;
 import ca.fraggergames.ffxivextract.models.SqPack_IndexFile.SqPack_File;
@@ -166,5 +168,41 @@ public class EXD_Searcher {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+	
+	public static void generateMaps(String path) throws IOException
+	{
+		String regions[] = {"f", "s", "w", "r", "l"};
+		String types[] = {"f", "t", "h", "r", "d"};		
+		BufferedWriter writer = new BufferedWriter(new FileWriter(path+"out.txt"));
+		/*
+		for (int i = 0; i < regions.length; i++)
+		{
+			for (int i2 = 0; i2 < 5; i2++)
+			{
+				for (int i3 = 0; i3 < types.length; i3++)
+				{
+					for (int i4 = 0; i4 < 10; i4++)
+					{
+						for (int floor = 0; floor < 8; floor++)
+						{
+							String spath = String.format("ui/map/%s%d%s%d/%02d/", regions[i], i2, types[i3], i4, floor);
+							writer.write(spath + String.format("%s%d%s%d%02dd.tex\r\n", regions[i], i2, types[i3], i4, floor));
+							writer.write(spath + String.format("%s%d%s%d%02d_s.tex\r\n", regions[i], i2, types[i3], i4, floor));
+							writer.write(spath + String.format("%s%d%s%d%02ds_s.tex\r\n", regions[i], i2, types[i3], i4, floor));
+							writer.write(spath + String.format("%s%d%s%d%02d_m.tex\r\n", regions[i], i2, types[i3], i4, floor));
+							writer.write(spath + String.format("%s%d%s%d%02dm_m.tex\r\n", regions[i], i2, types[i3], i4, floor));
+							System.out.println("Creating: " + spath + String.format("%s%d%s%d%02dd.tex\r\n", regions[i], i2, types[i3], i4, floor));
+						}
+					}
+				}
+			}
+		}*/
+		
+		writer.write("ui/map/default/00/default00m_m.tex\r\n");
+		writer.write("ui/map/default/00/default00s_s.tex\r\n");
+		writer.write("ui/map/default/00/default00_m.tex\r\n");
+		
+		writer.close();
 	}
 }

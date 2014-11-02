@@ -374,10 +374,14 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 		tools_macroEditor.setActionCommand("macroeditor");
 		tools_macroEditor.addActionListener(menuHandler);
 		
-		JMenuItem tools_logViewer = new JMenuItem(Strings.MENUITEM_LOGVIEWER);
+		JMenuItem tools_logViewer = new JMenuItem(Strings.MENUITEM_LOGVIEWER);		
 		tools_logViewer.setActionCommand("logviewer");
 		tools_logViewer.addActionListener(menuHandler);
 
+		tools_musicswapper.setEnabled(false);
+		tools_macroEditor.setEnabled(false);
+		tools_logViewer.setEnabled(false);
+		
 		Preferences prefs = Preferences.userNodeForPackage(ca.fraggergames.ffxivextract.Main.class);
 		options_enableUpdate = new JCheckBoxMenuItem(Strings.MENUITEM_ENABLEUPDATE, prefs.getBoolean(Constants.PREF_DO_DB_UPDATE, false));
 		options_enableUpdate.setActionCommand("options_update");
