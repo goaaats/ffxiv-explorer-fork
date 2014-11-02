@@ -1,12 +1,7 @@
 package ca.fraggergames.ffxivextract;
 
-import java.io.BufferedInputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.prefs.Preferences;
 
 import javax.swing.JOptionPane;
@@ -154,7 +149,6 @@ public class Main {
 			if (n == JOptionPane.YES_OPTION)
 			{
 				prefs.putBoolean(Constants.PREF_DO_DB_UPDATE, true);
-				checkForNewDb(fileMan);
 			}
 			else
 				prefs.putBoolean(Constants.PREF_DO_DB_UPDATE, false);
@@ -162,57 +156,15 @@ public class Main {
 		
 		//Version Check
 		if (prefs.getBoolean(Constants.PREF_DO_DB_UPDATE, false))
-			checkForNewDb(fileMan);
-		
-	}
-	
-	private static void checkForNewDb(FileManagerWindow fileMan){
-		VersionCheckObject checkObj = VersionUpdater.checkForUpdates();
-		
-		if (Constants.DB_VERSION_CODE < checkObj.currentDbVer)
 		{
-			int n = JOptionPane.showConfirmDialog(fileMan,  "A new DB was found updated on " + checkObj.dbUpdateDate + ", want to download? " + (Constants.APP_VERSION_CODE < checkObj.currentAppVer ? "\nBTW, a new app version is up at " + Constants.URL_WEBSITE + "!" : ""), "New DB Found",				    
-				    JOptionPane.YES_NO_OPTION);
-			if (n == JOptionPane.YES_OPTION)
+			VersionCheckObject checkObj = VersionUpdater.checkForUpdates();
+			
+			if (Constants.DB_VERSION_CODE < checkObj.currentDbVer || Constants.APP_VERSION_CODE < checkObj.currentAppVer )
 			{
-				File file = new File("./hashlist.db");
-				file.delete();
-				
-				BufferedInputStream in = null;
-			    FileOutputStream fout = null;
-			    try {
-			        in = new BufferedInputStream(new URL(Constants.URL_HASHLIST_FILE).openStream());
-			        fout = new FileOutputStream("./hashlist.db");
-
-			        final byte data[] = new byte[1024];
-			        int count;
-			        while ((count = in.read(data, 0, 1024)) != -1) {
-			            fout.write(data, 0, count);
-			        }
-			    } catch (FileNotFoundException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (MalformedURLException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} 
-				
-				//Init DB Again				
-				try {
-					File dbFile = new File("./" + Constants.DBFILE_NAME);
-					if (dbFile.exists())
-						HashDatabase.init();
-					else
-						JOptionPane.showMessageDialog(null,
-								Constants.DBFILE_NAME + " is missing. No file or folder names will be shown... instead the file's hashes will be displayed.",
-							    "Hash DB Load Error",
-							    JOptionPane.ERROR_MESSAGE);		
-				} catch (ClassNotFoundException e1) {			
-					e1.printStackTrace();
-				}
+				JOptionPane.showMessageDialog(null,
+						(Constants.DB_VERSION_CODE < checkObj.currentDbVer ? "-A new Hash DB was found, it was updated on " + checkObj.dbUpdateDate + ".\n" : "") + (Constants.APP_VERSION_CODE < checkObj.currentAppVer ? "-A new app version was found, it was updated on " + checkObj.appUpdateDate + "." : "") + "\nDownload at: " + Constants.URL_WEBSITE,
+					    "New Update Found",
+					    JOptionPane.INFORMATION_MESSAGE);
 			}
 		}
 		

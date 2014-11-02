@@ -13,9 +13,11 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.prefs.Preferences;
 
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
+import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -91,6 +93,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 	JMenuItem file_Close;
 	JMenuItem search_search;
 	JMenuItem search_searchAgain;	
+	JCheckBoxMenuItem options_enableUpdate;
 	
 	OggVorbisPlayer player;
 	
@@ -304,9 +307,10 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 				logViewer.setLocationRelativeTo(FileManagerWindow.this);
 				logViewer.setVisible(true);
 			}
-			else if (event.getActionCommand().equals("options_sort"))
+			else if (event.getActionCommand().equals("options_update"))
 			{
-				 
+				Preferences prefs = Preferences.userNodeForPackage(ca.fraggergames.ffxivextract.Main.class);				
+				prefs.putBoolean(Constants.PREF_DO_DB_UPDATE, options_enableUpdate.isSelected());
 			}
 			else if (event.getActionCommand().equals("quit"))
 			{				
@@ -373,10 +377,11 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 		JMenuItem tools_logViewer = new JMenuItem(Strings.MENUITEM_LOGVIEWER);
 		tools_logViewer.setActionCommand("logviewer");
 		tools_logViewer.addActionListener(menuHandler);
-		
-		JMenuItem options_enableSort = new JMenuItem(Strings.MENUITEM_ENABLESORT);
-		options_enableSort.setActionCommand("options_sort");
-		options_enableSort.addActionListener(menuHandler);
+
+		Preferences prefs = Preferences.userNodeForPackage(ca.fraggergames.ffxivextract.Main.class);
+		options_enableUpdate = new JCheckBoxMenuItem(Strings.MENUITEM_ENABLEUPDATE, prefs.getBoolean(Constants.PREF_DO_DB_UPDATE, false));
+		options_enableUpdate.setActionCommand("options_update");
+		options_enableUpdate.addActionListener(menuHandler);
 		
 		JMenuItem help_About = new JMenuItem("About");
 
@@ -398,7 +403,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 		tools.add(tools_macroEditor);
 		tools.add(tools_logViewer);
 		
-		options.add(options_enableSort);
+		options.add(options_enableUpdate);
 		
 		help.add(help_About);
 		
@@ -406,7 +411,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 		menu.add(file);
 		menu.add(search);
 		menu.add(tools);
-		//menu.add(options);
+		menu.add(options);
 		menu.add(help);
 		
 		this.setJMenuBar(menu);
@@ -418,6 +423,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 		if (fileTree.isOnlyFolder())
 		{
 			splitPane.setRightComponent(new JScrollPane());
+			return;
 		}
 		
 		if (fileTree.getSelectedFiles().size() == 0)
@@ -679,18 +685,55 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 						EXHF_File file = new EXHF_File(data);
 						
 						tempView = new EXDF_View(currentIndexFile, currentDatFile,  HashDatabase.getFolder(fileTree.getSelectedFiles().get(0).getId2()) + "/" + fileTree.getSelectedFiles().get(0).getName(), file);						
-						dataToSave = tempView.getCSV().getBytes();
-						extension = ".csv";
+						
+						for (int l = 0; l < (tempView.getNumLangs() == 1 ? 1 : 4); l++)
+						{
+														
+							String path = lastOpenedFile.getCanonicalPath();
+							String fileName = files.get(i).getName();
+							
+							if (fileName == null)						
+								fileName = String.format("%X", files.get(i).getId() & 0xFFFFFFFF);
+							
+							if (files.size() > 1)
+								path = lastOpenedFile.getCanonicalPath() + "\\" + fileName;	
+							
+							tempView.saveCSV(path + (tempView.getNumLangs()==1 ? "" : "_" + EXDF_View.langs[l]) +  ".csv", l);
+														
+						}
+						
+						continue;
 					}
-					else if (tempView != null && extension.equals(".exd") && doConvert)
+					else if (extension.equals(".exd") && doConvert)
 					{
-						if (tempView.isSame(files.get(i).getName()))
+						if (tempView != null && tempView.isSame(files.get(i).getName()))
 							continue;
 						EXDF_File file = new EXDF_File(data);
 						
 						tempView = new EXDF_View(currentIndexFile, currentDatFile,  HashDatabase.getFolder(fileTree.getSelectedFiles().get(0).getId2()) + "/" + fileTree.getSelectedFiles().get(0).getName(), file);						
-						dataToSave = tempView.getCSV().getBytes();
-						extension = ".csv";
+						
+						//Remove the thing
+						String exhName = files.get(i).getName(); 
+						exhName = exhName.replace("_en.exd", "");
+						exhName = exhName.replace("_ja.exd", "");
+						exhName = exhName.replace("_de.exd", "");
+						exhName = exhName.replace("_fr.exd", "");
+						exhName = exhName.substring(0, exhName.lastIndexOf("_")) +".exh";
+						
+						for (int l = 0; l < (tempView.getNumLangs() == 1 ? 1 : 4); l++)
+						{							
+							String path = lastOpenedFile.getParent();
+							String fileName = exhName;
+							
+							if (fileName == null)						
+								fileName = String.format("%X", files.get(i).getId() & 0xFFFFFFFF);
+							
+							path += "\\" + fileName;	
+							tempView.saveCSV(path + (tempView.getNumLangs()==1 ? "" : "_" + EXDF_View.langs[l]) + ".csv", l);
+							
+						}
+						
+						continue;
 					}
 					else if (extension.equals(".png") && doConvert)
 					{
@@ -733,7 +776,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 							out.write(dataToSave, 0, dataToSave.length);
 							out.close();
 						}
-												
+						continue;		
 					}
 					else
 					{

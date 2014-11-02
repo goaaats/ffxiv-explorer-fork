@@ -14,14 +14,14 @@ public class Constants {
 	public static boolean DEBUG = false;
 	public static boolean EASTER_EGG = false;
 
-	public static final String URL_WEBSITE = "http://141.117.162.99:8080/";
-	public static final String URL_VERSION_CHECK = "http://141.117.162.99:8080/version_check.json";
-	public static final String URL_HASHLIST_FILE = "http://141.117.162.99:8080/downloads/hashlist.db";
+	public static final String URL_WEBSITE = "http://ffxivexplorer.fragmenterworks.com/";
+	public static final String URL_VERSION_CHECK = URL_WEBSITE + "version_check.json";
+	public static final String URL_HASHLIST_FILE = URL_WEBSITE + "downloads/hashlist.db";
 	
 	public static final String DBFILE_NAME = "hashlist.db";
 	
 	public static final String PREF_FIRSTRUN = "pref_firstrun";
-	public static final String PREF_DO_APP_UPDATE = "pref_appupdate";
+	//public static final String PREF_DO_APP_UPDATE = "pref_appupdate";
 	public static final String PREF_DO_DB_UPDATE = "pref_dbupdate";
 	
 	public static final String[] iconList = {
