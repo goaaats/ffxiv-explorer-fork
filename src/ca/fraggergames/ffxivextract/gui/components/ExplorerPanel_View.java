@@ -6,8 +6,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.List;
 
 import javax.swing.Icon;
 import javax.swing.JScrollPane;
@@ -19,12 +17,9 @@ import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 
-import ca.fraggergames.ffxivextract.Constants;
 import ca.fraggergames.ffxivextract.models.SqPack_IndexFile;
 import ca.fraggergames.ffxivextract.models.SqPack_IndexFile.SqPack_File;
 import ca.fraggergames.ffxivextract.models.SqPack_IndexFile.SqPack_Folder;
-import ca.fraggergames.ffxivextract.storage.CompareFile;
-import ca.fraggergames.ffxivextract.storage.HashDatabase;
 
 @SuppressWarnings("serial")
 public class ExplorerPanel_View extends JScrollPane {
@@ -32,8 +27,6 @@ public class ExplorerPanel_View extends JScrollPane {
 	JTree fileTree;
 	DefaultMutableTreeNode root = new DefaultMutableTreeNode("No File Loaded");
 	JScrollPane scroller;
-
-	CompareFile currentCompareFile;
 	
 	public ExplorerPanel_View() {
 		setBackground(Color.WHITE);
@@ -52,9 +45,7 @@ public class ExplorerPanel_View extends JScrollPane {
 		fileTree.addTreeSelectionListener(l);
 	}
 	
-	public void fileOpened(SqPack_IndexFile index, CompareFile compareFile) {		
-		
-		currentCompareFile = compareFile;
+	public void fileOpened(SqPack_IndexFile index) {		
 		
 		if (index.hasNoFolders())
 		{
@@ -119,11 +110,11 @@ public class ExplorerPanel_View extends JScrollPane {
 	        {
 	        	SqPack_File file = (SqPack_File) node.getUserObject();
 	        	
-	        	if (currentCompareFile != null && currentCompareFile.isNewFile(file.getId()))
+	        	/*if (currentCompareFile != null && currentCompareFile.isNewFile(file.getId()))
 	        		setTextNonSelectionColor(new Color(0,150,0));
 	        	else
 	        		setTextNonSelectionColor(Color.BLACK);
-	        	
+	        	*/
 	        	value = file.getName();
 	        	
 	        	setLeafIcon(fileIcon);

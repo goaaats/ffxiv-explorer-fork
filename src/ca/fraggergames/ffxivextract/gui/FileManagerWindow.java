@@ -65,7 +65,6 @@ import ca.fraggergames.ffxivextract.models.SCD_File.SCD_Sound_Info;
 import ca.fraggergames.ffxivextract.models.SqPack_IndexFile;
 import ca.fraggergames.ffxivextract.models.SqPack_IndexFile.SqPack_File;
 import ca.fraggergames.ffxivextract.models.Texture_File;
-import ca.fraggergames.ffxivextract.storage.CompareFile;
 import ca.fraggergames.ffxivextract.storage.HashDatabase;
 
 @SuppressWarnings("serial")
@@ -79,7 +78,6 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 	//FILE IO
 	File lastOpenedFile = null;
 	SqPack_IndexFile currentIndexFile;
-	CompareFile currentCompareFile;
 	
 	//UI
 	SearchWindow searchWindow;
@@ -238,15 +236,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 			return;
 		
 		fileTree.fileClosed();	
-		currentIndexFile = null;
-		try {
-			if (currentCompareFile != null)
-				currentCompareFile.save();
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		currentCompareFile = null;
+		currentIndexFile = null;		
 		
 		setTitle(Constants.APPNAME);
 		hexView.setBytes(null);
@@ -657,8 +647,6 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 		protected Void doInBackground() throws Exception {
 			try {				
 				currentIndexFile = new SqPack_IndexFile(selectedFile.getAbsolutePath(), prgLoadingBar);			
-			//	currentDatFile = new SqPack_DatFile(selectedFile.getAbsolutePath().replace(".index", ".dat0"));
-				currentCompareFile = CompareFile.getCompareFile(selectedFile.getName().substring(0, selectedFile.getName().lastIndexOf('.')));
 			} catch (Exception e) {
 				JOptionPane.showMessageDialog(FileManagerWindow.this,
 						"There was an error opening this index file.",
@@ -675,7 +663,6 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 				currentIndexFile.displayIndexInfo();
 			
 			setTitle(Constants.APPNAME + " [" + selectedFile.getName() + "]");
-			fileTree.fileOpened(currentIndexFile, currentCompareFile);
 			file_Close.setEnabled(true);
 			search_search.setEnabled(true);
 			FileManagerWindow.this.setEnabled(true);
