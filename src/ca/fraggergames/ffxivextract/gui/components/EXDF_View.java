@@ -47,8 +47,7 @@ public class EXDF_View extends JScrollPane implements ItemListener{
 	public static final String[] langs = {"en","ja", "fr", "de"};
 	
 	//EXH Context
-	SqPack_IndexFile currentIndex;
-	SqPack_DatFile currentDat;
+	SqPack_IndexFile currentIndex;	
 	EXHF_File exhFile = null;
 	EXDF_File exdFile[] = null;
 	String exhFolder;
@@ -68,12 +67,11 @@ public class EXDF_View extends JScrollPane implements ItemListener{
 	private JTable table;
 	
 	//Given a EXD file, figure out EXH name, and look for it.
-	public EXDF_View(SqPack_IndexFile currentIndex, SqPack_DatFile currentDat, String fullPath, EXDF_File file) {		
+	public EXDF_View(SqPack_IndexFile currentIndex, String fullPath, EXDF_File file) {		
 		
 		this();
 		
 		this.currentIndex = currentIndex;
-		this.currentDat = currentDat;
 		
 		fullPath = fullPath.toLowerCase();
 		
@@ -121,7 +119,7 @@ public class EXDF_View extends JScrollPane implements ItemListener{
 			if (currentIndex.getPackFolders()[folderIndex].getFiles()[j].getId() == fullPathHash)
 			{
 				try {
-					byte[] data = currentDat.extractFile(currentIndex.getPackFolders()[folderIndex].getFiles()[j].getOffset(),  null);
+					byte[] data = currentIndex.extractFile(currentIndex.getPackFolders()[folderIndex].getFiles()[j].getOffset(),  null);
 					exhFile = new EXHF_File(data);
 					break;
 				} catch (IOException e) {
@@ -155,14 +153,13 @@ public class EXDF_View extends JScrollPane implements ItemListener{
 	}
 
 	//Given a EXH file, figure out EXD name, and look for it.
-	public EXDF_View(SqPack_IndexFile currentIndex, SqPack_DatFile currentDat, String fullPath, EXHF_File file) {		
+	public EXDF_View(SqPack_IndexFile currentIndex, String fullPath, EXHF_File file) {		
 		
 		this();
 		
 		fullPath = fullPath.toLowerCase();
 		
 		this.currentIndex = currentIndex;
-		this.currentDat = currentDat;
 		this.exhFile = file;		
 		
 		//If the name is unknown, don't bother
@@ -338,7 +335,7 @@ public class EXDF_View extends JScrollPane implements ItemListener{
 								else
 									HashDatabase.addPathToDB(String.format(exdName, exhFile.getPageTable()[i].pageNum, ""));
 							}
-							byte[] data = currentDat.extractFile(currentIndex.getPackFolders()[folderIndex].getFiles()[j2].getOffset(), null);
+							byte[] data = currentIndex.extractFile(currentIndex.getPackFolders()[folderIndex].getFiles()[j2].getOffset(), null);
 							exdFile[(i*(numLanguages == 1 ? 1 : 4))+j] = new EXDF_File(data);
 						} catch (IOException e) {
 							e.printStackTrace();
@@ -551,7 +548,7 @@ public class EXDF_View extends JScrollPane implements ItemListener{
 		
 		for (int y = exhFile.getPageTable()[0].pageNum; y < exhFile.getNumEntries(); y++)
 		{
-			for (int x = 0; x < exhFile.getDatasetTable().length; x++)
+			for (int x = 0; x < exhFile.getDatasetTable().length + 1; x++)
 			{
 				try{					
 					int page = 0;
@@ -614,7 +611,7 @@ public class EXDF_View extends JScrollPane implements ItemListener{
 					case 0x1b:
 					case 0x1a:
 					case 0x19:					
-						out.write(((int)entry.getByte(dataset.offset)&0xFF));
+						out.write(""+((int)entry.getByte(dataset.offset)&0xFF));
 						break;
 					case 0x09: // FLOAT
 					case 0x08:
@@ -647,7 +644,8 @@ public class EXDF_View extends JScrollPane implements ItemListener{
 					e.printStackTrace();
 					out.write("");
 				}
-				if (x != exhFile.getDatasetTable().length-1)
+				
+				if (x != exhFile.getDatasetTable().length)
 					out.write(",");
 			}
 			out.write("\r\n");

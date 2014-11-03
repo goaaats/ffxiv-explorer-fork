@@ -52,13 +52,14 @@ public class PathSearcher extends JFrame {
 	*/
 	
 	static String folders[] = {
-		"ui/"
+		"sound/"
 	};
 	
  	public static void doPathSearch(String path) throws IOException {
+
+		System.out.println("Opening " + path + "....");
 		
 		SqPack_IndexFile currentIndexFile = new SqPack_IndexFile(path);
-		SqPack_DatFile currentDatFile = new SqPack_DatFile(path.replace(".index", ".dat0"));
 		
 		int numFound = 0;
 		int numFoundFolder = 0;
@@ -72,13 +73,18 @@ public class PathSearcher extends JFrame {
 		{
 		
 			System.out.println("Searching for folder " + folders[folderIndex] + "....");
-			
+			Connection conn = HashDatabase.getConnection();
+			try {
+				conn.setAutoCommit(false);
+			} catch (SQLException e1) {
+				e1.printStackTrace();
+			}
 			String string = folders[folderIndex];
 			for (int i = 0; i < currentIndexFile.getPackFolders().length; i++) {
-				Connection conn = HashDatabase.getConnection();
 				try {
-					conn.setAutoCommit(false);
+					conn.commit();
 				} catch (SQLException e1) {
+					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
 				SqPack_Folder f = currentIndexFile.getPackFolders()[i];
@@ -86,10 +92,10 @@ public class PathSearcher extends JFrame {
 					SqPack_File fi = f.getFiles()[j];
 					byte[] data;
 					try {
-						if (currentDatFile.getContentType(fi.dataoffset) == 4)
+						if (currentIndexFile.getContentType(fi.dataoffset) == 4)
 							continue;
-						data = currentDatFile.extractFile(fi.dataoffset, null);
-						if (data == null)
+						data = currentIndexFile.extractFile(fi.dataoffset, null);
+						if (data == null || (data.length >= 8 && data[0] == 'S' && data[1] == 'E' && data[2] == 'D' && data[3] == 'B' && data[4] == 'S' && data[5] == 'S' && data[6] == 'C' && data[7] == 'F'))
 							continue;
 						
 						for (int i2 = 0; i2 < data.length - string.length(); i2++) {
@@ -144,16 +150,17 @@ public class PathSearcher extends JFrame {
 					}
 	
 				}
-				try {
-					conn.commit();
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-				HashDatabase.closeConnection(conn);
+				
 			}
 			System.out.println("Found " + numFoundFolder + " paths, " + numNewFoundFolder + " were new.");
 			numFoundFolder = 0;
 			numNewFoundFolder = 0;
+			try {
+				conn.commit();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+			HashDatabase.closeConnection(conn);
 		}
 		System.out.println("Done search on " + path + ". Found " + numFound + " paths, " + numNewFound + " were new.");
 		System.out.println("========================================");

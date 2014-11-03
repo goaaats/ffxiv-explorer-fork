@@ -35,7 +35,6 @@ public class SearchWindow extends JFrame {
 
 	// FILE IO
 	SqPack_IndexFile currentIndexFile;
-	SqPack_DatFile currentDatFile;
 	ISearchComplete searchCallback;
 
 	// UI
@@ -56,7 +55,7 @@ public class SearchWindow extends JFrame {
 	int lastFile = 0;
 	
 	public SearchWindow(SqPack_IndexFile currentIndexFile,
-			SqPack_DatFile currentDatFile, ISearchComplete searchCallback) {
+			ISearchComplete searchCallback) {
 		this.setTitle(Strings.DIALOG_TITLE_SEARCH);
 		URL imageURL = getClass().getResource("/res/frameicon.png");
 		ImageIcon image = new ImageIcon(imageURL);
@@ -64,7 +63,6 @@ public class SearchWindow extends JFrame {
 		this.searchCallback = searchCallback;
 		
 		this.currentIndexFile = currentIndexFile;
-		this.currentDatFile = currentDatFile;
 
 		// String search
 		pnlSearchString = new JPanel(new GridBagLayout());
@@ -164,7 +162,7 @@ public class SearchWindow extends JFrame {
 				SqPack_File fi = f.getFiles()[j];
 				byte[] data;
 				try {
-					data = currentDatFile.extractFile(fi.dataoffset, null);
+					data = currentIndexFile.extractFile(fi.dataoffset, null);
 					if (data == null)
 						continue;
 					

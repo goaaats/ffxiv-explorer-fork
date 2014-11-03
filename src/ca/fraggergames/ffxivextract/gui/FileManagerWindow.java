@@ -73,7 +73,6 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 	//FILE IO
 	File lastOpenedFile = null;
 	SqPack_IndexFile currentIndexFile;
-	SqPack_DatFile currentDatFile;
 	CompareFile currentCompareFile;
 	
 	//UI
@@ -197,7 +196,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 
 	protected void openFile(File selectedFile) {
 		
-		if (currentIndexFile != null || currentDatFile != null)
+		if (currentIndexFile != null)
 			closeFile();
 		
 		OpenIndexTask openTask = new OpenIndexTask(selectedFile);
@@ -206,17 +205,11 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 
 	protected void closeFile() {
 		
-		if (currentDatFile == null || currentIndexFile == null)
+		if (currentIndexFile == null)
 			return;
 		
-		fileTree.fileClosed();
-		try {
-			currentDatFile.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		fileTree.fileClosed();	
 		currentIndexFile = null;
-		currentDatFile = null;
 		try {
 			if (currentCompareFile != null)
 				currentCompareFile.save();
@@ -281,7 +274,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 			}
 			else if (event.getActionCommand().equals("search"))
 			{
-				searchWindow = new SearchWindow(currentIndexFile, currentDatFile, FileManagerWindow.this);
+				searchWindow = new SearchWindow(currentIndexFile, FileManagerWindow.this);
 				searchWindow.setLocationRelativeTo(FileManagerWindow.this);
 				searchWindow.setVisible(true);
 			}
@@ -450,10 +443,12 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 		}
 		else
 		{
-			lblOffsetValue.setText(String.format("0x%08X",fileTree.getSelectedFiles().get(0).getOffset()));
+			int datNum = (int) ((fileTree.getSelectedFiles().get(0).getOffset() & 0x000F) / 2);
+			
+			lblOffsetValue.setText(String.format("0x%08X",fileTree.getSelectedFiles().get(0).getOffset()*0x8) + " (Dat: " + datNum +")");
 			lblHashValue.setText(String.format("0x%08X",fileTree.getSelectedFiles().get(0).getId()));
 			try{
-				lblContentTypeValue.setText(""+currentDatFile.getContentType(fileTree.getSelectedFiles().get(0).getOffset()));
+				lblContentTypeValue.setText(""+currentIndexFile.getContentType(fileTree.getSelectedFiles().get(0).getOffset()));
 			}
 			catch (IOException ioe)
 			{
@@ -470,8 +465,8 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 		byte data[] = null;		
 		int contentType = -1;
 		try {
-			 contentType = currentDatFile.getContentType(file.getOffset()); 
-			data = currentDatFile.extractFile(file.dataoffset, null);
+			 contentType = currentIndexFile.getContentType(file.getOffset()); 
+			data = currentIndexFile.extractFile(file.dataoffset, null);
 		} catch (Exception e1) {
 			e1.printStackTrace();
 			JOptionPane.showMessageDialog(FileManagerWindow.this,
@@ -493,7 +488,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 		{							
 			try {
 				if (exhfComponent == null || !exhfComponent.isSame(file.getName()))				
-					exhfComponent = new EXDF_View(currentIndexFile, currentDatFile, HashDatabase.getFolder(file.getId2()) + "/" + file.getName(), new EXHF_File(data));				
+					exhfComponent = new EXDF_View(currentIndexFile, HashDatabase.getFolder(file.getId2()) + "/" + file.getName(), new EXHF_File(data));				
 				tabs.addTab("EXDF File", exhfComponent);			
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
@@ -504,7 +499,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 		{								
 			try {
 				if (exhfComponent == null || !exhfComponent.isSame(file.getName()))				
-					exhfComponent = new EXDF_View(currentIndexFile, currentDatFile, HashDatabase.getFolder(file.getId2()) + "/" + file.getName(), new EXDF_File(data));
+					exhfComponent = new EXDF_View(currentIndexFile, HashDatabase.getFolder(file.getId2()) + "/" + file.getName(), new EXDF_File(data));
 				tabs.addTab("EXHF File", exhfComponent);
 				
 			} catch (IOException e) {
@@ -633,7 +628,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 		protected Void doInBackground() throws Exception {
 			try {				
 				currentIndexFile = new SqPack_IndexFile(selectedFile.getAbsolutePath(), prgLoadingBar);			
-				currentDatFile = new SqPack_DatFile(selectedFile.getAbsolutePath().replace(".index", ".dat0"));
+			//	currentDatFile = new SqPack_DatFile(selectedFile.getAbsolutePath().replace(".index", ".dat0"));
 				currentCompareFile = CompareFile.getCompareFile(selectedFile.getName().substring(0, selectedFile.getName().lastIndexOf('.')));
 			} catch (Exception e) {
 				JOptionPane.showMessageDialog(FileManagerWindow.this,
@@ -678,9 +673,9 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 			
 			for (int i = 0; i < files.size(); i++){
 				try {
-					byte[] data = currentDatFile.extractFile(files.get(i).getOffset(), loadingDialog);
+					byte[] data = currentIndexFile.extractFile(files.get(i).getOffset(), loadingDialog);
 					byte[] dataToSave = null;
-					String extension = getExtension(currentDatFile.getContentType(files.get(i).getOffset()), data);
+					String extension = getExtension(currentIndexFile.getContentType(files.get(i).getOffset()), data);
 					
 					if (extension.equals(".exh") && doConvert)
 					{
@@ -688,7 +683,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 							continue;
 						EXHF_File file = new EXHF_File(data);
 						
-						tempView = new EXDF_View(currentIndexFile, currentDatFile,  HashDatabase.getFolder(fileTree.getSelectedFiles().get(0).getId2()) + "/" + fileTree.getSelectedFiles().get(0).getName(), file);						
+						tempView = new EXDF_View(currentIndexFile, HashDatabase.getFolder(fileTree.getSelectedFiles().get(0).getId2()) + "/" + fileTree.getSelectedFiles().get(0).getName(), file);						
 						
 						for (int l = 0; l < (tempView.getNumLangs() == 1 ? 1 : 4); l++)
 						{
@@ -714,7 +709,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 							continue;
 						EXDF_File file = new EXDF_File(data);
 						
-						tempView = new EXDF_View(currentIndexFile, currentDatFile,  HashDatabase.getFolder(fileTree.getSelectedFiles().get(0).getId2()) + "/" + fileTree.getSelectedFiles().get(0).getName(), file);						
+						tempView = new EXDF_View(currentIndexFile,  HashDatabase.getFolder(fileTree.getSelectedFiles().get(0).getId2()) + "/" + fileTree.getSelectedFiles().get(0).getName(), file);						
 						
 						//Remove the thing
 						String exhName = files.get(i).getName(); 

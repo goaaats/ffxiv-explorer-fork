@@ -405,6 +405,14 @@ public class HashDatabase {
 			file.readInt();
 			long lastStartPosition = 0;
 
+			Connection connection = null;
+			try{
+				connection = DriverManager
+						.getConnection("jdbc:sqlite:./hashlist.db");
+				connection.setAutoCommit(false);
+			}
+			catch (Exception e){}
+			
 			// Read until we hit EOF
 			while (true) {
 				lastStartPosition = file.getFilePointer();
@@ -430,24 +438,14 @@ public class HashDatabase {
 					System.out.println("Adding Entry: " + fullPath);
 
 				
-				Connection connection = null;
 				try{
-					connection = DriverManager
-							.getConnection("jdbc:sqlite:./hashlist.db");
 					Statement statement = connection.createStatement();
 					statement.setQueryTimeout(30); // set timeout to 30 sec.
-					statement.executeUpdate("insert or ignore into folders values("+ folderHash + ", '" + folder + "')");
-					statement.executeUpdate("insert or ignore into filenames values("+ fileHash + ", '" + fullPath + "')");
+					statement.executeUpdate("insert or ignore into folders values("+ folderHash + ", '" + folder + "',0)");
+					statement.executeUpdate("insert or ignore into filenames values("+ fileHash + ", '" + fullPath + "',0)");
 				} catch (SQLException e) {
 					System.err.println(e.getMessage());
-				} finally {
-					try {
-						if (connection != null)
-							connection.close();
-					} catch (SQLException e) {
-						System.err.println(e);
-					}
-				}
+				} 
 				
 				// Reset
 				file.seek(lastStartPosition);
@@ -458,7 +456,12 @@ public class HashDatabase {
 
 				file.skipBytes(0x108);
 			}
-
+			try {
+				connection.commit();
+					connection.close();
+			} catch (SQLException e) {
+				System.err.println(e);
+			}
 			file.close();
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block

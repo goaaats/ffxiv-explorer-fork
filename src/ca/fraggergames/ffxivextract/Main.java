@@ -2,6 +2,7 @@ package ca.fraggergames.ffxivextract;
 
 import java.io.File;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.prefs.Preferences;
 
 import javax.swing.JOptionPane;
@@ -37,6 +38,13 @@ public class Main {
 		} catch (ClassNotFoundException e1) {			
 			e1.printStackTrace();
 		}		
+/*		
+		try {
+			PathSearcher.doPathSearch("E:\\Program Files (x86)\\SquareEnix\\FINAL FANTASY XIV - A Realm Reborn\\game\\sqpack\\ffxiv\\080000.win32.index");
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 		
 		/*
 		
@@ -55,15 +63,15 @@ public class Main {
 		catch (Exception e){}*/
 		//EXD_Searcher.createEXDFiles("E:\\Coding\\workspace3\\FFXIV_Extractor\\exddump2.txt");
 		
-	/*	try {
-			HashDatabase.loadPathsFromTXT("E:\\Coding\\workspace3\\FFXIV_Extractor\\exddump2.txtout.txt");
+		try {
+			HashDatabase.loadPathsFromTXT("E:\\Coding\\workspace3\\FFXIV_Extractor\\out2.txt");
 			//return;
 		} catch (SQLException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-	
-		/*
+	/*
+		
 		SqPack_IndexFile index;
 		try {
 			index = new SqPack_IndexFile("E:\\Program Files (x86)\\SquareEnix\\FINAL FANTASY XIV - A Realm Reborn\\game\\sqpack\\ffxiv\\0a0000.win32.index");

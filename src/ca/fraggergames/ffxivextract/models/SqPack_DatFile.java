@@ -114,13 +114,31 @@ public class SqPack_DatFile {
 				}
 			}		
 			break;
+		}		
+		
+		byte decompressedFile[] = null;
+		int currentFileOffset = -1;
+		
+		try{
+		if (fileSize + extraHeaderSize < 0)
+			return null;
+		
+		if (fileSize + extraHeaderSize > 16000000)
+			return null;
+		decompressedFile = new byte[fileSize + extraHeaderSize];
+		currentFileOffset = extraHeaderSize;
 		}
-		byte decompressedFile[] = new byte[fileSize + extraHeaderSize];
-		int currentFileOffset = extraHeaderSize;
+		catch (Exception e)
+		{
+			return null;
+		}
 		
 		//If we got a loading dialog
 		if (loadingDialog != null)
 			loadingDialog.setMaxBlocks(dataBlocks.length);
+		
+		if (dataBlocks == null || dataBlocks[0] == null)
+			return null;
 		
 		//Extract File
 		for (int i = 0; i < dataBlocks[0].length; i++)

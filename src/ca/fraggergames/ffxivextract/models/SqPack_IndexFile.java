@@ -4,11 +4,14 @@ import java.io.IOException;
 
 import javax.swing.JProgressBar;
 
+import ca.fraggergames.ffxivextract.gui.components.Loading_Dialog;
 import ca.fraggergames.ffxivextract.helpers.LERandomAccessFile;
 import ca.fraggergames.ffxivextract.storage.HashDatabase;
 
 public class SqPack_IndexFile {
 
+	private String path;
+	
 	private SqPack_DataSegment segments[] = new SqPack_DataSegment[4];
 	private SqPack_Folder packFolders[];
 	private boolean noFolder = false;
@@ -18,6 +21,8 @@ public class SqPack_IndexFile {
 
 	public SqPack_IndexFile(String pathToIndex, JProgressBar prgLoadingBar) throws IOException {
 
+		path = pathToIndex;
+		
 		LERandomAccessFile ref = new LERandomAccessFile(pathToIndex, "r");
 
 		int sqpackHeaderLength = checkSqPackHeader(ref);	
@@ -64,6 +69,8 @@ public class SqPack_IndexFile {
 	
 	public SqPack_IndexFile(String pathToIndex) throws IOException {
 
+		path = pathToIndex;
+		
 		LERandomAccessFile ref = new LERandomAccessFile(pathToIndex, "r");
 
 		int sqpackHeaderLength = checkSqPackHeader(ref);	
@@ -238,7 +245,7 @@ public class SqPack_IndexFile {
 			{			
 				int id = ref.readInt();
 				int id2 = ref.readInt();
-				long dataoffset = ref.readInt() * 8;
+				long dataoffset = ref.readInt();
 				ref.readInt();
 			
 				files[i] = new SqPack_File(id, id2, dataoffset);
@@ -304,6 +311,35 @@ public class SqPack_IndexFile {
 		public String toString() {
 			return name;
 		}
+	}
+
+	public int getContentType(long dataoffset) throws IOException {
+		String pathToOpen = path;
+		
+		//Get the correct data number
+		int datNum = (int) ((dataoffset & 0x000F) / 2);
+		dataoffset -= dataoffset & 0x000F;		
+		pathToOpen = pathToOpen.replace("index", "dat" + datNum);
+		
+		SqPack_DatFile datFile = new SqPack_DatFile(pathToOpen);
+		int contentType = datFile.getContentType(dataoffset * 0x8);
+		datFile.close();
+		return contentType;
+	}
+
+	public byte[] extractFile(long dataoffset, Loading_Dialog loadingDialog) throws IOException {
+		
+		String pathToOpen = path;
+		
+		//Get the correct data number
+		int datNum = (int) ((dataoffset & 0x000F) / 2);
+		dataoffset -= dataoffset & 0x000F;		
+		pathToOpen = pathToOpen.replace("index", "dat" + datNum);
+		
+		SqPack_DatFile datFile = new SqPack_DatFile(pathToOpen);
+		byte[] data = datFile.extractFile(dataoffset * 0x8, loadingDialog);
+		datFile.close();
+		return data;
 	}
 
 

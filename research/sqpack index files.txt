@@ -37,3 +37,8 @@ Notes:
 0x004: Files Offset     Int32; Offset to file list in segment 1.
 0x008: Total Files Size Int32; Total size of all file segments for this folder. To find # files, divide by 0x10 (16).
 0x00b: Padding                 Padded to a total segment entry size of 16 bytes.
+
+NOTES:
+
+-Check the final byte of the offset. If Offset & 0x000F == 2, then the offset is pointing to dat1 rather dat0. Also remember 
+to subtract the 0x2 out. Theoretically, 0x4 would mean dat2 but unknown as of now. 
