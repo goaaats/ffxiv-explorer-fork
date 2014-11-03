@@ -1,8 +1,8 @@
 package ca.fraggergames.ffxivextract;
 
-import javax.swing.UIManager;
+import java.util.Enumeration;
 
-import ca.fraggergames.ffxivextract.storage.PathHashList;
+import javax.swing.UIManager;
 
 public class Constants {
 
@@ -38,10 +38,8 @@ public class Constants {
 		"001028D", "001028E", "00102FD"
 	};
 	
-	
-	
 	public static void setUIFont (javax.swing.plaf.FontUIResource f){
-	    java.util.Enumeration keys = UIManager.getDefaults().keys();
+	    Enumeration<Object> keys = UIManager.getDefaults().keys();
 	    while (keys.hasMoreElements()) {
 	      Object key = keys.nextElement();
 	      Object value = UIManager.get (key);

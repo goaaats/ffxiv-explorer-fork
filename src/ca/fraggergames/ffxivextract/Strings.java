@@ -1,6 +1,5 @@
 package ca.fraggergames.ffxivextract;
 
-import javax.swing.Icon;
 
 public class Strings {
 		

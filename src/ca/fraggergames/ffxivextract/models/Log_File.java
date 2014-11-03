@@ -8,7 +8,6 @@ import java.util.Date;
 import java.util.TimeZone;
 
 import ca.fraggergames.ffxivextract.Constants;
-import ca.fraggergames.ffxivextract.helpers.FFXIV_String;
 import ca.fraggergames.ffxivextract.helpers.LERandomAccessFile;
 
 public class Log_File {

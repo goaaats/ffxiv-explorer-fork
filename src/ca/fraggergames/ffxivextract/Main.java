@@ -2,7 +2,6 @@ package ca.fraggergames.ffxivextract;
 
 import java.io.File;
 import java.io.IOException;
-import java.sql.SQLException;
 import java.util.prefs.Preferences;
 
 import javax.swing.JOptionPane;
@@ -37,7 +36,8 @@ public class Main {
 					    JOptionPane.ERROR_MESSAGE);		
 		} catch (ClassNotFoundException e1) {			
 			e1.printStackTrace();
-		}		
+		}				
+		
 /*		
 		try {
 			PathSearcher.doPathSearch("E:\\Program Files (x86)\\SquareEnix\\FINAL FANTASY XIV - A Realm Reborn\\game\\sqpack\\ffxiv\\080000.win32.index");
@@ -62,7 +62,7 @@ public class Main {
 		}		
 		catch (Exception e){}*/
 		//EXD_Searcher.createEXDFiles("E:\\Coding\\workspace3\\FFXIV_Extractor\\exddump2.txt");
-		
+		/*
 		try {
 			HashDatabase.loadPathsFromTXT("E:\\Coding\\workspace3\\FFXIV_Extractor\\out2.txt");
 			//return;
@@ -143,7 +143,7 @@ public class Main {
 		FileManagerWindow fileMan = new FileManagerWindow(Constants.APPNAME);
 		fileMan.setVisible(true);								
 		
-		//Do version check
+		//Load Prefs
 		Preferences prefs = Preferences.userNodeForPackage(ca.fraggergames.ffxivextract.Main.class);
 		boolean firstRun = prefs.getBoolean(Constants.PREF_FIRSTRUN, true);
 		

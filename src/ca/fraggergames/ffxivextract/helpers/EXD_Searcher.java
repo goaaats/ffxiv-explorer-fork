@@ -9,9 +9,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 
-import javax.swing.text.NumberFormatter;
-
-import ca.fraggergames.ffxivextract.models.SqPack_DatFile;
 import ca.fraggergames.ffxivextract.models.SqPack_IndexFile;
 import ca.fraggergames.ffxivextract.models.SqPack_IndexFile.SqPack_File;
 import ca.fraggergames.ffxivextract.models.SqPack_IndexFile.SqPack_Folder;
@@ -60,7 +57,7 @@ public class EXD_Searcher {
 		
 	}
 	
-	public static void saveEXDNames(SqPack_IndexFile currentIndexFile, SqPack_DatFile currentDatFile)
+	public static void saveEXDNames(SqPack_IndexFile currentIndexFile)
 	{
 		BufferedWriter writer = null;
 		try {writer = new BufferedWriter(new FileWriter("./exddump.txt"));
@@ -76,7 +73,7 @@ public class EXD_Searcher {
 					SqPack_File fi = f.getFiles()[j];
 					byte[] data;
 					try {
-						data = currentDatFile.extractFile(fi.dataoffset, null);
+						data = currentIndexFile.extractFile(fi.dataoffset, null);
 						if (data == null)
 							continue;
 						
@@ -172,8 +169,8 @@ public class EXD_Searcher {
 	
 	public static void generateMaps(String path) throws IOException
 	{
-		String regions[] = {"f", "s", "w", "r", "l"};
-		String types[] = {"f", "t", "h", "r", "d"};		
+		//String regions[] = {"f", "s", "w", "r", "l"};
+		//String types[] = {"f", "t", "h", "r", "d"};		
 		BufferedWriter writer = new BufferedWriter(new FileWriter(path+"out.txt"));
 		/*
 		for (int i = 0; i < regions.length; i++)

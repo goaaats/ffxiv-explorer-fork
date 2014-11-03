@@ -3,11 +3,16 @@ package ca.fraggergames.ffxivextract.gui;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Rectangle;
+import java.awt.TexturePaint;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -15,6 +20,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.prefs.Preferences;
 
+import javax.imageio.ImageIO;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JCheckBoxMenuItem;
@@ -31,6 +37,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
+import javax.swing.JViewport;
 import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
 import javax.swing.SwingWorker;
@@ -55,10 +62,9 @@ import ca.fraggergames.ffxivextract.models.EXDF_File;
 import ca.fraggergames.ffxivextract.models.EXHF_File;
 import ca.fraggergames.ffxivextract.models.SCD_File;
 import ca.fraggergames.ffxivextract.models.SCD_File.SCD_Sound_Info;
-import ca.fraggergames.ffxivextract.models.SqPack_DatFile;
 import ca.fraggergames.ffxivextract.models.SqPack_IndexFile;
-import ca.fraggergames.ffxivextract.models.Texture_File;
 import ca.fraggergames.ffxivextract.models.SqPack_IndexFile.SqPack_File;
+import ca.fraggergames.ffxivextract.models.Texture_File;
 import ca.fraggergames.ffxivextract.storage.CompareFile;
 import ca.fraggergames.ffxivextract.storage.HashDatabase;
 
@@ -78,13 +84,16 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 	//UI
 	SearchWindow searchWindow;
 	ExplorerPanel_View fileTree = new ExplorerPanel_View();	
-	JSplitPane splitPane;
+	JSplitPane splitPane;	
 	JLabel lblOffsetValue;
 	JLabel lblHashValue ;
 	JLabel lblContentTypeValue;
 	Hex_View hexView = new Hex_View(16);
 	EXDF_View exhfComponent;
 	JProgressBar prgLoadingBar;
+	TexturePaint paint;
+	JScrollPane defaultScrollPane;
+	JViewport defaultViewPort;
 	
 	//MENU
 	JMenuItem file_Extract;
@@ -99,15 +108,21 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 	public FileManagerWindow(String title)
 	{	
 		addWindowListener(this);
-
-		//Provide minimum sizes for the two components in the split pane
-		Dimension minimumSize = new Dimension(100, 50);
+		
+		//Load generic bg img
+		BufferedImage bg;
+		try {
+			bg = ImageIO.read(getClass().getResource("/res/triangular.png"));
+			paint = new TexturePaint(bg, new Rectangle(120, 120));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		
 		setupMenu();
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		this.setSize(1200, 800);
 		this.setTitle(title);
-		ClassLoader cldr = this.getClass().getClassLoader();
+		
 		URL imageURL = getClass().getResource("/res/frameicon.png");
 		ImageIcon image = new ImageIcon(imageURL);
 		this.setIconImage(image.getImage());
@@ -116,10 +131,24 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 		getContentPane().add(pnlContent, BorderLayout.CENTER);
 		pnlContent.setLayout(new BoxLayout(pnlContent, BoxLayout.X_AXIS));
 		
-		splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
-			                           fileTree, new JScrollPane()){
+		defaultScrollPane = new JScrollPane();
+		defaultViewPort = new JViewport(){
+			@Override
+			public boolean isOpaque() {
+				return false;
+			}
 			
+			@Override
+			protected void paintComponent(Graphics g) {			
+		        Graphics2D g2d = (Graphics2D) g;
+		        g2d.setPaint(paint);
+		        g2d.fillRect(0, 0, getWidth(), getHeight());
+			}
 		};
+		defaultScrollPane.setViewport(defaultViewPort);
+		
+		splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
+			                           fileTree, defaultScrollPane);
 		pnlContent.add(splitPane);
 		
 		splitPane.setDividerLocation(150);
@@ -177,7 +206,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 		setLocationRelativeTo(null);	
 		
 		//Check Windows registry for a FFXIV folder
-		String value = null;
+		//String value = null;
 		/*try {
 			value = WinRegistry.readString (
 				    WinRegistry.HKEY_LOCAL_MACHINE,                             
@@ -221,7 +250,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 		
 		setTitle(Constants.APPNAME);
 		hexView.setBytes(null);
-		splitPane.setRightComponent(new JScrollPane());
+		splitPane.setRightComponent(defaultScrollPane);
 		file_Close.setEnabled(false);
 		search_search.setEnabled(false);
 		search_searchAgain.setEnabled(false);
@@ -419,7 +448,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 		
 		if (fileTree.isOnlyFolder())
 		{
-			splitPane.setRightComponent(new JScrollPane());
+			splitPane.setRightComponent(defaultScrollPane);
 			return;
 		}
 		

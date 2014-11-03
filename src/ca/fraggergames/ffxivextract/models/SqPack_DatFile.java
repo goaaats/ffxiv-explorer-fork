@@ -20,11 +20,12 @@ public class SqPack_DatFile {
 	
 	private LERandomAccessFile currentFilePointer;
 
-	public SqPack_DatFile(String path) throws FileNotFoundException {
+	protected SqPack_DatFile(String path) throws FileNotFoundException {
 		currentFilePointer = new LERandomAccessFile(path, "r");
 	}
 
-	public byte[] extractFile(long fileOffset, Loading_Dialog loadingDialog) throws IOException {
+	@SuppressWarnings("unused")
+	protected byte[] extractFile(long fileOffset, Loading_Dialog loadingDialog) throws IOException {
 		currentFilePointer.seek(fileOffset);
 		int headerLength = currentFilePointer.readInt();
 		int contentType = currentFilePointer.readInt();
@@ -232,7 +233,7 @@ public class SqPack_DatFile {
 	}
 
 	@SuppressWarnings("deprecation")
-	static void CHECK_ERR(Inflater z, int err, String msg) {
+	private static void CHECK_ERR(Inflater z, int err, String msg) {
 		if (err != JZlib.Z_OK) {
 			if (z.msg != null)
 				System.out.print(z.msg + " ");
@@ -241,7 +242,7 @@ public class SqPack_DatFile {
 		}
 	}
 
-	public void close() throws IOException {
+	protected void close() throws IOException {
 		currentFilePointer.close();
 	}
 
@@ -258,7 +259,7 @@ public class SqPack_DatFile {
 		return (int) ((s2 << 16) + s1);
 	}
 	
-	public class Data_Block{
+	protected class Data_Block{
 		public final int offset;
 		public final int padding;
 		public final int decompressedSize;
@@ -277,7 +278,7 @@ public class SqPack_DatFile {
 		}
 	}
 	
-	public class TextureBlocks{
+	protected class TextureBlocks{
 		public final int offset;
 		public final int padding;		
 		public final int tableOffset;
@@ -292,7 +293,7 @@ public class SqPack_DatFile {
 		
 	}
 
-	public int getContentType(long offset) throws IOException {
+	protected int getContentType(long offset) throws IOException {
 		currentFilePointer.seek(offset);
 		currentFilePointer.readInt(); //Header Length
 		return currentFilePointer.readInt();

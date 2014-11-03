@@ -9,8 +9,6 @@ import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
-import ca.fraggergames.ffxivextract.helpers.FFXIV_String;
-
 public class EXHF_File {	
 
 	private EXDF_Dataset datasetTable[];

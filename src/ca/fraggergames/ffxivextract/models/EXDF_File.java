@@ -1,6 +1,5 @@
 package ca.fraggergames.ffxivextract.models;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -9,8 +8,6 @@ import java.io.UnsupportedEncodingException;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.charset.CharsetDecoder;
 
 public class EXDF_File {
 
@@ -46,7 +43,7 @@ public class EXDF_File {
 			buffer.getShort();
 			
 			int offsetTableSize = buffer.getInt();
-			int dataSectionSize = buffer.getInt();
+			//int dataSectionSize = buffer.getInt();
 			
 			buffer.position(0x20);
 			

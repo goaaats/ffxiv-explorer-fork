@@ -386,6 +386,7 @@ public class HashDatabase {
 	// per entry.
 	// Entry header is: 4 bytes of nothing, some val, content type, 4 bytes of
 	// nothing. Then good stuff starts.
+	@SuppressWarnings("unused")
 	public static void loadPathsFromSQDB(String path) throws SQLException {
 		try {
 			LERandomAccessFile file = new LERandomAccessFile(path, "r");
@@ -471,23 +472,6 @@ public class HashDatabase {
 			e.printStackTrace();
 		}
 	}
-
-	public static void tableswap()
-	{
-		try {
-			PathHashList list = PathHashList.loadDB("C:\\Users\\Filip\\Desktop\\filelist.db");
-			Enumeration<String> elements = list.fileFullPath.elements();
-			Connection conn = HashDatabase.getConnection();			
-			
-			while(elements.hasMoreElements())
-				HashDatabase.addPathToDB(elements.nextElement(), conn);
-			HashDatabase.closeConnection(conn);			
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-	}	
 
 	public static Connection getConnection() {
 		Connection connection = null;		

@@ -22,11 +22,9 @@ import javax.swing.JTextField;
 
 import ca.fraggergames.ffxivextract.Constants;
 import ca.fraggergames.ffxivextract.Strings;
-import ca.fraggergames.ffxivextract.models.SqPack_DatFile;
 import ca.fraggergames.ffxivextract.models.SqPack_IndexFile;
 import ca.fraggergames.ffxivextract.models.SqPack_IndexFile.SqPack_File;
 import ca.fraggergames.ffxivextract.models.SqPack_IndexFile.SqPack_Folder;
-import ca.fraggergames.ffxivextract.storage.HashDatabase;
 
 @SuppressWarnings("serial")
 public class SearchWindow extends JFrame {
