@@ -439,6 +439,9 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 		if (fileTree.isOnlyFolder())
 		{
 			splitPane.setRightComponent(defaultScrollPane);
+			lblOffsetValue.setText("*");
+			lblHashValue.setText("*");			
+			lblContentTypeValue.setText("*");
 			return;
 		}
 		
