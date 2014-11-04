@@ -3,6 +3,7 @@ package ca.fraggergames.ffxivextract.models;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
+import javax.swing.JLabel;
 import javax.swing.JProgressBar;
 
 import ca.fraggergames.ffxivextract.gui.components.Loading_Dialog;
@@ -20,7 +21,7 @@ public class SqPack_IndexFile {
 	long offset;
 	int size;
 
-	public SqPack_IndexFile(String pathToIndex, JProgressBar prgLoadingBar) throws IOException {
+	public SqPack_IndexFile(String pathToIndex, JProgressBar prgLoadingBar, JLabel lblLoadingBarString) throws IOException {
 
 		path = pathToIndex;
 		
@@ -37,6 +38,9 @@ public class SqPack_IndexFile {
 
 			if (prgLoadingBar != null)
 				prgLoadingBar.setMaximum(segments[0].getSize()/0x10);
+
+			if (lblLoadingBarString != null)
+				lblLoadingBarString.setText("0%");
 			
 			packFolders = new SqPack_Folder[numFolders];
 
@@ -53,7 +57,7 @@ public class SqPack_IndexFile {
 				packFolders[i] = new SqPack_Folder(id, numFiles,
 						fileIndexOffset);
 
-				packFolders[i].readFiles(ref, prgLoadingBar);				
+				packFolders[i].readFiles(ref, prgLoadingBar, lblLoadingBarString);				
 			}
 		} else {
 			noFolder = true;
@@ -229,7 +233,7 @@ public class SqPack_IndexFile {
 				this.name = String.format("~%x", id);
 		}
 		
-		protected void readFiles(LERandomAccessFile ref, JProgressBar prgLoadingBar) throws IOException{
+		protected void readFiles(LERandomAccessFile ref, JProgressBar prgLoadingBar, JLabel lblLoadingBarString) throws IOException{
 			ref.seek(fileIndexOffset);
 			
 			for (int i = 0; i < files.length; i++)
@@ -243,6 +247,9 @@ public class SqPack_IndexFile {
 			
 				if (prgLoadingBar != null)
 					prgLoadingBar.setValue(prgLoadingBar.getValue()+1);
+				
+				if (lblLoadingBarString != null)
+					lblLoadingBarString.setText((int)(prgLoadingBar.getPercentComplete() * 100) + "%");
 			}
 		}
 		

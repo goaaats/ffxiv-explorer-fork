@@ -89,6 +89,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 	Hex_View hexView = new Hex_View(16);
 	EXDF_View exhfComponent;
 	JProgressBar prgLoadingBar;
+	JLabel lblLoadingBarString;
 	TexturePaint paint;
 	JScrollPane defaultScrollPane;
 	JViewport defaultViewPort;
@@ -200,7 +201,13 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 		
 		prgLoadingBar = new JProgressBar();
 		prgLoadingBar.setVisible(false);
+		
+		lblLoadingBarString = new JLabel("100%");
+		lblLoadingBarString.setHorizontalAlignment(SwingConstants.RIGHT);
+		lblLoadingBarString.setVisible(false);
+		pnlProgBar.add(lblLoadingBarString);
 		pnlProgBar.add(prgLoadingBar);
+		
 		setLocationRelativeTo(null);	
 		
 		//Check Windows registry for a FFXIV folder
@@ -652,16 +659,18 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 		
 		public OpenIndexTask(File selectedFile) {
 			this.selectedFile = selectedFile;
-			FileManagerWindow.this.setEnabled(false);
 			menu.setEnabled(false);
 			prgLoadingBar.setVisible(true);
 			prgLoadingBar.setValue(0);
+			lblLoadingBarString.setVisible(true);
+			for (int i = 0; i < menu.getMenuCount(); i++)
+				menu.getMenu(i).setEnabled(false);
 		}
 
 		@Override
 		protected Void doInBackground() throws Exception {
 			try {				
-				currentIndexFile = new SqPack_IndexFile(selectedFile.getAbsolutePath(), prgLoadingBar);			
+				currentIndexFile = new SqPack_IndexFile(selectedFile.getAbsolutePath(), prgLoadingBar, lblLoadingBarString);			
 			} catch (IOException e) {
 				JOptionPane.showMessageDialog(FileManagerWindow.this,
 						"There was an error opening this index file.",
@@ -680,10 +689,12 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 			setTitle(Constants.APPNAME + " [" + selectedFile.getName() + "]");
 			file_Close.setEnabled(true);
 			search_search.setEnabled(true);
-			FileManagerWindow.this.setEnabled(true);
 			prgLoadingBar.setValue(0);
 			prgLoadingBar.setVisible(false);
+			lblLoadingBarString.setVisible(false);
 			fileTree.fileOpened(currentIndexFile);
+			for (int i = 0; i < menu.getMenuCount(); i++)
+				menu.getMenu(i).setEnabled(true);
 		}
 	}
 
