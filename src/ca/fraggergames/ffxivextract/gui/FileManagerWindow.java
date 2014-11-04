@@ -668,6 +668,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 			FileManagerWindow.this.setEnabled(true);
 			prgLoadingBar.setValue(0);
 			prgLoadingBar.setVisible(false);
+			fileTree.fileOpened(currentIndexFile);
 		}
 	}
 

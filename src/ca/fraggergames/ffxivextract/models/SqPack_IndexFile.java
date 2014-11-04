@@ -142,24 +142,16 @@ public class SqPack_IndexFile {
 		int headerLength = ref.readInt();				
 
 		for (int i = 0; i < segments.length; i++) {
-			int firstVal = ref.readInt();
-			if (firstVal == 0) // Fell into padding... we done here
-				break;
-			else if (firstVal < 5) {
-				int offset = ref.readInt();
-				int size = ref.readInt();
-				byte[] sha1 = new byte[20];
-				ref.readFully(sha1, 0, 20);
-				segments[i] = new SqPack_DataSegment(offset, size, sha1);
-			} else {
-				int offset = firstVal;
-				int size = ref.readInt();
-				byte[] sha1 = new byte[20];
-				ref.readFully(sha1, 0, 20);
-				segments[i] = new SqPack_DataSegment(offset, size, sha1);
-			}
+			int firstVal = ref.readInt();			
+			int offset = ref.readInt();
+			int size = ref.readInt();
+			byte[] sha1 = new byte[20];
+			ref.readFully(sha1, 0, 20);
+			segments[i] = new SqPack_DataSegment(offset, size, sha1);			
 
-			ref.skipBytes(0x2C);
+			if (i == 0)
+				ref.skipBytes(0x4);
+			ref.skipBytes(0x28);
 		}
 		
 		return headerLength;
