@@ -36,7 +36,7 @@ public class SqPack_IndexFile {
 			int numFolders = size / 0x10;
 
 			if (prgLoadingBar != null)
-				prgLoadingBar.setMaximum(numFolders);
+				prgLoadingBar.setMaximum(segments[0].getSize()/0x10);
 			
 			packFolders = new SqPack_Folder[numFolders];
 
@@ -53,9 +53,7 @@ public class SqPack_IndexFile {
 				packFolders[i] = new SqPack_Folder(id, numFiles,
 						fileIndexOffset);
 
-				packFolders[i].readFiles(ref);
-				if (prgLoadingBar != null)
-					prgLoadingBar.setValue(prgLoadingBar.getValue()+1);
+				packFolders[i].readFiles(ref, prgLoadingBar);				
 			}
 		} else {
 			noFolder = true;
@@ -229,6 +227,23 @@ public class SqPack_IndexFile {
 			this.name = HashDatabase.getFolder(id);
 			if (this.name == null)
 				this.name = String.format("~%x", id);
+		}
+		
+		protected void readFiles(LERandomAccessFile ref, JProgressBar prgLoadingBar) throws IOException{
+			ref.seek(fileIndexOffset);
+			
+			for (int i = 0; i < files.length; i++)
+			{			
+				int id = ref.readInt();
+				int id2 = ref.readInt();
+				long dataoffset = ref.readInt();
+				ref.readInt();
+			
+				files[i] = new SqPack_File(id, id2, dataoffset);
+			
+				if (prgLoadingBar != null)
+					prgLoadingBar.setValue(prgLoadingBar.getValue()+1);
+			}
 		}
 		
 		protected void readFiles(LERandomAccessFile ref) throws IOException{
