@@ -1,5 +1,6 @@
 package ca.fraggergames.ffxivextract.models;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import javax.swing.JProgressBar;
@@ -305,7 +306,7 @@ public class SqPack_IndexFile {
 		}
 	}
 
-	public int getContentType(long dataoffset) throws IOException {
+	public int getContentType(long dataoffset) throws IOException, FileNotFoundException {
 		String pathToOpen = path;
 		
 		//Get the correct data number
@@ -319,7 +320,7 @@ public class SqPack_IndexFile {
 		return contentType;
 	}
 
-	public byte[] extractFile(long dataoffset, Loading_Dialog loadingDialog) throws IOException {
+	public byte[] extractFile(long dataoffset, Loading_Dialog loadingDialog) throws IOException, FileNotFoundException {
 		
 		String pathToOpen = path;
 		

@@ -21,19 +21,18 @@ Each Segment follows this (starting right after header length):
 0x00c: SHA-1 of Segment 20B;   Hash of the segment... [Segment Offset] to [Segment Offset] + [Segment Size]
 
 Notes: 
--Segment 1 is usually files, Segment 2 is unknown, Segment 3 is folders.
--Segment 2 sometimes has a duplicate, one with size of 0, and one with a normal size.
--It's assumed that if there is no third segment, only list files.
--Each segment is followed by a padding of 0x2C 0's
+-Segment 1 is usually files, Segment 2/3 is unknown, Segment 3 is folders.
+-Segments may not exist, but their position is still treated as if they did (benchmark has no segment 3 but you still need to skip it's bytes).
+-Each segment is followed by a padding of 0x28 0's, except the first one, which has 4 extra 0s.
 
 ===FILE SEGMENTS=== (each one is at each folder's [Files Offset], in segment 1) (Each is 16 bytes padded)
-0x000: File ID1 Hash    Int32; Hash to the file name stored somewhere
-0x004: File ID2 Hash    Int32; Hash to the file path stored somewhere
+0x000: File ID1 Hash    Int32; Hash to the file name
+0x004: File ID2 Hash    Int32; Hash to the file path
 0x008: File Data Offset Int32; Multiply by 0x08, points to compressed data in .dat file
 0x00b: Padding                 Padded to a total segment entry size of 16 bytes.
 
 ===FOLDER SEGMENTS=== (seen in segment 3, points to files in segment 1) (Each is 16 bytes padded)
-0x000: FOLDER ID Hash   Int32; Hash to the folder name stored somewhere
+0x000: FOLDER ID Hash   Int32; Hash to the folder name
 0x004: Files Offset     Int32; Offset to file list in segment 1.
 0x008: Total Files Size Int32; Total size of all file segments for this folder. To find # files, divide by 0x10 (16).
 0x00b: Padding                 Padded to a total segment entry size of 16 bytes.

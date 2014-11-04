@@ -485,18 +485,30 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 		int contentType = -1;
 		try {
 			 contentType = currentIndexFile.getContentType(file.getOffset()); 
-			data = currentIndexFile.extractFile(file.dataoffset, null);
-		} catch (Exception e1) {
-			e1.printStackTrace();
-			JOptionPane.showMessageDialog(FileManagerWindow.this,
-					"There was an error unpacking " + file.getName() + ".",					
-				    "File Unpack Error",
-				    JOptionPane.ERROR_MESSAGE);
+			 data = currentIndexFile.extractFile(file.dataoffset, null);
 		}
+		catch (FileNotFoundException eFNF) {
+			if (Constants.DEBUG)
+				eFNF.printStackTrace();
+			JLabel lblFNFError = new JLabel("The dat for this file is missing!");
+			tabs.addTab("Extract Error", lblFNFError);
+			hexView.setBytes(null);							
+			splitPane.setRightComponent(tabs);
+			return;
+		}
+		catch (IOException e) {
+			if (Constants.DEBUG)
+				e.printStackTrace();
+			JLabel lblLoadError = new JLabel("Something went terribly wrong extracting this file.");
+			tabs.addTab("Extract Error", lblLoadError);
+			hexView.setBytes(null);							
+			splitPane.setRightComponent(tabs);
+			return;
+		}		
 		
-		if (data == null)
+		if (data == null && contentType == 3)
 		{				
-			JLabel lbl3DModelError = new JLabel(contentType == 3 ? "Content Type 3 files are currently not supported. I am still figuring out how they are stored." : "Something went terribly wrong extracting this file.");
+			JLabel lbl3DModelError = new JLabel("Content Type 3 files are currently not supported. I am still figuring out how they are stored.");
 			tabs.addTab("3D Model", lbl3DModelError);
 			hexView.setBytes(null);							
 			splitPane.setRightComponent(tabs);
@@ -647,7 +659,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 		protected Void doInBackground() throws Exception {
 			try {				
 				currentIndexFile = new SqPack_IndexFile(selectedFile.getAbsolutePath(), prgLoadingBar);			
-			} catch (Exception e) {
+			} catch (IOException e) {
 				JOptionPane.showMessageDialog(FileManagerWindow.this,
 						"There was an error opening this index file.",
 					    "File Open Error",
@@ -823,7 +835,8 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 					
 					loadingDialog.nextFile(i+1, path + extension);
 				} catch (FileNotFoundException e) {
-					e.printStackTrace();
+					//e.printStackTrace();
+					
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
