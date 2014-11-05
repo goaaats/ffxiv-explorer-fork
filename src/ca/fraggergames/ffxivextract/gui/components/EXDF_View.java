@@ -66,6 +66,8 @@ public class EXDF_View extends JScrollPane implements ItemListener{
 	private JComboBox cmbLanguage;
 	private JTable table;
 	
+	private int langOverride = -1;
+	
 	//Given a EXD file, figure out EXH name, and look for it.
 	public EXDF_View(SqPack_IndexFile currentIndex, String fullPath, EXDF_File file) {		
 		
@@ -90,6 +92,7 @@ public class EXDF_View extends JScrollPane implements ItemListener{
 		exhName = exhName.replace("_ja.exd", "");
 		exhName = exhName.replace("_de.exd", "");
 		exhName = exhName.replace("_fr.exd", "");
+		exhName = exhName.replace("_chs.exd", "");
 		exhName = exhName.substring(0, exhName.lastIndexOf("_"));
 		String folderName = exhName.substring(0, fullPath.lastIndexOf("/"));
 		exhName = exhName.substring(fullPath.lastIndexOf("/")+1, exhName.length()) +".exh";
@@ -409,7 +412,7 @@ public class EXDF_View extends JScrollPane implements ItemListener{
 		}
 
 		@Override
-		public String getValueAt(int rowIndex, int columnIndex) {
+		public Object getValueAt(int rowIndex, int columnIndex) {
 			try{								
 				int page = 0;
 				
@@ -454,12 +457,11 @@ public class EXDF_View extends JScrollPane implements ItemListener{
 				//Grab Data		
 				totalRealEntries = 0;		
 				for (int i = 0; i < page; i++)
-				{					
-					
-					totalRealEntries += exdFiles[((numLanguages == 1? 1 : 4)*i) + cmbLanguage.getSelectedIndex()].getNumEntries();					
+				{															
+					totalRealEntries += exdFiles[((numLanguages == 1? 1 : 4)*i) + (langOverride != -1 ? langOverride : cmbLanguage.getSelectedIndex())].getNumEntries();					
 				}
 				
-				EXDF_Entry entry = exdFiles[((numLanguages == 1? 1 : 4)*page) + cmbLanguage.getSelectedIndex()].getEntry(rowIndex-totalRealEntries);
+				EXDF_Entry entry = exdFiles[((numLanguages == 1? 1 : 4)*page) + (langOverride != -1 ? langOverride : cmbLanguage.getSelectedIndex())].getEntry(rowIndex-totalRealEntries);
 				
 				//Index
 				if (columnIndex == 0)
@@ -476,21 +478,21 @@ public class EXDF_View extends JScrollPane implements ItemListener{
 				case 0x1b:
 				case 0x1a:
 				case 0x19:					
-					return ((int)entry.getByte(dataset.offset)&0xFF)+"";
+					return ((int)entry.getByte(dataset.offset)&0xFF);
 				case 0x09: // FLOAT
 				case 0x08:
-					return ""+entry.getFloat(dataset.offset);
+					return entry.getFloat(dataset.offset);
 				case 0x07: // INT
 				case 0x06:  
-					return ""+entry.getInt(dataset.offset);
+					return entry.getInt(dataset.offset);
 				case 0x05: // SHORT
 				case 0x04:
-					return ""+((int)entry.getShort(dataset.offset) & 0xFFFF);
+					return ((int)entry.getShort(dataset.offset) & 0xFFFF);
 				case 0x03: // BYTE
 				case 0x02:  
-					return ""+entry.getByte(dataset.offset);	
+					return entry.getByte(dataset.offset);	
 				case 0x01: // BOOL
-					return ""+entry.getBoolean(dataset.offset);
+					return entry.getBoolean(dataset.offset);
 				case 0x00: // STRING; Points to offset from end of dataset part. Read until 0x0.
 					return entry.getString(exhFile.getDatasetChunkSize(), dataset.offset);				
 				default:
@@ -525,132 +527,41 @@ public class EXDF_View extends JScrollPane implements ItemListener{
 		checkString = checkString.replace("_ja.exd", "");
 		checkString = checkString.replace("_de.exd", "");
 		checkString = checkString.replace("_fr.exd", "");
+		checkString = checkString.replace("_chs.exd", "");
 		checkString = checkString.substring(0, checkString.lastIndexOf("_")) +".exh";
 		return exhName.equals(checkString);			
 	}
 
 	public void saveCSV(String path, int lang) throws IOException
 	{
+		langOverride = lang;
 		OutputStreamWriter out = new OutputStreamWriter(new FileOutputStream(path),"UTF-8");		
 		
-		for (int i = 0; i < exhFile.getDatasetTable().length + 1; i++)
+		//Write columns
+		for (int col = 0; col < table.getColumnCount(); col++)
 		{
-			if (i == 0)
-				out.write("Index");
-			else
-				out.write(""+(i-1));
-			
-			if (i <= exhFile.getDatasetTable().length)
+			out.write(table.getColumnName(col));
+			if (col != table.getColumnCount()-1)
 				out.write(",");
 		}
 		
 		out.write("\r\n");
 		
-		for (int y = exhFile.getPageTable()[0].pageNum; y < exhFile.getNumEntries(); y++)
-		{
-			for (int x = 0; x < exhFile.getDatasetTable().length + 1; x++)
-			{
-				try{					
-					int page = 0;
-					
-//					rowIndex += exhFile.getPageTable()[0].pageNum;
-					
-					//Find Page
-					int totalRealEntries = 0;				
-					if (numPages != 1)
-					{
-						for (int i = 0; i <= exhFile.getPageTable().length; i++)
-						{												
-							if (i == exhFile.getPageTable().length)
-							{
-								if (i <= exhFile.getPageTable()[i-1].pageNum + exhFile.getPageTable()[i-1].numEntries)
-								{
-									page = i-1;
-									break;
-								}
-								else
-									out.write("ERROR");
-							}
-														
-							totalRealEntries += exhFile.getPageTable()[i].numEntries;						
-							if (totalRealEntries > y)
-							{
-								page = i;
-								totalRealEntries -= exhFile.getPageTable()[i].numEntries;
-								break;
-							}
-						}
-											
-					}
-					
-					//Grab Data		
-					totalRealEntries = 0;		
-					for (int i = 0; i < page; i++)
-					{					
-						
-						totalRealEntries += exdFile[((numLanguages == 1? 1 : 4)*i) + lang].getNumEntries();					
-					}
-					
-					EXDF_Entry entry = exdFile[((numLanguages == 1? 1 : 4)*page) + lang].getEntry(y-totalRealEntries);								
-					
-					if (x == 0)
-					{
-						out.write(""+entry.getIndex()+",");
-						continue;
-					}
-					
-					//Data
-					EXDF_Dataset dataset = exhFile.getDatasetTable()[x-1];
-					
-					switch (dataset.type)
-					{									
-					case 0x1f:
-					case 0x1e:
-					case 0x1d:
-					case 0x1c:
-					case 0x1b:
-					case 0x1a:
-					case 0x19:					
-						out.write(""+((int)entry.getByte(dataset.offset)&0xFF));
-						break;
-					case 0x09: // FLOAT
-					case 0x08:
-						out.write(""+entry.getFloat(dataset.offset));
-						break;
-					case 0x07: // INT
-					case 0x06:  
-						out.write(""+entry.getInt(dataset.offset));
-						break;
-					case 0x05: // SHORT
-					case 0x04:
-						out.write(""+((int)entry.getShort(dataset.offset) & 0xFFFF));
-						break;
-					case 0x03: // BYTE
-					case 0x02:  
-						out.write(""+entry.getByte(dataset.offset));	
-						break;
-					case 0x01: // BOOL
-						out.write(""+entry.getBoolean(dataset.offset));
-						break;
-					case 0x00: // STRING; Points to offset from end of dataset part. Read until 0x0.
-						out.write("\""+entry.getString(exhFile.getDatasetChunkSize(), dataset.offset)+"\"");
-						break;
-					default:
-						out.write("?");
-					}
-				}
-				catch (Exception e)
-				{
-					e.printStackTrace();
-					out.write("");
-				}
-				
-				if (x != exhFile.getDatasetTable().length)
-					out.write(",");
-			}
-			out.write("\r\n");
+		//Write data
+		for (int row = 0; row < table.getRowCount(); row++) {			
+		    for (int col = 0; col < table.getColumnCount(); col++) {
+		    	Object value = table.getValueAt(row, col);
+		    	if (value instanceof String)
+		    		out.write("\""+(String) value+"\""); 
+		    	else 
+		    		out.write("" + value);
+		    	if (col != table.getColumnCount()-1)
+		    		out.write(",");
+		    }
+		    out.write("\r\n");
 		}
 		out.close();
+		langOverride = -1;
 	}
 
 	public int getNumLangs() {

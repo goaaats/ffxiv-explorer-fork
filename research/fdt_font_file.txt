@@ -1,0 +1,13 @@
+###FDT FONT FILE RESEARCH###
+
+!Built on prior research done by RozeDoyanawa!
+
+===Glyph Entry===
+0x00: Unicode Byte		Int32; 
+0x00: Image Index		Short;
+0x00: X 				Short;
+0x00: Y 				Short;
+0x00: Width				Short;
+0x00: Height			Short;
+0x00: X Offset			Short;
+0x00: Y Offset			Short;

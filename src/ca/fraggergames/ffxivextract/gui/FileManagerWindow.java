@@ -726,7 +726,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 							continue;
 						EXHF_File file = new EXHF_File(data);
 						
-						tempView = new EXDF_View(currentIndexFile, HashDatabase.getFolder(fileTree.getSelectedFiles().get(0).getId2()) + "/" + fileTree.getSelectedFiles().get(0).getName(), file);						
+						tempView = new EXDF_View(currentIndexFile, HashDatabase.getFolder(fileTree.getSelectedFiles().get(i).getId2()) + "/" + fileTree.getSelectedFiles().get(i).getName(), file);						
 						
 						for (int l = 0; l < (tempView.getNumLangs() == 1 ? 1 : 4); l++)
 						{
@@ -752,7 +752,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 							continue;
 						EXDF_File file = new EXDF_File(data);
 						
-						tempView = new EXDF_View(currentIndexFile,  HashDatabase.getFolder(fileTree.getSelectedFiles().get(0).getId2()) + "/" + fileTree.getSelectedFiles().get(0).getName(), file);						
+						tempView = new EXDF_View(currentIndexFile,  HashDatabase.getFolder(fileTree.getSelectedFiles().get(i).getId2()) + "/" + fileTree.getSelectedFiles().get(i).getName(), file);						
 						
 						//Remove the thing
 						String exhName = files.get(i).getName(); 
@@ -760,6 +760,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 						exhName = exhName.replace("_ja.exd", "");
 						exhName = exhName.replace("_de.exd", "");
 						exhName = exhName.replace("_fr.exd", "");
+						exhName = exhName.replace("_chs.exd", "");
 						exhName = exhName.substring(0, exhName.lastIndexOf("_")) +".exh";
 						
 						for (int l = 0; l < (tempView.getNumLangs() == 1 ? 1 : 4); l++)
