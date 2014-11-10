@@ -449,6 +449,8 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 			lblOffsetValue.setText("*");
 			lblHashValue.setText("*");			
 			lblContentTypeValue.setText("*");
+			file_Extract.setEnabled(true);
+			file_ExtractRaw.setEnabled(true);	
 			return;
 		}
 		
@@ -514,15 +516,23 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 			hexView.setBytes(null);							
 			splitPane.setRightComponent(tabs);
 			return;
-		}		
+		}				
 		
-		if (data == null && contentType == 3)
+		if (contentType == 3)
 		{				
 			JLabel lbl3DModelError = new JLabel("Content Type 3 files are currently not supported. I am still figuring out how they are stored.");
 			tabs.addTab("3D Model", lbl3DModelError);
 			hexView.setBytes(null);							
 			splitPane.setRightComponent(tabs);
 			return;
+		}
+		
+		if (data == null)
+		{
+			JLabel lblLoadError = new JLabel("Something went terribly wrong extracting this file.");
+			tabs.addTab("Extract Error", lblLoadError);
+			hexView.setBytes(null);							
+			splitPane.setRightComponent(tabs);
 		}
 					
 		if (data.length >= 3 && data[0] == 'E' && data[1] == 'X' && data[2] == 'H' && data[3] == 'F')

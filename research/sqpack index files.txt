@@ -8,17 +8,17 @@ Current research on SqPack Index files
 0x010: ~~Unknown~~             Int32; Unknown but repeated in other header
 0x014: SqPack Type      Int32; Type 0: SQDB, Type 1: Data, Type 2: Index
 0x018: ~~Unknown~~             A lot of 0s, but 0xFFFF at 0x20
-0x3c0: SHA-1 of Header  20B;   SHA-1 of bytes 0x000-0x3BF, starts 64bytes before end of header
+0x3c0: SHA-1 of Header    20B; SHA-1 of bytes 0x000-0x3BF, starts 64bytes before end of header
 ~~~~~~~~Padding~~~~~~~~~       Padding of 0's till [Header Length]
 
 ===SEGMENT HEADER=== (starts after SQPACK HEADER)
 0x000: Header Length    Int32;
 
 Each Segment follows this (starting right after header length):
-0x000: Unknown          Int32; This seems to be 0x01 sometimes, however it was 0x02 in 040000.win32.index, a pack with 2 dat files.
+0x000: Unknown/Num Dats Int32; For segment 2 it's the number of dats for this archive (dat0, dat1, etc), for others unknown.
 0x004: Segment Offset   Int32; Offset to the segment
 0x008: Segment Size     Int32; How large a segment is
-0x00c: SHA-1 of Segment 20B;   Hash of the segment... [Segment Offset] to [Segment Offset] + [Segment Size]
+0x00c: SHA-1 of Segment   20B; Hash of the segment... [Segment Offset] to [Segment Offset] + [Segment Size]
 
 Notes: 
 -Segment 1 is usually files, Segment 2/3 is unknown, Segment 3 is folders.

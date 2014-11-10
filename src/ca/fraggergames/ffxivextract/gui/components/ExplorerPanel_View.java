@@ -149,7 +149,7 @@ public class ExplorerPanel_View extends JScrollPane {
 		
 		Object obj = ((DefaultMutableTreeNode) selectedPaths[0].getLastPathComponent()).getUserObject();
 		
-		return !(obj instanceof SqPack_File);
+		return (obj instanceof SqPack_Folder);
 	}
 	
 	public ArrayList<SqPack_File> getSelectedFiles()

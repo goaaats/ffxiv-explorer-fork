@@ -2,12 +2,61 @@
 
 !Built on prior research done by RozeDoyanawa!
 
+===FDT Header=== (0x20 in size, 32 bytes)
+0x00: Signature			Int32; ASCII "fcsv"
+0x04: Version			Int32; ASCII "0100" currently
+0x08: fthd offset		Int32;
+0x0c: fnhd offset		Int32; 
+
+===fthd Header===
+0x00: Signature			Int32; ASCII fthd
+0x04: Glyph Count		Int32;
+0x10: Image Width		Short;
+0x12: Image Height		Short;
+
+---GLYPH ENTRIES HERE---
+
 ===Glyph Entry===
 0x00: Unicode Byte		Int32; 
-0x00: Image Index		Short;
-0x00: X 				Short;
-0x00: Y 				Short;
-0x00: Width				Short;
-0x00: Height			Short;
-0x00: X Offset			Short;
-0x00: Y Offset			Short;
+0x04: Unknown           Short;
+0x06: Image Index		Short;
+0x08: X 				Short;
+0x0a: Y 				Short;
+0x0c: Width				Byte;
+0x0d: Height			Byte;
+0x0e: X Offset			Byte;
+0x0f: Y Offset			Byte;
+
+===knhd Header===
+0x00: Signature			Int32; ASCI knhd
+0x04: Count				Int32;
+
+---TABLE HERE---
+
+===Table Entry===
+0x00:					Int32;
+0x04:					Int32;
+0x08:					Short;
+0x0a:					Short;
+0x0c:					Byte;
+0x0d:					Byte; Always FF
+0x0e:					Byte; Always FF
+0x0f:					Byte; Always FF
+
+------------------------------------------------GFD FILE-------------------------------------------------------
+
+===GFD Header=== (0x10 in size, 16 bytes)
+0x00: Signature			Int32; ASCII "gftd"
+0x04: Version			Int32; ASCII "0100" currently
+0x08: Count				Int32;
+0x0c: Padding
+
+===GFD Entry==== (0x20 in size, 32 bytes)
+0x00: Index				Short;
+0x02: 					Short;
+0x04: 					Short;
+0x06: 					Short;
+0x08: 					Short;
+0x0a: NULL				Short;
+0x0c: 					Int32;
+0x10: Padding
