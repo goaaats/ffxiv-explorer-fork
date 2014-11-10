@@ -23,7 +23,7 @@ public class SqPack_DatFile {
 	protected SqPack_DatFile(String path) throws FileNotFoundException {
 		currentFilePointer = new LERandomAccessFile(path, "r");
 	}
-
+	
 	@SuppressWarnings("unused")
 	protected byte[] extractFile(long fileOffset, Loading_Dialog loadingDialog) throws IOException {
 		currentFilePointer.seek(fileOffset);
@@ -94,7 +94,77 @@ public class SqPack_DatFile {
 			
 			break;
 		case TYPE_MODEL:
-			return null;
+			
+			//First things
+			currentFilePointer.readInt(); //1
+			currentFilePointer.readInt(); //2
+			currentFilePointer.readInt(); //3
+			currentFilePointer.readInt(); //4
+			currentFilePointer.readInt(); //5
+			
+			currentFilePointer.readInt(); //Null
+			currentFilePointer.readInt(); //Null
+			currentFilePointer.readInt(); //Null
+			
+			currentFilePointer.readInt(); //6
+			currentFilePointer.readInt(); //7
+			currentFilePointer.readInt(); //8
+			
+			//Sizes
+			currentFilePointer.readInt(); //1
+			currentFilePointer.readInt(); //2
+			currentFilePointer.readInt(); //3
+			currentFilePointer.readInt(); //4
+			currentFilePointer.readInt(); //5
+			
+			currentFilePointer.readInt(); //Null
+			currentFilePointer.readInt(); //Null
+			currentFilePointer.readInt(); //Null
+			
+			currentFilePointer.readInt(); //6
+			currentFilePointer.readInt(); //7
+			currentFilePointer.readInt(); //8
+			
+			//Offset things
+			int offsets[] = new int[3];
+			offsets[0] = currentFilePointer.readInt(); //1
+			offsets[1] = currentFilePointer.readInt(); //2
+			offsets[2] = currentFilePointer.readInt(); //3
+			currentFilePointer.readInt(); //4
+			currentFilePointer.readInt(); //5
+			
+			currentFilePointer.readInt(); //Null
+			currentFilePointer.readInt(); //Null
+			currentFilePointer.readInt(); //Null
+			
+			currentFilePointer.readInt(); //6
+			currentFilePointer.readInt(); //7
+			currentFilePointer.readInt(); //8
+			
+			byte[] mdlData = new byte[fileSize];
+			int pos = 0;
+			for (int i = 0; i < offsets.length; i++)
+			{
+				// Block Header
+				currentFilePointer.seek(fileOffset + headerLength + offsets[i]);
+				int blockHeaderLength2 = currentFilePointer.readInt();
+				currentFilePointer.readInt(); // NULL
+				int compressedBlockSize2 = currentFilePointer.readInt(); 
+				int decompressedBlockSize2 = currentFilePointer.readInt();
+					
+				byte[] decompressedBlock2 = null;			
+				if (compressedBlockSize2 == 32000 || decompressedBlockSize2 == 1) //Not actually compressed, just read decompressed size
+				{
+					decompressedBlock2 = new byte[decompressedBlockSize2];
+					currentFilePointer.readFully(decompressedBlock2);
+				}
+				else //Gotta decompress
+					decompressedBlock2 = decompressBlock(compressedBlockSize2, decompressedBlockSize2);
+				
+				System.arraycopy(decompressedBlock2, 0, mdlData, pos, decompressedBlockSize2);
+				pos+=decompressedBlockSize2;
+			}
+			return mdlData;
 		case TYPE_BINARY: 
 			dataBlocks = new Data_Block[1][blockCount];
 			

@@ -260,6 +260,38 @@ public class HashDatabase {
 
 	}
 
+	public static boolean addFolderToDB(String folderName)
+	{
+		if (folderName.endsWith("/"))
+			folderName = folderName.substring(0, folderName.length()-1);
+		
+		int folderHash = computeCRC(folderName.getBytes(), 0,
+				folderName.getBytes().length);
+		
+		//if (Constants.DEBUG)
+			System.out.println("Adding Folder Entry: " + folderName);
+
+		Connection connection = null;
+		try{
+			connection = DriverManager
+					.getConnection("jdbc:sqlite:./hashlist.db");
+			Statement statement = connection.createStatement();
+			statement.setQueryTimeout(30); // set timeout to 30 sec.
+			statement.executeUpdate("insert or ignore into folders values(" + folderHash + ", '" + folderName + "', '0')");			
+		} catch (SQLException e) {
+			System.err.println(e.getMessage());
+			return false;
+		} finally {
+			try {
+				if (connection != null)
+					connection.close();
+			} catch (SQLException e) {
+				System.err.println(e);
+			}
+		}
+		return true;
+	}
+	
 	// Used to add a string to the db. Automatically hashes and splits it.
 	public static boolean addPathToDB(String fullPath) {
 

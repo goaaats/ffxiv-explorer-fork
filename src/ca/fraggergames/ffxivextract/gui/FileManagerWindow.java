@@ -224,6 +224,11 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 			//openFile(lastOpenedFile);
 		}
 		
+		Preferences prefs = Preferences.userNodeForPackage(ca.fraggergames.ffxivextract.Main.class);
+		
+		if (prefs.get(Constants.PREF_LASTOPENED, null) != null)
+			lastOpenedFile = new File(prefs.get(Constants.PREF_LASTOPENED, null));
+		
 		//Init Luadec
 		luadec = LuaDec.initLuaDec();		
 	}	
@@ -284,6 +289,9 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 				{
 					lastOpenedFile = fileChooser.getSelectedFile();
 					openFile(fileChooser.getSelectedFile());
+					
+					Preferences prefs = Preferences.userNodeForPackage(ca.fraggergames.ffxivextract.Main.class);
+					prefs.put(Constants.PREF_LASTOPENED, lastOpenedFile.getAbsolutePath());					
 				}
 			}
 			else if (event.getActionCommand().equals("close"))
@@ -515,7 +523,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 			splitPane.setRightComponent(tabs);
 			return;
 		}		
-		
+		/*
 		if (data == null && contentType == 3)
 		{				
 			JLabel lbl3DModelError = new JLabel("Content Type 3 files are currently not supported. I am still figuring out how they are stored.");
@@ -523,7 +531,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 			hexView.setBytes(null);							
 			splitPane.setRightComponent(tabs);
 			return;
-		}
+		}*/
 					
 		if (data.length >= 3 && data[0] == 'E' && data[1] == 'X' && data[2] == 'H' && data[3] == 'F')
 		{							
@@ -580,7 +588,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 		}	
 		
 		hexView.setBytes(data);	
-		if (contentType != 3)
+		//if (contentType != 3)
 			tabs.addTab("Raw Hex", hexView);			
 		splitPane.setRightComponent(tabs);
 	}
@@ -756,6 +764,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 						
 						//Remove the thing
 						String exhName = files.get(i).getName(); 
+						System.out.println(exhName);
 						exhName = exhName.replace("_en.exd", "");
 						exhName = exhName.replace("_ja.exd", "");
 						exhName = exhName.replace("_de.exd", "");
