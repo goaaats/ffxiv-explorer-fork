@@ -126,24 +126,27 @@ public class SqPack_DatFile {
 			currentFilePointer.readInt(); //8
 			
 			//Offset things
-			int offsets[] = new int[3];
+			int read = 1;
+			int offsets[] = new int[8];
 			offsets[0] = currentFilePointer.readInt(); //1
 			offsets[1] = currentFilePointer.readInt(); //2
 			offsets[2] = currentFilePointer.readInt(); //3
-			currentFilePointer.readInt(); //4
-			currentFilePointer.readInt(); //5
+			offsets[3] = currentFilePointer.readInt(); //4
+			offsets[4] = currentFilePointer.readInt(); //5
 			
 			currentFilePointer.readInt(); //Null
 			currentFilePointer.readInt(); //Null
 			currentFilePointer.readInt(); //Null
 			
-			currentFilePointer.readInt(); //6
-			currentFilePointer.readInt(); //7
-			currentFilePointer.readInt(); //8
+			offsets[5] = currentFilePointer.readInt(); //6
+			offsets[6] = currentFilePointer.readInt(); //7
+			offsets[7] = currentFilePointer.readInt(); //8
+			
+			offsets[0] = offsets[read];
 			
 			byte[] mdlData = new byte[fileSize];
 			int pos = 0;
-			for (int i = 0; i < offsets.length; i++)
+			for (int i = 0; i < 1; i++)
 			{
 				// Block Header
 				currentFilePointer.seek(fileOffset + headerLength + offsets[i]);
@@ -162,8 +165,12 @@ public class SqPack_DatFile {
 					decompressedBlock2 = decompressBlock(compressedBlockSize2, decompressedBlockSize2);
 				
 				System.arraycopy(decompressedBlock2, 0, mdlData, pos, decompressedBlockSize2);
-				pos+=decompressedBlockSize2;
-			}
+				pos+=decompressedBlockSize2;				
+			}			
+			mdlData[pos+3] = (byte) 0x88;
+			mdlData[pos+2] = (byte) 0x88;
+			mdlData[pos+1] = (byte) 0x88;
+			mdlData[pos] = (byte) 0x88;
 			return mdlData;
 		case TYPE_BINARY: 
 			dataBlocks = new Data_Block[1][blockCount];

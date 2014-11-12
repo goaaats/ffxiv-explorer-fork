@@ -120,6 +120,9 @@ public class Texture_File {
 					uncompressedWidth,
 					uncompressedHeight, 0, 0);
 		}
+		case 96: {
+			return ImageDecoding.decodeImageRGBAF(data, dataStart[index], uncompressedWidth, uncompressedHeight, 0, 0);
+		}
 		}
 		throw new ImageDecodingException("Unsupported format: "
 				+ compressionType);

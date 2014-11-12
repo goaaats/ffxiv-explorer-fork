@@ -44,7 +44,7 @@ Current research on SqPack Dat files
 ===TYPE-3 BLOCK TABLE=== (Size of Num blocks)
 
 0x000: Unknown					           Int32; Always 0x05000001
-0x004: Unknown Chunk			        44 Bytes; Each Block Follows Pattern: 5 Ints, 12b of NULL, 3 Ints.
+0x004: Frame Uncompressed Chunk	        44 Bytes; Each Block Follows Pattern: 5 Ints, 12b of NULL, 3 Ints. Size when uncompressed, but rounded
 0x030: Frame Size Chunk			        44 Bytes; Size of each frame (can be more than 1 data block).
 0x05C: Frame Offset Chunk		        44 Bytes; Offset to start of frame. 
 0x088: Block Size Indexes				   Short; Indexes into the next table below???
