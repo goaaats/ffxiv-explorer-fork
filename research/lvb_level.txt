@@ -1,0 +1,7 @@
+#### LVB LEVEL FILE RESEARCH ####
+
+===LVB Header===
+0x00: Signature			Int32;
+0x04: File Size			Int32;
+0x08: Unknown			Int32; Always 0x01
+0x0c: ASCII				Int32; ASCII SCN1

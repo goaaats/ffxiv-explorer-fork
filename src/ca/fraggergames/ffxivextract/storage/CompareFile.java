@@ -7,10 +7,6 @@ import java.io.FileOutputStream;
 import java.util.Calendar;
 import java.util.Hashtable;
 
-import com.esotericsoftware.kryo.Kryo;
-import com.esotericsoftware.kryo.io.Input;
-import com.esotericsoftware.kryo.io.Output;
-
 //Stores a master file list to check between updates.
 
 public class CompareFile {
@@ -42,7 +38,7 @@ public class CompareFile {
 	{		
 		File file = new File("./" + indexName + ".cmp");
 		if (file.exists())
-		{
+		{/*
 			Kryo kryo = new Kryo();
 			Input in = null;
 			try {
@@ -51,8 +47,9 @@ public class CompareFile {
 				return new CompareFile(indexName);
 			}
 			CompareFile obj = kryo.readObject(in, CompareFile.class);
-			in.close();
-			return obj;
+			in.close();*/
+			//return obj;
+			return null;
 		}	
 		else
 			return new CompareFile(indexName);
@@ -92,9 +89,9 @@ public class CompareFile {
 	
 	public void save() throws FileNotFoundException{
 		newFilesFound = false;
-		Kryo kryo = new Kryo();
-		Output out = new Output(new FileOutputStream(new File("./" + loadedIndexName + ".cmp")));
-		kryo.writeObject(out, this);
-		out.close();
+	//	Kryo kryo = new Kryo();
+	//	Output out = new Output(new FileOutputStream(new File("./" + loadedIndexName + ".cmp")));
+	//	kryo.writeObject(out, this);
+	//	out.close();
 	}
 }
