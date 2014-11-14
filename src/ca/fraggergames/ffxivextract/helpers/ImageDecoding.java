@@ -381,6 +381,52 @@ public final class ImageDecoding {
 		}
 		return img;
 	}
+	
+	/**
+	 * @param data
+	 * @param targetWidth
+	 * @param targetHeight
+	 * @param compressedWidth
+	 * @param compressedHeight
+	 * @return
+	 * @throws ImageDecodingException
+	 */
+	public static final BufferedImage decodeImageRGBAF(final byte[] data, final int offset, final int targetWidth, final int targetHeight, final int compressedWidth, final int compressedHeight) throws ImageDecodingException {
+		final BufferedImage img = new BufferedImage(targetWidth, targetHeight, BufferedImage.TYPE_INT_ARGB);
+		if (data.length < (targetHeight * targetWidth * 8)) {
+			throw new ImageDecodingException("Data too short");
+		}
+
+		final ByteBuffer buffer = ByteBuffer.wrap(data);
+		buffer.order(ByteOrder.LITTLE_ENDIAN);
+		buffer.position(offset);
+
+		int p = 0;
+		for (int y = 0; y < targetHeight; y++) {
+			for (int x = 0; x < targetWidth; x++) {
+				
+				float fr = HalfFloat_Utils.convertHalfToFloat(buffer.getShort());
+				float fg = HalfFloat_Utils.convertHalfToFloat(buffer.getShort());
+				float fb = HalfFloat_Utils.convertHalfToFloat(buffer.getShort());
+				float fa = HalfFloat_Utils.convertHalfToFloat(buffer.getShort());
+				
+				if (fr > 1)
+					fr = 1.0f;
+				if (fg > 1)
+					fg = 1.0f;
+				if (fb > 1)
+					fb = 1.0f;
+				
+				final int b = (int) (255f * fb);
+				final int g = (int) (255f * fg);
+				final int r = (int) (255f * fr);
+				final int a = 255;
+				p += 4;
+				img.setRGB(x, y, new Color(r, g, b, a).getRGB());
+			}
+		}
+		return img;
+	}
 
 	/**
 	 * @param data

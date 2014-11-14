@@ -1,5 +1,6 @@
 package ca.fraggergames.ffxivextract;
 
+import java.sql.Connection;
 import java.util.Enumeration;
 
 import javax.swing.UIManager;
@@ -7,13 +8,15 @@ import javax.swing.UIManager;
 public class Constants {
 
 	public static final String APPNAME = "FFXIV 2.0 Data Explorer";
-	public static final String VERSION = "v0.5";
+	public static final String VERSION = "v0.7b - (contenttype3_work Branch)";
 	public static final int APP_VERSION_CODE = 0;
 	public static final int DB_VERSION_CODE = 0;
-	public static final String COMMIT = "fc92a429023d6ea9e146789a5b89f1a266fabfd3";
+	public static final String COMMIT = "32c55784768823d7b36f1ca5d9d7d0da2d96b404";
 	public static boolean DEBUG = false;
 	public static boolean EASTER_EGG = false;
 
+	public static Connection GLOBAL_CONN;
+	
 	public static final String URL_WEBSITE = "http://ffxivexplorer.fragmenterworks.com/";
 	public static final String URL_VERSION_CHECK = URL_WEBSITE + "version_check.json";
 	public static final String URL_HASHLIST_FILE = URL_WEBSITE + "downloads/hashlist.db";
@@ -21,7 +24,7 @@ public class Constants {
 	public static final String DBFILE_NAME = "hashlist.db";
 	
 	public static final String PREF_FIRSTRUN = "pref_firstrun";
-	//public static final String PREF_DO_APP_UPDATE = "pref_appupdate";
+	public static final String PREF_LASTOPENED = "pref_lastopened";
 	public static final String PREF_DO_DB_UPDATE = "pref_dbupdate";
 	
 	public static final String[] iconList = {
@@ -36,7 +39,7 @@ public class Constants {
 		"001027B", "0010285", "0010278", "0010286", "0010287",
 		"0010288", "0010289", "001028A", "001028B", "001028C",
 		"001028D", "001028E", "00102FD"
-	};
+	};	
 	
 	public static void setUIFont (javax.swing.plaf.FontUIResource f){
 	    Enumeration<Object> keys = UIManager.getDefaults().keys();
