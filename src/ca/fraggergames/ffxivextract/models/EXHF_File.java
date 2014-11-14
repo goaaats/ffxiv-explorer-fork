@@ -8,6 +8,9 @@ import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 
 public class EXHF_File {	
 
@@ -65,6 +68,13 @@ public class EXHF_File {
 			//Dataset Table
 			for (int i = 0; i < numDataSetTable; i++)			
 				datasetTable[i] = new EXDF_Dataset(buffer.getShort(), buffer.getShort());			
+			
+			Arrays.sort(datasetTable, new Comparator<EXDF_Dataset>() {
+				@Override
+				public int compare(EXDF_Dataset a, EXDF_Dataset b) {
+					return a.offset - b.offset;
+				}
+			});
 			
 			//Page Table
 			for (int i = 0; i < numPageTable; i++)
