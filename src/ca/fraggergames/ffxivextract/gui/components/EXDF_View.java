@@ -471,14 +471,8 @@ public class EXDF_View extends JScrollPane implements ItemListener{
 				EXDF_Dataset dataset = exhFile.getDatasetTable()[columnIndex-1];									
 				switch (dataset.type)
 				{									
-				case 0x1f:
-				case 0x1e:
-				case 0x1d:
-				case 0x1c:
-				case 0x1b:
-				case 0x1a:
-				case 0x19:					
-					return ((int)entry.getByte(dataset.offset)&0xFF);
+				case 0x0b: // QUAD
+					return entry.getQuad(dataset.offset);
 				case 0x09: // FLOAT
 				case 0x08:
 					return entry.getFloat(dataset.offset);
@@ -496,7 +490,7 @@ public class EXDF_View extends JScrollPane implements ItemListener{
 				case 0x00: // STRING; Points to offset from end of dataset part. Read until 0x0.
 					return entry.getString(exhFile.getDatasetChunkSize(), dataset.offset);				
 				default:
-					return "?";
+					return "?";// Value: " + ((int)entry.getByte(dataset.offset)&0xFF);
 				}
 			}
 			catch (Exception e)
