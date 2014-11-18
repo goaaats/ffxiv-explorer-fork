@@ -593,7 +593,9 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 			}
 			else
 			{
-				
+				JLabel lbl3DModelError = new JLabel("Cannot show decompiled lua because luadec.dll has not been found or was not loaded correctly.");
+				tabs.addTab("Decompiled Lua", lbl3DModelError);						
+				splitPane.setRightComponent(tabs);				
 			}
 		}	
 		
