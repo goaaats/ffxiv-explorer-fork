@@ -1,16 +1,12 @@
 package ca.fraggergames.ffxivextract.models;
 
-import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.nio.channels.FileChannel;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -22,21 +18,19 @@ import com.jcraft.jzlib.GZIPOutputStream;
 
 public class DatBuilder {
 	
-	LERandomAccessFile fos = null;
-	private String savePath;
+	private LERandomAccessFile fileOut = null;
 	private long currentOffset = 0x800;
-	int index;
+	private int index;
 	
-	public DatBuilder(int index, String outPath)
+	public DatBuilder(int index, String outPath) throws FileNotFoundException
 	{
-		this.savePath = outPath;
 		this.index = index + 1;
-		try {
-			fos = new LERandomAccessFile(new File(outPath), "rw");
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		
+		File f = new File(outPath);
+		if (f.exists())
+			f.delete();
+	
+		fileOut = new LERandomAccessFile(new File(outPath), "rw");
 	}
 	
 	public long addFile(String path)
@@ -49,6 +43,7 @@ public class DatBuilder {
 		    fIn.close();
 		} catch (Exception e) {
 		    e.printStackTrace();
+		    return -1;
 		}
 		
 		ArrayList<DataBlock> blocks = new ArrayList<DatBuilder.DataBlock>();
@@ -83,7 +78,9 @@ public class DatBuilder {
 				largestBlock = currentBlock.uncompressedSize;
 			}
 			catch (Exception e)
-			{}
+			{
+				return -1;
+			}
 		}
 		
 		//Generate Header
@@ -116,16 +113,15 @@ public class DatBuilder {
 		System.arraycopy(tempHeader, 0,	 header, 0, header.length);
 		
 		try {
-//			FileChannel ch = fos.getChannel();
-			fos.seek(currentOffset);
-			fos.write(header);
+			fileOut.seek(currentOffset);
+			fileOut.write(header);
 			
 			Iterator<DataBlock> it2 = blocks.iterator();			
 			while (it2.hasNext())
 			{			
 				DataBlock block = it2.next();
 				
-				fos.seek(currentOffset+header.length + block.offset);
+				fileOut.seek(currentOffset+header.length + block.offset);
 				
 				byte data2[] = new byte[16 + block.compressedSize];
 				ByteBuffer bb = ByteBuffer.wrap(data2);
@@ -142,10 +138,10 @@ public class DatBuilder {
 				
 				bb.rewind();
 				
-				fos.write(data2);				
+				fileOut.write(data2);				
 			}			
 			
-			long curposition = fos.getFilePointer();
+			long curposition = fileOut.getFilePointer();
 			while ((curposition & 0xFF) != 0x00)
 				curposition += 1;
 			
@@ -153,10 +149,11 @@ public class DatBuilder {
 			
 			currentOffset = curposition;
 			
+			System.out.println(String.format("Added file at path \"%s\", to offset: 0x%X", path, entryOffset));
+			
 			return entryOffset;
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			e.printStackTrace();			
 		}
 		return -1;
 	}	
@@ -226,10 +223,6 @@ public class DatBuilder {
 		
 		return dataHeader;
 	}
-	
-	public void addItem(byte[] data){
-		
-	}
 
 	private class DataBlock{
 		public final short totalSize;
@@ -238,18 +231,6 @@ public class DatBuilder {
 		public final int uncompressedSize;
 		public final int offset;
 		public int nextOffset;
-		
-		public byte[] getHeader()
-		{
-			byte header[] = new byte[16];			
-			ByteBuffer bb = ByteBuffer.wrap(header);
-			bb.order(ByteOrder.LITTLE_ENDIAN);
-			bb.putInt(0x10);
-			bb.putInt(0);
-			bb.putInt(compressedSize);
-			bb.putInt(uncompressedSize);
-			return header;
-		}
 		
 		public DataBlock(int offset, byte toBeCompressed[]) throws IOException
 		{
@@ -272,47 +253,48 @@ public class DatBuilder {
 			
 			totalSize = (short) (nextOffset - offset);
 		}
-
-		public DataBlock(int offset, byte[] finalBlock, int length) {
-			compressedSize = 32000;
-			uncompressedSize = length;
-			compressedData = finalBlock;
-			
-			//Generate offset	
-			this.offset = offset;
-			nextOffset = uncompressedSize + 0x10 + offset;
-			while ((nextOffset & 0xFF) != 0x00)
-				nextOffset += 1;
-			
-			totalSize = (short) (nextOffset - offset);
-		}
+		
 	}
 
-	public void finish() throws IOException {		
-		byte buffer[] = new byte[2048];
-		ByteBuffer bb = ByteBuffer.wrap(buffer);		
-		fos.seek(0x800);
-		MessageDigest md = null;
-		try {
-			md = MessageDigest.getInstance("SHA1");
-		} catch (NoSuchAlgorithmException e) {
-			e.printStackTrace();
-		}
-		while (true)
-		{
-			int bytesRead = fos.read(buffer);
-			bb.rewind();
-			if (bytesRead <= 0)
-				break;
-			md.update(buffer, 0, bytesRead);
-			bb.rewind();
-		}
+	public void finish() {
 		
-		byte sha1[] = md.digest();
-						
-		fos.seek(0);
-		fos.write(buildSqpackDatHeader());
-		fos.write(buildSqpackDatDataHeader((int) currentOffset, sha1, index));
-		fos.close();
+		try{		
+			byte buffer[] = new byte[2048];
+			ByteBuffer bb = ByteBuffer.wrap(buffer);		
+			fileOut.seek(0x800);
+			MessageDigest md = null;
+			try {
+				md = MessageDigest.getInstance("SHA1");
+			} catch (NoSuchAlgorithmException e) {
+				e.printStackTrace();
+			}
+			while (true)
+			{
+				int bytesRead = fileOut.read(buffer);
+				bb.rewind();
+				if (bytesRead <= 0)
+					break;
+				md.update(buffer, 0, bytesRead);
+				bb.rewind();
+			}
+			
+			byte sha1[] = md.digest();
+							
+			fileOut.seek(0);
+			fileOut.write(buildSqpackDatHeader());
+			fileOut.write(buildSqpackDatDataHeader((int) currentOffset, sha1, index));
+			fileOut.close();
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();			
+		}
+		finally{
+			try {
+				fileOut.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 }
