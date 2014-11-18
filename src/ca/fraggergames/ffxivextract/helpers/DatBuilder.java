@@ -1,4 +1,4 @@
-package ca.fraggergames.ffxivextract.models;
+package ca.fraggergames.ffxivextract.helpers;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -12,7 +12,6 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import ca.fraggergames.ffxivextract.helpers.LERandomAccessFile;
 
 import com.jcraft.jzlib.GZIPOutputStream;
 
