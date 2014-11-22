@@ -76,6 +76,10 @@ XOR all header bytes with the encode byte.
 ===DATA===
 Ogg Vorbis data is here
 
+--------------Duplicate Header-----------------------------
+It seems that the first header is 3 chunks in size, each 0x120 bytes long. It's the Vorbis
+Indentification, Comment, and Setup headers. This is repeated after. 
+
 --------------Putting MS-ADPCM into WAV--------------------
 -Write "RIFF"
 -Write 36 + [Size of first frame to end of file]

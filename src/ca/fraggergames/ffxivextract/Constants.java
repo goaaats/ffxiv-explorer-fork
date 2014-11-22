@@ -8,10 +8,10 @@ import javax.swing.UIManager;
 public class Constants {
 
 	public static final String APPNAME = "FFXIV 2.0 Data Explorer";
-	public static final String VERSION = "v0.7b - (contenttype3_work Branch)";
+	public static final String VERSION = "v0.8";
 	public static final int APP_VERSION_CODE = 0;
 	public static final int DB_VERSION_CODE = 0;
-	public static final String COMMIT = "32c55784768823d7b36f1ca5d9d7d0da2d96b404";
+	public static final String COMMIT = "fd4f2f97bd50be32ec65633e963e0100d8bedd0c";
 	public static boolean DEBUG = false;
 	public static boolean EASTER_EGG = false;
 
