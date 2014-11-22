@@ -76,7 +76,8 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 	JMenuBar menu = new JMenuBar();
 	
 	//FILE IO
-	File lastOpenedFile = null;
+	File lastOpenedIndexFile = null;
+	File lastSaveLocation = null;
 	SqPack_IndexFile currentIndexFile;
 	
 	//UI
@@ -227,7 +228,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 		Preferences prefs = Preferences.userNodeForPackage(ca.fraggergames.ffxivextract.Main.class);
 		
 		if (prefs.get(Constants.PREF_LASTOPENED, null) != null)
-			lastOpenedFile = new File(prefs.get(Constants.PREF_LASTOPENED, null));
+			lastOpenedIndexFile = new File(prefs.get(Constants.PREF_LASTOPENED, null));
 		
 		//Init Luadec
 		luadec = LuaDec.initLuaDec();		
@@ -268,7 +269,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 		public void actionPerformed(ActionEvent event) {
 			if (event.getActionCommand().equals("open"))
 			{
-				JFileChooser fileChooser = new JFileChooser(lastOpenedFile);
+				JFileChooser fileChooser = new JFileChooser(lastOpenedIndexFile);
 				FileFilter filter = new FileFilter() {
 					
 					@Override
@@ -287,11 +288,11 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 				int retunval = fileChooser.showOpenDialog(FileManagerWindow.this);
 				if (retunval == JFileChooser.APPROVE_OPTION)
 				{
-					lastOpenedFile = fileChooser.getSelectedFile();
+					lastOpenedIndexFile = fileChooser.getSelectedFile();
 					openFile(fileChooser.getSelectedFile());
 					
 					Preferences prefs = Preferences.userNodeForPackage(ca.fraggergames.ffxivextract.Main.class);
-					prefs.put(Constants.PREF_LASTOPENED, lastOpenedFile.getAbsolutePath());					
+					prefs.put(Constants.PREF_LASTOPENED, lastOpenedIndexFile.getAbsolutePath());					
 				}
 			}
 			else if (event.getActionCommand().equals("close"))
@@ -606,45 +607,36 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 	}
 
 	private void extract(boolean doConvert) {				
-		JFileChooser fileChooser = new JFileChooser(lastOpenedFile);
+		JFileChooser fileChooser = new JFileChooser(lastSaveLocation);
 		
 		ArrayList<SqPack_File> files = fileTree.getSelectedFiles();		
 		
-		if (files.size() > 1)
-			fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-		else
-		{			
-			fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);		
-
-			String fileName = HashDatabase.getFileName(files.get(0).getId());
-			
-			if (fileName == null)
-				fileName = String.format("%08X", files.get(0).getId() & 0xFFFFFFFF);
-			
-			fileChooser.setSelectedFile(new File(fileName));			
-			FileFilter filter = new FileFilter() {
+	
+		fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);		
 				
-				@Override
-				public String getDescription() {
-					return "FFXIV Converted";
-				}
-				
-				@Override
-				public boolean accept(File f) {
-					return f.getName().endsWith(".csv") || f.getName().endsWith(".ogg") || f.getName().endsWith(".wav") ||f.getName().endsWith(".png") || f.isDirectory();
-				}				
-			};
-			fileChooser.addChoosableFileFilter(filter);
-			fileChooser.setFileFilter(filter);
-			fileChooser.setAcceptAllFileFilterUsed(false);
-		}		
+		FileFilter filter = new FileFilter() {
+			
+			@Override
+			public String getDescription() {
+				return "FFXIV Converted";
+			}
+			
+			@Override
+			public boolean accept(File f) {
+				return f.getName().endsWith(".csv") || f.getName().endsWith(".ogg") || f.getName().endsWith(".wav") ||f.getName().endsWith(".png") || f.isDirectory();
+			}				
+		};
+		fileChooser.addChoosableFileFilter(filter);
+		fileChooser.setFileFilter(filter);
+		fileChooser.setAcceptAllFileFilterUsed(false);
+	
 	
 		int retunval = fileChooser.showSaveDialog(FileManagerWindow.this);
 		
 		if (retunval == JFileChooser.APPROVE_OPTION)
 		{
-			lastOpenedFile = fileChooser.getSelectedFile();
-			lastOpenedFile.getParentFile().mkdirs();
+			lastSaveLocation = fileChooser.getSelectedFile();
+			lastSaveLocation.getParentFile().mkdirs();
 	
 			Loading_Dialog loadingDialog = new Loading_Dialog(FileManagerWindow.this, files.size());
 			loadingDialog.setTitle("Extracting...");
@@ -670,7 +662,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 			return ".png";
 		}
 		else
-			return ".dat";
+			return "";
 	}
 
 	class OpenIndexTask extends SwingWorker<Void, Void>{
@@ -736,8 +728,18 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 			
 			for (int i = 0; i < files.size(); i++){
 				try {
+					String folderName = HashDatabase.getFolder(files.get(i).getId2());					
+					String fileName = files.get(i).getName();					
+					if (fileName == null)						
+						fileName = String.format("%X", files.get(i).getId() & 0xFFFFFFFF);												
+					if (folderName == null)
+						folderName = String.format("%X", files.get(i).getId2() & 0xFFFFFFFF);	
+					
+					loadingDialog.nextFile(i, folderName + "/" + fileName);
+					
 					byte[] data = currentIndexFile.extractFile(files.get(i).getOffset(), loadingDialog);
 					byte[] dataToSave = null;
+					
 					String extension = getExtension(currentIndexFile.getContentType(files.get(i).getOffset()), data);
 					
 					if (extension.equals(".exh") && doConvert)
@@ -750,16 +752,20 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 						
 						for (int l = 0; l < (tempView.getNumLangs() == 1 ? 1 : 4); l++)
 						{
-														
-							String path = lastOpenedFile.getCanonicalPath();
-							String fileName = files.get(i).getName();
+											
+							String path = lastSaveLocation.getCanonicalPath();
 							
 							if (fileName == null)						
 								fileName = String.format("%X", files.get(i).getId() & 0xFFFFFFFF);
+															
+							if (folderName == null)
+								folderName = String.format("%X", files.get(i).getId2() & 0xFFFFFFFF);
 							
-							if (files.size() > 1)
-								path = lastOpenedFile.getCanonicalPath() + "\\" + fileName;	
+							path = lastSaveLocation.getCanonicalPath() + "\\" + folderName + "\\" + fileName;
 							
+							File mkDirPath = new File(path);
+							mkDirPath.getParentFile().mkdirs();						
+													
 							tempView.saveCSV(path + (tempView.getNumLangs()==1 ? "" : "_" + EXDF_View.langs[l]) +  ".csv", l);
 														
 						}
@@ -785,16 +791,21 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 						exhName = exhName.substring(0, exhName.lastIndexOf("_")) +".exh";
 						
 						for (int l = 0; l < (tempView.getNumLangs() == 1 ? 1 : 4); l++)
-						{							
-							String path = lastOpenedFile.getParent();
-							String fileName = exhName;
+						{	
+							String path = lastSaveLocation.getCanonicalPath();
 							
-							if (fileName == null)						
-								fileName = String.format("%X", files.get(i).getId() & 0xFFFFFFFF);
+							fileName = exhName;
+															
+							if (folderName == null)
+								folderName = String.format("%X", files.get(i).getId2() & 0xFFFFFFFF);
+							
+							path = lastSaveLocation.getCanonicalPath() + "\\" + folderName + "\\" + fileName;
+							
+							File mkDirPath = new File(path);
+							mkDirPath.getParentFile().mkdirs();																																	
 							
 							path += "\\" + fileName;	
 							tempView.saveCSV(path + (tempView.getNumLangs()==1 ? "" : "_" + EXDF_View.langs[l]) + ".csv", l);
-							
 						}
 						
 						continue;
@@ -826,15 +837,19 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 							}
 							else							
 								continue;
-														
-							String path = lastOpenedFile.getCanonicalPath();
-							String fileName = files.get(i).getName();
+											
+							String path = lastSaveLocation.getCanonicalPath();
 							
-							if (fileName == null)						
+							if (fileName == null)				
 								fileName = String.format("%X", files.get(i).getId() & 0xFFFFFFFF);
+															
+							if (folderName == null)
+								folderName = String.format("%X", files.get(i).getId2() & 0xFFFFFFFF);
 							
-							if (files.size() > 1)
-								path = lastOpenedFile.getCanonicalPath() + "\\" + fileName;														
+							path = lastSaveLocation.getCanonicalPath() + "\\" + folderName + "\\" + fileName;
+							
+							File mkDirPath = new File(path);
+							mkDirPath.getParentFile().mkdirs();																															
 							
 							LERandomAccessFile out = new LERandomAccessFile(path + (file.getNumEntries()==1 ? "" : "_" + s) + extension, "rw");
 							out.write(dataToSave, 0, dataToSave.length);
@@ -856,22 +871,29 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 						continue;
 					}
 					
-					String path = lastOpenedFile.getCanonicalPath();
-					String fileName = HashDatabase.getFileName(files.get(i).getId());
+					String path = lastSaveLocation.getCanonicalPath();
 					
-					if (fileName == null)						
+					if (fileName == null){						
 						fileName = String.format("%X", files.get(i).getId() & 0xFFFFFFFF);
+						if (!doConvert)
+							extension = "";
+					}
+					else if (!doConvert)
+						extension = "";
+						
+					if (folderName == null)
+						folderName = String.format("%X", files.get(i).getId2() & 0xFFFFFFFF);
 					
-					if (files.size() > 1)
-						path = lastOpenedFile.getCanonicalPath() + "\\" + fileName;
+					path = lastSaveLocation.getCanonicalPath() + "\\" + folderName + "\\" + fileName;
+					
+					File mkDirPath = new File(path);
+					mkDirPath.getParentFile().mkdirs();
 					
 					LERandomAccessFile out = new LERandomAccessFile(path + extension, "rw");
 					out.write(dataToSave, 0, dataToSave.length);
-					out.close();
-					
-					loadingDialog.nextFile(i+1, path + extension);
+					out.close();					
 				} catch (FileNotFoundException e) {
-					//e.printStackTrace();
+					e.printStackTrace();
 					
 				} catch (IOException e) {
 					e.printStackTrace();

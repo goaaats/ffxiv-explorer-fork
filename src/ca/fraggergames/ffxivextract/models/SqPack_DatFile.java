@@ -213,7 +213,7 @@ public class SqPack_DatFile {
 		
 		//If we got a loading dialog
 		if (loadingDialog != null)
-			loadingDialog.setMaxBlocks(dataBlocks.length);
+			loadingDialog.setMaxBlocks(dataBlocks[0].length);
 		
 		if (dataBlocks == null || dataBlocks[0] == null)
 			return null;
