@@ -705,7 +705,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 			prgLoadingBar.setVisible(false);
 			lblLoadingBarString.setVisible(false);
 			fileTree.fileOpened(currentIndexFile);
-			searchWindow = new SearchWindow(currentIndexFile, FileManagerWindow.this);
+			searchWindow = new SearchWindow(FileManagerWindow.this, currentIndexFile, FileManagerWindow.this);
 			for (int i = 0; i < menu.getMenuCount(); i++)
 				menu.getMenu(i).setEnabled(true);
 		}
