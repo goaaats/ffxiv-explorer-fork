@@ -240,7 +240,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 			closeFile();
 		
 		OpenIndexTask openTask = new OpenIndexTask(selectedFile);
-		openTask.execute();
+		openTask.execute();		
 	}
 
 	protected void closeFile() {
@@ -308,10 +308,10 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 				extract(false);
 			}
 			else if (event.getActionCommand().equals("search"))
-			{
-				searchWindow = new SearchWindow(currentIndexFile, FileManagerWindow.this);
+			{				
 				searchWindow.setLocationRelativeTo(FileManagerWindow.this);
 				searchWindow.setVisible(true);
+				searchWindow.reset();
 			}
 			else if (event.getActionCommand().equals("searchagain"))
 			{
@@ -705,6 +705,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 			prgLoadingBar.setVisible(false);
 			lblLoadingBarString.setVisible(false);
 			fileTree.fileOpened(currentIndexFile);
+			searchWindow = new SearchWindow(currentIndexFile, FileManagerWindow.this);
 			for (int i = 0; i < menu.getMenuCount(); i++)
 				menu.getMenu(i).setEnabled(true);
 		}
@@ -917,6 +918,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 		if (file == null)
 		{
 			search_searchAgain.setEnabled(false);
+			searchWindow.reset();
 			return;
 		}
 		
