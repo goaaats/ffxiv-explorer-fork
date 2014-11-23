@@ -315,6 +315,9 @@ public class MusicSwapperWindow extends JFrame {
 		setSwapperEnabled(true);
 		SqPack_File[] originalFiles;
 
+		((DefaultListModel<String>)lstOriginal.getModel()).clear();
+		((DefaultListModel<String>)lstSet.getModel()).clear();
+		
 		panel_2.setEnabled(true);
 		lblBackup.setEnabled(true);
 		
@@ -361,7 +364,13 @@ public class MusicSwapperWindow extends JFrame {
 		loadDropDown(lstSet, originalFiles, 0);
 
 		edittingIndexFile = file;
-			
+
+		//Init this since the list listener doesn't fire
+		txtSetTo.setText(String.format(Strings.MUSICSWAPPER_CURRENTOFFSET, editedFiles[lstOriginal.getSelectedIndex()].getOffset() & 0xFFFFFFFF));
+		if (editedFiles[lstOriginal.getSelectedIndex()].getOffset() != originalMusicFile.getPackFolders()[0].getFiles()[lstOriginal.getSelectedIndex()].dataoffset)
+			txtSetTo.setForeground(Color.RED);
+		else
+			txtSetTo.setForeground(Color.decode("#006400"));
 	}
 
 	private void loadDropDown(JList<String> list, SqPack_File[] files,
@@ -378,7 +387,7 @@ public class MusicSwapperWindow extends JFrame {
 				listModel.addElement(String.format("%08X (%08X)", files[i].id & 0xFFFFFFFF, files[i].getOffset() & 0xFFFFFFFF));
 		}
 			
-		list.setSelectedIndex(selectedSpot);
+		list.setSelectedIndex(0);
 	}
 
 	private void createBackup() throws IOException
@@ -399,6 +408,13 @@ public class MusicSwapperWindow extends JFrame {
 		btnRestore.setEnabled(true);
 		
 		setSwapperEnabled(true);
+			
+		//Init this since the list listener doesn't fire
+		txtSetTo.setText(String.format(Strings.MUSICSWAPPER_CURRENTOFFSET, editedFiles[lstOriginal.getSelectedIndex()].getOffset() & 0xFFFFFFFF));
+		if (editedFiles[lstOriginal.getSelectedIndex()].getOffset() != originalMusicFile.getPackFolders()[0].getFiles()[lstOriginal.getSelectedIndex()].dataoffset)
+			txtSetTo.setForeground(Color.RED);
+		else
+			txtSetTo.setForeground(Color.decode("#006400"));
 	}
 	
 	private void restoreFromBackup() throws IOException
@@ -462,6 +478,10 @@ public class MusicSwapperWindow extends JFrame {
 	}
 
 	private void swapMusic(int which, int to) {
+		
+		if (which == -1 || to == -1)
+			return;
+		
 		SqPack_File toBeChanged = originalMusicFile.getPackFolders()[0].getFiles()[which];
 		SqPack_File toThisFile = originalMusicFile.getPackFolders()[0].getFiles()[to];
 		editedFiles[which] = new SqPack_File(toBeChanged.getId(), toBeChanged.getId2(),
