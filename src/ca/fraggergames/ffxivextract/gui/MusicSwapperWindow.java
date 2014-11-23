@@ -1,14 +1,39 @@
 package ca.fraggergames.ffxivextract.gui;
 
+import java.awt.BorderLayout;
+import java.awt.EventQueue;
+
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.TitledBorder;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.filechooser.FileFilter;
+import javax.swing.DefaultListModel;
+import javax.swing.ImageIcon;
+import javax.swing.JComboBox;
+import javax.swing.JFileChooser;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JTextField;
+import javax.swing.JButton;
+import javax.swing.BoxLayout;
+import java.awt.Component;
+import javax.swing.JList;
+
 import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.GridBagConstraints;
+import java.awt.GridLayout;
 import java.awt.GridBagLayout;
+import java.awt.GridBagConstraints;
 import java.awt.Insets;
+import javax.swing.AbstractListModel;
+import javax.swing.JScrollPane;
+import javax.swing.SwingConstants;
+import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -17,71 +42,174 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.channels.FileChannel;
 
-import javax.swing.BorderFactory;
-import javax.swing.BoxLayout;
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JMenuBar;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
-import javax.swing.SwingConstants;
-import javax.swing.filechooser.FileFilter;
+import javax.swing.ListSelectionModel;
 
-import ca.fraggergames.ffxivextract.Constants;
 import ca.fraggergames.ffxivextract.Strings;
 import ca.fraggergames.ffxivextract.helpers.LERandomAccessFile;
 import ca.fraggergames.ffxivextract.models.SqPack_IndexFile;
+import ca.fraggergames.ffxivextract.models.SqPack_IndexFile.SqPack_DataSegment;
 import ca.fraggergames.ffxivextract.models.SqPack_IndexFile.SqPack_File;
-import ca.fraggergames.ffxivextract.storage.HashDatabase;
 
-@SuppressWarnings("serial")
 public class MusicSwapperWindow extends JFrame {
 
-	JMenuBar menu = new JMenuBar();
-
-	// FILE IO
-	File lastOpenedFile = null;
+	//FILE I/O
+	private File lastOpenedFile;
+	File backup = null;
 	File edittingIndexFile = null;
 	SqPack_IndexFile editMusicFile, originalMusicFile;
-
 	SqPack_File[] editedFiles;
-
-	// UI
-	JPanel pnlMainDatFile;
-	JLabel txtDatLabel;
-	JTextField txtDatPath;
-	JButton btnBrowse;	
-
-	JPanel pnlSwapper;
-	JLabel txtOriginal, txtSet;
-	JComboBox drpOriginal;
-	JComboBox drpSet;
-	JLabel txtSetTo;
-	JButton btnSwap, btnRevert;
-
+	
+	//GUI
+	private JPanel panel_2;
+	private JPanel pnlSwapper;
+	private JPanel contentPane;
+	private JTextField txtDatPath;
+	private JLabel lblBackup;
+	private JButton btnBackup, btnRestore;
+	private JLabel txtSetTo;
+	private JLabel lblOriginal, lblSetId;
+	private JList<String> lstOriginal = new JList<String>();
+	private JList<String> lstSet = new JList<String>();
+	private JButton btnSwap, btnRevert;
+	
 	public MusicSwapperWindow() {
 		this.setTitle(Strings.DIALOG_TITLE_MUSICSWAPPER);
 		URL imageURL = getClass().getResource("/res/frameicon.png");
 		ImageIcon image = new ImageIcon(imageURL);
 		this.setIconImage(image.getImage());
-
-		// ARCHIVE PATH SETUP
-		pnlMainDatFile = new JPanel(new GridBagLayout());
-		pnlMainDatFile.setBorder(BorderFactory
-				.createTitledBorder(Strings.MUSICSWAPPER_FRAMETITLE_ARCHIVE));
-		txtDatLabel = new JLabel(Strings.MUSICSWAPPER_PATHTOFILE);
+		
+		contentPane = new JPanel();
+		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+		setContentPane(contentPane);
+		contentPane.setLayout(new BorderLayout(0, 0));
+		
+		JPanel panel = new JPanel();
+		contentPane.add(panel, BorderLayout.NORTH);
+		panel.setLayout(new BorderLayout(0, 0));
+		
+		JPanel panel_1 = new JPanel();
+		panel_1.setBorder(new TitledBorder(null, Strings.MUSICSWAPPER_FRAMETITLE_ARCHIVE, TitledBorder.LEADING, TitledBorder.TOP, null, null));
+		panel.add(panel_1, BorderLayout.NORTH);
+		panel_1.setLayout(new BorderLayout(0, 0));
+		
 		txtDatPath = new JTextField();
 		txtDatPath.setEditable(false);
 		txtDatPath.setText(Strings.MUSICSWAPPER_DEFAULTPATHTEXT);
-		txtDatPath.setPreferredSize(new Dimension(200, txtDatPath
-				.getPreferredSize().height));
-
-		btnBrowse = new JButton(Strings.BUTTONNAMES_BROWSE);
+		panel_1.add(txtDatPath, BorderLayout.CENTER);
+		
+		JButton btnBrowse = new JButton(Strings.BUTTONNAMES_BROWSE);
+		panel_1.add(btnBrowse, BorderLayout.EAST);
+		
+		panel_2 = new JPanel();
+		panel_2.setBorder(new TitledBorder(null, "Backup", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+		panel.add(panel_2);
+		panel_2.setLayout(new BorderLayout(0, 0));
+		
+		lblBackup = new JLabel("No backup found");
+		panel_2.add(lblBackup, BorderLayout.CENTER);
+		lblBackup.setHorizontalAlignment(SwingConstants.LEFT);
+		
+		JPanel panel_3 = new JPanel();
+		panel_3.setAlignmentX(Component.LEFT_ALIGNMENT);
+		panel_2.add(panel_3, BorderLayout.EAST);
+		panel_3.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
+		
+		btnBackup = new JButton("Backup");
+		panel_3.add(btnBackup);
+		
+		btnRestore = new JButton("Restore");
+		btnBackup.setEnabled(false);
+		btnRestore.setEnabled(false);
+		panel_2.setEnabled(false);
+		lblBackup.setEnabled(false);
+		panel_3.add(btnRestore);
+		
+		pnlSwapper = new JPanel();
+		pnlSwapper.setBorder(new TitledBorder(null, Strings.MUSICSWAPPER_FRAMETITLE_SWAPPING, TitledBorder.LEADING, TitledBorder.TOP, null, null));
+		contentPane.add(pnlSwapper);
+		pnlSwapper.setLayout(new BorderLayout(0, 0));
+		
+		JPanel panel_4 = new JPanel();
+		pnlSwapper.add(panel_4, BorderLayout.CENTER);
+		panel_4.setLayout(new GridLayout(0, 2, 0, 0));
+		
+		JPanel panel_6 = new JPanel();
+		panel_6.setBorder(new EmptyBorder(0, 0, 0, 3));
+		panel_4.add(panel_6);
+		panel_6.setLayout(new BoxLayout(panel_6, BoxLayout.Y_AXIS));
+		
+		lblOriginal = new JLabel(Strings.MUSICSWAPPER_ORIGINALID);
+		panel_6.add(lblOriginal);
+		
+		JScrollPane scrollPane = new JScrollPane();
+		scrollPane.setAlignmentX(Component.LEFT_ALIGNMENT);
+		panel_6.add(scrollPane);
+			
+		lstOriginal.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		lstOriginal.setModel(new DefaultListModel<String>());
+		lstOriginal.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+			
+			@Override
+			public void valueChanged(ListSelectionEvent event) {				
+				
+				if (lstOriginal.getSelectedIndex() == -1)
+				{
+					lstSet.clearSelection();
+					return;
+				}
+				
+				if (event.getValueIsAdjusting() ||lstSet.getModel().getSize() == 0)
+					return;				
+				txtSetTo.setText(String.format(Strings.MUSICSWAPPER_CURRENTOFFSET, editedFiles[lstOriginal.getSelectedIndex()].getOffset() & 0xFFFFFFFF));
+				if (editedFiles[lstOriginal.getSelectedIndex()].getOffset() != originalMusicFile.getPackFolders()[0].getFiles()[lstOriginal.getSelectedIndex()].dataoffset)
+					txtSetTo.setForeground(Color.RED);
+				else
+					txtSetTo.setForeground(Color.decode("#006400"));
+			
+			}
+		});		
+		
+		scrollPane.setViewportView(lstOriginal);
+		
+		JPanel panel_5 = new JPanel();
+		panel_5.setBorder(new EmptyBorder(0, 3, 0, 0));
+		panel_4.add(panel_5);
+		panel_5.setLayout(new BoxLayout(panel_5, BoxLayout.Y_AXIS));
+		
+		lblSetId = new JLabel(Strings.MUSICSWAPPER_TOID);
+		panel_5.add(lblSetId);
+		
+		JScrollPane scrollPane_1 = new JScrollPane();
+		scrollPane_1.setAlignmentX(Component.LEFT_ALIGNMENT);
+		panel_5.add(scrollPane_1);
+		
+		lstSet.setModel(new DefaultListModel<String>());
+		lstSet.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		scrollPane_1.setViewportView(lstSet);
+		
+		JPanel panel_8 = new JPanel();
+		panel_8.setBorder(new EmptyBorder(5, 0, 0, 0));
+		pnlSwapper.add(panel_8, BorderLayout.SOUTH);
+		panel_8.setLayout(new BoxLayout(panel_8, BoxLayout.Y_AXIS));
+		
+		txtSetTo = new JLabel(Strings.MUSICSWAPPER_CURRENTSETTO);
+		panel_8.add(txtSetTo);
+		
+		JPanel panel_9 = new JPanel();
+		FlowLayout flowLayout = (FlowLayout) panel_9.getLayout();
+		flowLayout.setAlignment(FlowLayout.RIGHT);
+		panel_9.setAlignmentX(Component.LEFT_ALIGNMENT);
+		panel_8.add(panel_9);
+		
+		btnSwap = new JButton(Strings.BUTTONNAMES_SET);
+		btnRevert = new JButton(Strings.BUTTONNAMES_REVERT);
+		btnSwap.setHorizontalAlignment(SwingConstants.LEFT);
+		panel_9.add(btnSwap);
+		
+		panel_9.add(btnRevert);
+		
+		//SETUP
+		
 		btnBrowse.addActionListener(new ActionListener() {
 
 			@Override
@@ -89,102 +217,59 @@ public class MusicSwapperWindow extends JFrame {
 				setPath();
 			}
 		});
-
-		pnlMainDatFile.add(txtDatLabel);
-		pnlMainDatFile.add(txtDatPath);
-		pnlMainDatFile.add(btnBrowse);
-
-		// SWAPPER SETUP
-		pnlSwapper = new JPanel(new GridBagLayout());
-		pnlSwapper.setBorder(BorderFactory.createTitledBorder(Strings.MUSICSWAPPER_FRAMETITLE_SWAPPING));
-		txtOriginal = new JLabel(Strings.MUSICSWAPPER_FROMID, SwingConstants.LEFT);
-
-		txtSet = new JLabel(Strings.MUSICSWAPPER_TOID, SwingConstants.LEFT);
-		txtOriginal = new JLabel(Strings.MUSICSWAPPER_ORIGINALID);
-		drpOriginal = new JComboBox();
-		drpOriginal.addItemListener(new ItemListener() {
-			public void itemStateChanged(ItemEvent itemEvent) {
-				int state = itemEvent.getStateChange();
-				if (state == ItemEvent.SELECTED && editMusicFile != null)
-				{
-					txtSetTo.setText(String.format(Strings.MUSICSWAPPER_CURRENTOFFSET, editedFiles[drpOriginal.getSelectedIndex()].getOffset() & 0xFFFFFFFF));
-					if (editedFiles[drpOriginal.getSelectedIndex()].getOffset() != originalMusicFile.getPackFolders()[0].getFiles()[drpOriginal.getSelectedIndex()].dataoffset)
-						txtSetTo.setForeground(Color.RED);
-					else
-						txtSetTo.setForeground(Color.decode("#006400"));
-				}
-			}
-		});
-		drpSet = new JComboBox();
-
-		txtSetTo = new JLabel(Strings.MUSICSWAPPER_CURRENTSETTO);
 		
-		btnSwap = new JButton(Strings.BUTTONNAMES_SET);
-		btnRevert = new JButton(Strings.BUTTONNAMES_REVERT);
-
-		GridBagConstraints gc = new GridBagConstraints();
-		gc.fill = GridBagConstraints.HORIZONTAL;
-		gc.weightx = 1;
-		gc.weighty = 1;
-		gc.gridx = 0;
-		gc.gridy = 0;
-		gc.insets = new Insets(0, 0, 0, 5);
-		pnlSwapper.add(txtOriginal, gc);
-		gc.gridx = 2;
-		gc.gridy = 0;
-		gc.insets = new Insets(0, 5, 0, 0);
-		pnlSwapper.add(txtSet, gc);
-		gc.gridx = 0;
-		gc.gridy = 1;
-		gc.insets = new Insets(0, 0, 5, 5);
-		pnlSwapper.add(drpOriginal, gc);
-		gc.gridx = 2;
-		gc.gridy = 1;
-		gc.insets = new Insets(0, 5, 5, 0);
-		pnlSwapper.add(drpSet, gc);
-		gc.gridx = 0;
-		gc.gridy = 3;
-		gc.gridwidth = 2;
-		gc.insets = new Insets(0, 0, 5, 0);
-		pnlSwapper.add(txtSetTo, gc);
-		gc.gridx = 0;
-		gc.gridy = 4;
-		gc.insets = new Insets(0, 0, 0, 5);
-		gc.gridwidth = 2;
-		pnlSwapper.add(btnSwap, gc);
-		gc.gridx = 2;
-		gc.insets = new Insets(0, 5, 0, 0);
-		pnlSwapper.add(btnRevert, gc);
-
-		// ROOT
-		JPanel pnlRoot = new JPanel();
-		pnlRoot.setLayout(new BoxLayout(pnlRoot, BoxLayout.Y_AXIS));
-		pnlRoot.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-		pnlRoot.add(pnlMainDatFile);
-		pnlRoot.add(pnlSwapper);
-
 		btnSwap.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				swapMusic(drpOriginal.getSelectedIndex(),
-						drpSet.getSelectedIndex());
+				swapMusic(lstOriginal.getSelectedIndex(),
+						lstSet.getSelectedIndex());
 			}
 		});
 		btnRevert.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				swapMusic(drpOriginal.getSelectedIndex(),
-						drpOriginal.getSelectedIndex());
+				swapMusic(lstOriginal.getSelectedIndex(),
+						lstOriginal.getSelectedIndex());
 			}
 		});
+		
+		btnBackup.addActionListener(new ActionListener() {
 
-		getContentPane().add(pnlRoot);
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				try {
+					createBackup();
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+			}
+		});
+		
+		btnRestore.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				try {
+					restoreFromBackup();
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+			}
+		});
+				
 		pack();
 		setSwapperEnabled(false);
+		
+		JOptionPane.showMessageDialog(this,
+				Strings.MSG_MUSICSWAPPER,
+			    Strings.MSG_MUSICSWAPPER_TITLE,
+			    JOptionPane.INFORMATION_MESSAGE);
 	}
-
+	
 	public void setPath() {
 		JFileChooser fileChooser = new JFileChooser(lastOpenedFile);
 
@@ -230,8 +315,11 @@ public class MusicSwapperWindow extends JFrame {
 		setSwapperEnabled(true);
 		SqPack_File[] originalFiles;
 
+		panel_2.setEnabled(true);
+		lblBackup.setEnabled(true);
+		
 		// Check if we got a backup
-		File backup = new File(file.getParentFile().getAbsoluteFile(),
+		backup = new File(file.getParentFile().getAbsoluteFile(),
 				"0c0000.win32.index.bak");
 		if (backup.exists()) {
 			System.out.println("Backup found, checking file.");
@@ -253,48 +341,101 @@ public class MusicSwapperWindow extends JFrame {
 						.getFiles();
 			}
 			System.out.println("File is good.");
+			lblBackup.setText("Backup exists. Remember to restore before patching.");
+			btnBackup.setEnabled(false);
+			btnRestore.setEnabled(true);
 		} else {
 			// Create backup
-			System.out.println("No backup found, creating backup.");
 			copyFile(file, backup);
 			editMusicFile = new SqPack_IndexFile(file.getCanonicalPath());
 			originalMusicFile = new SqPack_IndexFile(backup.getCanonicalPath());
 			originalFiles = originalMusicFile.getPackFolders()[0].getFiles();
 			editedFiles = editMusicFile.getPackFolders()[0].getFiles();
+			lblBackup.setText("Backup was auto generated. Remember to restore before patching.");
+			btnBackup.setEnabled(false);
+			btnRestore.setEnabled(true);
 		}
 
 		// We are good, load up the index
-		loadDropDown(drpOriginal, originalFiles, 0);
-		loadDropDown(drpSet, originalFiles, 0);
+		loadDropDown(lstOriginal, originalFiles, 0);
+		loadDropDown(lstSet, originalFiles, 0);
 
 		edittingIndexFile = file;
+			
 	}
 
-	private void loadDropDown(JComboBox dropdown, SqPack_File[] files,
+	private void loadDropDown(JList<String> list, SqPack_File[] files,
 			int selectedSpot) {
-		dropdown.removeAllItems();
+		DefaultListModel<String> listModel = (DefaultListModel<String>)list.getModel();
+		
 		for (int i = 0; i < files.length; i++)
 		{
 			String fileName = files[i].getName();
 			
 			if (fileName !=null)
-				dropdown.addItem(String.format("%s (%08X)", fileName, files[i].getOffset() & 0xFFFFFFFF));
+				listModel.addElement(String.format("%s (%08X)", fileName, files[i].getOffset() & 0xFFFFFFFF));
 			else
-				dropdown.addItem(String.format("%08X (%08X)", files[i].id & 0xFFFFFFFF, files[i].getOffset() & 0xFFFFFFFF));
+				listModel.addElement(String.format("%08X (%08X)", files[i].id & 0xFFFFFFFF, files[i].getOffset() & 0xFFFFFFFF));
 		}
 			
-		dropdown.setSelectedIndex(selectedSpot);
+		list.setSelectedIndex(selectedSpot);
 	}
 
+	private void createBackup() throws IOException
+	{
+		// Create backup
+		System.out.println("Creating backup.");
+		copyFile(edittingIndexFile, backup);
+		editMusicFile = new SqPack_IndexFile(edittingIndexFile.getCanonicalPath());
+		originalMusicFile = new SqPack_IndexFile(backup.getCanonicalPath());
+		SqPack_File originalFiles[] = originalMusicFile.getPackFolders()[0].getFiles();
+		editedFiles = editMusicFile.getPackFolders()[0].getFiles();
+		
+		loadDropDown(lstOriginal, originalFiles, 0);
+		loadDropDown(lstSet, originalFiles, 0);
+		
+		lblBackup.setText("Backup exists. Remember to restore before patching.");
+		btnBackup.setEnabled(false);
+		btnRestore.setEnabled(true);
+		
+		setSwapperEnabled(true);
+	}
+	
+	private void restoreFromBackup() throws IOException
+	{
+		// Create backup
+		System.out.println("Restoring...");
+		
+		edittingIndexFile.delete();
+		backup.renameTo(edittingIndexFile);
+		
+		lblBackup.setText("Backup does not exist.");
+		btnBackup.setEnabled(true);
+		btnRestore.setEnabled(false);
+		
+		setSwapperEnabled(false);
+	}
+	
 	private void setSwapperEnabled(boolean isEnabled) {
-		pnlSwapper.setEnabled(isEnabled);
-		txtOriginal.setEnabled(isEnabled);
-		drpOriginal.setEnabled(isEnabled);
-		txtSet.setEnabled(isEnabled);
-		txtSetTo.setEnabled(isEnabled);
-		drpSet.setEnabled(isEnabled);
+		
+		lstOriginal.clearSelection();
+		lstSet.clearSelection();
+		
+		if (!isEnabled){			
+			((DefaultListModel<String>)lstOriginal.getModel()).clear();
+			((DefaultListModel<String>)lstSet.getModel()).clear();
+			txtSetTo.setText(Strings.MUSICSWAPPER_CURRENTSETTO);
+			txtSetTo.setForeground(Color.decode("#000000"));
+		}
 		btnSwap.setEnabled(isEnabled);
 		btnRevert.setEnabled(isEnabled);
+		lblOriginal.setEnabled(isEnabled);
+		lstOriginal.setEnabled(isEnabled);
+		lblSetId.setEnabled(isEnabled);
+		txtSetTo.setEnabled(isEnabled);
+		lstSet.setEnabled(isEnabled);
+		pnlSwapper.setEnabled(isEnabled);
+		
 	}
 
 	public static void copyFile(File sourceFile, File destFile)
@@ -336,12 +477,13 @@ public class MusicSwapperWindow extends JFrame {
 					edittingIndexFile.getCanonicalPath(), "rw");
 
 			ref.seek(SqPack_IndexFile.checkSqPackHeader(ref));
-			ref.readInt();
-			int firstVal = ref.readInt();
-			if (firstVal == 0) // Fell into padding... we done here
-				throw new IOException();
+			
+			int segHeaderLengthres = ref.readInt();				
+			
+			//Read it in
+			int firstVal = ref.readInt();			
 			int offset = ref.readInt();
-			int size = ref.readInt()/0x10;
+			int size = ref.readInt();
 			
 			ref.seek(offset);
 			for (int i = 0; i < size; i++)
@@ -349,7 +491,7 @@ public class MusicSwapperWindow extends JFrame {
 				if (i == which)
 				{
 					ref.skipBytes(8);
-					ref.writeInt((int)editedFiles[which].dataoffset/0x8);					
+					ref.writeInt((int)editedFiles[which].dataoffset);					
 				}
 				else
 					ref.skipBytes(16);									
