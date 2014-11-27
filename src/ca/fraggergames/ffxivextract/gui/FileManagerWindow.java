@@ -541,6 +541,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 			tabs.addTab("Extract Error", lblLoadError);
 			hexView.setBytes(null);							
 			splitPane.setRightComponent(tabs);
+			return;
 		}
 					
 		if (data.length >= 3 && data[0] == 'E' && data[1] == 'X' && data[2] == 'H' && data[3] == 'F')
