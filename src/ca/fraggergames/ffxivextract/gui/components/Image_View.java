@@ -39,7 +39,7 @@ public class Image_View extends JPanel {
 		list.setAutoscrolls(false);
 		list.setEnabled(false);
 		
-		final String[] values = new String[] {"Compression Type: " + texture.compressionType, "Width: " + texture.uncompressedWidth, "Height: " + texture.uncompressedHeight};
+		final String[] values = new String[] {"Compression Type: " + texture.getCompressionTypeString(), "Width: " + texture.uncompressedWidth, "Height: " + texture.uncompressedHeight};
 		
 		list.setModel(new AbstractListModel() {
 			

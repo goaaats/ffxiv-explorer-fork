@@ -34,9 +34,9 @@ public class Texture_File {
 		ByteBuffer bb = ByteBuffer.wrap(data);
 		bb.order(ByteOrder.LITTLE_ENDIAN);
 		bb.getInt(); // Uknown
-		compressionType = bb.get();
+		compressionType = bb.getShort();
 		numMipMaps = bb.get();		
-		bb.getShort();
+		bb.get();
 		uncompressedWidth = bb.getShort();
 		uncompressedHeight = bb.getShort();
 		bb.getShort();
@@ -56,7 +56,7 @@ public class Texture_File {
 			throw new NullPointerException("Data is null");
 		}
 		switch (compressionType) {
-		case 32: {
+		case 0x3420: {
 			return ImageDecoding.decodeImageDX1(data,
 					dataStart[index],
 					uncompressedWidth,
@@ -64,13 +64,14 @@ public class Texture_File {
 					uncompressedWidth / 4,
 					uncompressedHeight / 4);
 		}
-		case 48: {
+		case 0x1130:
+		case 0x1131: {
 			return ImageDecoding.decodeImageRaw(data,
 					dataStart[index],
 					uncompressedWidth,
 					uncompressedHeight, 0, 0);
 		}
-		case 49: {
+		case 0x3431: {
 			return ImageDecoding.decodeImageDX5(data,
 					dataStart[index],
 					uncompressedWidth,
@@ -78,7 +79,7 @@ public class Texture_File {
 					uncompressedWidth / 4,
 					uncompressedHeight / 4);
 		}
-		case 64: {
+		case 0x1440: {
 			if (parameters != null) {
 				if (parameters.containsKey("4444.channel")) {
 					Object q = parameters.get("4444.channel");
@@ -102,25 +103,20 @@ public class Texture_File {
 					uncompressedWidth,
 					uncompressedHeight, 0, 0);
 		}
-		case 65: {
+		case 0x1441: {
 			return ImageDecoding.decodeImage5551(data,
 					dataStart[index],
 					uncompressedWidth,
 					uncompressedHeight, 0, 0, parameters);
 		}
-		case 80: {
+		case 0x1450:
+		case 0x1451:{
 			return ImageDecoding.decodeImageRGBA(data,
 					dataStart[index],
 					uncompressedWidth,
 					uncompressedHeight, 0, 0);
-		}
-		case 81: {
-			return ImageDecoding.decodeImageRGBA(data,
-					dataStart[index],
-					uncompressedWidth,
-					uncompressedHeight, 0, 0);
-		}
-		case 96: {
+		}		
+		case 0x2460: {
 			return ImageDecoding.decodeImageRGBAF(data, dataStart[index], uncompressedWidth, uncompressedHeight, 0, 0);
 		}
 		}
@@ -134,6 +130,31 @@ public class Texture_File {
 		ImageIO.write(decode(0, null), "png", baos);
 		byte[] bytes = baos.toByteArray();
 		return bytes;		
+	}
+
+	public String getCompressionTypeString() {
+		switch (compressionType)
+		{
+		case 0x3420: 
+			return "DX1";
+		case 0x3430: 
+			return "DX3";
+		case 0x3431:
+			return "DX5";
+		case 0x1130:
+		case 0x1131: 
+			return "RGB 8bit";		
+		case 0x1440: 
+			return "RGBA 4444";		
+		case 0x1441: 
+			return "RGBA 5551";
+		case 0x1450:
+		case 0x1451:
+			return "RGBA";
+		case 0x2460: 
+			return "RGBAF";
+		default: return String.format("Unknown: 0x%x", compressionType);
+		}
 	}
 	
 }
