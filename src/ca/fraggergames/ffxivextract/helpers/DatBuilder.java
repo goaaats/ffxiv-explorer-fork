@@ -144,7 +144,7 @@ public class DatBuilder {
 			while ((curposition & 0xFF) != 0x00)
 				curposition += 1;
 			
-			long entryOffset = ((currentOffset)/8) + (index * 2);
+			long entryOffset = ((currentOffset)/8) + ((index-1) * 2);
 			
 			currentOffset = curposition;
 			
