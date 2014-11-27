@@ -5,7 +5,7 @@ public class Strings {
 		
 	//Dialog Titles
 	public static final String DIALOG_TITLE_ABOUT = "About";
-	public static final String DIALOG_TITLE_MUSICSWAPPER = "Music Swap Tool (EXPERIMENTAL)";
+	public static final String DIALOG_TITLE_MUSICSWAPPER = "Music Swap Tool";
 	public static final String DIALOG_TITLE_SEARCH = "Search";
 	public static final String DIALOG_TITLE_ERROR = "Error";
 	
@@ -46,7 +46,7 @@ public class Strings {
 	public static final String MENUITEM_EXTRACTRAW = "Extract Raw";
 	public static final String MENUITEM_SEARCH = "Search";
 	public static final String MENUITEM_SEARCHAGAIN = "Search Again";
-	public static final String MENUITEM_MUSICSWAPPER = "Music Swapper (EXPERIMENTAL)";
+	public static final String MENUITEM_MUSICSWAPPER = "Music Swapper";
 	public static final String MENUITEM_MACROEDITOR = "Macro Editor (NOT DONE)";
 	public static final String MENUITEM_LOGVIEWER = "Log Viewer (NOT DONE)";
 	public static final String MENUITEM_ENABLEUPDATE = "Check for Updates";
@@ -64,7 +64,9 @@ public class Strings {
 	public static final String ERROR_CANNOT_OPEN_INDEX = "Could not open index file. Shut off FFXIV if it is running currently.";
 	public static final String ERROR_EDITIO = "Bad IOException happened. You should replace the edited index file with the backup.";
 	
-	
+	//Misc
+	public static final String MSG_MUSICSWAPPER_TITLE = "Before Using Swapper";
+	public static final String MSG_MUSICSWAPPER = "This program modifies FFXIV ARR's files. I am not responsible in the case where swapping the music files leads to a ban or damaged game. Use at your own risk.\n\nRemember to restore before patching the game as the patcher may have issues with modified files.\n	\nThe index file is automatically backed up as \"0c0000.win32.index.bak\" in the same folder as \"0c0000.win32.index\".";
 	
 	
 }

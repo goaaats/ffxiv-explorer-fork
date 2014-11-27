@@ -1,4 +1,4 @@
----Gear Set Files---
+---Gear Set Files---  By Ioncannon
 
 -Starts with item number, then label name.
 -Actual data is encoded with an XOR (look for the repeating value, decode with this)

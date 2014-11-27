@@ -1,4 +1,6 @@
-#### SCD FILE RESEARCH ####
+#### SCD FILE RESEARCH #### By Ioncannon
+
+!Some information was based on VGMStream!
 
 Current research on SCD music/sound files. Sorry it's a mess.
 
@@ -75,6 +77,10 @@ XOR all header bytes with the encode byte.
 
 ===DATA===
 Ogg Vorbis data is here
+
+--------------Duplicate Header-----------------------------
+It seems that the first header is 3 chunks in size, each 0x120 bytes long. It's the Vorbis
+Indentification, Comment, and Setup headers. This is repeated after. 
 
 --------------Putting MS-ADPCM into WAV--------------------
 -Write "RIFF"

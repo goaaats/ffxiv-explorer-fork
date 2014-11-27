@@ -1,4 +1,4 @@
-#### DAT FILE RESEARCH ####
+#### DAT FILE RESEARCH #### By Ioncannon
 
 Current research on SqPack Dat files
 

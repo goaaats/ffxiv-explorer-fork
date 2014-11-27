@@ -29,7 +29,7 @@ public class AboutWindow extends JFrame {
 	JPanel aboutWindow = new JPanel();
 	JPanel container = new JPanel();
 	FancyJLabel appname = new FancyJLabel(Constants.APPNAME);	
-	JLabel author = new FancyJLabel("By Magis");
+	JLabel author = new FancyJLabel("By Ioncannon");
 	JLabel version = new FancyJLabel(Strings.ABOUTDIALOG_VERSION + " " + Constants.VERSION);
 	JLabel gitcommit = new FancyJLabel(Strings.ABOUTDIALOG_GITVERSION + " " + Constants.COMMIT.substring(0, 10));
 	

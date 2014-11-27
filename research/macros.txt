@@ -1,4 +1,4 @@
-MACRO DAT FILE
+MACRO DAT FILE By Ioncannon
 
 0x08: Size of macro book from 0x10.
 
