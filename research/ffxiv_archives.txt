@@ -26,10 +26,10 @@ MTRL -Material Files
 SKLB -Skeleton Files
 PAP -Animation Files
 SHCD -Shaders 
-ATEX
-AVFX
-CUT
+ATEX -Textures for animations
+AVFX -Animation description ???
+CUT -Cutscene description???
 OBSB 
 ENVB
-PCB
+PCB -Collision... stuff
 SGB

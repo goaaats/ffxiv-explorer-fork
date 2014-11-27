@@ -1,4 +1,4 @@
-#### INDEX FILE RESEARCH ####
+#### INDEX FILE RESEARCH #### By Ioncannon
 
 Current research on SqPack Index files
 
