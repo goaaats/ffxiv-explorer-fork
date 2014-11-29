@@ -66,6 +66,7 @@ public class MusicSwapperWindow extends JFrame {
 	//CUSTOM MUSIC STUFF
 	private int currentDatIndex;
 	private ArrayList<Long> customIndexes = new ArrayList<Long>();
+	private boolean datWasGenerated = false;
 	
 	//GUI
 	private JPanel pnlBackup;
@@ -411,6 +412,7 @@ public class MusicSwapperWindow extends JFrame {
 					((DefaultListModel<String>)lstSet.getModel()).add(0, ((DefaultListModel<String>)lstCustomMusic.getModel()).elementAt(i));
 				
 				btnGenerateDat.setEnabled(false);
+				datWasGenerated = true;
 			}
 		});
 		
@@ -470,6 +472,10 @@ public class MusicSwapperWindow extends JFrame {
 
 		((DefaultListModel<String>)lstOriginal.getModel()).clear();
 		((DefaultListModel<String>)lstSet.getModel()).clear();
+		
+		datWasGenerated = false;
+		((DefaultListModel<String>)lstCustomMusic.getModel()).clear();
+		customIndexes.clear();
 		
 		pnlBackup.setEnabled(true);
 		lblBackup.setEnabled(true);
@@ -589,6 +595,10 @@ public class MusicSwapperWindow extends JFrame {
 		btnRestore.setEnabled(false);
 		
 		setSwapperEnabled(false);
+		
+		datWasGenerated = false;
+		((DefaultListModel<String>)lstCustomMusic.getModel()).clear();
+		customIndexes.clear();
 	}
 	
 	private void setSwapperEnabled(boolean isEnabled) {
