@@ -42,6 +42,8 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 
 import javax.swing.ListSelectionModel;
 
@@ -487,7 +489,25 @@ public class MusicSwapperWindow extends JFrame {
 			System.out.println("Backup found, checking file.");
 			// Should hash here, but for now just check file counts
 			editMusicFile = new SqPack_IndexFile(file.getCanonicalPath());
+			
+			Arrays.sort(editMusicFile.getPackFolders()[0].getFiles(), new Comparator<SqPack_File>() {
+
+				@Override
+				public int compare(SqPack_File o1, SqPack_File o2) {
+					return o1.getName().compareTo(o2.getName());
+				}
+			});
+			
 			originalMusicFile = new SqPack_IndexFile(backup.getCanonicalPath());
+			
+			Arrays.sort(originalMusicFile.getPackFolders()[0].getFiles(), new Comparator<SqPack_File>() {
+
+				@Override
+				public int compare(SqPack_File o1, SqPack_File o2) {
+					return o1.getName().compareTo(o2.getName());
+				}
+			});
+			
 			originalFiles = originalMusicFile.getPackFolders()[0].getFiles();
 			editedFiles = editMusicFile.getPackFolders()[0].getFiles();
 
@@ -511,6 +531,23 @@ public class MusicSwapperWindow extends JFrame {
 			copyFile(file, backup);
 			editMusicFile = new SqPack_IndexFile(file.getCanonicalPath());
 			originalMusicFile = new SqPack_IndexFile(backup.getCanonicalPath());
+			
+			Arrays.sort(editMusicFile.getPackFolders()[0].getFiles(), new Comparator<SqPack_File>() {
+
+				@Override
+				public int compare(SqPack_File o1, SqPack_File o2) {
+					return o1.getName().compareTo(o2.getName());
+				}
+			});
+			
+			Arrays.sort(originalMusicFile.getPackFolders()[0].getFiles(), new Comparator<SqPack_File>() {
+
+				@Override
+				public int compare(SqPack_File o1, SqPack_File o2) {
+					return o1.getName().compareTo(o2.getName());
+				}
+			});
+			
 			originalFiles = originalMusicFile.getPackFolders()[0].getFiles();
 			editedFiles = editMusicFile.getPackFolders()[0].getFiles();
 			lblBackup.setText("Backup was auto generated. Remember to restore before patching.");
@@ -664,7 +701,7 @@ public class MusicSwapperWindow extends JFrame {
 		
 		if (lstCustomMusic.getModel().getSize() == 0)
 		{
-			SqPack_File toThisFile = originalMusicFile.getPackFolders()[0].getFiles()[to - lstCustomMusic.getModel().getSize() + 1];
+			SqPack_File toThisFile = originalMusicFile.getPackFolders()[0].getFiles()[to - lstCustomMusic.getModel().getSize()];
 			editedFiles[which] = new SqPack_File(toBeChanged.getId(), toBeChanged.getId2(),
 				toThisFile.getOffset());
 			tooffset = toThisFile.getOffset();
