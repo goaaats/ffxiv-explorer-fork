@@ -37,7 +37,7 @@ public class Path_to_Hash_Window extends JFrame {
 		URL imageURL = getClass().getResource("/res/frameicon.png");
 		ImageIcon image = new ImageIcon(imageURL);
 		this.setIconImage(image.getImage());
-		setBounds(100, 100, 450, 160);
+		setBounds(100, 100, 510, 220);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		contentPane.setLayout(new BorderLayout(0, 0));		
@@ -46,12 +46,12 @@ public class Path_to_Hash_Window extends JFrame {
 		JPanel panel_1 = new JPanel();
 		contentPane.add(panel_1, BorderLayout.CENTER);
 		panel_1.setBorder(new EmptyBorder(5, 0, 0, 0));
-		panel_1.setLayout(new BoxLayout(panel_1, BoxLayout.X_AXIS));
+ 		panel_1.setLayout(new BoxLayout(panel_1, BoxLayout.X_AXIS));
 		
 		scrollPane = new JScrollPane();
 		panel_1.add(scrollPane);
 		
-		txtOutput = new JTextArea(Strings.PATHTOHASH_FOLDER_HASH + "\n" + Strings.PATHTOHASH_FILE_HASH);
+		txtOutput = new JTextArea(Strings.PATHTOHASH_INTRO);
 		scrollPane.setViewportView(txtOutput);
 		txtOutput.setRows(2);
 		txtOutput.setEditable(false);

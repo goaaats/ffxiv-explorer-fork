@@ -33,8 +33,8 @@ public class Strings {
 	public static final String PATHTOHASH_FILE_HASH = "File Hash: ";
 	public static final String PATHTOHASH_BUTTON_HASHTHIS = "Calculate";
 	public static final String PATHTOHASH_BUTTON_CLOSE = "Close";
-	public static final String PATHTOHASH_INTRO = "Set a valid path in the form of \"folder/subfolder/file.ext\" and click calculate.";
-	public static final String PATHTOHASH_ERROR_INVALID = "Not a valid path";
+	public static final String PATHTOHASH_INTRO = "Set a valid path in the form of \"folder/subfolder/file.ext\"\nand click calculate.";
+	public static final String PATHTOHASH_ERROR_INVALID = "Not a valid path.";
 	
 	//Search Window
 	public static final String SEARCH_FRAMETITLE_BYSTRING = "Search for String";
