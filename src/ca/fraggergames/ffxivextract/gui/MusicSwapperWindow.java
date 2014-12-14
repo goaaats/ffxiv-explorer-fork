@@ -10,6 +10,7 @@ import javax.swing.border.TitledBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.filechooser.FileFilter;
+import javax.swing.DefaultListCellRenderer;
 import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
 import javax.swing.JComboBox;
@@ -19,6 +20,8 @@ import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import javax.swing.JButton;
 import javax.swing.BoxLayout;
+import javax.swing.ListCellRenderer;
+
 import java.awt.Component;
 import javax.swing.JList;
 
@@ -197,6 +200,7 @@ public class MusicSwapperWindow extends JFrame {
 			
 		lstOriginal.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		lstOriginal.setModel(new DefaultListModel<String>());
+		lstOriginal.setCellRenderer(new SwapperCellRenderer());
 		lstOriginal.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
 			
 			@Override
@@ -285,7 +289,7 @@ public class MusicSwapperWindow extends JFrame {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				swapMusic(lstOriginal.getSelectedIndex(),
-						lstOriginal.getSelectedIndex() + (lstSet.getModel().getSize() == 0 ? 0 : lstCustomMusic.getModel().getSize() + 1));
+						lstOriginal.getSelectedIndex() + (customIndexes.size() == 0 ? 0 : lstCustomMusic.getModel().getSize() + 1));
 			}
 		});
 		
@@ -377,8 +381,8 @@ public class MusicSwapperWindow extends JFrame {
 				{
 					for (int i = 0; i < customIndexes.size(); i++)
 						((DefaultListModel<String>)lstSet.getModel()).removeElementAt(0);
-				}
-				((DefaultListModel<String>)lstSet.getModel()).removeElementAt(0);
+					((DefaultListModel<String>)lstSet.getModel()).removeElementAt(0);
+				}				
 				
 				customIndexes.clear();
 				
@@ -410,11 +414,13 @@ public class MusicSwapperWindow extends JFrame {
 				
 				//Put new songs into list
 				((DefaultListModel<String>)lstSet.getModel()).add(0,"-----------");				
-				for (int i = lstCustomMusic.getModel().getSize() - 1; i >= 0; i--)
+				for (int i = lstCustomMusic.getModel().getSize() - 1; i >= 0; i--)	
 					((DefaultListModel<String>)lstSet.getModel()).add(0, ((DefaultListModel<String>)lstCustomMusic.getModel()).elementAt(i));
 				
 				btnGenerateDat.setEnabled(false);
 				datWasGenerated = true;
+				
+				lstOriginal.repaint();
 			}
 		});
 		
@@ -771,4 +777,50 @@ public class MusicSwapperWindow extends JFrame {
 		}
 	}
 
+	class SwapperCellRenderer extends DefaultListCellRenderer {
+	     
+		public SwapperCellRenderer() {
+	         setOpaque(true);
+	     }
+
+		@Override
+		public Component getListCellRendererComponent(JList<?> list,
+				Object value, int index, boolean isSelected,
+				boolean cellHasFocus) {
+			setText(value.toString());
+
+	         Color background;
+	         Color foreground;
+
+	         int lastVal = (int) ((editedFiles[index].dataoffset) & 0xF);
+	         
+	         boolean flagAsInvalid = false;
+	         if (!customIndexes.contains(editedFiles[index].dataoffset) && lastVal == (currentDatIndex+1))
+	        	 flagAsInvalid = true;
+	         	  
+	         if (isSelected) {
+	        	 if (flagAsInvalid)
+	        	 {	        		 	 
+	        		 Component defaultComponent = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+			         setForeground(Color.RED);
+			         setBackground(defaultComponent.getBackground());
+	        	 }
+	        	 else
+	        		 return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);	            
+	         } else {
+	        	 if (flagAsInvalid)
+	        	 {
+			         setBackground(Color.RED);
+			         setForeground(Color.WHITE);
+	        	 }
+	        	 else
+	        	 {
+	        		 return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+	        	 }
+	         };
+
+	         return this;
+		}
+	 }
+	
 }
