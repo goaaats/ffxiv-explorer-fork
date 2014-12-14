@@ -37,13 +37,18 @@ import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.URL;
 import java.nio.channels.FileChannel;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -59,6 +64,8 @@ import ca.fraggergames.ffxivextract.models.SqPack_IndexFile.SqPack_DataSegment;
 import ca.fraggergames.ffxivextract.models.SqPack_IndexFile.SqPack_File;
 import javax.swing.UIManager;
 
+import com.google.gson.Gson;
+
 public class MusicSwapperWindow extends JFrame {
 
 	//FILE I/O
@@ -70,6 +77,8 @@ public class MusicSwapperWindow extends JFrame {
 	
 	//CUSTOM MUSIC STUFF
 	private int currentDatIndex;
+	private String customDatPath;
+	private ArrayList<String> customPaths = new ArrayList<String>();
 	private ArrayList<Long> customIndexes = new ArrayList<Long>();
 	private boolean datWasGenerated = false;
 	
@@ -363,7 +372,7 @@ public class MusicSwapperWindow extends JFrame {
 			public void actionPerformed(ActionEvent arg0) {
 				int selected = lstCustomMusic.getSelectedIndex();
 				if (selected >= 0)
-					((DefaultListModel<String>)lstCustomMusic.getModel()).remove(selected);
+					((DefaultListModel<String>)lstCustomMusic.getModel()).remove(selected);							
 				
 				if (((DefaultListModel<String>)lstCustomMusic.getModel()).size() == 0)
 					btnGenerateDat.setEnabled(false);
@@ -384,13 +393,18 @@ public class MusicSwapperWindow extends JFrame {
 					((DefaultListModel<String>)lstSet.getModel()).removeElementAt(0);
 				}				
 				
+				customPaths.clear();
 				customIndexes.clear();
 				
 				try {
 					//Generate DAT
-					DatBuilder builder = new DatBuilder(currentDatIndex, edittingIndexFile.getParent() + "\\0c0000.win32.dat" + currentDatIndex);
+					customDatPath = edittingIndexFile.getParent() + "\\0c0000.win32.dat" + currentDatIndex;
+					DatBuilder builder = new DatBuilder(currentDatIndex, customDatPath);					
 					for (int i = 0; i < lstCustomMusic.getModel().getSize(); i++)
+					{
+						customPaths.add(lstCustomMusic.getModel().getElementAt(i));
 						customIndexes.add(builder.addFile(lstCustomMusic.getModel().getElementAt(i)));
+					}
 					builder.finish();
 										
 					//Edit Index
@@ -411,6 +425,8 @@ public class MusicSwapperWindow extends JFrame {
 						    JOptionPane.ERROR_MESSAGE);
 					e.printStackTrace();
 				}				
+				
+				saveCustomDatIndexList();
 				
 				//Put new songs into list
 				((DefaultListModel<String>)lstSet.getModel()).add(0,"-----------");				
@@ -483,6 +499,7 @@ public class MusicSwapperWindow extends JFrame {
 		
 		datWasGenerated = false;
 		((DefaultListModel<String>)lstCustomMusic.getModel()).clear();
+		customPaths.clear();
 		customIndexes.clear();
 		
 		pnlBackup.setEnabled(true);
@@ -558,7 +575,7 @@ public class MusicSwapperWindow extends JFrame {
 			editedFiles = editMusicFile.getPackFolders()[0].getFiles();
 			lblBackup.setText("Backup was auto generated. Remember to restore before patching.");
 			btnBackup.setEnabled(false);
-			btnRestore.setEnabled(true);
+			btnRestore.setEnabled(true);			
 		}
 
 		// Set Current Index
@@ -573,6 +590,8 @@ public class MusicSwapperWindow extends JFrame {
 
 		edittingIndexFile = file;
 
+		loadCustomDatIndexList();
+		
 		//Init this since the list listener doesn't fire
 		txtSetTo.setText(String.format(Strings.MUSICSWAPPER_CURRENTOFFSET, editedFiles[lstOriginal.getSelectedIndex()].getOffset() & 0xFFFFFFFF));
 		if (editedFiles[lstOriginal.getSelectedIndex()].getOffset() != originalMusicFile.getPackFolders()[0].getFiles()[lstOriginal.getSelectedIndex()].dataoffset)
@@ -631,6 +650,10 @@ public class MusicSwapperWindow extends JFrame {
 		System.out.println("Restoring...");
 		
 		edittingIndexFile.delete();
+		File generatedDatFile = new File(customDatPath);
+		generatedDatFile.delete();
+		File generatedDatFileList = new File(customDatPath + ".lst");
+		generatedDatFileList.delete();
 		backup.renameTo(edittingIndexFile);
 		
 		lblBackup.setText("Backup does not exist.");
@@ -641,6 +664,7 @@ public class MusicSwapperWindow extends JFrame {
 		
 		datWasGenerated = false;
 		((DefaultListModel<String>)lstCustomMusic.getModel()).clear();
+		customPaths.clear();
 		customIndexes.clear();
 	}
 	
@@ -777,6 +801,72 @@ public class MusicSwapperWindow extends JFrame {
 		}
 	}
 
+	private void loadCustomDatIndexList(){
+		CustomDatPOJO toLoad = null;		
+		Gson gson = new Gson();
+		
+		try{
+			String json = null;
+			BufferedReader br = new BufferedReader(new FileReader(edittingIndexFile.getParent() + "\\0c0000.win32.dat" + currentDatIndex + ".lst"));
+		    try {
+		        StringBuilder sb = new StringBuilder();
+		        String line = br.readLine();
+		
+		        while (line != null) {
+		            sb.append(line);
+		            sb.append(System.lineSeparator());
+		            line = br.readLine();
+		        }
+		        json = sb.toString();
+		    } finally {
+		        br.close();
+		    }
+			toLoad = gson.fromJson(json, CustomDatPOJO.class);	         
+		}
+		catch(FileNotFoundException e)
+		{
+			return;
+		}
+		catch(IOException e)
+		{
+			e.printStackTrace();
+		} 				
+		
+		customDatPath = toLoad.datPath;
+		customPaths = toLoad.musicPaths;
+		customIndexes = toLoad.musicOffsets;
+		
+		for (int i = 0; i < customPaths.size(); i++)
+			((DefaultListModel<String>)lstCustomMusic.getModel()).addElement(customPaths.get(i));
+		
+		//Put new songs into list
+		((DefaultListModel<String>)lstSet.getModel()).add(0,"-----------");				
+		for (int i = lstCustomMusic.getModel().getSize() - 1; i >= 0; i--)	
+			((DefaultListModel<String>)lstSet.getModel()).add(0, ((DefaultListModel<String>)lstCustomMusic.getModel()).elementAt(i));
+		
+		btnGenerateDat.setEnabled(false);
+		datWasGenerated = true;
+		
+		lstOriginal.repaint();
+	}
+	
+	private void saveCustomDatIndexList(){
+		CustomDatPOJO toSave = new CustomDatPOJO();
+		toSave.datPath = customDatPath;
+		toSave.musicPaths = customPaths;
+		toSave.musicOffsets = customIndexes;
+		Gson gson = new Gson();	
+		String json = gson.toJson(toSave);
+		try{
+		FileOutputStream fileOut =
+		         new FileOutputStream(customDatPath + ".lst");
+				 fileOut.write(json.getBytes());
+		         fileOut.close();		         
+		}
+		catch(IOException e)
+		{e.printStackTrace();}
+	}
+	
 	class SwapperCellRenderer extends DefaultListCellRenderer {
 	     
 		public SwapperCellRenderer() {
@@ -823,4 +913,10 @@ public class MusicSwapperWindow extends JFrame {
 		}
 	 }
 	
+	private class CustomDatPOJO
+	{
+		public String datPath;
+		public ArrayList<String> musicPaths;
+		public ArrayList<Long> musicOffsets;		
+	}
 }
