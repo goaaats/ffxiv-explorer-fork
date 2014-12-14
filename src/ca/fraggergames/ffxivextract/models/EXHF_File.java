@@ -19,6 +19,7 @@ public class EXHF_File {
 	private int datasetChunkSize = 0;
 	private int numLangs = 0;
 	private int numEntries = 0;
+	private int trueNumEntries = 0;
 	
 	public EXHF_File(byte[] data) throws IOException {
 		loadEXHF(data);
@@ -78,8 +79,11 @@ public class EXHF_File {
 			
 			//Page Table
 			for (int i = 0; i < numPageTable; i++)
+			{
 				pageTable[i] = new EXDF_Page(buffer.getInt(), buffer.getInt());
-			
+				trueNumEntries += pageTable[i].numEntries;
+			}
+						
 		} 
 		catch (BufferUnderflowException underflowException) {} 
 		catch (BufferOverflowException overflowException) {}
@@ -119,6 +123,10 @@ public class EXHF_File {
 		return pageTable;
 	}
 
+	public int getTrueNumEntries(){
+		return trueNumEntries;
+	}
+	
 	public int getNumEntries() {
 		return numEntries;
 	}

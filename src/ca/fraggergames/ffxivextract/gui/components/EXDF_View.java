@@ -354,7 +354,7 @@ public class EXDF_View extends JScrollPane implements ItemListener{
 	//Setup UI with known data
 	private void setupUI() {
 		lblExhName.setText(exhName);
-		lblExhNumEntries.setText(""+exhFile.getNumEntries());
+		lblExhNumEntries.setText(""+exhFile.getNumEntries() + ((exhFile.getNumEntries() == exhFile.getTrueNumEntries()? "": " (Page Sum: " +exhFile.getTrueNumEntries() + ")")));
 		lblExhNumLangs.setText(""+(exhFile.getNumLanguages()-1));
 		lblExhNumPages.setText(""+exhFile.getNumPages());
 		if (exhFile.getNumLanguages() != 1)
@@ -399,7 +399,10 @@ public class EXDF_View extends JScrollPane implements ItemListener{
 		@Override
 		public int getRowCount() {
 		
-			return exhFile.getNumEntries();
+			if (exhFile.getTrueNumEntries() > exhFile.getNumEntries())
+				return exhFile.getNumEntries();
+			else
+				return exhFile.getTrueNumEntries();
 
 		}
 
