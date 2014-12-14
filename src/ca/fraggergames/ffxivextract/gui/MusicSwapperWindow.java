@@ -52,6 +52,8 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Hashtable;
 
 import javax.swing.ListSelectionModel;
 
@@ -74,6 +76,7 @@ public class MusicSwapperWindow extends JFrame {
 	private File edittingIndexFile = null;
 	private SqPack_IndexFile editMusicFile, originalMusicFile;
 	private SqPack_File[] editedFiles;	
+	private Hashtable<Integer, Integer> originalPositionTable = new Hashtable<Integer, Integer>(); //Fucking hack, but this is my fix if we want alphabetical sort
 	
 	//CUSTOM MUSIC STUFF
 	private int currentDatIndex;
@@ -424,16 +427,17 @@ public class MusicSwapperWindow extends JFrame {
 					output.close();
 				} catch (FileNotFoundException e) {
 					JOptionPane.showMessageDialog(MusicSwapperWindow.this,
-							"Read Error",
-						    "There was an error loading a file.",
+							Strings.ERROR_CANNOT_OPEN_INDEX,
+						    Strings.DIALOG_TITLE_ERROR,
 						    JOptionPane.ERROR_MESSAGE);
-					e.printStackTrace();
+					return;
 				} catch (IOException e) {
 					JOptionPane.showMessageDialog(MusicSwapperWindow.this,
 							"Write Error",
 						    "There was an error writing to the modded index file.",
 						    JOptionPane.ERROR_MESSAGE);
 					e.printStackTrace();
+					return;
 				}				
 				
 				saveCustomDatIndexList();
@@ -532,6 +536,10 @@ public class MusicSwapperWindow extends JFrame {
 			});
 			
 			originalMusicFile = new SqPack_IndexFile(backup.getCanonicalPath());
+						
+			SqPack_File[] files = originalMusicFile.getPackFolders()[0].getFiles();
+			for (int i = 0; i < files.length; i ++)
+				originalPositionTable.put(files[i].id, i);
 			
 			Arrays.sort(originalMusicFile.getPackFolders()[0].getFiles(), new Comparator<SqPack_File>() {
 
@@ -637,6 +645,22 @@ public class MusicSwapperWindow extends JFrame {
 		SqPack_File originalFiles[] = originalMusicFile.getPackFolders()[0].getFiles();
 		editedFiles = editMusicFile.getPackFolders()[0].getFiles();
 		
+		Arrays.sort(editMusicFile.getPackFolders()[0].getFiles(), new Comparator<SqPack_File>() {
+
+			@Override
+			public int compare(SqPack_File o1, SqPack_File o2) {
+				return o1.getName().compareTo(o2.getName());
+			}
+		});
+		
+		Arrays.sort(originalMusicFile.getPackFolders()[0].getFiles(), new Comparator<SqPack_File>() {
+
+			@Override
+			public int compare(SqPack_File o1, SqPack_File o2) {
+				return o1.getName().compareTo(o2.getName());
+			}
+		});
+		
 		loadDropDown(lstOriginal, originalFiles, 0);
 		loadDropDown(lstSet, originalFiles, 0);
 		
@@ -660,10 +684,14 @@ public class MusicSwapperWindow extends JFrame {
 		System.out.println("Restoring...");
 		
 		edittingIndexFile.delete();
-		File generatedDatFile = new File(customDatPath);
-		generatedDatFile.delete();
-		File generatedDatFileList = new File(customDatPath + ".lst");
-		generatedDatFileList.delete();
+		if (customDatPath != null){
+			File generatedDatFile = new File(customDatPath);
+			if (generatedDatFile.exists())
+				generatedDatFile.delete();		
+			File generatedDatFileList = new File(customDatPath + ".lst");
+			if (generatedDatFileList.exists())
+				generatedDatFileList.delete();
+		}
 		backup.renameTo(edittingIndexFile);
 		
 		lblBackup.setText("Backup does not exist.");
@@ -734,11 +762,13 @@ public class MusicSwapperWindow extends JFrame {
 	private void swapMusic(int which, int to) {
 		
 		if (which == -1 || to == -1)
-			return;
+			return;		
 		
 		long tooffset = 0;
 		
 		SqPack_File toBeChanged = originalMusicFile.getPackFolders()[0].getFiles()[which];		
+		
+		which = originalPositionTable.get(toBeChanged.id);
 		
 		if (lstCustomMusic.getModel().getSize() == 0)
 		{
@@ -763,13 +793,9 @@ public class MusicSwapperWindow extends JFrame {
 				tooffset = customIndexes.get(to);
 			}
 		}
-
-		txtSetTo.setText(String.format(Strings.MUSICSWAPPER_CURRENTOFFSET, tooffset & 0xFFFFFFFF));
-		if (toBeChanged.getOffset() != tooffset)
-			txtSetTo.setForeground(Color.RED);
-		else
-			txtSetTo.setForeground(Color.decode("#006400"));
-		try {
+		
+		try {			
+			
 			LERandomAccessFile ref = new LERandomAccessFile(
 					edittingIndexFile.getCanonicalPath(), "rw");
 
@@ -785,6 +811,7 @@ public class MusicSwapperWindow extends JFrame {
 			ref.seek(offset);
 			for (int i = 0; i < size; i++)
 			{	
+				
 				if (i == which)
 				{
 					ref.skipBytes(8);
@@ -795,6 +822,12 @@ public class MusicSwapperWindow extends JFrame {
 			}
 						
 			ref.close();
+			
+			txtSetTo.setText(String.format(Strings.MUSICSWAPPER_CURRENTOFFSET, tooffset & 0xFFFFFFFF));
+			if (toBeChanged.getOffset() != tooffset)
+				txtSetTo.setForeground(Color.RED);
+			else
+				txtSetTo.setForeground(Color.decode("#006400"));
 			
 			System.out.println("Data changed");
 		} catch (FileNotFoundException e) {
