@@ -9,7 +9,7 @@ public class Constants {
 
 	public static final String APPNAME = "FFXIV 2.0 Data Explorer";
 	public static final String VERSION = "v1.1";
-	public static final int APP_VERSION_CODE = 1;
+	public static final int APP_VERSION_CODE = 2;
 	public static final String COMMIT = "e7a91cc886b58dd3bd78cb4fcd462283cdb902dc";
 	public static boolean DEBUG = false;
 	public static boolean EASTER_EGG = false;
