@@ -679,11 +679,18 @@ public class MusicSwapperWindow extends JFrame {
 	}
 	
 	private void restoreFromBackup() throws IOException
-	{
+	{		
 		// Create backup
 		System.out.println("Restoring...");
 		
-		edittingIndexFile.delete();
+		if (!edittingIndexFile.delete())
+		{
+			JOptionPane.showMessageDialog(MusicSwapperWindow.this,
+					Strings.ERROR_CANNOT_OPEN_INDEX,
+				    Strings.DIALOG_TITLE_ERROR,
+				    JOptionPane.ERROR_MESSAGE);
+			return;
+		}
 		if (customDatPath != null){
 			File generatedDatFile = new File(customDatPath);
 			if (generatedDatFile.exists())
