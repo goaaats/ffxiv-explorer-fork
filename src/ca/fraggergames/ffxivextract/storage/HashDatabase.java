@@ -243,7 +243,12 @@ public class HashDatabase {
 					.executeUpdate("create table if not exists folders (hash integer NOT NULL, path string, PRIMARY KEY (hash))");
 			statement
 					.executeUpdate("create table if not exists filenames (hash integer NOT NULL, path string, PRIMARY KEY (hash))");
-
+			statement
+					.executeUpdate("create table if not exists dbinfo (type string NOT NULL, value string NOT NULL)");
+			
+			if (getHashDBVersion() == -1)
+				statement
+						.executeUpdate("insert into dbinfo  values ('version', '-1')");
 		} catch (SQLException e) {
 			// if the error message is "out of memory",
 			// it probably means no database file is found
@@ -260,6 +265,34 @@ public class HashDatabase {
 
 	}
 
+	public static int getHashDBVersion()
+	{
+		String version = "-1";
+		Connection connection = null;		
+		try{
+			connection = DriverManager
+					.getConnection("jdbc:sqlite:./hashlist.db");
+			Statement statement = connection.createStatement();
+			ResultSet rs = statement
+					.executeQuery("select * from dbinfo where type = 'version'");
+						
+			while (rs.next())
+				version = rs.getString("value");
+		} catch (SQLException e) {
+			System.err.println(e.getMessage());
+			return -1;
+		} finally {
+			try {
+				if (connection != null)
+					connection.close();
+			} catch (SQLException e) {
+				System.err.println(e);
+			}
+		}		 
+		
+		return Integer.parseInt(version);
+	}
+	
 	public static boolean addFolderToDB(String folderName)
 	{
 		if (folderName.endsWith("/"))

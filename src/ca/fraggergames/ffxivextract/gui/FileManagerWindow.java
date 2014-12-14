@@ -518,6 +518,17 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 		int contentType = -1;
 		try {
 			 contentType = currentIndexFile.getContentType(file.getOffset()); 
+			 
+			 //If it's a placeholder, don't bother			 
+			 if (contentType == 0x01)
+			 {
+				 JLabel lblFNFError = new JLabel("This is currently a placeholder, there is no data to here.");
+				 tabs.addTab("No Data", lblFNFError);
+				 hexView.setBytes(null);							
+				 splitPane.setRightComponent(tabs);
+				 return;
+			 }
+			 
 			 data = currentIndexFile.extractFile(file.dataoffset, null);
 		}
 		catch (FileNotFoundException eFNF) {
