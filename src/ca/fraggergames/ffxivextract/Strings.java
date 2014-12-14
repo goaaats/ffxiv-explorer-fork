@@ -1,5 +1,7 @@
 package ca.fraggergames.ffxivextract;
 
+import javax.swing.Icon;
+
 
 public class Strings {
 		
@@ -24,6 +26,16 @@ public class Strings {
 	public static final String MUSICSWAPPER_CURRENTOFFSET = "Currently set to offset: %08X";
 	public static final String MUSICSWAPPER_CURRENTSETTO = "Currently set to: ";
 	
+	//Path to Hash Tool
+	public static final String PATHTOHASH_TITLE = "Path -> Hash Calculator";
+	public static final String PATHTOHASH_PATH = "Path: ";
+	public static final String PATHTOHASH_FOLDER_HASH = "Folder Hash: ";
+	public static final String PATHTOHASH_FILE_HASH = "File Hash: ";
+	public static final String PATHTOHASH_BUTTON_HASHTHIS = "Calculate";
+	public static final String PATHTOHASH_BUTTON_CLOSE = "Close";
+	public static final String PATHTOHASH_INTRO = "Set a valid path in the form of \"folder/subfolder/file.ext\" and click calculate.";
+	public static final String PATHTOHASH_ERROR_INVALID = "Not a valid path";
+	
 	//Search Window
 	public static final String SEARCH_FRAMETITLE_BYSTRING = "Search for String";
 	public static final String SEARCH_FRAMETITLE_BYBYTES = "Search for Bytes";
@@ -47,6 +59,7 @@ public class Strings {
 	public static final String MENUITEM_SEARCH = "Search";
 	public static final String MENUITEM_SEARCHAGAIN = "Search Again";
 	public static final String MENUITEM_MUSICSWAPPER = "Music Swapper";
+	public static final String MENUITEM_HASHCALC = "Path -> Hash Calculator";
 	public static final String MENUITEM_MACROEDITOR = "Macro Editor (NOT DONE)";
 	public static final String MENUITEM_LOGVIEWER = "Log Viewer (NOT DONE)";
 	public static final String MENUITEM_ENABLEUPDATE = "Check for Updates";
@@ -66,8 +79,7 @@ public class Strings {
 	
 	//Misc
 	public static final String MSG_MUSICSWAPPER_TITLE = "Before Using Swapper";
-	public static final String MSG_MUSICSWAPPER = "This program modifies FFXIV ARR's files. I am not responsible in the case where swapping the music files leads to a ban or damaged game. Use at your own risk.\n\nRemember to restore before patching the game as the patcher may have issues with modified files.\n	\nThe index file is automatically backed up as \"0c0000.win32.index.bak\" in the same folder as \"0c0000.win32.index\".";
-	
+	public static final String MSG_MUSICSWAPPER = "This program modifies FFXIV ARR's files. I am not responsible in the case where swapping the music files leads to a ban or damaged game. Use at your own risk.\n\nRemember to restore before patching the game as the patcher may have issues with modified files.\n	\nThe index file is automatically backed up as \"0c0000.win32.index.bak\" in the same folder as \"0c0000.win32.index\".";	
 	
 }
 	
