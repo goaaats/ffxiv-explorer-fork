@@ -102,6 +102,8 @@ public class MusicSwapperWindow extends JFrame {
 	private JButton btnAdd;
 	private JButton btnGenerateDat;
 	private JButton btnRemove;
+	private JLabel lblGenerateMessage;
+	private JPanel panel_7;
 	
 	public MusicSwapperWindow() {
 		this.setTitle(Strings.DIALOG_TITLE_MUSICSWAPPER);
@@ -171,6 +173,15 @@ public class MusicSwapperWindow extends JFrame {
 		lstCustomMusic.setVisibleRowCount(5);
 		lstCustomMusic.setModel(new DefaultListModel<String>());
 		scrollPane_2.setViewportView(lstCustomMusic);
+		
+		panel_7 = new JPanel();
+		panel_7.setBorder(new EmptyBorder(5, 5, 5, 5));
+		pnlCustomMusic.add(panel_7, BorderLayout.WEST);
+		panel_7.setLayout(new BorderLayout(0, 0));
+		
+		lblGenerateMessage = new JLabel("Generating a new custom dat may break already set indices. \r\nPlease go through the music list and reset anything flagged red.");
+		lblGenerateMessage.setHorizontalAlignment(SwingConstants.CENTER);
+		panel_7.add(lblGenerateMessage);
 		
 		panel_2 = new JPanel();
 		FlowLayout flowLayout_1 = (FlowLayout) panel_2.getLayout();
@@ -373,10 +384,7 @@ public class MusicSwapperWindow extends JFrame {
 				int selected = lstCustomMusic.getSelectedIndex();
 				if (selected >= 0)
 					((DefaultListModel<String>)lstCustomMusic.getModel()).remove(selected);							
-				
-				if (((DefaultListModel<String>)lstCustomMusic.getModel()).size() == 0)
-					btnGenerateDat.setEnabled(false);
-				else
+												
 					btnGenerateDat.setEnabled(true);
 			}
 		});
@@ -389,9 +397,11 @@ public class MusicSwapperWindow extends JFrame {
 				if (customIndexes.size() != 0)
 				{
 					for (int i = 0; i < customIndexes.size(); i++)
-						((DefaultListModel<String>)lstSet.getModel()).removeElementAt(0);
+						((DefaultListModel<String>)lstSet.getModel()).removeElementAt(0);					
+				}
+				
+				if (((DefaultListModel<String>)lstSet.getModel()).get(0).equals("-----------"))
 					((DefaultListModel<String>)lstSet.getModel()).removeElementAt(0);
-				}				
 				
 				customPaths.clear();
 				customIndexes.clear();
@@ -680,6 +690,7 @@ public class MusicSwapperWindow extends JFrame {
 			txtSetTo.setForeground(Color.decode("#000000"));
 		}
 		
+		lblGenerateMessage.setEnabled(isEnabled);
 		pnlCustomMusic.setEnabled(isEnabled);
 		lstCustomMusic.setEnabled(isEnabled);
 		btnAdd.setEnabled(isEnabled);
