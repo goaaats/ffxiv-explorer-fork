@@ -161,7 +161,7 @@ public class MusicSwapperWindow extends JFrame {
 		panel_3.add(btnRestore);
 		
 		pnlCustomMusic = new JPanel();
-		pnlCustomMusic.setBorder(new TitledBorder(null, "Custom Music", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+		pnlCustomMusic.setBorder(new TitledBorder(null, "Custom Music <Advance>", TitledBorder.LEADING, TitledBorder.TOP, null, null));
 		panel.add(pnlCustomMusic);
 		pnlCustomMusic.setLayout(new BorderLayout(0, 0));
 		
@@ -409,17 +409,36 @@ public class MusicSwapperWindow extends JFrame {
 				customPaths.clear();
 				customIndexes.clear();
 				
+				String lastLoaded = "";						
 				try {
 					//Generate DAT
 					customDatPath = edittingIndexFile.getParent() + "\\0c0000.win32.dat" + currentDatIndex;
+					File datlstfile = new File(customDatPath + ".lst");
+					datlstfile.delete();
+					
 					DatBuilder builder = new DatBuilder(currentDatIndex, customDatPath);					
 					for (int i = 0; i < lstCustomMusic.getModel().getSize(); i++)
 					{
+						lastLoaded = lstCustomMusic.getModel().getElementAt(i);
 						customPaths.add(lstCustomMusic.getModel().getElementAt(i));
 						customIndexes.add(builder.addFile(lstCustomMusic.getModel().getElementAt(i)));
 					}
 					builder.finish();
-										
+				} catch (FileNotFoundException e) {
+					JOptionPane.showMessageDialog(MusicSwapperWindow.this,
+							lastLoaded + " is missing. Dat generation was aborted. Please recreate the custom dat file, as some custom indexes may be invalid.\nDo not set any custom songs until done, as this may corrupt the index file and require a restore.",
+						    Strings.DIALOG_TITLE_ERROR,
+						    JOptionPane.ERROR_MESSAGE);
+					return;
+				} catch (IOException e) {
+					JOptionPane.showMessageDialog(MusicSwapperWindow.this,
+							"Write Error",
+						    "There was an error writing to the modded index file.",
+						    JOptionPane.ERROR_MESSAGE);
+					e.printStackTrace();
+					return;
+				}	
+				try{
 					//Edit Index
 					LERandomAccessFile output = new LERandomAccessFile(edittingIndexFile, "rw");					
 					output.seek(0x450);					
@@ -438,7 +457,8 @@ public class MusicSwapperWindow extends JFrame {
 						    JOptionPane.ERROR_MESSAGE);
 					e.printStackTrace();
 					return;
-				}				
+				}	
+				
 				
 				saveCustomDatIndexList();
 				
@@ -525,6 +545,7 @@ public class MusicSwapperWindow extends JFrame {
 		if (backup.exists()) {
 			System.out.println("Backup found, checking file.");
 			// Should hash here, but for now just check file counts
+			originalMusicFile = new SqPack_IndexFile(backup.getCanonicalPath());
 			editMusicFile = new SqPack_IndexFile(file.getCanonicalPath());
 			
 			Arrays.sort(editMusicFile.getPackFolders()[0].getFiles(), new Comparator<SqPack_File>() {
@@ -534,9 +555,7 @@ public class MusicSwapperWindow extends JFrame {
 					return o1.getName().compareTo(o2.getName());
 				}
 			});
-			
-			originalMusicFile = new SqPack_IndexFile(backup.getCanonicalPath());
-						
+											
 			SqPack_File[] files = originalMusicFile.getPackFolders()[0].getFiles();
 			for (int i = 0; i < files.length; i ++)
 				originalPositionTable.put(files[i].id, i);
@@ -775,7 +794,8 @@ public class MusicSwapperWindow extends JFrame {
 		
 		SqPack_File toBeChanged = originalMusicFile.getPackFolders()[0].getFiles()[which];		
 		
-		which = originalPositionTable.get(toBeChanged.id);
+		//This is the index of the file, not the alphaed 
+		int fileIndex = originalPositionTable.get(toBeChanged.id);
 		
 		if (lstCustomMusic.getModel().getSize() == 0)
 		{
@@ -819,7 +839,7 @@ public class MusicSwapperWindow extends JFrame {
 			for (int i = 0; i < size; i++)
 			{	
 				
-				if (i == which)
+				if (i == fileIndex)
 				{
 					ref.skipBytes(8);
 					ref.writeInt((int)tooffset);					
