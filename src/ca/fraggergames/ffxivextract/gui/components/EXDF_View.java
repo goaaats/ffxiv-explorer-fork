@@ -354,7 +354,7 @@ public class EXDF_View extends JScrollPane implements ItemListener{
 	//Setup UI with known data
 	private void setupUI() {
 		lblExhName.setText(exhName);
-		lblExhNumEntries.setText(""+exhFile.getNumEntries());
+		lblExhNumEntries.setText(""+exhFile.getNumEntries() + ((exhFile.getNumEntries() == exhFile.getTrueNumEntries()? "": " (Page Sum: " +exhFile.getTrueNumEntries() + ")")));
 		lblExhNumLangs.setText(""+(exhFile.getNumLanguages()-1));
 		lblExhNumPages.setText(""+exhFile.getNumPages());
 		if (exhFile.getNumLanguages() != 1)
@@ -399,7 +399,10 @@ public class EXDF_View extends JScrollPane implements ItemListener{
 		@Override
 		public int getRowCount() {
 		
-			return exhFile.getNumEntries();
+			if (exhFile.getTrueNumEntries() > exhFile.getNumEntries())
+				return exhFile.getNumEntries();
+			else
+				return exhFile.getTrueNumEntries();
 
 		}
 
@@ -472,7 +475,8 @@ public class EXDF_View extends JScrollPane implements ItemListener{
 				switch (dataset.type)
 				{									
 				case 0x0b: // QUAD
-					return entry.getQuad(dataset.offset);
+					int quad[] = entry.getQuad(dataset.offset);
+					return quad[0] + ", " + quad[1] + ", " + quad[2] + ", " + quad[3];
 				case 0x09: // FLOAT
 				case 0x08:
 					return entry.getFloat(dataset.offset);

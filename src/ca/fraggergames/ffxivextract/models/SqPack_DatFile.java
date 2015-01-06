@@ -95,61 +95,43 @@ public class SqPack_DatFile {
 			break;
 		case TYPE_MODEL:
 			
-			//First things
-			currentFilePointer.readInt(); //1
-			currentFilePointer.readInt(); //2
-			currentFilePointer.readInt(); //3
-			currentFilePointer.readInt(); //4
-			currentFilePointer.readInt(); //5
+			ContentType3Container container = new ContentType3Container();								
 			
-			currentFilePointer.readInt(); //Null
-			currentFilePointer.readInt(); //Null
-			currentFilePointer.readInt(); //Null
-			
-			currentFilePointer.readInt(); //6
-			currentFilePointer.readInt(); //7
-			currentFilePointer.readInt(); //8
-			
-			//Sizes
-			currentFilePointer.readInt(); //1
-			currentFilePointer.readInt(); //2
-			currentFilePointer.readInt(); //3
-			currentFilePointer.readInt(); //4
-			currentFilePointer.readInt(); //5
-			
-			currentFilePointer.readInt(); //Null
-			currentFilePointer.readInt(); //Null
-			currentFilePointer.readInt(); //Null
-			
-			currentFilePointer.readInt(); //6
-			currentFilePointer.readInt(); //7
-			currentFilePointer.readInt(); //8
-			
-			//Offset things
-			int read = 1;
-			int offsets[] = new int[8];
-			offsets[0] = currentFilePointer.readInt(); //1
-			offsets[1] = currentFilePointer.readInt(); //2
-			offsets[2] = currentFilePointer.readInt(); //3
-			offsets[3] = currentFilePointer.readInt(); //4
-			offsets[4] = currentFilePointer.readInt(); //5
-			
-			currentFilePointer.readInt(); //Null
-			currentFilePointer.readInt(); //Null
-			currentFilePointer.readInt(); //Null
-			
-			offsets[5] = currentFilePointer.readInt(); //6
-			offsets[6] = currentFilePointer.readInt(); //7
-			offsets[7] = currentFilePointer.readInt(); //8
-			
-			offsets[0] = offsets[read];
-			
-			byte[] mdlData = new byte[fileSize];
-			int pos = 0;
-			for (int i = 0; i < 1; i++)
+			for (int i = 0; i < 11; i++)
+				container.chunkDecompressedSizes[i] = currentFilePointer.readInt();
+			for (int i = 0; i < 11; i++)
+				container.chunkSizes[i] = currentFilePointer.readInt();
+			for (int i = 0; i < 11; i++)
+				container.chunkOffsets[i] = currentFilePointer.readInt();
+			for (int i = 0; i < 11; i++)
+				container.chunkStartBlockIndex[i] = currentFilePointer.readShort();
+			int numBlocks = 0;
+			for (int i = 0; i < 11; i++)
 			{
+				container.chunkNumBlocks[i] = currentFilePointer.readShort();
+				numBlocks+= container.chunkNumBlocks[i];
+			}
+			
+			container.blockSizes = new short[numBlocks];
+			
+			//Skip, unknown
+			currentFilePointer.readInt();
+			currentFilePointer.readInt();
+			
+			for (int i = 0; i < numBlocks; i++)
+				container.blockSizes[i] = currentFilePointer.readShort();
+			
+			//int CHOSEN_CHUNK = 2; 
+
+			int pos = 0;
+			byte[] mdlData = new byte[container.chunkDecompressedSizes[2] + container.chunkDecompressedSizes[8]];
+			
+			currentFilePointer.seek(fileOffset + headerLength + container.chunkOffsets[2]);			
+			for (int i = 0; i < container.chunkNumBlocks[2]; i++)
+			{					
+				int lastPos = (int) currentFilePointer.getFilePointer();
+				
 				// Block Header
-				currentFilePointer.seek(fileOffset + headerLength + offsets[i]);
 				int blockHeaderLength2 = currentFilePointer.readInt();
 				currentFilePointer.readInt(); // NULL
 				int compressedBlockSize2 = currentFilePointer.readInt(); 
@@ -165,12 +147,38 @@ public class SqPack_DatFile {
 					decompressedBlock2 = decompressBlock(compressedBlockSize2, decompressedBlockSize2);
 				
 				System.arraycopy(decompressedBlock2, 0, mdlData, pos, decompressedBlockSize2);
-				pos+=decompressedBlockSize2;				
+				pos+=decompressedBlockSize2;
+				
+				currentFilePointer.seek(lastPos + container.blockSizes[container.chunkStartBlockIndex[2]+i]);
+			}
+			
+			currentFilePointer.seek(fileOffset + headerLength + container.chunkOffsets[8]);			
+			for (int i = 0; i < container.chunkNumBlocks[8]; i++)
+			{					
+				int lastPos = (int) currentFilePointer.getFilePointer();
+				
+				// Block Header
+				int blockHeaderLength2 = currentFilePointer.readInt();
+				currentFilePointer.readInt(); // NULL
+				int compressedBlockSize2 = currentFilePointer.readInt(); 
+				int decompressedBlockSize2 = currentFilePointer.readInt();
+					
+				byte[] decompressedBlock2 = null;			
+				if (compressedBlockSize2 == 32000 || decompressedBlockSize2 == 1) //Not actually compressed, just read decompressed size
+				{
+					decompressedBlock2 = new byte[decompressedBlockSize2];
+					currentFilePointer.readFully(decompressedBlock2);
+				}
+				else //Gotta decompress
+					decompressedBlock2 = decompressBlock(compressedBlockSize2, decompressedBlockSize2);
+				
+				System.arraycopy(decompressedBlock2, 0, mdlData, pos, decompressedBlockSize2);
+				//pos+=decompressedBlockSize2;
+				
+				currentFilePointer.seek(lastPos + container.blockSizes[container.chunkStartBlockIndex[8]+i]);
 			}			
-			mdlData[pos+3] = (byte) 0x88;
-			mdlData[pos+2] = (byte) 0x88;
-			mdlData[pos+1] = (byte) 0x88;
-			mdlData[pos] = (byte) 0x88;
+			
+
 			return mdlData;
 		case TYPE_BINARY: 
 			dataBlocks = new Data_Block[1][blockCount];

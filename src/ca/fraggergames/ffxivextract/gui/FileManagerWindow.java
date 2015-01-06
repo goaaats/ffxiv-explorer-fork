@@ -54,12 +54,15 @@ import ca.fraggergames.ffxivextract.gui.components.Hex_View;
 import ca.fraggergames.ffxivextract.gui.components.Image_View;
 import ca.fraggergames.ffxivextract.gui.components.Loading_Dialog;
 import ca.fraggergames.ffxivextract.gui.components.Lua_View;
+import ca.fraggergames.ffxivextract.gui.components.OpenGL_View;
+import ca.fraggergames.ffxivextract.gui.components.Path_to_Hash_Window;
 import ca.fraggergames.ffxivextract.gui.components.Sound_View;
 import ca.fraggergames.ffxivextract.helpers.LERandomAccessFile;
 import ca.fraggergames.ffxivextract.helpers.LuaDec;
 import ca.fraggergames.ffxivextract.helpers.OggVorbisPlayer;
 import ca.fraggergames.ffxivextract.models.EXDF_File;
 import ca.fraggergames.ffxivextract.models.EXHF_File;
+import ca.fraggergames.ffxivextract.models.Model;
 import ca.fraggergames.ffxivextract.models.SCD_File;
 import ca.fraggergames.ffxivextract.models.SCD_File.SCD_Sound_Info;
 import ca.fraggergames.ffxivextract.models.SqPack_IndexFile;
@@ -317,6 +320,12 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 			{
 				searchWindow.searchAgain();
 			}
+			else if (event.getActionCommand().equals("hashcalc"))
+			{
+				Path_to_Hash_Window hasher = new Path_to_Hash_Window();
+				hasher.setLocationRelativeTo(FileManagerWindow.this);
+				hasher.setVisible(true);
+			}
 			else if (event.getActionCommand().equals("musicswapper"))
 			{
 				MusicSwapperWindow swapper = new MusicSwapperWindow();
@@ -398,6 +407,10 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 		tools_musicswapper.setActionCommand("musicswapper");
 		tools_musicswapper.addActionListener(menuHandler);
 		
+		JMenuItem tools_hashcalculator = new JMenuItem(Strings.MENUITEM_HASHCALC);
+		tools_hashcalculator.setActionCommand("hashcalc");
+		tools_hashcalculator.addActionListener(menuHandler);
+		
 		JMenuItem tools_macroEditor = new JMenuItem(Strings.MENUITEM_MACROEDITOR);
 		tools_macroEditor.setActionCommand("macroeditor");
 		tools_macroEditor.addActionListener(menuHandler);
@@ -432,6 +445,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 		search.add(search_searchAgain);
 		
 		tools.add(tools_musicswapper);
+		tools.add(tools_hashcalculator);
 		tools.add(tools_macroEditor);
 		tools.add(tools_logViewer);
 		
@@ -506,6 +520,17 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 		int contentType = -1;
 		try {
 			 contentType = currentIndexFile.getContentType(file.getOffset()); 
+			 
+			 //If it's a placeholder, don't bother			 
+			 if (contentType == 0x01)
+			 {
+				 JLabel lblFNFError = new JLabel("This is currently a placeholder, there is no data to here.");
+				 tabs.addTab("No Data", lblFNFError);
+				 hexView.setBytes(null);							
+				 splitPane.setRightComponent(tabs);
+				 return;
+			 }
+			 
 			 data = currentIndexFile.extractFile(file.dataoffset, null);
 		}
 		catch (FileNotFoundException eFNF) {
@@ -528,12 +553,15 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 		}				
 		
 		if (contentType == 3)
-		{				
+		{		
+//			OpenGL_View view = new OpenGL_View(new Model(data));
+		//	tabs.addTab("3D Model", view);
+			/*
 			JLabel lbl3DModelError = new JLabel("Content Type 3 files are currently not supported. I am still figuring out how they are stored.");
 			tabs.addTab("3D Model", lbl3DModelError);
 			hexView.setBytes(null);							
 			splitPane.setRightComponent(tabs);
-			return;
+			return;*/
 		}
 		
 		if (data == null)

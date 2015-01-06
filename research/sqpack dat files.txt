@@ -30,7 +30,7 @@ Current research on SqPack Dat files
 
 ===DATA ENTRY HEADER=== (Minimum size is 0x80) 
 0x000: Header Length     Int32; 
-0x004: Content Type      Int32; 0x02 - Binary, 0x03 - Model, 0x04 - Texture
+0x004: Content Type      Int32; 0x01 - Empty Placeholder, 0x02 - Binary, 0x03 - Model, 0x04 - Texture
 0x008: Uncompressed Size Int32;
 0x00c: ~~Unknown~~       Int32;
 0x010: Block Buffer Size Int32; Buffer size need to read largest block
@@ -43,12 +43,16 @@ Current research on SqPack Dat files
 
 ===TYPE-3 BLOCK TABLE=== (Size of Num blocks)
 
-0x000: Unknown					           Int32; Always 0x05000001
-0x004: Frame Uncompressed Chunk	        44 Bytes; Each Block Follows Pattern: 5 Ints, 12b of NULL, 3 Ints. Size when uncompressed, but rounded
-0x030: Frame Size Chunk			        44 Bytes; Size of each frame (can be more than 1 data block).
-0x05C: Frame Offset Chunk		        44 Bytes; Offset to start of frame. 
-0x088: Block Size Indexes				   Short; Indexes into the next table below???
-0x0D0: Block Size Table			Num Blocks*Short; Size of each data block below
+0x000: Unknown					               Int32; Always 0x05000001
+0x004: Frame Uncompressed Chunk	            44 Bytes; Each Block Follows Pattern: 5 Ints, 12b of NULL, 3 Ints (5, 3, 3). Size when uncompressed, but rounded
+0x030: Frame Size Chunk			            44 Bytes; Size of each frame (can be more than 1 data block).
+0x05C: Frame Offset Chunk		            44 Bytes; Offset to start of frame. 
+0x088: Frame Start Block Index    			22 Bytes; Which block each of the 8 chunks start at. Shorts. Follows 5,3,3 pattern but it isn't null, rather repeated? 
+0x09E: Num Blocks in Frame           		22 Bytes; All shorts, follows the 5 value, 3 0s, 3 values format.     
+0x0B4: Unknown								   Short; Divisible by 6 (0x3, 0x6, 0x9, 0xc)
+0x0B6: Unknown								   Short; Either 1 or 2.
+0x0B8: Unknown								   Int32; Always 0x103.
+0x0BC: Block Size Table	          Num Blocks * Short; Size of each data block below
 			
 ===TYPE-4 BLOCK TABLE=== (Size of Num blocks)
 0x000: Frame Offset				Int32; Starting block for this frame.

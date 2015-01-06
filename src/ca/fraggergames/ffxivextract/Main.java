@@ -2,6 +2,8 @@ package ca.fraggergames.ffxivextract;
 
 import java.io.File;
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.prefs.Preferences;
 
 import javax.swing.JOptionPane;
@@ -11,6 +13,8 @@ import ca.fraggergames.ffxivextract.gui.FileManagerWindow;
 import ca.fraggergames.ffxivextract.helpers.PathSearcher;
 import ca.fraggergames.ffxivextract.helpers.VersionUpdater;
 import ca.fraggergames.ffxivextract.helpers.VersionUpdater.VersionCheckObject;
+import ca.fraggergames.ffxivextract.models.SqPack_IndexFile;
+import ca.fraggergames.ffxivextract.models.SqPack_IndexFile.SqPack_Folder;
 import ca.fraggergames.ffxivextract.storage.HashDatabase;
 
 public class Main {
@@ -36,7 +40,7 @@ public class Main {
 					    JOptionPane.ERROR_MESSAGE);		
 		} catch (ClassNotFoundException e1) {			
 			e1.printStackTrace();
-		}				
+		}
 		
 /*		
 		try {
@@ -45,22 +49,90 @@ public class Main {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-		
+		*/
 		/*
+		SqPack_IndexFile index = null;
+		try {
+			index = new SqPack_IndexFile("E:\\Program Files (x86)\\SquareEnix\\FINAL FANTASY XIV - A Realm Reborn\\game\\sqpack\\ffxiv\\060000.win32.index");
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 		
 		try{
-			for (int i = 127000; i < 128000; i+= 1000)
-			{
 				Connection conn = HashDatabase.getConnection();
 				conn.setAutoCommit(false);
-				for (int i2 = i; i2 < i+1000; i2++)
-					HashDatabase.addPathToDB("ui/icon/" + String.format("%06d", i) + "/de/" + String.format("%06d", i2) + ".tex", conn);
-				System.out.println(i);
+												
+				for (SqPack_Folder folder : index.getPackFolders())
+				{
+					String folderName = folder.getName();
+					if (!folderName.contains("ui/map/"))
+						continue;					
+					
+					//Check if there is a unamed file
+					boolean foundUnknown = false;
+					for (int i = 0; i < folder.getFiles().length; i++)
+					{
+						if (!folder.getFiles()[i].getName().contains("m_m.tex"))
+						{
+							foundUnknown = true;
+							break;
+						}
+					}					
+					if (!foundUnknown)
+						continue;
+
+					String[] split = folderName.split("/");
+					
+					
+					/*
+					int foldernum = Integer.parseInt(split[2]);
+					
+					for (int filenum = foldernum; filenum < foldernum + 999; filenum++){
+						if (foldernum >= 20000 && foldernum <= 53000)
+						{
+							HashDatabase.addPathToDB("ui/icon/" + String.format("%06d", foldernum) + "/" + String.format("%06d", filenum) + ".tex", conn);
+							System.out.println("ui/icon/" + String.format("%06d", foldernum) + "/" + String.format("%06d", filenum) + ".tex");
+							HashDatabase.addPathToDB("ui/icon/" + String.format("%06d", foldernum) + "/hq/" + String.format("%06d", filenum) + ".tex", conn);
+							System.out.println("ui/icon/" + String.format("%06d", foldernum) + "/hq/" + String.format("%06d", filenum) + ".tex");
+							
+						}
+						else if ((foldernum >= 150000 && foldernum <= 180000))
+						{
+							HashDatabase.addPathToDB("ui/icon/" + String.format("%06d", foldernum) + "/en/" + String.format("%06d", filenum) + ".tex", conn);
+							System.out.println("ui/icon/" + String.format("%06d", foldernum) + "/en/" + String.format("%06d", filenum) + ".tex");
+							HashDatabase.addPathToDB("ui/icon/" + String.format("%06d", foldernum) + "/de/" + String.format("%06d", filenum) + ".tex", conn);
+							System.out.println("ui/icon/" + String.format("%06d", foldernum) + "/de/" + String.format("%06d", filenum) + ".tex");
+							HashDatabase.addPathToDB("ui/icon/" + String.format("%06d", foldernum) + "/ja/" + String.format("%06d", filenum) + ".tex", conn);
+							System.out.println("ui/icon/" + String.format("%06d", foldernum) + "/ja/" + String.format("%06d", filenum) + ".tex");
+							HashDatabase.addPathToDB("ui/icon/" + String.format("%06d", foldernum) + "/fr/" + String.format("%06d", filenum) + ".tex", conn);
+							System.out.println("ui/icon/" + String.format("%06d", foldernum) + "/fr/" + String.format("%06d", filenum) + ".tex");
+						}
+						else if ((foldernum >= 120000 && foldernum <= 127000))
+						{
+							HashDatabase.addPathToDB("ui/icon/" + String.format("%06d", foldernum) + "/en/" + String.format("%06d", filenum) + ".tex", conn);
+							System.out.println("ui/icon/" + String.format("%06d", foldernum) + "/en/" + String.format("%06d", filenum) + ".tex");
+							HashDatabase.addPathToDB("ui/icon/" + String.format("%06d", foldernum) + "/de/" + String.format("%06d", filenum) + ".tex", conn);
+							System.out.println("ui/icon/" + String.format("%06d", foldernum) + "/de/" + String.format("%06d", filenum) + ".tex");
+							HashDatabase.addPathToDB("ui/icon/" + String.format("%06d", foldernum) + "/ja/" + String.format("%06d", filenum) + ".tex", conn);
+							System.out.println("ui/icon/" + String.format("%06d", foldernum) + "/ja/" + String.format("%06d", filenum) + ".tex");
+							HashDatabase.addPathToDB("ui/icon/" + String.format("%06d", foldernum) + "/fr/" + String.format("%06d", filenum) + ".tex", conn);
+							System.out.println("ui/icon/" + String.format("%06d", foldernum) + "/fr/" + String.format("%06d", filenum) + ".tex");
+							
+						}
+						else{
+							//HashDatabase.addPathToDB("ui/icon/" + String.format("%06d", foldernum) + "/" + String.format("%06d", filenum) + ".tex", conn);
+							//System.out.println("ui/icon/" + String.format("%06d", foldernum) + "/" + String.format("%06d", filenum) + ".tex");							
+						}
+						
+					}
+				}
 				conn.commit();
 				HashDatabase.closeConnection(conn);
-			}
+			
 		}		
-		catch (Exception e){}*/
+		catch (Exception e){}
+		*/
 		//EXD_Searcher.createEXDFiles("E:\\Coding\\workspace3\\FFXIV_Extractor\\exddump2.txt");
 		/*
 		try {
@@ -167,10 +239,10 @@ public class Main {
 		{
 			VersionCheckObject checkObj = VersionUpdater.checkForUpdates();
 			
-			if (Constants.DB_VERSION_CODE < checkObj.currentDbVer || Constants.APP_VERSION_CODE < checkObj.currentAppVer )
+			if (HashDatabase.getHashDBVersion() < checkObj.currentDbVer || Constants.APP_VERSION_CODE < checkObj.currentAppVer )
 			{
 				JOptionPane.showMessageDialog(null,
-						(Constants.DB_VERSION_CODE < checkObj.currentDbVer ? "-A new Hash DB was found, it was updated on " + checkObj.dbUpdateDate + ".\n" : "") + (Constants.APP_VERSION_CODE < checkObj.currentAppVer ? "-A new app version was found, it was updated on " + checkObj.appUpdateDate + "." : "") + "\nDownload at: " + Constants.URL_WEBSITE,
+						(HashDatabase.getHashDBVersion() < checkObj.currentDbVer ? "-A new Hash DB was found, it was updated on " + checkObj.dbUpdateDate + ".\n" : "") + (Constants.APP_VERSION_CODE < checkObj.currentAppVer ? "-A new app version was found, it was updated on " + checkObj.appUpdateDate + "." : "") + "\nDownload at: " + Constants.URL_WEBSITE,
 					    "New Update Found",
 					    JOptionPane.INFORMATION_MESSAGE);
 			}

@@ -1,6 +1,8 @@
 package ca.fraggergames.ffxivextract.gui;
 
 import java.awt.BorderLayout;
+import java.awt.Cursor;
+import java.awt.Desktop;
 import java.awt.Font;
 import java.awt.FontFormatException;
 import java.awt.Graphics;
@@ -8,9 +10,12 @@ import java.awt.Graphics2D;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.RenderingHints;
+import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
@@ -32,8 +37,9 @@ public class AboutWindow extends JFrame {
 	JLabel author = new FancyJLabel("By Ioncannon");
 	JLabel version = new FancyJLabel(Strings.ABOUTDIALOG_VERSION + " " + Constants.VERSION);
 	JLabel gitcommit = new FancyJLabel(Strings.ABOUTDIALOG_GITVERSION + " " + Constants.COMMIT.substring(0, 10));
+	JLabel website = new FancyJLabel("<html><a href=\"\">"+Constants.URL_WEBSITE+"</a></html>");
 	
-	JLabel magisImage = new JLabel();
+	JLabel meImage = new JLabel();
 	
 	private int easterEggActivate = 0;
 	
@@ -58,14 +64,19 @@ public class AboutWindow extends JFrame {
 		author.setFont(standardFont);
 		version.setFont(standardFont);
 		gitcommit.setFont(standardFont);
+		website.setFont(standardFont);
 		
 		ImageIcon image = new ImageIcon(getClass().getResource("/res/me.png"));
-		magisImage.setIcon(image);				
+		meImage.setIcon(image);				
 			
+		website.setCursor(new Cursor(Cursor.HAND_CURSOR));
+		goWebsite(website);
+		
 		container.add(appname);
 		container.add(author);
 		container.add(version);
-		container.add(gitcommit);		
+		container.add(gitcommit);
+		container.add(website);	
 		
 		container.setBorder(new EmptyBorder(10, 10, 10, 10));
 		
@@ -77,7 +88,7 @@ public class AboutWindow extends JFrame {
 		
 		aboutWindow.setLayout(new BorderLayout());		
 		aboutWindow.add(centerPanel, BorderLayout.LINE_START);
-		aboutWindow.add(magisImage, BorderLayout.LINE_END);
+		aboutWindow.add(meImage, BorderLayout.LINE_END);
 		getContentPane().add(aboutWindow);		
 		
 		ImageIcon icon = new ImageIcon(getClass().getResource("/res/frameicon.png"));
@@ -88,7 +99,7 @@ public class AboutWindow extends JFrame {
 		this.setResizable(false);
 		
 		//Easter Egg :)
-		magisImage.addMouseListener(new MouseListener() {
+		meImage.addMouseListener(new MouseListener() {
 			
 			@Override
 			public void mouseReleased(MouseEvent arg0) {
@@ -142,6 +153,22 @@ public class AboutWindow extends JFrame {
 			}
 		});
 	}
+	
+	private void goWebsite(JLabel website) {
+        website.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                try {
+                    Desktop.getDesktop().browse(new URI(Constants.URL_WEBSITE));
+                } catch (IOException ex) {
+                    //It looks like there's a problem
+                } catch (URISyntaxException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+            }
+        });
+    }
 
 	private class FancyJLabel extends JLabel{
 	

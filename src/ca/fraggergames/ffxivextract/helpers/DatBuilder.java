@@ -32,18 +32,14 @@ public class DatBuilder {
 		fileOut = new LERandomAccessFile(new File(outPath), "rw");
 	}
 	
-	public long addFile(String path)
+	public long addFile(String path) throws IOException, FileNotFoundException
 	{
 		File fileToLoad = new File(path);
 		byte[] data = new byte[(int) fileToLoad.length()];
-		try {
+		
 		    FileInputStream fIn = new FileInputStream(fileToLoad);
 		    fIn.read(data);
-		    fIn.close();
-		} catch (Exception e) {
-		    e.printStackTrace();
-		    return -1;
-		}
+		    fIn.close();		
 		
 		ArrayList<DataBlock> blocks = new ArrayList<DatBuilder.DataBlock>();
 		int position = 0;
@@ -111,7 +107,6 @@ public class DatBuilder {
 		byte header[] = new byte[headerSize];
 		System.arraycopy(tempHeader, 0,	 header, 0, header.length);
 		
-		try {
 			fileOut.seek(currentOffset);
 			fileOut.write(header);
 			
@@ -151,10 +146,7 @@ public class DatBuilder {
 			System.out.println(String.format("Added file at path \"%s\", to offset: 0x%X", path, entryOffset));
 			
 			return entryOffset;
-		} catch (IOException e) {
-			e.printStackTrace();			
-		}
-		return -1;
+		
 	}	
 
 	private byte[] buildSqpackDatHeader()
