@@ -984,6 +984,18 @@ public class MusicSwapperWindow extends JFrame {
 		}
 	 }
 	
+	private void createSCDfromOGG()
+	{
+		//Generate Basic Info
+		
+		//Read Ogg, set num channels + sample rate
+		
+		//Read 3 Oggs, get header size set locations
+		
+		//Copy over Ogg
+	
+	}
+	
 	private class CustomDatPOJO
 	{
 		public String datPath;
