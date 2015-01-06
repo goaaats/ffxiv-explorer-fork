@@ -54,6 +54,7 @@ import ca.fraggergames.ffxivextract.gui.components.Hex_View;
 import ca.fraggergames.ffxivextract.gui.components.Image_View;
 import ca.fraggergames.ffxivextract.gui.components.Loading_Dialog;
 import ca.fraggergames.ffxivextract.gui.components.Lua_View;
+import ca.fraggergames.ffxivextract.gui.components.OpenGL_View;
 import ca.fraggergames.ffxivextract.gui.components.Path_to_Hash_Window;
 import ca.fraggergames.ffxivextract.gui.components.Sound_View;
 import ca.fraggergames.ffxivextract.helpers.LERandomAccessFile;
@@ -61,6 +62,7 @@ import ca.fraggergames.ffxivextract.helpers.LuaDec;
 import ca.fraggergames.ffxivextract.helpers.OggVorbisPlayer;
 import ca.fraggergames.ffxivextract.models.EXDF_File;
 import ca.fraggergames.ffxivextract.models.EXHF_File;
+import ca.fraggergames.ffxivextract.models.Model;
 import ca.fraggergames.ffxivextract.models.SCD_File;
 import ca.fraggergames.ffxivextract.models.SCD_File.SCD_Sound_Info;
 import ca.fraggergames.ffxivextract.models.SqPack_IndexFile;
@@ -551,12 +553,15 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 		}				
 		
 		if (contentType == 3)
-		{				
+		{		
+//			OpenGL_View view = new OpenGL_View(new Model(data));
+		//	tabs.addTab("3D Model", view);
+			/*
 			JLabel lbl3DModelError = new JLabel("Content Type 3 files are currently not supported. I am still figuring out how they are stored.");
 			tabs.addTab("3D Model", lbl3DModelError);
 			hexView.setBytes(null);							
 			splitPane.setRightComponent(tabs);
-			return;
+			return;*/
 		}
 		
 		if (data == null)

@@ -475,7 +475,8 @@ public class EXDF_View extends JScrollPane implements ItemListener{
 				switch (dataset.type)
 				{									
 				case 0x0b: // QUAD
-					return entry.getQuad(dataset.offset);
+					int quad[] = entry.getQuad(dataset.offset);
+					return quad[0] + ", " + quad[1] + ", " + quad[2] + ", " + quad[3];
 				case 0x09: // FLOAT
 				case 0x08:
 					return entry.getFloat(dataset.offset);

@@ -9,10 +9,6 @@ import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 
-import org.oldhen.ieee754lib.BitReader;
-import org.oldhen.ieee754lib.IEEE754;
-import org.oldhen.ieee754lib.IEEE754Standard;
-
 public class EXDF_File {
 
 	private byte data[];
@@ -132,14 +128,17 @@ public class EXDF_File {
 			return buffer.getShort();
 		}
 		
-		public double getQuad(short offset) {
+		public int[] getQuad(short offset) {
 			ByteBuffer buffer = ByteBuffer.wrap(dataChunk);
 			buffer.position(offset);
-			byte[] quadBytes = new byte[16];
-			buffer.get(quadBytes);
-			IEEE754 quad = IEEE754.decode(IEEE754Standard.QUADRUPLE, 
-			        BitReader.wrap(ByteBuffer.wrap(quadBytes)));
-			return quad.toDouble();
+			
+			int quad[] = new int[4];
+			quad[0] = buffer.getShort();
+			quad[1] = buffer.getShort();
+			quad[2] = buffer.getShort();
+			quad[3] = buffer.getShort();
+			
+			return quad;
 		}		
 		
 		public int getInt(int offset)
