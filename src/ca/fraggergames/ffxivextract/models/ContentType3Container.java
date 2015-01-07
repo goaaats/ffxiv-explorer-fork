@@ -9,6 +9,9 @@ public class ContentType3Container {
 	public int chunkStartBlockIndex[] = new int[11];
 	public int chunkNumBlocks[] = new int[11];
 	
-	short blockSizes[];
+	public short blockSizes[];
+	
+	public short numChunk1Entries;
+	public short numMaterials;
 	
 }
