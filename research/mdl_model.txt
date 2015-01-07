@@ -1,0 +1,67 @@
+#### MODEL FILE RESEARCH ####
+
+--CHUNK 1--
+Variable amount of structs, all 0x88 in size.
+
+--Chunk 2--
+
+0x000: Num Strings			  Int; Number of strings in the string block.
+0x004: String Block Size	  Int; Size of the string block.
+0x008: String Block			     ; Material paths and animation names?
+
+--Post String block
+
+--0x18 bytes of header
+0x000: Unknown				  Int; 
+0x004: Unknown				  Int;
+0x008: Unknown				Short;
+0x00c: Unknown				Short;
+0x010: Unknown				Short;
+0x014: Unknown				  Int;
+0x018: NULL					  Int;
+0x01c: Unknown			     Byte;
+0x01d: Unknown			     Byte;
+
+0x01e: Num Structs?			  Int;
+
+--0x18 bytes of header
+
+--0x28 bytes of header
+
+--CHUNK 3--
+
+Will appear * num meshes
+
+--Vertex Table-- (Size of Num Verts)
+0x000: X					Short; Half Float.
+0x002: Y					Short; Half Float.
+0x004: Z					Short; Half Float.
+0x006: W					Short; Half Float.
+0x008: Bone Weight			  Int;
+0x00c: Bone Index			  Int;
+
+--Aux Geo Data Table-- (Size of Num Verts)
+0x000: Normal X				Short; Half Float.
+0x002: Normal Y				Short; Half Float.
+0x004: Normal Z				Short; Half Float.
+0x006: Normal W				Short; Half Float.
+0x008: Binormal X	   		 Byte;
+0x009: Binormal Y	 		 Byte;
+0x00a: Binormal Z	 		 Byte;
+0x00b: Binormal W	 		 Byte;
+0x00c: Color R				 Byte;
+0x00d: Color G				 Byte;
+0x00e: Color B				 Byte;
+0x00f: Color A				 Byte;
+0x010: Tex Coord U1			Short; Half Float.
+0x012: Tex Coord V1			Short; Half Float.
+0x014: Tex Coord U2			Short; Half Float.
+0x016: Tex Coord V2			Short; Half Float.
+
+--CHUNK 9--
+
+Will appear * num meshes.
+
+--Indice Table-- (Size of Num Indices)
+0x000: Index			    Short; 
+
