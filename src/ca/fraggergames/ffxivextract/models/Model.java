@@ -4,73 +4,82 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
 public class Model {
-
-	//int numVerts = 1981;
-	//int numIndex = 6252;
-	int numVerts = 2770;
-	int numIndex = 8220;
-	//int numVerts = 24;
-	//int numIndex = 36;
-	//int numVerts = 2743;
-	//int numIndex = 6438;
 	
-	public short[] verts = new short[numVerts*4];
-	public int[] boneWeight = new int[numVerts];
-	public int[] boneIndex = new int[numVerts];
+	private int numLoD0Meshes;
+	private int numLoD1Meshes;
+	private int numLoD2Meshes;
 	
-	public short[] normals = new short[numVerts*3];
-	public byte[] biNormals = new byte[numVerts*4];
-	public byte[] colors = new byte[numVerts*4];
-	public short[] texCords = new short[numVerts*4];	
-	
-	public short indices[] = new short [numIndex];
-	
+	private Mesh meshList[];
+		
 	public Model(byte[] data)
-	{
+	{		
 		ByteBuffer bb = ByteBuffer.wrap(data);
 		bb.order(ByteOrder.LITTLE_ENDIAN);
-		for (int i = 0; i < numVerts; i++)
-		{			
-			verts[i*4] = bb.getShort();
-			verts[i*4+1] = bb.getShort();
-			verts[i*4+2] = bb.getShort();
-			verts[i*4+3] = bb.getShort();
-			boneWeight[i] = bb.getInt();
-			boneIndex[i] = bb.getInt();
-		}					
 		
-		//Normals, Binormals, Colors, and Tex Coords
-		for (int i = 0; i < numVerts; i++)
-		{
-			normals[i*3] = bb.getShort();
-			normals[i*3+1] = bb.getShort();
-			normals[i*3+2] = bb.getShort();
-			bb.getShort();
-			
-			biNormals[i*4] = bb.get();
-			biNormals[i*4+1] = bb.get();
-			biNormals[i*4+2] = bb.get();
-			biNormals[i*4+3] = bb.get();
-			
-			colors[i*4] = bb.get();
-			colors[i*4+1] = bb.get();
-			colors[i*4+2] = bb.get();
-			colors[i*4+3] = bb.get();
-			
-			texCords[i*4] = bb.getShort();
-			texCords[i*4+1] = bb.getShort();
-			texCords[i*4+2] = bb.getShort();
-			texCords[i*4+3] = bb.getShort();
-		}		
+		int numMeshes = bb.getInt();		
 		
-		//Index Table
-		for (int i = 0; i < numIndex; i++)
-		{
-			indices[i]=bb.getShort();
-			
-			if (indices[i] > verts.length/4)
-				System.out.println(String.format("FUCK, INVALID VERT: %x @ %x", indices[i], i));
-		}
+		meshList = new Mesh[numMeshes];
+		
+		//DirectX Structs
+		bb.position(0x44 + (0x88 * numMeshes));
+		
+		//Strings
+		int numStrings = bb.getInt();
+		int stringBlockSize = bb.getInt();
+		bb.position(bb.position() + stringBlockSize);
+
+		bb.position(bb.position()+0x18);
+		short numStructs = bb.getShort();
+		bb.position(bb.position()+0x20);
+		
+		bb.position(bb.position()+(0x18 * numStructs));
+
+		numLoD0Meshes = bb.getShort();
+        		
+        bb.position(bb.position()+0x28);
+        
+        int lod0VertBuffSize = bb.getInt();
+        int lod0IndexBuffSize = bb.getInt();
+        int lod0VertOffset = bb.getInt();
+        int lod0IndexOffset = bb.getInt();             
+        
+        bb.position(bb.position()+(0x3c*2));
+        
+        //Load LoD 0 Mesh Info
+        for (int i = 0; i < numLoD0Meshes; i++)
+        {
+        	int vertCount = bb.getInt();
+        	int indexCount = bb.getInt();
+        	
+        	System.out.println("Mesh " + i + ", numVerts: " + vertCount);
+        	System.out.println("Mesh " + i + ", numIndex: " + indexCount);
+        	
+        	bb.getInt();bb.getInt();
+        	
+        	int indexBufferOffset = bb.getInt();
+        	int vertexBufferOffset = bb.getInt();
+        	
+        	bb.getInt();bb.getInt();        	
+        	
+        	int vertexSize = bb.get();        	
+        	
+        	bb.position(bb.position()+3);
+        	
+        	meshList[i] = new Mesh(vertCount, indexCount, vertexBufferOffset, indexBufferOffset, vertexSize);
+        }
+        
+        //Load LoD 0 Meshes
+        for (int i = 0; i < numLoD0Meshes; i++)                	
+        	meshList[i].loadMeshes(bb, lod0VertOffset, lod0IndexOffset);        
+	}
+	
+	public Mesh[] getMeshes()
+	{
+		return meshList;
+	}
+
+	public int getNumLOD0Meshes() {
+		return numLoD0Meshes;
 	}
 	
 }

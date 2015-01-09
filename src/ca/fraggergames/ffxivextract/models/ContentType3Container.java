@@ -11,7 +11,7 @@ public class ContentType3Container {
 	
 	public short blockSizes[];
 	
-	public short numChunk1Entries;
+	public short numMeshes;
 	public short numMaterials;
 	
 }

@@ -115,7 +115,7 @@ public class SqPack_DatFile {
 			container.blockSizes = new short[numBlocks];
 			
 			//Skip, unknown
-			container.numChunk1Entries = currentFilePointer.readShort();
+			container.numMeshes = currentFilePointer.readShort();
 			container.numMaterials = currentFilePointer.readShort();
 			short y1 = currentFilePointer.readShort();
 			short y2 = currentFilePointer.readShort();
@@ -125,11 +125,12 @@ public class SqPack_DatFile {
 			
 			//int CHOSEN_CHUNK = 2; 
 
-			int pos = 0;
-			byte[] mdlData = new byte[container.chunkDecompressedSizes[0] + container.chunkDecompressedSizes[1] + container.chunkDecompressedSizes[2] + container.chunkDecompressedSizes[8]];
-			
+			int pos = 0x44;
+			byte[] mdlData = new byte[fileSize];
+			mdlData[1] = (byte) ((container.numMeshes >> 4) & 0xFF);
+			mdlData[0] = (byte) (container.numMeshes & 0xFF);
 			currentFilePointer.seek(fileOffset + headerLength + container.chunkOffsets[0]);			
-			for (int i = 0; i < container.chunkNumBlocks[0]; i++)
+			for (int i = 0; i < container.blockSizes.length; i++)
 			{					
 				int lastPos = (int) currentFilePointer.getFilePointer();
 				
@@ -151,9 +152,10 @@ public class SqPack_DatFile {
 				System.arraycopy(decompressedBlock2, 0, mdlData, pos, decompressedBlockSize2);
 				pos+=decompressedBlockSize2;
 				
-				currentFilePointer.seek(lastPos + container.blockSizes[container.chunkStartBlockIndex[0]+i]);
+				currentFilePointer.seek(lastPos + container.blockSizes[i]);
 			}						
-			
+			/*
+			pos = container.chunkDecompressedSizes[0];
 			currentFilePointer.seek(fileOffset + headerLength + container.chunkOffsets[1]);			
 			for (int i = 0; i < container.chunkNumBlocks[1]; i++)
 			{					
@@ -180,6 +182,7 @@ public class SqPack_DatFile {
 				currentFilePointer.seek(lastPos + container.blockSizes[container.chunkStartBlockIndex[1]+i]);
 			}			
 			
+			pos = container.chunkDecompressedSizes[1]+container.chunkDecompressedSizes[0];
 			currentFilePointer.seek(fileOffset + headerLength + container.chunkOffsets[2]);			
 			for (int i = 0; i < container.chunkNumBlocks[2]; i++)
 			{					
@@ -206,32 +209,8 @@ public class SqPack_DatFile {
 				currentFilePointer.seek(lastPos + container.blockSizes[container.chunkStartBlockIndex[2]+i]);
 			}
 			
-			currentFilePointer.seek(fileOffset + headerLength + container.chunkOffsets[8]);			
-			for (int i = 0; i < container.chunkNumBlocks[8]; i++)
-			{					
-				int lastPos = (int) currentFilePointer.getFilePointer();
-				
-				// Block Header
-				int blockHeaderLength2 = currentFilePointer.readInt();
-				currentFilePointer.readInt(); // NULL
-				int compressedBlockSize2 = currentFilePointer.readInt(); 
-				int decompressedBlockSize2 = currentFilePointer.readInt();
-					
-				byte[] decompressedBlock2 = null;			
-				if (compressedBlockSize2 == 32000 || decompressedBlockSize2 == 1) //Not actually compressed, just read decompressed size
-				{
-					decompressedBlock2 = new byte[decompressedBlockSize2];
-					currentFilePointer.readFully(decompressedBlock2);
-				}
-				else //Gotta decompress
-					decompressedBlock2 = decompressBlock(compressedBlockSize2, decompressedBlockSize2);
-				
-				System.arraycopy(decompressedBlock2, 0, mdlData, pos, decompressedBlockSize2);
-				//pos+=decompressedBlockSize2;
-				
-				currentFilePointer.seek(lastPos + container.blockSizes[container.chunkStartBlockIndex[8]+i]);
-			}			
 			
+			System.out.println(container.numChunk1Entries);
 			/*
 			System.out.println(String.format("0x%x",y1));
 			System.out.println(String.format("0x%x",y2));

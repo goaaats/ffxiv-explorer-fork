@@ -138,16 +138,8 @@ public class OpenGL_View extends JPanel {
 		private float angleX = 0;
 		private float angleY = 0;
 		
-		ShortBuffer verts;
-		ShortBuffer indices;   
-		ShortBuffer normals;
-		
 		public ModelRenderer(Model model) {
-			this.model = model;			
-			
-			verts = Buffers.newDirectShortBuffer(model.verts);			
-			indices = Buffers.newDirectShortBuffer(model.indices);
-			normals = Buffers.newDirectShortBuffer(model.normals);
+			this.model = model;					
 		}
 
 		public void zoom(int notches) {
@@ -171,25 +163,27 @@ public class OpenGL_View extends JPanel {
 
 		@Override
 		public void display(GLAutoDrawable drawable) {
-			verts.position(0);
-			indices.position(0);
-			normals.position(0);
-			
 			GL2 gl = drawable.getGL().getGL2(); 
 		    gl.glClear(GL2.GL_COLOR_BUFFER_BIT | GL2.GL_DEPTH_BUFFER_BIT); 
 		    gl.glLoadIdentity(); 
-		 
+			 		    
 		    gl.glTranslatef(panX, panY, zoom);
 		    gl.glRotatef(angleX, 0, 1, 0);
-		    gl.glRotatef(angleY, 1, 0, 0);	
-		    gl.glEnableClientState(GL2.GL_VERTEX_ARRAY);
-		    gl.glEnableClientState(GL2.GL_NORMAL_ARRAY);
-		    gl.glVertexPointer(4, GL2.GL_HALF_FLOAT, 0, verts);
-		    gl.glNormalPointer(GL2.GL_HALF_FLOAT, 0, normals);
-		    gl.glDrawElements(GL2.GL_TRIANGLES, model.indices.length, GL2.GL_UNSIGNED_SHORT, indices);
-		    gl.glDisableClientState(GL2.GL_VERTEX_ARRAY);
-		    gl.glDisableClientState(GL2.GL_NORMAL_ARRAY);
-				    
+		    gl.glRotatef(angleY, 1, 0, 0);
+		    
+		    for (int i = 0; i < 1; i++){
+				model.getMeshes()[i].vertBuffer.position(0);
+				model.getMeshes()[i].indexBuffer.position(0);
+			    gl.glEnableClientState(GL2.GL_VERTEX_ARRAY);
+			    gl.glEnableClientState(GL2.GL_NORMAL_ARRAY);
+			    gl.glVertexPointer(4, GL2.GL_HALF_FLOAT, 0, model.getMeshes()[i].vertBuffer);
+			    ByteBuffer otherData = model.getMeshes()[i].vertBuffer.duplicate();
+			    otherData.position(model.getMeshes()[i].numVerts*8);
+			    gl.glNormalPointer(GL2.GL_HALF_FLOAT, 24, otherData);
+			    gl.glDrawElements(GL2.GL_TRIANGLES, model.getMeshes()[i].numIndex, GL2.GL_UNSIGNED_SHORT, model.getMeshes()[i].indexBuffer);
+			    gl.glDisableClientState(GL2.GL_VERTEX_ARRAY);
+			    gl.glDisableClientState(GL2.GL_NORMAL_ARRAY);
+			}
 		}
 
 		@Override
