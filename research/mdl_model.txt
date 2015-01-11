@@ -1,7 +1,9 @@
 #### MODEL FILE RESEARCH ####
 
 --CHUNK 1--
-Variable amount of structs, all 0x88 in size.
+
+Variable amount of D3DVERTEXELEMENT9 structs, all 0x88 in size. Max 17 of them it seems.
+Used to initialize the buffers if using DirectX.
 
 --Chunk 2--
 
@@ -11,24 +13,47 @@ Variable amount of structs, all 0x88 in size.
 
 --Post String block
 
---0x18 bytes of header
 0x000: Unknown				  Int; 
 0x004: Unknown				  Int;
 0x008: Unknown				Short;
-0x00c: Unknown				Short;
-0x010: Unknown				Short;
-0x014: Unknown				  Int;
-0x018: NULL					  Int;
-0x01c: Unknown			     Byte;
-0x01d: Unknown			     Byte;
+0x00a: Material Count		Short;
+0x00c: Animation Count		Short;
+0x010: Unknown				  Int;
+0x014: NULL					  Int;
+0x015: Unknown			     Byte;
+0x016: Unknown			     Byte;
+0x018: Num Structs?			Short;
 
-0x01e: Num Structs?			  Int;
+--0x20 bytes of header
 
---0x18 bytes of header
+--Structs here 0x18 in size * num structs
 
---0x28 bytes of header
+0x   : Num meshes LOD1      Short; 
 
---CHUNK 3--
+--Skip 0x28
+
+	 : Vertex Buffer Size     Int;
+	 : Index Buffer Size      Int;
+	 : Vertex Buffer Offset   Int;
+	 : Index  Buffer Offset   Int;
+
+--LOD 1 MESH TABLE-- (Size of Num LOD1 Meshes)
+0x000: Vertex Count			  Int;
+0x004: Index Count			  Int;
+0x008: Unknown   			  Int;
+0x00c: Unknown   			  Int;
+0x010: Index Buffer Offset	  Int;
+0x014: Vertex Buffer Offset   Int;
+0x018: Unknown   			  Int;
+0x01c: Unknown   			  Int;
+0c020: Vertex Size		     Byte;
+0c021: Unknown				 Byte;
+0c021: Unknown              Short;
+--LOD 2 MESH TABLE-- (Size of Num LOD2 Meshes); Same as LOD1
+--LOD 3 MESH TABLE-- (Size of Num LOD3 Meshes); Same as LOD1
+
+
+--CHUNK 3,4,5-- (Three for each LoD)
 
 Will appear * num meshes
 
@@ -58,7 +83,7 @@ Will appear * num meshes
 0x014: Tex Coord U2			Short; Half Float.
 0x016: Tex Coord V2			Short; Half Float.
 
---CHUNK 9--
+--CHUNK 9,10,11-- (Three for each LoD)
 
 Will appear * num meshes.
 
