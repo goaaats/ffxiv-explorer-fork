@@ -13,18 +13,25 @@ public class Mesh{
 	public int vertOffset, indexOffset;		
 	public int numVerts, numIndex;
 	
+	public int vertexSize, auxVertexSize, unknownSize, indexSize;
+	
 	public int[] boneWeight;
 	public int[] boneIndex;
 	
 	public Mesh(int vertCount, int indexCount, int vertexBufferOffset,
-			int indexBufferOffset, int vertexSize) {
+			int indexBufferOffset, int sizeinfo) {
 		this.numVerts = vertCount;
 		this.numIndex = indexCount;
 		this.vertOffset = vertexBufferOffset;
-		this.indexOffset = indexBufferOffset;
+		this.indexOffset = indexBufferOffset;		
 		
-		this.vertBuffer = Buffers.newDirectByteBuffer(numVerts * (16+24));
-		this.indexBuffer = Buffers.newDirectByteBuffer(numIndex * 2);
+		this.vertexSize = (sizeinfo >> 8*0) & 0xFF;
+		this.auxVertexSize = (sizeinfo >> 8*1) & 0xFF;
+		this.unknownSize = (sizeinfo >> 8*2) & 0xFF;
+		this.indexSize = (sizeinfo >> 8*3) & 0xFF;		
+		
+		this.vertBuffer = Buffers.newDirectByteBuffer(numVerts * (vertexSize+auxVertexSize));
+		this.indexBuffer = Buffers.newDirectByteBuffer(numIndex * indexSize);
 	}
 
 	public void loadMeshes(ByteBuffer bb, int lodVertexOffset, int lodIndexOffset){
@@ -80,8 +87,8 @@ public class Mesh{
 			
 			indexBuffer.putShort(index);
 			
-			if (index > numVerts)
-				System.out.println(String.format("FUCK, INVALID VERT: %x @ %x", index, i));
+		//	if (index > numVerts)
+			//	System.out.println(String.format("FUCK, INVALID VERT: %x @ %x", index, i));
 		}
 	}
 }

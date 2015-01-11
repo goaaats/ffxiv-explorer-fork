@@ -21,10 +21,15 @@ import javax.media.opengl.awt.GLCanvas;
 import javax.media.opengl.glu.GLU;
 import javax.swing.JPanel;
 
+import ca.fraggergames.ffxivextract.models.Mesh;
 import ca.fraggergames.ffxivextract.models.Model;
 
 import com.jogamp.common.nio.Buffers;
 import com.jogamp.opengl.util.Animator;
+import javax.swing.border.TitledBorder;
+import javax.swing.JLabel;
+import javax.swing.JComboBox;
+import javax.swing.BoxLayout;
 
 public class OpenGL_View extends JPanel {
 
@@ -125,6 +130,33 @@ public class OpenGL_View extends JPanel {
 			}
 		});
         setLayout(new BorderLayout(0, 0));
+        
+        JPanel panel = new JPanel();
+        panel.setBorder(new TitledBorder(null, "Model Info", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+        add(panel, BorderLayout.NORTH);
+        panel.setLayout(new BorderLayout(0, 0));
+        
+        JPanel panel_1 = new JPanel();
+        panel.add(panel_1, BorderLayout.EAST);
+        
+        JLabel lbl1 = new JLabel("Detail Level:");
+        panel_1.add(lbl1);
+        
+        JComboBox comboBox = new JComboBox();
+        panel_1.add(comboBox);
+        
+        JPanel panel_2 = new JPanel();
+        panel.add(panel_2, BorderLayout.CENTER);
+        panel_2.setLayout(new BoxLayout(panel_2, BoxLayout.Y_AXIS));
+        
+        JLabel lblVertices = new JLabel("Vertices:");
+        panel_2.add(lblVertices);
+        
+        JLabel lblIndices = new JLabel("Indices:");
+        panel_2.add(lblIndices);
+        
+        JLabel lblMeshes = new JLabel("Meshes:");
+        panel_2.add(lblMeshes);
         add( glcanvas, BorderLayout.CENTER);
 	}
 	
@@ -171,16 +203,19 @@ public class OpenGL_View extends JPanel {
 		    gl.glRotatef(angleX, 0, 1, 0);
 		    gl.glRotatef(angleY, 1, 0, 0);
 		    
-		    for (int i = 0; i < 1; i++){
-				model.getMeshes()[i].vertBuffer.position(0);
-				model.getMeshes()[i].indexBuffer.position(0);
+		    for (int i = 0; i < 4; i++){
+		    	
+		    	Mesh mesh = model.getMeshes(0)[i]; 
+		    	
+		    	mesh.vertBuffer.position(0);
+		    	mesh.indexBuffer.position(0);
 			    gl.glEnableClientState(GL2.GL_VERTEX_ARRAY);
 			    gl.glEnableClientState(GL2.GL_NORMAL_ARRAY);
-			    gl.glVertexPointer(4, GL2.GL_HALF_FLOAT, 0, model.getMeshes()[i].vertBuffer);
-			    ByteBuffer otherData = model.getMeshes()[i].vertBuffer.duplicate();
-			    otherData.position(model.getMeshes()[i].numVerts*8);
+			    gl.glVertexPointer(4, GL2.GL_HALF_FLOAT, 0, mesh.vertBuffer);
+			    ByteBuffer otherData = mesh.vertBuffer.duplicate();
+			    otherData.position(mesh.numVerts*8);
 			    gl.glNormalPointer(GL2.GL_HALF_FLOAT, 24, otherData);
-			    gl.glDrawElements(GL2.GL_TRIANGLES, model.getMeshes()[i].numIndex, GL2.GL_UNSIGNED_SHORT, model.getMeshes()[i].indexBuffer);
+			    gl.glDrawElements(GL2.GL_TRIANGLES, mesh.numIndex, GL2.GL_UNSIGNED_SHORT, mesh.indexBuffer);
 			    gl.glDisableClientState(GL2.GL_VERTEX_ARRAY);
 			    gl.glDisableClientState(GL2.GL_NORMAL_ARRAY);
 			}
