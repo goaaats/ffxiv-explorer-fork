@@ -80,15 +80,8 @@ public class Mesh{
 		}		
 		
 		//Index Table
-		bb.position(lodIndexOffset);
+		bb.position(lodIndexOffset + (indexOffset * 2));
 		for (int i = 0; i < numIndex; i++)
-		{
-			short index =bb.getShort();
-			
-			indexBuffer.putShort(index);
-			
-		//	if (index > numVerts)
-			//	System.out.println(String.format("FUCK, INVALID VERT: %x @ %x", index, i));
-		}
+			indexBuffer.putShort(bb.getShort());
 	}
 }

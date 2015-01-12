@@ -88,5 +88,9 @@ public class Model {
 	{
 		return lodInfo.length;
 	}
+
+	public int getNumMesh(int lodLevel) {
+		return lodInfo[lodLevel].numMeshes;
+	}
 	
 }

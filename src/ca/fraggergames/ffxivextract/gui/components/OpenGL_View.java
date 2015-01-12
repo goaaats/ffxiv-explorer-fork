@@ -203,9 +203,9 @@ public class OpenGL_View extends JPanel {
 		    gl.glRotatef(angleX, 0, 1, 0);
 		    gl.glRotatef(angleY, 1, 0, 0);
 		    
-		    for (int i = 0; i < 4; i++){
+		    for (int i = 0; i < model.getNumMesh(1); i++){
 		    	
-		    	Mesh mesh = model.getMeshes(0)[i]; 
+		    	Mesh mesh = model.getMeshes(1)[i]; 
 		    	
 		    	mesh.vertBuffer.position(0);
 		    	mesh.indexBuffer.position(0);
