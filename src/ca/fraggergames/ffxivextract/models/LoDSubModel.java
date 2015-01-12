@@ -2,6 +2,8 @@ package ca.fraggergames.ffxivextract.models;
 
 import java.nio.ByteBuffer;
 
+import ca.fraggergames.ffxivextract.Constants;
+
 public class LoDSubModel {
 
 	final public short numMeshes;
@@ -32,8 +34,10 @@ public class LoDSubModel {
         int vertOffset = bb.getInt();
         int indexOffset = bb.getInt();
 		
-        System.out.println("Number of meshes: " + numMeshes);
-        System.out.println(String.format("Vert Table Size: %d\nIndex Table Size: %d\nVert Table Offset: %d\nIndex Table Offset: %d\n", vertBuffSize, indexBuffSize, vertOffset, indexOffset));
+        if (Constants.DEBUG){
+	        System.out.println("Number of meshes: " + numMeshes);
+	        System.out.println(String.format("Vert Table Size: %d\nIndex Table Size: %d\nVert Table Offset: %d\nIndex Table Offset: %d\n", vertBuffSize, indexBuffSize, vertOffset, indexOffset));
+        }
         
 		return new LoDSubModel(numMeshes, vertBuffSize, indexBuffSize, vertOffset, indexOffset);
 	}

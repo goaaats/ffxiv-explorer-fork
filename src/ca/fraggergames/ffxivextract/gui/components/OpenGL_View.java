@@ -196,21 +196,18 @@ public class OpenGL_View extends JPanel {
 
 		public void zoom(int notches) {
 			zoom += notches * 0.25f;
-			//System.out.println("Zooming to: " + zoom);
 		}
 		
 		public void rotate(float x, float y)
 		{
 			angleX += x * 1.0f;
 			angleY += y * 1.0f;
-			//System.out.println("Rotating to: " + angleX + ",  " + angleY);
 		}
 		
 		public void pan(float x, float y)
 		{
 			panX += x * 0.05f;
 			panY += -y * 0.05f;
-			//System.out.println("Panning to: " + panX + ",  " + panY);
 		}
 
 		@Override
@@ -231,11 +228,19 @@ public class OpenGL_View extends JPanel {
 		    	mesh.indexBuffer.position(0);
 			    gl.glEnableClientState(GL2.GL_VERTEX_ARRAY);
 			    gl.glEnableClientState(GL2.GL_NORMAL_ARRAY);
-			    gl.glVertexPointer(4, GL2.GL_HALF_FLOAT, 0, mesh.vertBuffer);
-			    //gl.glVertexPointer(3, GL2.GL_FLOAT, 0, mesh.vertBuffer);			    
+			    
+			    if (mesh.vertexSize == 0x10 || mesh.vertexSize == 0x8)
+			    	gl.glVertexPointer(4, GL2.GL_HALF_FLOAT, 0, mesh.vertBuffer);
+			    else if (mesh.vertexSize == 0x14)
+			    	gl.glVertexPointer(3, GL2.GL_FLOAT, 0, mesh.vertBuffer);
+			    
 			    ByteBuffer otherData = mesh.vertBuffer.duplicate();
-			    otherData.position(mesh.numVerts*8);
-			    //otherData.position(mesh.numVerts*12);
+			    
+			    if (mesh.vertexSize == 0x10 || mesh.vertexSize == 0x8)
+			    	otherData.position(mesh.numVerts*8);
+			    else
+			    	otherData.position(mesh.numVerts*12);
+			    	
 			    gl.glNormalPointer(GL2.GL_HALF_FLOAT, 24, otherData);
 			    gl.glDrawElements(GL2.GL_TRIANGLES, mesh.numIndex, GL2.GL_UNSIGNED_SHORT, mesh.indexBuffer);
 			    gl.glDisableClientState(GL2.GL_VERTEX_ARRAY);

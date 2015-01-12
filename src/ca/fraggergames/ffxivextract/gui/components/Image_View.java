@@ -63,7 +63,7 @@ public class Image_View extends JPanel {
 		try {
 			BufferedImage preview = texture.decode(0, null);
 			imgPreviewCanvas = new NavigableImagePanel(preview);
-			if (texture.compressionType == 96)
+			if (texture.compressionType == 0x2460)
 				imgPreviewCanvas.setHighQualityRenderingEnabled(false);
 			scrollPane.setViewportView(imgPreviewCanvas);
 		} catch (ImageDecodingException e) {
