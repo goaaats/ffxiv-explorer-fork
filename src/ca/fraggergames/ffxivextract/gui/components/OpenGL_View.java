@@ -1,6 +1,8 @@
 package ca.fraggergames.ffxivextract.gui.components;
 
 import java.awt.BorderLayout;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
@@ -27,18 +29,22 @@ import ca.fraggergames.ffxivextract.models.Model;
 import com.jogamp.common.nio.Buffers;
 import com.jogamp.opengl.util.Animator;
 import javax.swing.border.TitledBorder;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JLabel;
 import javax.swing.JComboBox;
 import javax.swing.BoxLayout;
 
 public class OpenGL_View extends JPanel {
 
+	JComboBox cmbLodChooser;
+	
 	Animator animator;
 	ModelRenderer renderer;
 	
 	private boolean leftMouseDown = false;
 	private boolean rightMouseDown = false;
 	
+	private int currentLoD = 0;
 	private int lastOriginX, lastOriginY;
 	private int lastX, lastY;
 	
@@ -142,8 +148,22 @@ public class OpenGL_View extends JPanel {
         JLabel lbl1 = new JLabel("Detail Level:");
         panel_1.add(lbl1);
         
-        JComboBox comboBox = new JComboBox();
-        panel_1.add(comboBox);
+        cmbLodChooser = new JComboBox();
+        panel_1.add(cmbLodChooser);
+        cmbLodChooser.addItem("0");
+        cmbLodChooser.addItem("1");
+        cmbLodChooser.addItem("2");
+        
+        cmbLodChooser.addItemListener(new ItemListener() {
+			
+			@Override
+			public void itemStateChanged(ItemEvent e) {
+				if (e.getStateChange() == ItemEvent.SELECTED) {
+			          currentLoD = Integer.parseInt((String)e.getItem());
+			    }
+			}
+		});
+        
         
         JPanel panel_2 = new JPanel();
         panel.add(panel_2, BorderLayout.CENTER);
@@ -203,9 +223,9 @@ public class OpenGL_View extends JPanel {
 		    gl.glRotatef(angleX, 0, 1, 0);
 		    gl.glRotatef(angleY, 1, 0, 0);
 		    
-		    for (int i = 0; i < model.getNumMesh(1); i++){
+		    for (int i = 0; i < model.getNumMesh(currentLoD); i++){
 		    	
-		    	Mesh mesh = model.getMeshes(1)[i]; 
+		    	Mesh mesh = model.getMeshes(currentLoD)[i]; 
 		    	
 		    	mesh.vertBuffer.position(0);
 		    	mesh.indexBuffer.position(0);
@@ -218,6 +238,7 @@ public class OpenGL_View extends JPanel {
 			    gl.glDrawElements(GL2.GL_TRIANGLES, mesh.numIndex, GL2.GL_UNSIGNED_SHORT, mesh.indexBuffer);
 			    gl.glDisableClientState(GL2.GL_VERTEX_ARRAY);
 			    gl.glDisableClientState(GL2.GL_NORMAL_ARRAY);
+			    
 			}
 		}
 
