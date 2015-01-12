@@ -195,7 +195,7 @@ public class OpenGL_View extends JPanel {
 		}
 
 		public void zoom(int notches) {
-			zoom += notches;
+			zoom += notches * 0.25f;
 			//System.out.println("Zooming to: " + zoom);
 		}
 		
@@ -232,8 +232,10 @@ public class OpenGL_View extends JPanel {
 			    gl.glEnableClientState(GL2.GL_VERTEX_ARRAY);
 			    gl.glEnableClientState(GL2.GL_NORMAL_ARRAY);
 			    gl.glVertexPointer(4, GL2.GL_HALF_FLOAT, 0, mesh.vertBuffer);
+			    //gl.glVertexPointer(3, GL2.GL_FLOAT, 0, mesh.vertBuffer);			    
 			    ByteBuffer otherData = mesh.vertBuffer.duplicate();
 			    otherData.position(mesh.numVerts*8);
+			    //otherData.position(mesh.numVerts*12);
 			    gl.glNormalPointer(GL2.GL_HALF_FLOAT, 24, otherData);
 			    gl.glDrawElements(GL2.GL_TRIANGLES, mesh.numIndex, GL2.GL_UNSIGNED_SHORT, mesh.indexBuffer);
 			    gl.glDisableClientState(GL2.GL_VERTEX_ARRAY);

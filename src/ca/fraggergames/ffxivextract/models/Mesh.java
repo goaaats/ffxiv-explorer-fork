@@ -46,14 +46,17 @@ public class Mesh{
 		for (int i = 0; i < numVerts; i++)
 		{			
 			
-			if (vertexSize == 0x14)
-				bb.getInt();
 			bb.get(buffer);
 			vertBuffer.put(buffer);
 			boneWeight[i] = bb.getInt();
 			boneIndex[i] = bb.getInt();
 			
-			
+			/*
+			bb.get(buffer);
+			vertBuffer.put(buffer);
+			int x = bb.getInt();
+			vertBuffer.putInt(x);
+			*/
 		}								
 		
 		//Normals, Binormals, Colors, and Tex Coords
