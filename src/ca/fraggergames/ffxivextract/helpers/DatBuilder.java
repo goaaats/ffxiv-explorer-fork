@@ -275,6 +275,8 @@ public class DatBuilder {
 			fileOut.write(buildSqpackDatHeader());
 			fileOut.write(buildSqpackDatDataHeader((int) currentOffset, sha1, index));
 			fileOut.close();
+			
+			System.out.println("Dat file created.");
 		}
 		catch (IOException e)
 		{

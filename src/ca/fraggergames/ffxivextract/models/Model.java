@@ -7,6 +7,9 @@ import ca.fraggergames.ffxivextract.Constants;
 
 public class Model {
 	
+	private String stringArray[];
+	private short numAtrStrings, numAnimStrings, numMaterialStrings;	
+	
 	private LoDSubModel lodModels[] = new LoDSubModel[3];
 		
 	public Model(byte[] data)
@@ -22,33 +25,81 @@ public class Model {
 		//Strings
 		int numStrings = bb.getInt();
 		int stringBlockSize = bb.getInt();
-		bb.position(bb.position() + stringBlockSize);
+		
+		stringArray = new String[numStrings];
+		byte stringBuffer[] = new byte[stringBlockSize];
+		bb.get(stringBuffer);		
+		
+		int stringCounter = 0;
+		int start=0, end=0;
+		for (int i = 0; i < stringBuffer.length; i++)
+		{			
+			if (stringBuffer[i] == 0)
+			{
+				if (stringCounter >= numStrings)
+					break;
+				stringArray[stringCounter] = new String(stringBuffer, start, end-start);
+				start = end+1;
+				stringCounter++;				
+			}
+			end++;
+		}
 
-		//Stuff
-		bb.position(bb.position()+0x18);
+		if (Constants.DEBUG)
+		{
+			System.out.println("-----Strings-----");
+			for(String s : stringArray)
+				System.out.println(s);
+		}
+		
+		//Counts
+		bb.getInt();
+		bb.getShort();		
+		bb.getShort();		
+		numAtrStrings = bb.getShort();		
+		bb.getShort();				
+		numMaterialStrings = bb.getShort();
+		numAnimStrings = bb.getShort();						
+		bb.getShort();		
+
+		if (Constants.DEBUG){
+			System.out.println("Atr Strings: " + numAtrStrings);
+			System.out.println("Material Strings: " + numMaterialStrings);
+			System.out.println("Anim Things: " + numAnimStrings);
+		}
+		
+		loadMaterials();
+		
+		//Skip Stuff
+		bb.position(bb.position()+0x8);
 		short numStructs = bb.getShort();
 		bb.position(bb.position()+0x1e);
 				
-		bb.position(bb.position()+(0x20 * numStructs));
-
-		if (Constants.DEBUG)
-			System.out.println("LoD Header Info");
+		bb.position(bb.position()+(0x20 * numStructs));		
+		
 		//LOD Headers		
+		if (Constants.DEBUG)
+			System.out.println("-----LoD Header Info-----");
 		for (int i = 0; i < lodModels.length; i++)
 		{
 			if (Constants.DEBUG)
-				System.out.println("-----LoD Level " + i + "-----");
+				System.out.println(String.format("LoD Level %d:", i));
 			lodModels[i] = LoDSubModel.loadInfo(bb);
 		}
         //Load Mesh Info
+		if (Constants.DEBUG)
+			System.out.println("-----LoD Mesh Info-----");
 		for (int i = 0; i < lodModels.length; i++)
 		{
 			if (Constants.DEBUG)
-				System.out.println(String.format("-----LoD %d-----", i));
+				System.out.println(String.format("LoD %d:", i));
 			
 			Mesh meshList[] = new Mesh[lodModels[i].numMeshes];
 			for (int j = 0; j < lodModels[i].numMeshes; j++)
-			{								
+			{		
+				if (Constants.DEBUG)
+					System.out.println(String.format("Mesh %d:", j));
+				
 				int vertCount = bb.getInt();
 	        	int indexCount = bb.getInt();	    	        
 	        	
@@ -67,11 +118,11 @@ public class Model {
 	        	
 	        	if (Constants.DEBUG)
 	        	{
-		        	System.out.println("Mesh " + j + ", numVerts: " + vertCount);
-		        	System.out.println("Mesh " + j + ", numIndex: " + indexCount);	   
+		        	System.out.println("numVerts: " + vertCount);
+		        	System.out.println("numIndex: " + indexCount);	   
 		        	
-		        	System.out.println("Mesh " + j + ", vertOffset: " + vertexBufferOffset);
-		        	System.out.println("Mesh " + j + ", indexOffset: " + indexBufferOffset);
+		        	System.out.println("vertOffset: " + vertexBufferOffset);
+		        	System.out.println("indexOffset: " + indexBufferOffset);
 	        	}
 	        	
 			}
@@ -82,6 +133,11 @@ public class Model {
         	lodModels[i].loadMeshes(bb);
         }
         	       
+	}
+	
+	private void loadMaterials()
+	{
+		
 	}
 	
 	public Mesh[] getMeshes(int lodLevel)
