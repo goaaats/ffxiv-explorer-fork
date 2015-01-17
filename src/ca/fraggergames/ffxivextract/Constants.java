@@ -11,7 +11,7 @@ public class Constants {
 	public static final String VERSION = "v1.2a";
 	public static final int APP_VERSION_CODE = 2;
 	public static final String COMMIT = "97c4ad999d8c6dc2331b983aa73ff2d44ac7e5f0";
-	public static boolean DEBUG = false;
+	public static boolean DEBUG = true;
 	public static boolean EASTER_EGG = false;
 
 	public static Connection GLOBAL_CONN;
