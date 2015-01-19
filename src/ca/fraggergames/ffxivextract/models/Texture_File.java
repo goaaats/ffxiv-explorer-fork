@@ -19,6 +19,7 @@ public class Texture_File {
 	final public int numMipMaps;
 
 	final public int dataStart[];
+	final public int dataLength[];
 
 	final public int uncompressedWidth;
 	final public int uncompressedHeight;
@@ -26,6 +27,7 @@ public class Texture_File {
 	final public byte data[];
 
 	final public short numFrames;
+
 	
 	public Texture_File(byte data[]) {
 
@@ -44,11 +46,14 @@ public class Texture_File {
 		
 		bb.position(0x1c);
 		
-		dataStart = new int[numFrames];		
+		dataStart = new int[numFrames];
+		dataLength = new int[numFrames];
+		
 		for (int i = 0; i < numFrames; i++)
-			dataStart[i] = bb.getInt(); 
+			dataStart[i] = bb.getInt();
+		
 	}
-
+	
 	public final BufferedImage decode(int index, 
 			final Map<String, Object> parameters) throws ImageDecodingException {
 

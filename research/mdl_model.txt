@@ -40,7 +40,8 @@ Used to initialize the buffers if using DirectX.
 --LOD 1 MESH TABLE-- (Size of Num LOD1 Meshes)
 0x000: Vertex Count			  Int;
 0x004: Index Count			  Int;
-0x008: Unknown   			  Int;
+0x008: Material Number		Short;
+0x00a: Unknown				Short;
 0x00c: Unknown   			  Int;
 0x010: Index Buffer Offset	  Int;
 0x014: Vertex Buffer Offset   Int;

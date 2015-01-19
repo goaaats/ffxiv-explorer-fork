@@ -8,10 +8,8 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
+import java.awt.image.BufferedImage;
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.FloatBuffer;
-import java.nio.ShortBuffer;
 
 import javax.media.opengl.GL2;
 import javax.media.opengl.GL3;
@@ -21,18 +19,21 @@ import javax.media.opengl.GLEventListener;
 import javax.media.opengl.GLProfile;
 import javax.media.opengl.awt.GLCanvas;
 import javax.media.opengl.glu.GLU;
+import javax.swing.BoxLayout;
+import javax.swing.ImageIcon;
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.border.TitledBorder;
 
+import ca.fraggergames.ffxivextract.helpers.ImageDecoding.ImageDecodingException;
+import ca.fraggergames.ffxivextract.models.Material;
 import ca.fraggergames.ffxivextract.models.Mesh;
 import ca.fraggergames.ffxivextract.models.Model;
+import ca.fraggergames.ffxivextract.models.Texture_File;
 
 import com.jogamp.common.nio.Buffers;
 import com.jogamp.opengl.util.Animator;
-import javax.swing.border.TitledBorder;
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.JLabel;
-import javax.swing.JComboBox;
-import javax.swing.BoxLayout;
 
 public class OpenGL_View extends JPanel {
 
@@ -40,6 +41,7 @@ public class OpenGL_View extends JPanel {
 	
 	Animator animator;
 	ModelRenderer renderer;
+	JLabel lbl1;
 	
 	private boolean leftMouseDown = false;
 	private boolean rightMouseDown = false;
@@ -47,6 +49,11 @@ public class OpenGL_View extends JPanel {
 	private int currentLoD = 0;
 	private int lastOriginX, lastOriginY;
 	private int lastX, lastY;
+	
+	//Matrices
+	float[] modelMatrix = new float[16];
+	float[] viewMatrix = new float[16];
+	float[] projMatrix = new float[16];
 	
 	public OpenGL_View(Model model) {
 		GLProfile glProfile = GLProfile.getDefault();
@@ -145,7 +152,7 @@ public class OpenGL_View extends JPanel {
         JPanel panel_1 = new JPanel();
         panel.add(panel_1, BorderLayout.EAST);
         
-        JLabel lbl1 = new JLabel("Detail Level:");
+        lbl1 = new JLabel("Detail Level:");
         panel_1.add(lbl1);
         
         cmbLodChooser = new JComboBox();
@@ -190,8 +197,11 @@ public class OpenGL_View extends JPanel {
 		private float angleX = 0;
 		private float angleY = 0;
 		
+		private int[] textureIds;
+		
 		public ModelRenderer(Model model) {
-			this.model = model;					
+			this.model = model;
+			textureIds = new int[model.getNumMaterials() * 4];
 		}
 
 		public void zoom(int notches) {
@@ -210,24 +220,75 @@ public class OpenGL_View extends JPanel {
 			panY += -y * 0.05f;
 		}
 
+		boolean loaded = false;
+		
 		@Override
 		public void display(GLAutoDrawable drawable) {
-			GL2 gl = drawable.getGL().getGL2(); 
+			GL2 gl = drawable.getGL().getGL2();
+			
+			if (!loaded)
+			{
+				for (int i = 0; i < model.getNumMaterials(); i++){
+					gl.glGenTextures(4, model.getMaterial(i).getGLTextureIds(),0);												
+					Material m = model.getMaterial(i);
+					Texture_File diffuse = m.getDiffuseMapTexture();
+					BufferedImage img = null;
+					try {
+						img = diffuse.decode(0, null);
+					} catch (ImageDecodingException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}								
+					
+					int[] pixels = new int[img.getWidth() * img.getHeight()];
+					img.getRGB(0, 0, img.getWidth(), img.getHeight(), pixels, 0, img.getWidth());				
+					
+					ByteBuffer buffer = Buffers.newDirectByteBuffer(img.getWidth() * img.getHeight() * 4);
+					
+					//Fucking Java Trash
+					for(int y = 0; y < img.getHeight(); y++){
+			            for(int x = 0; x < img.getWidth(); x++){
+			                int pixel = pixels[y * img.getWidth() + x];
+			                buffer.put((byte) ((pixel >> 16) & 0xFF));     
+			                buffer.put((byte) ((pixel >> 8) & 0xFF));      
+			                buffer.put((byte) (pixel & 0xFF));               
+			                buffer.put((byte) ((pixel >> 24) & 0xFF));
+			            }
+			        }				
+			        buffer.flip(); //FOR THE LOVE OF GOD DO NOT FORGET THIS
+					buffer.position(0);
+					
+			        //Load into VRAM
+			        gl.glBindTexture(GL2.GL_TEXTURE_2D, m.getGLTextureIds()[0]);
+					gl.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_S, GL2.GL_REPEAT);
+					gl.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_T, GL2.GL_REPEAT);
+					gl.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_MIN_FILTER, GL2.GL_LINEAR);
+					gl.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_MAG_FILTER, GL2.GL_LINEAR);
+					
+					gl.glTexImage2D(GL2.GL_TEXTURE_2D, 0, GL2.GL_RGBA, img.getWidth(), img.getHeight(), 0, GL2.GL_RGBA, GL2.GL_UNSIGNED_BYTE, buffer);
+					loaded = true;
+					gl.glBindTexture(GL2.GL_TEXTURE_2D, 0);
+				}
+			}
+			
 		    gl.glClear(GL2.GL_COLOR_BUFFER_BIT | GL2.GL_DEPTH_BUFFER_BIT); 
 		    gl.glLoadIdentity(); 
 			 		    
 		    gl.glTranslatef(panX, panY, zoom);
 		    gl.glRotatef(angleX, 0, 1, 0);
-		    gl.glRotatef(angleY, 1, 0, 0);
+		    gl.glRotatef(angleY, 1, 0, 0);		  		    
 		    
 		    for (int i = 0; i < model.getNumMesh(currentLoD); i++){
 		    	
-		    	Mesh mesh = model.getMeshes(currentLoD)[i]; 
+		    	Mesh mesh = model.getMeshes(currentLoD)[i]; 		    		    		    			    
+		    	
+		    	gl.glBindTexture(GL2.GL_TEXTURE_2D, model.getMaterial(mesh.materialNumber).getGLTextureIds()[0]);
 		    	
 		    	mesh.vertBuffer.position(0);
 		    	mesh.indexBuffer.position(0);
 			    gl.glEnableClientState(GL2.GL_VERTEX_ARRAY);
 			    gl.glEnableClientState(GL2.GL_NORMAL_ARRAY);
+			    gl.glEnableClientState(GL2.GL_TEXTURE_COORD_ARRAY);
 			    
 			    if (mesh.vertexSize == 0x10 || mesh.vertexSize == 0x8)
 			    	gl.glVertexPointer(4, GL2.GL_HALF_FLOAT, 0, mesh.vertBuffer);
@@ -240,12 +301,20 @@ public class OpenGL_View extends JPanel {
 			    	otherData.position(mesh.numVerts*8);
 			    else
 			    	otherData.position(mesh.numVerts*12);
+			    
+			    ByteBuffer texData = mesh.vertBuffer.duplicate();
+			    
+			    if (mesh.vertexSize == 0x10 || mesh.vertexSize == 0x8)
+			    	texData.position((mesh.numVerts*8) + 16);
+			    else
+			    	texData.position((mesh.numVerts*12)+ 16);			
 			    	
 			    gl.glNormalPointer(GL2.GL_HALF_FLOAT, 24, otherData);
+			    gl.glTexCoordPointer(2,GL2.GL_HALF_FLOAT, 24, texData);
 			    gl.glDrawElements(GL2.GL_TRIANGLES, mesh.numIndex, GL2.GL_UNSIGNED_SHORT, mesh.indexBuffer);
 			    gl.glDisableClientState(GL2.GL_VERTEX_ARRAY);
 			    gl.glDisableClientState(GL2.GL_NORMAL_ARRAY);
-			    
+			    gl.glDisableClientState(GL2.GL_TEXTURE_COORD_ARRAY);
 			}
 		}
 
@@ -263,12 +332,17 @@ public class OpenGL_View extends JPanel {
 		      gl.glDepthFunc(GL3.GL_LEQUAL);  // the type of depth test to do
 		      gl.glHint(GL2.GL_PERSPECTIVE_CORRECTION_HINT, GL3.GL_NICEST); // best perspective correction
 		      gl.glShadeModel(GL2.GL_SMOOTH); // blends colors nicely, and smoothes out lighting
+		      gl.glEnable(GL2.GL_BLEND); 
+		      gl.glBlendFunc (GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA);
+		      
+		      gl.glEnable(GL2.GL_TEXTURE_2D);
+		      gl.glTexEnvf(GL2.GL_TEXTURE_ENV, GL2.GL_TEXTURE_ENV_MODE, GL2.GL_MODULATE);
 		      
 		      //Delete this scrub shit later
 		      gl.glEnable(GL2.GL_LIGHTING);
 		      gl.glEnable(GL2.GL_LIGHT0);
 		      
-		      float light_ambient[] = { 0.0f, 0.0f, 0.0f, 1.0f };
+		      float light_ambient[] = { 0.5f, 0.5f, 0.5f, 1.0f };
 		      float light_diffuse[] = { 1.0f, 1.0f, 1.0f, 1.0f };
 		      float light_specular[] = { 1.0f, 1.0f, 1.0f, 1.0f };
 		      float light_position[] = { 1.0f, 1.0f, 1.0f, 0.0f };		    

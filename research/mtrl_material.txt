@@ -3,8 +3,8 @@
 ===Material File===
 0x00: ~~Unknown~~				  Int32;
 0x04: Filesize					  Int32;
-0x08:							  Short;
-0x0a: Material Info Size		  Short;
+0x08: Size of All Strings		  Short;
+0x0a: 							  Short;
 0x0c: Path Count				  Byte;
 0x0d: Map Count					  Byte;
 0x0e: Colorset Count			  Byte;

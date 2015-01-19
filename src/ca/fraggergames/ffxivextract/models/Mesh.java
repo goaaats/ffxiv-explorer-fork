@@ -15,10 +15,12 @@ public class Mesh{
 	
 	public int vertexSize, auxVertexSize, unknownSize, indexSize;
 	
+	public int materialNumber;
+	
 	public int[] boneWeight;
 	public int[] boneIndex;
 	
-	public Mesh(int vertCount, int indexCount, int vertexBufferOffset,
+	public Mesh(int vertCount, int indexCount, int meshNum, int vertexBufferOffset,
 			int indexBufferOffset, int sizeinfo) {
 		this.numVerts = vertCount;
 		this.numIndex = indexCount;
