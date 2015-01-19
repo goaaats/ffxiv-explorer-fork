@@ -9,10 +9,15 @@ import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.ByteBuffer;
+import java.nio.IntBuffer;
+import java.util.Scanner;
 
-import javax.media.opengl.GL2;
+import javax.media.opengl.GL;
 import javax.media.opengl.GL3;
+import javax.media.opengl.GL3bc;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLCapabilities;
 import javax.media.opengl.GLEventListener;
@@ -20,12 +25,12 @@ import javax.media.opengl.GLProfile;
 import javax.media.opengl.awt.GLCanvas;
 import javax.media.opengl.glu.GLU;
 import javax.swing.BoxLayout;
-import javax.swing.ImageIcon;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.border.TitledBorder;
 
+import ca.fraggergames.ffxivextract.helpers.Matrix;
 import ca.fraggergames.ffxivextract.helpers.ImageDecoding.ImageDecodingException;
 import ca.fraggergames.ffxivextract.models.Material;
 import ca.fraggergames.ffxivextract.models.Mesh;
@@ -48,12 +53,7 @@ public class OpenGL_View extends JPanel {
 	
 	private int currentLoD = 0;
 	private int lastOriginX, lastOriginY;
-	private int lastX, lastY;
-	
-	//Matrices
-	float[] modelMatrix = new float[16];
-	float[] viewMatrix = new float[16];
-	float[] projMatrix = new float[16];
+	private int lastX, lastY;		
 	
 	public OpenGL_View(Model model) {
 		GLProfile glProfile = GLProfile.getDefault();
@@ -199,6 +199,23 @@ public class OpenGL_View extends JPanel {
 		
 		private int[] textureIds;
 		
+		//Shader Stuff
+		private int shaderProgram = 0;
+		
+		private int modelLocation;
+		private int viewLocation;
+		private int projLocation;
+		
+		private int positionLocation;
+		private int normalLocation;
+		private int texCoordLocation;
+		private int colorLocation;
+		
+		//Matrices
+		float[] modelMatrix = new float[16];
+		float[] viewMatrix = new float[16];
+		float[] projMatrix = new float[16];
+		
 		public ModelRenderer(Model model) {
 			this.model = model;
 			textureIds = new int[model.getNumMaterials() * 4];
@@ -224,7 +241,7 @@ public class OpenGL_View extends JPanel {
 		
 		@Override
 		public void display(GLAutoDrawable drawable) {
-			GL2 gl = drawable.getGL().getGL2();
+			GL3bc gl = drawable.getGL().getGL3bc();
 			
 			if (!loaded)
 			{
@@ -259,62 +276,79 @@ public class OpenGL_View extends JPanel {
 					buffer.position(0);
 					
 			        //Load into VRAM
-			        gl.glBindTexture(GL2.GL_TEXTURE_2D, m.getGLTextureIds()[0]);
-					gl.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_S, GL2.GL_REPEAT);
-					gl.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_T, GL2.GL_REPEAT);
-					gl.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_MIN_FILTER, GL2.GL_LINEAR);
-					gl.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_MAG_FILTER, GL2.GL_LINEAR);
+			        gl.glBindTexture(GL3.GL_TEXTURE_2D, m.getGLTextureIds()[0]);
+					gl.glTexParameteri(GL3.GL_TEXTURE_2D, GL3.GL_TEXTURE_WRAP_S, GL3.GL_REPEAT);
+					gl.glTexParameteri(GL3.GL_TEXTURE_2D, GL3.GL_TEXTURE_WRAP_T, GL3.GL_REPEAT);
+					gl.glTexParameteri(GL3.GL_TEXTURE_2D, GL3.GL_TEXTURE_MIN_FILTER, GL3.GL_LINEAR);
+					gl.glTexParameteri(GL3.GL_TEXTURE_2D, GL3.GL_TEXTURE_MAG_FILTER, GL3.GL_LINEAR);
 					
-					gl.glTexImage2D(GL2.GL_TEXTURE_2D, 0, GL2.GL_RGBA, img.getWidth(), img.getHeight(), 0, GL2.GL_RGBA, GL2.GL_UNSIGNED_BYTE, buffer);
+					gl.glTexImage2D(GL3.GL_TEXTURE_2D, 0, GL3.GL_RGBA, img.getWidth(), img.getHeight(), 0, GL3.GL_RGBA, GL3.GL_UNSIGNED_BYTE, buffer);
 					loaded = true;
-					gl.glBindTexture(GL2.GL_TEXTURE_2D, 0);
+					gl.glBindTexture(GL3.GL_TEXTURE_2D, 0);
 				}
 			}
 			
-		    gl.glClear(GL2.GL_COLOR_BUFFER_BIT | GL2.GL_DEPTH_BUFFER_BIT); 
-		    gl.glLoadIdentity(); 
-			 		    
-		    gl.glTranslatef(panX, panY, zoom);
-		    gl.glRotatef(angleX, 0, 1, 0);
-		    gl.glRotatef(angleY, 1, 0, 0);		  		    
+		    gl.glClear(GL3.GL_COLOR_BUFFER_BIT | GL3.GL_DEPTH_BUFFER_BIT); 		  
+		    
+		    Matrix.setIdentityM(modelMatrix, 0);
+		    Matrix.translateM(modelMatrix, 0, panX, panY, zoom);
+		    Matrix.rotateM(modelMatrix, 0, angleX, 0, 1, 0);
+		    Matrix.rotateM(modelMatrix, 0, angleY, 1, 0, 0);		     		   		    		    
 		    
 		    for (int i = 0; i < model.getNumMesh(currentLoD); i++){
 		    	
 		    	Mesh mesh = model.getMeshes(currentLoD)[i]; 		    		    		    			    
 		    	
-		    	gl.glBindTexture(GL2.GL_TEXTURE_2D, model.getMaterial(mesh.materialNumber).getGLTextureIds()[0]);
+		    	gl.glBindTexture(GL3.GL_TEXTURE_2D, model.getMaterial(mesh.materialNumber).getGLTextureIds()[0]);
 		    	
 		    	mesh.vertBuffer.position(0);
 		    	mesh.indexBuffer.position(0);
-			    gl.glEnableClientState(GL2.GL_VERTEX_ARRAY);
-			    gl.glEnableClientState(GL2.GL_NORMAL_ARRAY);
-			    gl.glEnableClientState(GL2.GL_TEXTURE_COORD_ARRAY);
-			    
-			    if (mesh.vertexSize == 0x10 || mesh.vertexSize == 0x8)
-			    	gl.glVertexPointer(4, GL2.GL_HALF_FLOAT, 0, mesh.vertBuffer);
+		    	
+		    	//Position
+		    	if (mesh.vertexSize == 0x10 || mesh.vertexSize == 0x8)
+		    		gl.glVertexAttribPointer(positionLocation, 4, GL3.GL_HALF_FLOAT, false, 0, mesh.vertBuffer);
 			    else if (mesh.vertexSize == 0x14)
-			    	gl.glVertexPointer(3, GL2.GL_FLOAT, 0, mesh.vertBuffer);
-			    
-			    ByteBuffer otherData = mesh.vertBuffer.duplicate();
-			    
+			    	gl.glVertexAttribPointer(positionLocation, 3, GL3.GL_FLOAT, false, 0, mesh.vertBuffer);
+		    	
+		    	//Normal
+		    	ByteBuffer normalData = mesh.vertBuffer.duplicate();			    
 			    if (mesh.vertexSize == 0x10 || mesh.vertexSize == 0x8)
-			    	otherData.position(mesh.numVerts*8);
+			    	normalData.position(mesh.numVerts*8);
 			    else
-			    	otherData.position(mesh.numVerts*12);
-			    
-			    ByteBuffer texData = mesh.vertBuffer.duplicate();
-			    
+			    	normalData.position(mesh.numVerts*12);		    	
+		    	gl.glVertexAttribPointer(normalLocation, 4, GL3.GL_HALF_FLOAT, false, 24, normalData);
+		    	
+		    	//Tex Coord
+		    	ByteBuffer texData = mesh.vertBuffer.duplicate();			    
 			    if (mesh.vertexSize == 0x10 || mesh.vertexSize == 0x8)
 			    	texData.position((mesh.numVerts*8) + 16);
 			    else
-			    	texData.position((mesh.numVerts*12)+ 16);			
-			    	
-			    gl.glNormalPointer(GL2.GL_HALF_FLOAT, 24, otherData);
-			    gl.glTexCoordPointer(2,GL2.GL_HALF_FLOAT, 24, texData);
-			    gl.glDrawElements(GL2.GL_TRIANGLES, mesh.numIndex, GL2.GL_UNSIGNED_SHORT, mesh.indexBuffer);
-			    gl.glDisableClientState(GL2.GL_VERTEX_ARRAY);
-			    gl.glDisableClientState(GL2.GL_NORMAL_ARRAY);
-			    gl.glDisableClientState(GL2.GL_TEXTURE_COORD_ARRAY);
+			    	texData.position((mesh.numVerts*12)+ 16);		
+		    	gl.glVertexAttribPointer(texCoordLocation, 4, GL3.GL_HALF_FLOAT, false, 24, texData);
+		    	
+		    	//Color
+		    	ByteBuffer colorData = mesh.vertBuffer.duplicate();			    
+			    if (mesh.vertexSize == 0x10 || mesh.vertexSize == 0x8)
+			    	colorData.position((mesh.numVerts*8) + 12);
+			    else
+			    	colorData.position((mesh.numVerts*12)+ 12);	
+		    	gl.glVertexAttribPointer(colorLocation, 4, GL3.GL_UNSIGNED_BYTE, false, 24, colorData);
+		    	
+		    	gl.glEnableVertexAttribArray(positionLocation);
+		    	gl.glEnableVertexAttribArray(normalLocation);
+		    	gl.glEnableVertexAttribArray(texCoordLocation);
+		    	gl.glEnableVertexAttribArray(colorLocation);		    	
+		    	
+		    	gl.glUniformMatrix4fv(modelLocation, 1, false, modelMatrix, 0);
+		    	gl.glUniformMatrix4fv(viewLocation, 1, false, viewMatrix, 0);
+		    	gl.glUniformMatrix4fv(projLocation, 1, false, projMatrix, 0);		    
+	
+			    gl.glDrawElements(GL3.GL_TRIANGLES, mesh.numIndex, GL3.GL_UNSIGNED_SHORT, mesh.indexBuffer);
+			    gl.glDisableVertexAttribArray(positionLocation);
+		    	gl.glDisableVertexAttribArray(normalLocation);
+		    	gl.glDisableVertexAttribArray(texCoordLocation);
+		    	gl.glDisableVertexAttribArray(colorLocation);			  
+			    
 			}
 		}
 
@@ -324,53 +358,111 @@ public class OpenGL_View extends JPanel {
 
 		@Override
 		public void init(GLAutoDrawable drawable) {
-			GL2 gl = drawable.getGL().getGL2();      // get the OpenGL graphics context
+			GL3 gl = drawable.getGL().getGL3();      // get the OpenGL graphics context
 		      glu = new GLU();                         // get GL Utilities
 		      gl.glClearColor(0.3f, 0.3f, 0.3f, 0.0f); // set background (clear) color
 		      gl.glClearDepth(1.0f);      // set clear depth value to farthest
 		      gl.glEnable(GL3.GL_DEPTH_TEST); // enables depth testing
 		      gl.glDepthFunc(GL3.GL_LEQUAL);  // the type of depth test to do
-		      gl.glHint(GL2.GL_PERSPECTIVE_CORRECTION_HINT, GL3.GL_NICEST); // best perspective correction
-		      gl.glShadeModel(GL2.GL_SMOOTH); // blends colors nicely, and smoothes out lighting
-		      gl.glEnable(GL2.GL_BLEND); 
-		      gl.glBlendFunc (GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA);
+		      gl.glEnable(GL3.GL_BLEND); 
+		      gl.glBlendFunc (GL3.GL_SRC_ALPHA, GL3.GL_ONE_MINUS_SRC_ALPHA);		      
+		      gl.glEnable(GL3.GL_TEXTURE_2D);
 		      
-		      gl.glEnable(GL2.GL_TEXTURE_2D);
-		      gl.glTexEnvf(GL2.GL_TEXTURE_ENV, GL2.GL_TEXTURE_ENV_MODE, GL2.GL_MODULATE);
-		      
-		      //Delete this scrub shit later
-		      gl.glEnable(GL2.GL_LIGHTING);
-		      gl.glEnable(GL2.GL_LIGHT0);
-		      
-		      float light_ambient[] = { 0.5f, 0.5f, 0.5f, 1.0f };
-		      float light_diffuse[] = { 1.0f, 1.0f, 1.0f, 1.0f };
-		      float light_specular[] = { 1.0f, 1.0f, 1.0f, 1.0f };
-		      float light_position[] = { 1.0f, 1.0f, 1.0f, 0.0f };		    
+		      try {
+		    	  
+		    	//Create Shader
+				shaderProgram = createShaderProgram(gl);
+				
+				//Set Attrib Locations
+				positionLocation = gl.glGetAttribLocation(shaderProgram, "aPosition");
+				normalLocation = gl.glGetAttribLocation(shaderProgram, "aNormal");
+				texCoordLocation = gl.glGetAttribLocation(shaderProgram, "aTexCoord");
+				colorLocation = gl.glGetAttribLocation(shaderProgram, "aColor");
+				
+				//Set Uniform Locations
+				modelLocation = gl.glGetUniformLocation(shaderProgram, "uModelMatrix");
+				viewLocation = gl.glGetUniformLocation(shaderProgram, "uViewMatrix");
+				projLocation = gl.glGetUniformLocation(shaderProgram, "uProjMatrix");
 
-		      gl.glLightfv(GL2.GL_LIGHT0, GL2.GL_AMBIENT, light_ambient,0);
-		      gl.glLightfv(GL2.GL_LIGHT0, GL2.GL_DIFFUSE, light_diffuse,0);
-		      gl.glLightfv(GL2.GL_LIGHT0, GL2.GL_SPECULAR, light_specular,0);
-		      gl.glLightfv(GL2.GL_LIGHT0, GL2.GL_POSITION, light_position,0);
+			    gl.glUseProgram(shaderProgram);
+				
+			} catch (IOException e) {
+				e.printStackTrace();
+				System.out.println("Could not load shader");
+			}
+		      
 		}
 
+		private int createShaderProgram(GL3 gl) throws IOException {
+			
+			 String vsrc = readFromStream(OpenGL_View.class
+					 .getResourceAsStream("/res/shaders/vert.glsl")); 
+			 
+			 String fsrc = readFromStream(OpenGL_View.class
+					 .getResourceAsStream("/res/shaders/frag.glsl")); 
+			
+			int vertShader = createShader(gl, GL3.GL_VERTEX_SHADER, vsrc);
+			int fragShader = createShader(gl, GL3.GL_FRAGMENT_SHADER, fsrc);
+			
+			int shaderProgram = gl.glCreateProgram();
+			gl.glAttachShader(shaderProgram, vertShader);
+			gl.glAttachShader(shaderProgram, fragShader);
+			gl.glLinkProgram(shaderProgram);
+			gl.glValidateProgram(shaderProgram);
+			
+			return shaderProgram;
+		}
+
+		private String readFromStream(InputStream ins) throws IOException {
+			if (ins == null) {
+				 throw new IOException("Could not read from stream.");
+			}
+			StringBuffer buffer = new StringBuffer();
+		 	Scanner scanner = new Scanner(ins);
+			try {
+				while (scanner.hasNextLine()) {
+					buffer.append(scanner.nextLine() + "\n");
+				}
+			} finally {
+					scanner.close();
+				}
+			return buffer.toString(); 
+		}
+
+		private int createShader(GL3 gl, int shaderType, String source)
+		{
+			int shader = gl.glCreateShader(shaderType);
+			gl.glShaderSource(shader, 1, new String[] {source}, (int[]) null, 0);
+			gl.glCompileShader(shader);
+			
+			int[] compiled = new int[1];
+            gl.glGetShaderiv(shader, GL3.GL_COMPILE_STATUS, compiled, 0);
+            if (compiled[0] == 0) {
+                byte[] infoLog = new byte[1024];
+                gl.glGetShaderInfoLog(shader, 1024, null, 0, infoLog, 0);
+                System.out.println(new String(infoLog));
+                gl.glDeleteShader(shader);
+                shader = 0;
+                return 0;
+            }
+			
+			return shader;
+		}
+		
 		@Override
 		public void reshape(GLAutoDrawable drawable, int x, int y, int width, int height){
-			GL2 gl = drawable.getGL().getGL2();  // get the OpenGL 2 graphics context
+			GL3bc gl = drawable.getGL().getGL3bc();  // get the OpenGL 2 graphics context
 			 
 		      if (height == 0) height = 1;   // prevent divide by zero
 		      float aspect = (float)width / height;
 		 
-		      // Set the view port (display area) to cover the entire window
 		      gl.glViewport(0, 0, width, height);
 		 
-		      // Setup perspective projection, with aspect ratio matches viewport
-		      gl.glMatrixMode(GL2.GL_PROJECTION);  // choose projection matrix
-		      gl.glLoadIdentity();             // reset projection matrix
-		      glu.gluPerspective(45.0, aspect, 0.1, 100.0); // fovy, aspect, zNear, zFar
-		 
-		      // Enable the model-view transform
-		      gl.glMatrixMode(GL2.GL_MODELVIEW);
-		      gl.glLoadIdentity(); // reset
+		      Matrix.setIdentityM(projMatrix, 0);
+		      Matrix.perspectiveM(projMatrix, 0, 45.0f, aspect, 0.1f, 100.0f);
+		     
+		      Matrix.setIdentityM(modelMatrix, 0);
+		      Matrix.setIdentityM(viewMatrix, 0);
 		}
 		
 	}
