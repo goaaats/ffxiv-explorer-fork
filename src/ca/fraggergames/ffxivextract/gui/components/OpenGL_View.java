@@ -211,6 +211,16 @@ public class OpenGL_View extends JPanel {
 		private int texCoordLocation;
 		private int colorLocation;
 		
+		private int diffuseTexLocation;
+		private int normalTexLocation;
+		private int specularTexLocation;
+		private int colorSetTexLocation;
+		
+		private int usesDiffuseLocation;
+		private int usesNormalLocation;
+		private int usesSpecularLocation;
+		private int usesColorSetLocation;
+		
 		//Matrices
 		float[] modelMatrix = new float[16];
 		float[] viewMatrix = new float[16];
@@ -314,16 +324,14 @@ public class OpenGL_View extends JPanel {
 			
 		    gl.glClear(GL3.GL_COLOR_BUFFER_BIT | GL3.GL_DEPTH_BUFFER_BIT); 		  
 		    
-		    Matrix.setIdentityM(modelMatrix, 0);
-		    Matrix.translateM(modelMatrix, 0, panX, panY, zoom);
+		    Matrix.setIdentityM(viewMatrix, 0);
+		    Matrix.translateM(viewMatrix, 0, panX, panY, zoom);
 		   // Matrix.rotateM(modelMatrix, 0, angleX, 0, 1, 0);
 		    //Matrix.rotateM(modelMatrix, 0, angleY, 1, 0, 0);		     		   		    		    
 		    
 		    for (int i = 0; i < model.getNumMesh(currentLoD); i++){
 		    	
-		    	Mesh mesh = model.getMeshes(currentLoD)[i]; 		    		    		    			    
-		    	
-		    	gl.glBindTexture(GL3.GL_TEXTURE_2D, model.getMaterial(mesh.materialNumber).getGLTextureIds()[0]);
+		    	Mesh mesh = model.getMeshes(currentLoD)[i]; 		    		    		    			    		    	
 		    	
 		    	mesh.vertBuffer.position(0);
 		    	mesh.indexBuffer.position(0);
@@ -358,16 +366,40 @@ public class OpenGL_View extends JPanel {
 			    	colorData.position((mesh.numVerts*12)+ 12);	
 		    	gl.glVertexAttribPointer(colorLocation, 4, GL3.GL_UNSIGNED_BYTE, false, 24, colorData);
 		    	
+		    	//Textures
+		    	gl.glUniform1i(usesDiffuseLocation, 1);
+		    	gl.glUniform1i(usesNormalLocation, 1);
+		    	gl.glUniform1i(usesSpecularLocation, 1);
+		    	gl.glUniform1i(usesColorSetLocation, 1);
+		    	
+		    	gl.glUniform1i(diffuseTexLocation, 0);
+		    	gl.glUniform1i(normalTexLocation, 1);
+		    	gl.glUniform1i(specularTexLocation, 2);
+		    	gl.glUniform1i(colorSetTexLocation, 3);
+		    	
+		    	gl.glActiveTexture(GL3.GL_TEXTURE0);
+		    	gl.glBindTexture(GL3.GL_TEXTURE_2D, model.getMaterial(mesh.materialNumber).getGLTextureIds()[0]);
+		    	gl.glActiveTexture(GL3.GL_TEXTURE1);
+		    	gl.glBindTexture(GL3.GL_TEXTURE_2D, model.getMaterial(mesh.materialNumber).getGLTextureIds()[1]);
+		    	gl.glActiveTexture(GL3.GL_TEXTURE2);
+		    	gl.glBindTexture(GL3.GL_TEXTURE_2D, model.getMaterial(mesh.materialNumber).getGLTextureIds()[2]);
+		    	gl.glActiveTexture(GL3.GL_TEXTURE3);
+		    	gl.glBindTexture(GL3.GL_TEXTURE_2D, model.getMaterial(mesh.materialNumber).getGLTextureIds()[3]);		    	
+		    	
 		    	gl.glEnableVertexAttribArray(positionLocation);
 		    	gl.glEnableVertexAttribArray(normalLocation);
 		    	gl.glEnableVertexAttribArray(texCoordLocation);
 		    	gl.glEnableVertexAttribArray(colorLocation);		    	
 		    	
+		    	//Position Matrices
 		    	gl.glUniformMatrix4fv(modelLocation, 1, false, modelMatrix, 0);
 		    	gl.glUniformMatrix4fv(viewLocation, 1, false, viewMatrix, 0);
 		    	gl.glUniformMatrix4fv(projLocation, 1, false, projMatrix, 0);		    
-	
+			    	
+		    	//Draw
 			    gl.glDrawElements(GL3.GL_TRIANGLES, mesh.numIndex, GL3.GL_UNSIGNED_SHORT, mesh.indexBuffer);
+			    
+			    //Disable
 			    gl.glDisableVertexAttribArray(positionLocation);
 		    	gl.glDisableVertexAttribArray(normalLocation);
 		    	gl.glDisableVertexAttribArray(texCoordLocation);
@@ -408,6 +440,17 @@ public class OpenGL_View extends JPanel {
 				viewLocation = gl.glGetUniformLocation(shaderProgram, "uViewMatrix");
 				projLocation = gl.glGetUniformLocation(shaderProgram, "uProjMatrix");
 
+				//Set Uniform Tex Locations
+				diffuseTexLocation = gl.glGetUniformLocation(shaderProgram, "uDiffuseTex");
+				normalTexLocation = gl.glGetUniformLocation(shaderProgram, "uNormalTex");
+				specularTexLocation = gl.glGetUniformLocation(shaderProgram, "uSpecularTex");
+				colorSetTexLocation = gl.glGetUniformLocation(shaderProgram, "uColorSetTex");
+				
+				usesDiffuseLocation = gl.glGetUniformLocation(shaderProgram, "uHasDiffuse");
+				usesNormalLocation = gl.glGetUniformLocation(shaderProgram, "uHasNormal");
+				usesSpecularLocation = gl.glGetUniformLocation(shaderProgram, "uHasSpecular");
+				usesColorSetLocation = gl.glGetUniformLocation(shaderProgram, "uHasColorSet");
+				
 			    gl.glUseProgram(shaderProgram);
 				
 			} catch (IOException e) {
