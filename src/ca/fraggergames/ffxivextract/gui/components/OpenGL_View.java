@@ -248,52 +248,76 @@ public class OpenGL_View extends JPanel {
 				for (int i = 0; i < model.getNumMaterials(); i++){
 					gl.glGenTextures(4, model.getMaterial(i).getGLTextureIds(),0);												
 					Material m = model.getMaterial(i);
-					Texture_File diffuse = m.getDiffuseMapTexture();
-					BufferedImage img = null;
-					try {
-						img = diffuse.decode(0, null);
-					} catch (ImageDecodingException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}								
 					
-					int[] pixels = new int[img.getWidth() * img.getHeight()];
-					img.getRGB(0, 0, img.getWidth(), img.getHeight(), pixels, 0, img.getWidth());				
-					
-					ByteBuffer buffer = Buffers.newDirectByteBuffer(img.getWidth() * img.getHeight() * 4);
-					
-					//Fucking Java Trash
-					for(int y = 0; y < img.getHeight(); y++){
-			            for(int x = 0; x < img.getWidth(); x++){
-			                int pixel = pixels[y * img.getWidth() + x];
-			                buffer.put((byte) ((pixel >> 16) & 0xFF));     
-			                buffer.put((byte) ((pixel >> 8) & 0xFF));      
-			                buffer.put((byte) (pixel & 0xFF));               
-			                buffer.put((byte) ((pixel >> 24) & 0xFF));
-			            }
-			        }				
-			        buffer.flip(); //FOR THE LOVE OF GOD DO NOT FORGET THIS
-					buffer.position(0);
-					
-			        //Load into VRAM
-			        gl.glBindTexture(GL3.GL_TEXTURE_2D, m.getGLTextureIds()[0]);
-					gl.glTexParameteri(GL3.GL_TEXTURE_2D, GL3.GL_TEXTURE_WRAP_S, GL3.GL_REPEAT);
-					gl.glTexParameteri(GL3.GL_TEXTURE_2D, GL3.GL_TEXTURE_WRAP_T, GL3.GL_REPEAT);
-					gl.glTexParameteri(GL3.GL_TEXTURE_2D, GL3.GL_TEXTURE_MIN_FILTER, GL3.GL_LINEAR);
-					gl.glTexParameteri(GL3.GL_TEXTURE_2D, GL3.GL_TEXTURE_MAG_FILTER, GL3.GL_LINEAR);
-					
-					gl.glTexImage2D(GL3.GL_TEXTURE_2D, 0, GL3.GL_RGBA, img.getWidth(), img.getHeight(), 0, GL3.GL_RGBA, GL3.GL_UNSIGNED_BYTE, buffer);
-					loaded = true;
-					gl.glBindTexture(GL3.GL_TEXTURE_2D, 0);
+					for (int j = 0; j < 4; j++){
+						
+						Texture_File tex = null;
+						
+						switch(j)
+						{
+						case 0: 
+							tex = m.getDiffuseMapTexture();
+							break;
+						case 1: 
+							tex = m.getNormalMapTexture();
+							break;
+						case 2: 
+							tex = m.getSpecularMapTexture();
+							break;
+						case 3: 
+							tex = m.getColorSetTexture();
+							break;
+						}
+						
+						if (tex == null)
+							continue;
+						
+						BufferedImage img = null;
+						try {
+							img = tex.decode(0, null);
+						} catch (ImageDecodingException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}								
+						
+						int[] pixels = new int[img.getWidth() * img.getHeight()];
+						img.getRGB(0, 0, img.getWidth(), img.getHeight(), pixels, 0, img.getWidth());				
+						
+						ByteBuffer buffer = Buffers.newDirectByteBuffer(img.getWidth() * img.getHeight() * 4);
+						
+						//Fucking Java Trash
+						for(int y = 0; y < img.getHeight(); y++){
+				            for(int x = 0; x < img.getWidth(); x++){
+				                int pixel = pixels[y * img.getWidth() + x];
+				                buffer.put((byte) ((pixel >> 16) & 0xFF));     
+				                buffer.put((byte) ((pixel >> 8) & 0xFF));      
+				                buffer.put((byte) (pixel & 0xFF));               
+				                buffer.put((byte) ((pixel >> 24) & 0xFF));
+				            }
+				        }				
+				        buffer.flip(); //FOR THE LOVE OF GOD DO NOT FORGET THIS
+						buffer.position(0);
+						
+				        //Load into VRAM
+				        gl.glBindTexture(GL3.GL_TEXTURE_2D, m.getGLTextureIds()[j]);
+						gl.glTexParameteri(GL3.GL_TEXTURE_2D, GL3.GL_TEXTURE_WRAP_S, GL3.GL_REPEAT);
+						gl.glTexParameteri(GL3.GL_TEXTURE_2D, GL3.GL_TEXTURE_WRAP_T, GL3.GL_REPEAT);
+						gl.glTexParameteri(GL3.GL_TEXTURE_2D, GL3.GL_TEXTURE_MIN_FILTER, GL3.GL_LINEAR);
+						gl.glTexParameteri(GL3.GL_TEXTURE_2D, GL3.GL_TEXTURE_MAG_FILTER, GL3.GL_LINEAR);
+						
+						gl.glTexImage2D(GL3.GL_TEXTURE_2D, 0, GL3.GL_RGBA, img.getWidth(), img.getHeight(), 0, GL3.GL_RGBA, GL3.GL_UNSIGNED_BYTE, buffer);						
+						gl.glBindTexture(GL3.GL_TEXTURE_2D, 0);
+					}					
 				}
+				loaded = true;
 			}
 			
 		    gl.glClear(GL3.GL_COLOR_BUFFER_BIT | GL3.GL_DEPTH_BUFFER_BIT); 		  
 		    
 		    Matrix.setIdentityM(modelMatrix, 0);
 		    Matrix.translateM(modelMatrix, 0, panX, panY, zoom);
-		    Matrix.rotateM(modelMatrix, 0, angleX, 0, 1, 0);
-		    Matrix.rotateM(modelMatrix, 0, angleY, 1, 0, 0);		     		   		    		    
+		   // Matrix.rotateM(modelMatrix, 0, angleX, 0, 1, 0);
+		    //Matrix.rotateM(modelMatrix, 0, angleY, 1, 0, 0);		     		   		    		    
 		    
 		    for (int i = 0; i < model.getNumMesh(currentLoD); i++){
 		    	
