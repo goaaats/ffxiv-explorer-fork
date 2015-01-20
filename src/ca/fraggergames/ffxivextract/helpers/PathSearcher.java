@@ -4,7 +4,11 @@ import java.awt.Dimension;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.BufferedWriter;
+import java.io.FileInputStream;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -167,5 +171,45 @@ public class PathSearcher extends JFrame {
 	
 	}
 
+ 	public static void addModelsFromItemsTable(String path)
+ 	{
+ 		InputStream in;
+		BufferedWriter writer = null;
+		
+		boolean readingName = true;
+		
+		try {
+			in  = new FileInputStream(path);
+			writer = new BufferedWriter(new FileWriter("./exddump2.txt"));
+			
+			while(true)
+			{
+				int b = in.read();
+				
+				if (b == -1)
+					break;
+				
+				if (b == ',' || b == 0x0D)
+				{
+					if (b == 0x0D)
+						in.read();
+					if (readingName)
+						writer.append("\r\n");
+					readingName = !readingName;
+				}
 	
+				System.out.println((char)b);
+				
+				if (readingName)
+					writer.append((char)b);
+			}
+			in.close();
+			writer.close();
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		
+ 	}
+ 	
 }

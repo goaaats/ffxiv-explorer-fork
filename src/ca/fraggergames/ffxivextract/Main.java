@@ -4,12 +4,14 @@ import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Hashtable;
 import java.util.prefs.Preferences;
 
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 
 import ca.fraggergames.ffxivextract.gui.FileManagerWindow;
+import ca.fraggergames.ffxivextract.helpers.EXD_Searcher;
 import ca.fraggergames.ffxivextract.helpers.PathSearcher;
 import ca.fraggergames.ffxivextract.helpers.VersionUpdater;
 import ca.fraggergames.ffxivextract.helpers.VersionUpdater.VersionCheckObject;
@@ -41,7 +43,6 @@ public class Main {
 		} catch (ClassNotFoundException e1) {			
 			e1.printStackTrace();
 		}
-		
 /*		
 		try {
 			PathSearcher.doPathSearch("E:\\Program Files (x86)\\SquareEnix\\FINAL FANTASY XIV - A Realm Reborn\\game\\sqpack\\ffxiv\\080000.win32.index");
@@ -133,10 +134,11 @@ public class Main {
 		}		
 		catch (Exception e){}
 		*/
-		//EXD_Searcher.createEXDFiles("E:\\Coding\\workspace3\\FFXIV_Extractor\\exddump2.txt");
-		/*
+		EXD_Searcher.saveEXL();
+		EXD_Searcher.createEXDFiles("./exddump2.txt");
+		
 		try {
-			HashDatabase.loadPathsFromTXT("E:\\Coding\\workspace3\\FFXIV_Extractor\\out2.txt");
+			HashDatabase.loadPathsFromTXT("./exddump2.txtout.txt");
 			//return;
 		} catch (SQLException e1) {
 			// TODO Auto-generated catch block
@@ -156,6 +158,12 @@ public class Main {
 		}*/
 		
 		//EXD_Searcher.saveEXL();
+		
+		for (int i = 0; i < 150; i++)
+		{
+			HashDatabase.addPathToDB(String.format("chara/monster/m8%03d/obj/body/b0001/b0001.imc", i));
+			HashDatabase.addPathToDB(String.format("chara/monster/m8%03d/obj/body/b0001/model/m8%03db0001.mdl", i, i));
+		}
 		
 		//Arguments
 		if (args.length>0)

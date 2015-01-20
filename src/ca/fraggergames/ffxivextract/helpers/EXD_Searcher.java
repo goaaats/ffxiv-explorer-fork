@@ -24,7 +24,7 @@ public class EXD_Searcher {
 		boolean readingName = true;
 		
 		try {
-			in  = new FileInputStream("C:\\Users\\Filip\\Desktop\\root.exl.dat");
+			in  = new FileInputStream("C:\\Users\\Filip\\Desktop\\exd\\root.exl");
 			writer = new BufferedWriter(new FileWriter("./exddump2.txt"));
 			
 			while(true)
@@ -39,7 +39,7 @@ public class EXD_Searcher {
 					if (b == 0x0D)
 						in.read();
 					if (readingName)
-						writer.append("\r\n");
+						writer.append("");
 					readingName = !readingName;
 				}
 	
@@ -150,11 +150,80 @@ public class EXD_Searcher {
 					break;
 				in.replace("\n", "");
 				in.replace("\r", "");
-				writer.write(in + ".exh\r\n");
-				writer.write(in + "_0_en.exd\r\n");
-				writer.write(in + "_0_ja.exd\r\n");
-				writer.write(in + "_0_de.exd\r\n");
-				writer.write(in + "_0_fr.exd\r\n");
+				writer.write("exd/"+in + ".exh\r\n");
+				writer.write("exd/"+in + "_0_en.exd\r\n");
+				writer.write("exd/"+in + "_0_ja.exd\r\n");
+				writer.write("exd/"+in + "_0_de.exd\r\n");
+				writer.write("exd/"+in + "_0_fr.exd\r\n");
+			}
+			reader.close();
+			writer.close();
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	public static void getModels(String path)
+	{
+		try {
+			BufferedReader reader = new BufferedReader(new FileReader(path));
+			BufferedWriter writer = new BufferedWriter(new FileWriter(path+"out.txt"));
+			
+			while(true){
+				String in = reader.readLine();
+				if (in == null)
+					break;
+				String[] split = in.split(":");
+				
+				String model1 = split[10];
+				String model2 = split[11];
+				
+				//Model1
+				if (!model1.equals("0, 0, 0, 0")){
+					String[] model1Split = model1.split(",");
+					int section1 = Integer.parseInt(model1Split[3]);
+					int modelNum1 = Integer.parseInt(model1Split[2]);
+					int variant1 = Integer.parseInt(model1Split[1]);				
+					
+					String type1 = null;
+					
+					if (section1 < 30)
+						type1 = "chara/accessory/";
+					else if (section1 < 3)
+						type1 = "chara/equipment/";
+					else if (section1 < 3)
+						type1 = "chara/weapon/";
+					
+					String imcPath1 = String.format("");
+					String modelPath1 = String.format("");
+					String materialPath1 = String.format("");
+					String texturePath1 = String.format("");
+				}
+				//Model2
+				if (!model2.equals("0, 0, 0, 0")){
+					String[] model2Split = model2.split(",");
+					int section2 = Integer.parseInt(model2Split[3]);
+					int modelNum2 = Integer.parseInt(model2Split[2]);
+					int variant2 = Integer.parseInt(model2Split[1]);
+					
+					String type2 = null;
+					
+					if (section2 < 30)
+						type2 = "chara/accessory/";
+					else if (section2 < 3)
+						type2 = "chara/equipment/";
+					else if (section2 < 3)
+						type2 = "chara/weapon/";
+					
+					String imcPath2 = String.format("%s%04d.imc");
+					String modelPath2 = String.format("%s%04d.mdl");
+					String materialPath2 = String.format("texture/a");
+					String texturePath2 = String.format("texture/a");
+				}
 			}
 			reader.close();
 			writer.close();
