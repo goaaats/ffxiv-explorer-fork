@@ -554,7 +554,12 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 		
 		if (contentType == 3)
 		{		
-			OpenGL_View view = new OpenGL_View(new Model(HashDatabase.getFolder(file.getId2()) + "/" + file.getName(), currentIndexFile, data));
+			OpenGL_View view = null;
+			
+			if (HashDatabase.getFolder(file.getId2()) == null)
+				view = new OpenGL_View(new Model(null, currentIndexFile, data));
+			else
+				view = new OpenGL_View(new Model(HashDatabase.getFolder(file.getId2()) + "/" + file.getName(), currentIndexFile, data));
 			tabs.addTab("3D Model", view);
 			/*
 			JLabel lbl3DModelError = new JLabel("Content Type 3 files are currently not supported. I am still figuring out how they are stored.");

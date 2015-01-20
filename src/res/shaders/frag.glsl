@@ -73,21 +73,22 @@ void main() {
 	}
     
     //Compute Normal Map
-	if (uHasNormal)	
-		normal.xyz = calculateNormalMap();
+	//if (uHasNormal)	
+		//normal.xyz = calculateNormalMap();
     
     //Diffuse
     mapDiffuse = mapDiffuse * max(dot(vNormal.xyz,L),0.0);
     mapDiffuse = vec4(table_color.xyz * mapDiffuse.xyz, 1.0);
-    mapDiffuse = clamp(mapDiffuse, 0.0, 1.0);         
+    mapDiffuse = clamp(mapDiffuse, 0.0, 1.0);
+    mapDiffuse = mapDiffuse + (table_unknown1 * 0.5);
 
 	//Specular
 	if (uHasSpecular)
 	{
 		mapSpecular = texture2D(uSpecularTex, vTexCoord.st);
-		float specular = pow( max(dot(R, -E), 0.0), 2.0);
-		specularColor = vec4(1.0, 1.0, 1.0, 1.0) * mapSpecular.r * mapSpecular.a * specular;
-		specularColor = table_specular * specularColor;
+		float specular = pow( max(dot(R, E), 0.0), 1.0);
+		specularColor = table_specular * mapSpecular.r * mapSpecular.a * specular;
+		//specularColor = table_specular * specularColor;
 	}	
 
     gl_FragColor = mapDiffuse + specularColor;

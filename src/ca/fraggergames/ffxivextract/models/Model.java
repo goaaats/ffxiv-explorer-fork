@@ -19,6 +19,8 @@ public class Model {
 	private String stringArray[];
 	private short numAtrStrings, numAnimStrings, numMaterialStrings;	
 	
+	private int numVariants = -1;
+	
 	private Material materials[];
 	private LoDSubModel lodModels[] = new LoDSubModel[3];
 		
@@ -35,7 +37,7 @@ public class Model {
 		ByteBuffer bb = ByteBuffer.wrap(data);
 		bb.order(ByteOrder.LITTLE_ENDIAN);
 		
-		int numTotalMeshes = bb.getInt();				
+		int numTotalMeshes = bb.getShort();				
 		
 		//DirectX Structs
 		bb.position(0x44 + (0x88 * numTotalMeshes));
@@ -87,7 +89,8 @@ public class Model {
 			System.out.println("Anim Things: " + numAnimStrings);
 		}
 		
-		loadMaterials();
+		numVariants = loadNumberOfVariants();		
+		loadMaterials(1);
 		
 		//Skip Stuff
 		bb.position(bb.position()+0x8);
@@ -156,49 +159,94 @@ public class Model {
         	       
 	}
 	
-	private void loadMaterials()
+	private short loadNumberOfVariants()
+	{
+		if (modelPath == null || modelPath.contains("null"))
+			return -1;
+		
+		String incFolderPath = String.format("%s", modelPath.substring(0, modelPath.indexOf("model")-1));			
+		
+		int hash1 = HashDatabase.computeCRC(incFolderPath.getBytes(), 0, incFolderPath.getBytes().length);			
+		
+		for (SqPack_Folder f : currentIndex.getPackFolders())
+		{			
+			if (f.getId() == hash1)
+			{
+					for (int i = 0; i < numMaterialStrings; i++)
+					{
+						String fileString = incFolderPath.substring(incFolderPath.lastIndexOf("/")+1) + ".imc";										
+							
+						int hash2 = HashDatabase.computeCRC(fileString.getBytes(), 0, fileString.getBytes().length);
+						for (SqPack_File file : f.getFiles())
+						{
+							if (file.id == hash2)
+							{
+								HashDatabase.addPathToDB(incFolderPath+"/"+fileString);
+								
+								try {
+									byte[] data = currentIndex.extractFile(file.getOffset(), null);
+									ByteBuffer bb = ByteBuffer.wrap(data);
+									bb.order(ByteOrder.LITTLE_ENDIAN);
+									return bb.getShort();
+								} catch (FileNotFoundException e) {
+									// TODO Auto-generated catch block
+									e.printStackTrace();
+								} catch (IOException e) {
+									// TODO Auto-generated catch block
+									e.printStackTrace();
+								}															
+							}
+						}
+					}
+			}
+		}
+		return -1;
+	}
+	
+	public void loadMaterials(int variant)
 	{		
-		if (modelPath == null)
+		if (modelPath == null || modelPath.contains("null"))
 			return;
 		
 		String split[] = modelPath.split("/");
 		
 		
-			String materialFolderPath = String.format("%smaterial/v%04d", modelPath.substring(0, modelPath.indexOf("model")), 1);			
-			
-			int hash1 = HashDatabase.computeCRC(materialFolderPath.getBytes(), 0, materialFolderPath.getBytes().length);			
-			
-			for (SqPack_Folder f : currentIndex.getPackFolders())
-			{			
-				if (f.getId() == hash1)
-				{
-						for (int i = 0; i < numMaterialStrings; i++)
-						{
-							String fileString = null;
+		String materialFolderPath = String.format("%smaterial/v%04d", modelPath.substring(0, modelPath.indexOf("model")), variant);			
+		
+		int hash1 = HashDatabase.computeCRC(materialFolderPath.getBytes(), 0, materialFolderPath.getBytes().length);			
+		
+		for (SqPack_Folder f : currentIndex.getPackFolders())
+		{			
+			if (f.getId() == hash1)
+			{
+					for (int i = 0; i < numMaterialStrings; i++)
+					{
+						String fileString = null;
+						
+						if (stringArray[numAtrStrings+numAnimStrings+i].startsWith("/"))
+							fileString = stringArray[numAtrStrings+numAnimStrings+i].substring(1);
+						else
+							fileString = stringArray[numAtrStrings+numAnimStrings+i].substring(stringArray[numAtrStrings+numAnimStrings+i].lastIndexOf("/")+1);
 							
-							if (stringArray[numAtrStrings+numAnimStrings+i].startsWith("/"))
-								fileString = stringArray[numAtrStrings+numAnimStrings+i].substring(1);
-							else
-								fileString = stringArray[numAtrStrings+numAnimStrings+i].substring(stringArray[numAtrStrings+numAnimStrings+i].lastIndexOf("/")+1);
-								
-							int hash2 = HashDatabase.computeCRC(fileString.getBytes(), 0, fileString.getBytes().length);
-							for (SqPack_File file : f.getFiles())
+						int hash2 = HashDatabase.computeCRC(fileString.getBytes(), 0, fileString.getBytes().length);
+						for (SqPack_File file : f.getFiles())
+						{
+							if (file.id == hash2)
 							{
-								if (file.id == hash2)
-								{
-									try {
-										materials[i] = new Material(materialFolderPath, currentIndex, currentIndex.extractFile(file.dataoffset, null));
-									} catch (FileNotFoundException e) {
-										e.printStackTrace();
-									} catch (IOException e) {
-										e.printStackTrace();
-									}
-									break;
+								try {
+									HashDatabase.addPathToDB(materialFolderPath+"/"+fileString);
+									materials[i] = new Material(materialFolderPath, currentIndex, currentIndex.extractFile(file.dataoffset, null));
+								} catch (FileNotFoundException e) {
+									e.printStackTrace();
+								} catch (IOException e) {
+									e.printStackTrace();
 								}
+								break;
 							}
 						}
-				}
-			}		
+					}
+			}
+		}		
 	}
 	
 	public Mesh[] getMeshes(int lodLevel)
@@ -225,7 +273,12 @@ public class Model {
 	}
 
 	public int getNumMaterials() {
-		return materials.length;
+		return modelPath.contains("null") ? 0 : materials.length;
+	}
+	
+	public int getNumVariants()
+	{
+		return numVariants;
 	}
 	
 }

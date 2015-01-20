@@ -83,6 +83,7 @@ public class Material {
 								{
 									if (file.id == hash2)
 									{
+										HashDatabase.addPathToDB(s);
 										try {
 											switch (i)
 											{

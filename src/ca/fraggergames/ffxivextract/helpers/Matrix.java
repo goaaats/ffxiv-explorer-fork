@@ -72,26 +72,31 @@ public class Matrix {
     public static void multiplyMM(float[] result, int resultOffset,
             float[] lhs, int lhsOffset, float[] rhs, int rhsOffset)
     {
-    	float r[] = new float[16];
+    	float lhs2[] = new float[16];
+    	float rhs2[] = new float[16];
     	
-    	 for (int i=0 ; i<4 ; i++) {
-    		 final float rhs_i0 = rhs[ I(i,0) ];
-    		 float ri0 = lhs[ I(0,0) ] * rhs_i0;
-    		 float ri1 = lhs[ I(0,1) ] * rhs_i0;
-    		 float ri2 = lhs[ I(0,2) ] * rhs_i0;
-    		 float ri3 = lhs[ I(0,3) ] * rhs_i0;
+    	System.arraycopy(lhs, lhsOffset, lhs2, 0, 16);
+    	System.arraycopy(rhs, rhsOffset, rhs2, 0, 16);
+    	
+    	for (int i=0 ; i<4 ; i++) {
+    		 final float rhs2_i0 = rhs2[ I(i,0) ];
+    		 float ri0 = lhs2[ I(0,0) ] * rhs2_i0;
+    		 float ri1 = lhs2[ I(0,1) ] * rhs2_i0;
+    		 float ri2 = lhs2[ I(0,2) ] * rhs2_i0;
+    		 float ri3 = lhs2[ I(0,3) ] * rhs2_i0;
     		 for (int j=1 ; j<4 ; j++) {
-    		 final float rhs_ij = rhs[ I(i,j) ];
-    		 ri0 += lhs[ I(j,0) ] * rhs_ij;
-    		 ri1 += lhs[ I(j,1) ] * rhs_ij;
-    		 ri2 += lhs[ I(j,2) ] * rhs_ij;
-    		 ri3 += lhs[ I(j,3) ] * rhs_ij;
+    		 final float rhs2_ij = rhs2[ I(i,j) ];
+    		 ri0 += lhs2[ I(j,0) ] * rhs2_ij;
+    		 ri1 += lhs2[ I(j,1) ] * rhs2_ij;
+    		 ri2 += lhs2[ I(j,2) ] * rhs2_ij;
+    		 ri3 += lhs2[ I(j,3) ] * rhs2_ij;
     		 }
-    		 r[ I(i,0) ] = ri0;
-    		 r[ I(i,1) ] = ri1;
-    		 r[ I(i,2) ] = ri2;
-    		 r[ I(i,3) ] = ri3;
+    		 result[resultOffset+ I(i,0) ] = ri0;
+    		 result[resultOffset+ I(i,1) ] = ri1;
+    		 result[resultOffset+ I(i,2) ] = ri2;
+    		 result[resultOffset+ I(i,3) ] = ri3;
     		 }
+    	 
     }
 
     private static int I(int _i, int _j)

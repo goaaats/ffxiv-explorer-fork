@@ -127,8 +127,10 @@ public class SqPack_DatFile {
 
 			int pos = 0x44;
 			byte[] mdlData = new byte[fileSize];
-			mdlData[1] = (byte) ((container.numMeshes >> 4) & 0xFF);
-			mdlData[0] = (byte) (container.numMeshes & 0xFF);
+			ByteBuffer bb = ByteBuffer.wrap(mdlData);
+			bb.order(ByteOrder.LITTLE_ENDIAN);
+			bb.putShort(container.numMeshes);
+			bb.putShort(container.numMaterials);
 			currentFilePointer.seek(fileOffset + headerLength + container.chunkOffsets[0]);			
 			for (int i = 0; i < container.blockSizes.length; i++)
 			{					
