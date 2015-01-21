@@ -83,23 +83,24 @@ public class Material {
 								{
 									if (file.id == hash2)
 									{
-										HashDatabase.addPathToDB(s);
+										HashDatabase.addPathToDB(s);																			
+										
 										try {
-											switch (i)
-											{
-											case 0:
-												diffuse = new Texture_File(currentIndex.extractFile(file.dataoffset, null));
-												break;
-											case 1:
-												normal = new Texture_File(currentIndex.extractFile(file.dataoffset, null));
-												break;
-											case 2:
-												specular = new Texture_File(currentIndex.extractFile(file.dataoffset, null));
-												break;
-											case 3:
-												colorSet = new Texture_File(currentIndex.extractFile(file.dataoffset, null));
-												break;
-											}
+											byte extracted[] = currentIndex.extractFile(file.dataoffset, null);
+											if (extracted == null)
+												continue;
+											
+											if (fileString.endsWith("_d.tex"))
+												diffuse = new Texture_File(extracted);
+											else if (fileString.endsWith("_n.tex"))
+												normal = new Texture_File(extracted);
+											else if (fileString.endsWith("_s.tex"))
+												specular = new Texture_File(extracted);
+											else if (fileString.endsWith("_m.tex"))
+												diffuse = new Texture_File(extracted);
+											else
+												colorSet = new Texture_File(extracted);
+											
 										} catch (FileNotFoundException e) {
 											e.printStackTrace();
 										} catch (IOException e) {

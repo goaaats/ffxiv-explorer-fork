@@ -379,7 +379,7 @@ public class OpenGL_View extends JPanel {
 		    Matrix.setIdentityM(viewMatrix, 0);
 		    Matrix.translateM(viewMatrix, 0, panX, panY, zoom);
 		    Matrix.rotateM(viewMatrix, 0, angleX, 0, 1, 0);
-		    Matrix.rotateM(viewMatrix, 0, angleY, 1, 0, 0);		     		   		    		    
+		    Matrix.rotateM(viewMatrix, 0, angleY, 1, 0, 0);		     		   		    		    		    
 		    
 		    for (int i = 0; i < model.getNumMesh(currentLoD); i++){
 		    	
@@ -419,18 +419,22 @@ public class OpenGL_View extends JPanel {
 		    	gl.glVertexAttribPointer(colorLocation, 4, GL3.GL_UNSIGNED_BYTE, false, 24, colorData);
 		    	
 		    	//Textures
-		    	if (model.getNumMaterials() != 0){
-		    	gl.glUniform1i(usesDiffuseLocation, 1);
-		    	gl.glUniform1i(usesNormalLocation, 1);
-		    	gl.glUniform1i(usesSpecularLocation, 1);
-		    	gl.glUniform1i(usesColorSetLocation, 1);
-		    	
-		    	gl.glUniform1i(diffuseTexLocation, 0);
-		    	gl.glUniform1i(normalTexLocation, 1);
-		    	gl.glUniform1i(specularTexLocation, 2);
-		    	gl.glUniform1i(colorSetTexLocation, 3);
-		    	
-		    	
+		    	if (model.getNumMaterials() != 0 && model.getMaterial(mesh.materialNumber) != null){
+		    		
+		    		if (model.getMaterial(mesh.materialNumber).getDiffuseMapTexture() != null)
+		    			gl.glUniform1i(usesDiffuseLocation, 1);
+		    		if (model.getMaterial(mesh.materialNumber).getNormalMapTexture() != null)
+		    			gl.glUniform1i(usesNormalLocation, 1);
+		    		if (model.getMaterial(mesh.materialNumber).getSpecularMapTexture() != null)
+		    			gl.glUniform1i(usesSpecularLocation, 1);
+		    		if (model.getMaterial(mesh.materialNumber).getColorSetTexture() != null)
+		    			gl.glUniform1i(usesColorSetLocation, 1);
+			    	
+			    	gl.glUniform1i(diffuseTexLocation, 0);
+			    	gl.glUniform1i(normalTexLocation, 1);
+			    	gl.glUniform1i(specularTexLocation, 2);
+			    	gl.glUniform1i(colorSetTexLocation, 3);
+		    			    	
 			    	gl.glActiveTexture(GL3.GL_TEXTURE0);
 			    	gl.glBindTexture(GL3.GL_TEXTURE_2D, model.getMaterial(mesh.materialNumber).getGLTextureIds()[0]);
 			    	gl.glActiveTexture(GL3.GL_TEXTURE1);

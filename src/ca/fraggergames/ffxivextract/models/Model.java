@@ -17,7 +17,7 @@ public class Model {
 	SqPack_IndexFile currentIndex;
 	
 	private String stringArray[];
-	private short numAtrStrings, numAnimStrings, numMaterialStrings;	
+	private short numAtrStrings, numBoneStrings, numMaterialStrings, numShpStrings;	
 	
 	private int numVariants = -1;
 	
@@ -78,15 +78,15 @@ public class Model {
 		numAtrStrings = bb.getShort();		
 		bb.getShort();				
 		numMaterialStrings = bb.getShort( );
-		numAnimStrings = bb.getShort();						
-		bb.getShort();		
+		numBoneStrings = bb.getShort();						
+		numShpStrings = bb.getShort();		
 
 		materials = new Material[numMaterialStrings];
 		
 		if (Constants.DEBUG){
 			System.out.println("Atr Strings: " + numAtrStrings);
 			System.out.println("Material Strings: " + numMaterialStrings);
-			System.out.println("Anim Things: " + numAnimStrings);
+			System.out.println("Anim Things: " + numBoneStrings);
 		}
 		
 		numVariants = loadNumberOfVariants();		
@@ -208,10 +208,18 @@ public class Model {
 		if (modelPath == null || modelPath.contains("null"))
 			return;
 		
-		String split[] = modelPath.split("/");
+		String split[] = modelPath.split("/");		
 		
+		String materialFolderPath = null;
 		
-		String materialFolderPath = String.format("%smaterial/v%04d", modelPath.substring(0, modelPath.indexOf("model")), variant);			
+		if ((modelPath.contains("face") || modelPath.contains("hair"))){
+			if (variant == 1)
+				materialFolderPath = String.format("%smaterial", modelPath.substring(0, modelPath.indexOf("model")));
+			else
+				materialFolderPath = String.format("%smaterial/v%04d", modelPath.substring(0, modelPath.indexOf("model")), variant-1);
+		}
+		else
+			materialFolderPath = String.format("%smaterial/v%04d", modelPath.substring(0, modelPath.indexOf("model")), variant);
 		
 		int hash1 = HashDatabase.computeCRC(materialFolderPath.getBytes(), 0, materialFolderPath.getBytes().length);			
 		
@@ -223,10 +231,10 @@ public class Model {
 					{
 						String fileString = null;
 						
-						if (stringArray[numAtrStrings+numAnimStrings+i].startsWith("/"))
-							fileString = stringArray[numAtrStrings+numAnimStrings+i].substring(1);
+						if (stringArray[numAtrStrings+numBoneStrings+i].startsWith("/"))
+							fileString = stringArray[numAtrStrings+numBoneStrings+i].substring(1);
 						else
-							fileString = stringArray[numAtrStrings+numAnimStrings+i].substring(stringArray[numAtrStrings+numAnimStrings+i].lastIndexOf("/")+1);
+							fileString = stringArray[numAtrStrings+numBoneStrings+i].substring(stringArray[numAtrStrings+numBoneStrings+i].lastIndexOf("/")+1);
 							
 						int hash2 = HashDatabase.computeCRC(fileString.getBytes(), 0, fileString.getBytes().length);
 						for (SqPack_File file : f.getFiles())

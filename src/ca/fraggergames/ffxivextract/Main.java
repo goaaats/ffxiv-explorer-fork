@@ -134,7 +134,7 @@ public class Main {
 		}		
 		catch (Exception e){}
 		*/
-		EXD_Searcher.saveEXL();
+		/*EXD_Searcher.saveEXL();
 		EXD_Searcher.createEXDFiles("./exddump2.txt");
 		
 		try {
@@ -143,7 +143,7 @@ public class Main {
 		} catch (SQLException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
-		}
+		}*/
 	/*
 		
 		SqPack_IndexFile index;
@@ -158,12 +158,12 @@ public class Main {
 		}*/
 		
 		//EXD_Searcher.saveEXL();
-		
+		/*
 		for (int i = 0; i < 150; i++)
 		{
 			HashDatabase.addPathToDB(String.format("chara/monster/m8%03d/obj/body/b0001/b0001.imc", i));
 			HashDatabase.addPathToDB(String.format("chara/monster/m8%03d/obj/body/b0001/model/m8%03db0001.mdl", i, i));
-		}
+		}*/
 		
 		//Arguments
 		if (args.length>0)
