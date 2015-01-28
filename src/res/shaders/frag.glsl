@@ -6,6 +6,8 @@ varying vec4 vNormal;
 varying vec4 vTexCoord;
 varying vec4 vColor;
 varying vec4 vBiTangent;
+
+varying mat4 vTBNMatrix;
 varying vec3 vLightDir;
 varying vec3 vEyeVec;
 
@@ -18,19 +20,6 @@ uniform bool uHasDiffuse;
 uniform bool uHasNormal;
 uniform bool uHasSpecular;
 uniform bool uHasColorSet;
-
-vec3 calculateNormalMap()
-{
-	vec3 normal = vNormal.xyz;
-	vec3 biTangent = vBiTangent.xyz;
-	vec3 tangent = cross(biTangent, normal);
-	vec3 mapNormal = texture2D(uNormalTex, vTexCoord.st).xyz;
-	mapNormal = 2.0 * mapNormal - vec3(1.0, 1.0, 1.0);	
-	mat3 TBN = mat3(tangent, biTangent, normal);
-	vec3 newNormal = TBN * mapNormal;
-	newNormal = normalize(newNormal);
-	return newNormal;
-}
 
 void main() {
 	
@@ -62,11 +51,14 @@ void main() {
     }
         
     if (uHasDiffuse)
-    	mapDiffuse = mapDiffuse * texture2D(uDiffuseTex, vTexCoord.st);
+    	mapDiffuse = texture2D(uDiffuseTex, vTexCoord.st);
         
     //Compute Normal Map
-	//if (uHasNormal)	
-		normal.xyz = calculateNormalMap();
+	if (uHasNormal)	
+	{
+		vec4 normal_raw = mapNormal;
+        normal = normalize(((normal_raw * 2.0 - 1.0) * vTBNMatrix).xyz);
+	}
         
 	vec3 L = normalize(vLightDir);
     vec3 E = normalize(vEyeVec);
@@ -81,15 +73,13 @@ void main() {
         table_unknown2 = texture2D(uColorSetTex, vec2(0.875, mapNormal.a));              
 	}
         
-    
-    //Diffuse
-    mapDiffuse = mapDiffuse * max(dot(normal,L),0.0);
-    
     if (uHasNormal && uHasColorSet){
     	mapDiffuse = vec4(table_color.xyz * mapDiffuse.xyz, 1.0);
     	mapDiffuse = mapDiffuse + (table_unknown1 * 0.5);
     }
     
+    //Diffuse
+    mapDiffuse = mapDiffuse * max(dot(normal,L),0.0);
     mapDiffuse = clamp(mapDiffuse, 0.0, 1.0);    
 
 	//Specular
@@ -102,10 +92,9 @@ void main() {
 		if (uHasNormal && uHasColorSet)
 			specularColor = table_specular * specular;
 		
-		//specularColor = table_specular * specularColor;
 	}	
 
-    gl_FragColor = mapDiffuse + specularColor;
+    gl_FragColor = vec4(mapDiffuse.xyz,1.0) + specularColor;
 }
 
 

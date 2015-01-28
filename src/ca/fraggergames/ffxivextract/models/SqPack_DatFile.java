@@ -248,9 +248,7 @@ public class SqPack_DatFile {
 		try{
 		if (fileSize + extraHeaderSize < 0)
 			return null;
-		
-		if (fileSize + extraHeaderSize > 16000000)
-			return null;
+				
 		decompressedFile = new byte[fileSize + extraHeaderSize];
 		currentFileOffset = extraHeaderSize;
 		}

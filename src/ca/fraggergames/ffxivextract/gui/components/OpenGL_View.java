@@ -253,6 +253,7 @@ public class OpenGL_View extends JPanel {
 		private int positionLocation;
 		private int normalLocation;
 		private int texCoordLocation;
+		private int binormalLocation;
 		private int colorLocation;
 		
 		private int diffuseTexLocation;
@@ -410,6 +411,14 @@ public class OpenGL_View extends JPanel {
 			    	texData.position((mesh.numVerts*12)+ 16);		
 		    	gl.glVertexAttribPointer(texCoordLocation, 4, GL3.GL_HALF_FLOAT, false, 24, texData);
 		    	
+		    	//BiNormal
+		    	ByteBuffer binormalData = mesh.vertBuffer.duplicate();			    
+			    if (mesh.vertexSize == 0x10 || mesh.vertexSize == 0x8)
+			    	binormalData.position(mesh.numVerts*8+8);
+			    else
+			    	binormalData.position(mesh.numVerts*12+8);		    	
+		    	gl.glVertexAttribPointer(binormalLocation, 4, GL3.GL_UNSIGNED_BYTE, false, 24, binormalData);
+		    	
 		    	//Color
 		    	ByteBuffer colorData = mesh.vertBuffer.duplicate();			    
 			    if (mesh.vertexSize == 0x10 || mesh.vertexSize == 0x8)
@@ -447,6 +456,7 @@ public class OpenGL_View extends JPanel {
 			    	gl.glEnableVertexAttribArray(positionLocation);
 			    	gl.glEnableVertexAttribArray(normalLocation);
 			    	gl.glEnableVertexAttribArray(texCoordLocation);
+			    	gl.glEnableVertexAttribArray(binormalLocation);
 			    	gl.glEnableVertexAttribArray(colorLocation);		    	
 		    	}
 		    	//Position Matrices
@@ -461,6 +471,7 @@ public class OpenGL_View extends JPanel {
 			    gl.glDisableVertexAttribArray(positionLocation);
 		    	gl.glDisableVertexAttribArray(normalLocation);
 		    	gl.glDisableVertexAttribArray(texCoordLocation);
+		    	gl.glDisableVertexAttribArray(binormalLocation);
 		    	gl.glDisableVertexAttribArray(colorLocation);			  
 			    
 			}
@@ -491,6 +502,7 @@ public class OpenGL_View extends JPanel {
 				positionLocation = gl.glGetAttribLocation(shaderProgram, "aPosition");
 				normalLocation = gl.glGetAttribLocation(shaderProgram, "aNormal");
 				texCoordLocation = gl.glGetAttribLocation(shaderProgram, "aTexCoord");
+				binormalLocation = gl.glGetAttribLocation(shaderProgram, "aBiTangent");
 				colorLocation = gl.glGetAttribLocation(shaderProgram, "aColor");
 				
 				//Set Uniform Locations

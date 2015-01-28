@@ -167,6 +167,78 @@ public class EXD_Searcher {
 		}
 	}
 	
+	public static void getModelsFromModelChara(String path)
+	{
+		try {
+			BufferedReader reader = new BufferedReader(new FileReader(path));
+			
+			while(true){
+				String in = reader.readLine();
+				if (in == null)
+					break;
+				String[] split = in.split(":");
+				
+				int id = Integer.parseInt(split[1]);
+				int type = Integer.parseInt(split[3]);
+				int model = Integer.parseInt(split[4]);
+				int variant = Integer.parseInt(split[5]);
+					
+				String typePath = "";
+				String imcPath = null, modelPath = null, skelPath = null;
+				
+				switch(type){
+				case 3:
+					typePath = "chara/monster/m";
+					//imcPath = String.format("%s%04d/obj/body/b%04d/b%04d.imc", typePath,id,model,model);
+					//modelPath = String.format("%s%04d/obj/body/b%04d/model/m%04db%04d.mdl", typePath,id,model,id,model);
+					//System.out.println(imcPath);
+					//System.out.println(modelPath);								
+					//HashDatabase.addPathToDB(imcPath);
+					//HashDatabase.addPathToDB(modelPath);
+					
+					skelPath = String.format("%s%04d/skeleton/base/b%04d/eid_m%04db%04d.eid", typePath,id,model,id,model);
+					System.out.println(skelPath);
+					HashDatabase.addPathToDB(skelPath);
+					skelPath = String.format("%s%04d/skeleton/base/b%04d/skl_m%04db%04d.sklp", typePath,id,model,id,model);
+					System.out.println(skelPath);
+					HashDatabase.addPathToDB(skelPath);
+					skelPath = String.format("%s%04d/skeleton/base/b%04d/skl_m%04db%04d.sklb", typePath,id,model,id,model);
+					System.out.println(skelPath);
+					HashDatabase.addPathToDB(skelPath);
+					break;
+				case 4:/*
+					typePath = "chara/demihuman/d";
+					imcPath = String.format("%s%04d/obj/equipment/e%04d/e%04d.imc", typePath,id,model,model);
+					System.out.println(imcPath);
+					HashDatabase.addPathToDB(imcPath);
+					
+					modelPath = String.format("%s%04d/obj/equipment/e%04d/model/d%04de%04d_met.mdl", typePath,id,model,id,model);					
+					System.out.println(modelPath);												
+					HashDatabase.addPathToDB(modelPath);
+					modelPath = String.format("%s%04d/obj/equipment/e%04d/model/d%04de%04d_top.mdl", typePath,id,model,id,model);					
+					System.out.println(modelPath);												
+					HashDatabase.addPathToDB(modelPath);
+					modelPath = String.format("%s%04d/obj/equipment/e%04d/model/d%04de%04d_dwn.mdl", typePath,id,model,id,model);					
+					System.out.println(modelPath);												
+					HashDatabase.addPathToDB(modelPath);
+					modelPath = String.format("%s%04d/obj/equipment/e%04d/model/d%04de%04d_sho.mdl", typePath,id,model,id,model);					
+					System.out.println(modelPath);												
+					HashDatabase.addPathToDB(modelPath);
+					break;*/
+				}
+				
+					
+			}
+			reader.close();			
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
 	public static void getModels(String path)
 	{
 		try {
@@ -179,8 +251,8 @@ public class EXD_Searcher {
 					break;
 				String[] split = in.split(":");
 				
-				String model1 = split[10];
-				String model2 = split[11];
+				String model1 = split[0];
+				String model2 = split[1];
 				
 				//Model1
 				if (!model1.equals("0, 0, 0, 0")){

@@ -43,6 +43,9 @@ public class Main {
 		} catch (ClassNotFoundException e1) {			
 			e1.printStackTrace();
 		}
+		
+	//	EXD_Searcher.getModelsFromModelChara("C:\\Users\\Filip\\Desktop\\exd\\modelchara.csv");
+		
 /*		
 		try {
 			PathSearcher.doPathSearch("E:\\Program Files (x86)\\SquareEnix\\FINAL FANTASY XIV - A Realm Reborn\\game\\sqpack\\ffxiv\\080000.win32.index");
