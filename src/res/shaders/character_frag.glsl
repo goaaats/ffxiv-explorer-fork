@@ -27,9 +27,7 @@ void main() {
 	vec4 mapDiffuse = vColor;		   
 	vec4 mapNormal;
 	vec4 mapSpecular;
-	vec4 specularColor;
-	
-	mapDiffuse = vec4(1.0, 1.0, 1.0, 1.0);
+	vec4 specularColor;	
 	
 	//Color Sets
 	vec4 table_color;
@@ -40,18 +38,24 @@ void main() {
 	//Other
 	vec3 normal = vNormal.xyz;
 
+	//Texture Maps
+	if (uHasNormal) 
+        mapNormal = texture2D(uNormalTex, vTexCoord.st);
+	if (uHasDiffuse)
+    	mapDiffuse = texture2D(uDiffuseTex, vTexCoord.st);
+	if (uHasNormal && uHasColorSet)
+	{
+		table_color = texture2D(uColorSetTex, vec2(0.125, mapNormal.a));
+        table_specular = texture2D(uColorSetTex, vec2(0.375, mapNormal.a));
+        table_unknown1 = texture2D(uColorSetTex, vec2(0.625, mapNormal.a));
+        table_unknown2 = texture2D(uColorSetTex, vec2(0.875, mapNormal.a));              
+	}
+
 	//Check for Transparent	
 	if (uHasNormal) {
-        mapNormal = texture2D(uNormalTex, vTexCoord.st);
-
-        // Alpha testing
-        if (mapNormal.b < 0.5) {
-            discard;
-        }
-    }
-        
-    if (uHasDiffuse)
-    	mapDiffuse = texture2D(uDiffuseTex, vTexCoord.st);
+        if (mapNormal.b < 0.5)
+            discard;        
+    }  
         
     //Compute Normal Map
 	if (uHasNormal)	
@@ -62,16 +66,7 @@ void main() {
         
 	vec3 L = normalize(vLightDir);
     vec3 E = normalize(vEyeVec);
-    vec3 R = reflect(-L, normal);
-
-	//Compute ColorSet Map
-	if (uHasNormal && uHasColorSet)
-	{
-		table_color = texture2D(uColorSetTex, vec2(0.125, mapNormal.a));
-        table_specular = texture2D(uColorSetTex, vec2(0.375, mapNormal.a));
-        table_unknown1 = texture2D(uColorSetTex, vec2(0.625, mapNormal.a));
-        table_unknown2 = texture2D(uColorSetTex, vec2(0.875, mapNormal.a));              
-	}
+    vec3 R = reflect(-L, normal);	
         
     if (uHasNormal && uHasColorSet){
     	mapDiffuse = vec4(table_color.xyz * mapDiffuse.xyz, 1.0);
@@ -79,7 +74,7 @@ void main() {
     }
     
     //Diffuse
-    mapDiffuse = mapDiffuse * max(dot(normal,L),0.0);
+    mapDiffuse.xyz = mapDiffuse.xyz * max(dot(normal,L),0.0);
     mapDiffuse = clamp(mapDiffuse, 0.0, 1.0);    
 
 	//Specular
@@ -94,7 +89,7 @@ void main() {
 		
 	}	
 
-    gl_FragColor = vec4(mapDiffuse.xyz,1.0) + specularColor;
+    gl_FragColor = mapDiffuse + specularColor;
 }
 
 

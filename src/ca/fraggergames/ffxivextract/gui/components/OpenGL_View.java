@@ -32,9 +32,12 @@ import javax.swing.border.TitledBorder;
 
 import ca.fraggergames.ffxivextract.helpers.Matrix;
 import ca.fraggergames.ffxivextract.helpers.ImageDecoding.ImageDecodingException;
+import ca.fraggergames.ffxivextract.models.HairShader;
+import ca.fraggergames.ffxivextract.models.IrisShader;
 import ca.fraggergames.ffxivextract.models.Material;
 import ca.fraggergames.ffxivextract.models.Mesh;
 import ca.fraggergames.ffxivextract.models.Model;
+import ca.fraggergames.ffxivextract.models.Shader;
 import ca.fraggergames.ffxivextract.models.Texture_File;
 
 import com.jogamp.common.nio.Buffers;
@@ -298,6 +301,13 @@ public class OpenGL_View extends JPanel {
 
 		boolean loaded = false;
 		
+		
+		/////DEFAULT COLORS//////
+		float hairColor[] = {0.396f,0.263f,0.129f,1.0f};
+		float highlightColor[] = {0.650f,0.502f,0.392f,1.0f};
+		float eyeColor[] = {0.0f,0.502f,0.0f,1.0f};
+		/////DEFAULT COLORS//////
+		
 		@Override
 		public void display(GLAutoDrawable drawable) {
 			GL3bc gl = drawable.getGL().getGL3bc();
@@ -370,6 +380,8 @@ public class OpenGL_View extends JPanel {
 						
 						gl.glTexImage2D(GL3.GL_TEXTURE_2D, 0, GL3.GL_RGBA, img.getWidth(), img.getHeight(), 0, GL3.GL_RGBA, GL3.GL_UNSIGNED_BYTE, buffer);						
 						gl.glBindTexture(GL3.GL_TEXTURE_2D, 0);
+						
+						m.loadShader(gl);
 					}					
 				}
 				loaded = true;
@@ -384,16 +396,20 @@ public class OpenGL_View extends JPanel {
 		    
 		    for (int i = 0; i < model.getNumMesh(currentLoD); i++){
 		    	
-		    	Mesh mesh = model.getMeshes(currentLoD)[i]; 		    		    		    			    		    	
+		    	Mesh mesh = model.getMeshes(currentLoD)[i];
+		    	Material material = model.getMaterial(mesh.materialNumber);
+		    	Shader shader = material.getShader();
+		    	
+		    	gl.glUseProgram(shader.getShaderProgramID());
 		    	
 		    	mesh.vertBuffer.position(0);
 		    	mesh.indexBuffer.position(0);
 		    	
 		    	//Position
 		    	if (mesh.vertexSize == 0x10 || mesh.vertexSize == 0x8)
-		    		gl.glVertexAttribPointer(positionLocation, 4, GL3.GL_HALF_FLOAT, false, 0, mesh.vertBuffer);
+		    		gl.glVertexAttribPointer(shader.getAttribPosition(), 4, GL3.GL_HALF_FLOAT, false, 0, mesh.vertBuffer);
 			    else if (mesh.vertexSize == 0x14)
-			    	gl.glVertexAttribPointer(positionLocation, 3, GL3.GL_FLOAT, false, 0, mesh.vertBuffer);
+			    	gl.glVertexAttribPointer(shader.getAttribPosition(), 3, GL3.GL_FLOAT, false, 0, mesh.vertBuffer);
 		    	
 		    	//Normal
 		    	ByteBuffer normalData = mesh.vertBuffer.duplicate();			    
@@ -401,7 +417,7 @@ public class OpenGL_View extends JPanel {
 			    	normalData.position(mesh.numVerts*8);
 			    else
 			    	normalData.position(mesh.numVerts*12);		    	
-		    	gl.glVertexAttribPointer(normalLocation, 4, GL3.GL_HALF_FLOAT, false, 24, normalData);
+		    	gl.glVertexAttribPointer(shader.getAttribNormal(), 4, GL3.GL_HALF_FLOAT, false, 24, normalData);
 		    	
 		    	//Tex Coord
 		    	ByteBuffer texData = mesh.vertBuffer.duplicate();			    
@@ -409,7 +425,7 @@ public class OpenGL_View extends JPanel {
 			    	texData.position((mesh.numVerts*8) + 16);
 			    else
 			    	texData.position((mesh.numVerts*12)+ 16);		
-		    	gl.glVertexAttribPointer(texCoordLocation, 4, GL3.GL_HALF_FLOAT, false, 24, texData);
+		    	gl.glVertexAttribPointer(shader.getAttribTexCoord(), 4, GL3.GL_HALF_FLOAT, false, 24, texData);
 		    	
 		    	//BiNormal
 		    	ByteBuffer binormalData = mesh.vertBuffer.duplicate();			    
@@ -417,7 +433,7 @@ public class OpenGL_View extends JPanel {
 			    	binormalData.position(mesh.numVerts*8+8);
 			    else
 			    	binormalData.position(mesh.numVerts*12+8);		    	
-		    	gl.glVertexAttribPointer(binormalLocation, 4, GL3.GL_UNSIGNED_BYTE, false, 24, binormalData);
+		    	gl.glVertexAttribPointer(shader.getAttribBiTangent(), 4, GL3.GL_UNSIGNED_BYTE, false, 24, binormalData);
 		    	
 		    	//Color
 		    	ByteBuffer colorData = mesh.vertBuffer.duplicate();			    
@@ -425,45 +441,23 @@ public class OpenGL_View extends JPanel {
 			    	colorData.position((mesh.numVerts*8) + 12);
 			    else
 			    	colorData.position((mesh.numVerts*12)+ 12);	
-		    	gl.glVertexAttribPointer(colorLocation, 4, GL3.GL_UNSIGNED_BYTE, false, 24, colorData);
+		    	gl.glVertexAttribPointer(shader.getAttribColor(), 4, GL3.GL_UNSIGNED_BYTE, false, 24, colorData);
 		    	
-		    	//Textures
-		    	if (model.getNumMaterials() != 0 && model.getMaterial(mesh.materialNumber) != null){
-		    		
-		    		if (model.getMaterial(mesh.materialNumber).getDiffuseMapTexture() != null)
-		    			gl.glUniform1i(usesDiffuseLocation, 1);
-		    		if (model.getMaterial(mesh.materialNumber).getNormalMapTexture() != null)
-		    			gl.glUniform1i(usesNormalLocation, 1);
-		    		if (model.getMaterial(mesh.materialNumber).getSpecularMapTexture() != null)
-		    			gl.glUniform1i(usesSpecularLocation, 1);
-		    		if (model.getMaterial(mesh.materialNumber).getColorSetTexture() != null)
-		    			gl.glUniform1i(usesColorSetLocation, 1);
+		    	shader.setTextures(gl, material);
+		    	shader.setMatrix(gl, modelMatrix, viewMatrix, projMatrix);
 			    	
-			    	gl.glUniform1i(diffuseTexLocation, 0);
-			    	gl.glUniform1i(normalTexLocation, 1);
-			    	gl.glUniform1i(specularTexLocation, 2);
-			    	gl.glUniform1i(colorSetTexLocation, 3);
-		    			    	
-			    	gl.glActiveTexture(GL3.GL_TEXTURE0);
-			    	gl.glBindTexture(GL3.GL_TEXTURE_2D, model.getMaterial(mesh.materialNumber).getGLTextureIds()[0]);
-			    	gl.glActiveTexture(GL3.GL_TEXTURE1);
-			    	gl.glBindTexture(GL3.GL_TEXTURE_2D, model.getMaterial(mesh.materialNumber).getGLTextureIds()[1]);
-			    	gl.glActiveTexture(GL3.GL_TEXTURE2);
-			    	gl.glBindTexture(GL3.GL_TEXTURE_2D, model.getMaterial(mesh.materialNumber).getGLTextureIds()[2]);
-			    	gl.glActiveTexture(GL3.GL_TEXTURE3);
-			    	gl.glBindTexture(GL3.GL_TEXTURE_2D, model.getMaterial(mesh.materialNumber).getGLTextureIds()[3]);		    	
-			    	
-			    	gl.glEnableVertexAttribArray(positionLocation);
-			    	gl.glEnableVertexAttribArray(normalLocation);
-			    	gl.glEnableVertexAttribArray(texCoordLocation);
-			    	gl.glEnableVertexAttribArray(binormalLocation);
-			    	gl.glEnableVertexAttribArray(colorLocation);		    	
-		    	}
-		    	//Position Matrices
-		    	gl.glUniformMatrix4fv(modelLocation, 1, false, modelMatrix, 0);
-		    	gl.glUniformMatrix4fv(viewLocation, 1, false, viewMatrix, 0);
-		    	gl.glUniformMatrix4fv(projLocation, 1, false, projMatrix, 0);		    
-			    	
+		    	if (shader instanceof HairShader)
+		    		((HairShader)shader).setHairColor(gl, hairColor, highlightColor);
+		    	else if (shader instanceof IrisShader)
+		    		((IrisShader)shader).setEyeColor(gl, eyeColor);
+		    	
+		    	//Enable
+		    	gl.glEnableVertexAttribArray(positionLocation);
+		    	gl.glEnableVertexAttribArray(normalLocation);
+		    	gl.glEnableVertexAttribArray(texCoordLocation);
+		    	gl.glEnableVertexAttribArray(binormalLocation);
+		    	gl.glEnableVertexAttribArray(colorLocation);	
+		    	
 		    	//Draw
 			    gl.glDrawElements(GL3.GL_TRIANGLES, mesh.numIndex, GL3.GL_UNSIGNED_SHORT, mesh.indexBuffer);
 			    
@@ -492,98 +486,8 @@ public class OpenGL_View extends JPanel {
 		      gl.glEnable(GL3.GL_BLEND); 
 		      gl.glBlendFunc (GL3.GL_SRC_ALPHA, GL3.GL_ONE_MINUS_SRC_ALPHA);		      
 		      gl.glEnable(GL3.GL_TEXTURE_2D);
+		    		      
 		      
-		      try {
-		    	  
-		    	//Create Shader
-				shaderProgram = createShaderProgram(gl);
-				
-				//Set Attrib Locations
-				positionLocation = gl.glGetAttribLocation(shaderProgram, "aPosition");
-				normalLocation = gl.glGetAttribLocation(shaderProgram, "aNormal");
-				texCoordLocation = gl.glGetAttribLocation(shaderProgram, "aTexCoord");
-				binormalLocation = gl.glGetAttribLocation(shaderProgram, "aBiTangent");
-				colorLocation = gl.glGetAttribLocation(shaderProgram, "aColor");
-				
-				//Set Uniform Locations
-				modelLocation = gl.glGetUniformLocation(shaderProgram, "uModelMatrix");
-				viewLocation = gl.glGetUniformLocation(shaderProgram, "uViewMatrix");
-				projLocation = gl.glGetUniformLocation(shaderProgram, "uProjMatrix");
-
-				//Set Uniform Tex Locations
-				diffuseTexLocation = gl.glGetUniformLocation(shaderProgram, "uDiffuseTex");
-				normalTexLocation = gl.glGetUniformLocation(shaderProgram, "uNormalTex");
-				specularTexLocation = gl.glGetUniformLocation(shaderProgram, "uSpecularTex");
-				colorSetTexLocation = gl.glGetUniformLocation(shaderProgram, "uColorSetTex");
-				
-				usesDiffuseLocation = gl.glGetUniformLocation(shaderProgram, "uHasDiffuse");
-				usesNormalLocation = gl.glGetUniformLocation(shaderProgram, "uHasNormal");
-				usesSpecularLocation = gl.glGetUniformLocation(shaderProgram, "uHasSpecular");
-				usesColorSetLocation = gl.glGetUniformLocation(shaderProgram, "uHasColorSet");
-				
-			    gl.glUseProgram(shaderProgram);
-				
-			} catch (IOException e) {
-				e.printStackTrace();
-				System.out.println("Could not load shader");
-			}
-		      
-		}
-
-		private int createShaderProgram(GL3 gl) throws IOException {
-			
-			 String vsrc = readFromStream(OpenGL_View.class
-					 .getResourceAsStream("/res/shaders/vert.glsl")); 
-			 
-			 String fsrc = readFromStream(OpenGL_View.class
-					 .getResourceAsStream("/res/shaders/frag.glsl")); 
-			
-			int vertShader = createShader(gl, GL3.GL_VERTEX_SHADER, vsrc);
-			int fragShader = createShader(gl, GL3.GL_FRAGMENT_SHADER, fsrc);
-			
-			int shaderProgram = gl.glCreateProgram();
-			gl.glAttachShader(shaderProgram, vertShader);
-			gl.glAttachShader(shaderProgram, fragShader);
-			gl.glLinkProgram(shaderProgram);
-			gl.glValidateProgram(shaderProgram);
-			
-			return shaderProgram;
-		}
-
-		private String readFromStream(InputStream ins) throws IOException {
-			if (ins == null) {
-				 throw new IOException("Could not read from stream.");
-			}
-			StringBuffer buffer = new StringBuffer();
-		 	Scanner scanner = new Scanner(ins);
-			try {
-				while (scanner.hasNextLine()) {
-					buffer.append(scanner.nextLine() + "\n");
-				}
-			} finally {
-					scanner.close();
-				}
-			return buffer.toString(); 
-		}
-
-		private int createShader(GL3 gl, int shaderType, String source)
-		{
-			int shader = gl.glCreateShader(shaderType);
-			gl.glShaderSource(shader, 1, new String[] {source}, (int[]) null, 0);
-			gl.glCompileShader(shader);
-			
-			int[] compiled = new int[1];
-            gl.glGetShaderiv(shader, GL3.GL_COMPILE_STATUS, compiled, 0);
-            if (compiled[0] == 0) {
-                byte[] infoLog = new byte[1024];
-                gl.glGetShaderInfoLog(shader, 1024, null, 0, infoLog, 0);
-                System.out.println(new String(infoLog));
-                gl.glDeleteShader(shader);
-                shader = 0;
-                return 0;
-            }
-			
-			return shader;
 		}
 		
 		@Override

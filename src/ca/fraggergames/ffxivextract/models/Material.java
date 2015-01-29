@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
+import javax.media.opengl.GL3;
+
 import ca.fraggergames.ffxivextract.models.SqPack_IndexFile.SqPack_File;
 import ca.fraggergames.ffxivextract.models.SqPack_IndexFile.SqPack_Folder;
 import ca.fraggergames.ffxivextract.storage.HashDatabase;
@@ -19,6 +21,9 @@ public class Material {
 	
 	Texture_File diffuse, normal, specular;
 	Texture_File colorSet;
+	private boolean shaderReady = false;
+	
+	Shader shader;
 	
 	//Rendering
 	int textureIds[] = new int[4];
@@ -26,7 +31,7 @@ public class Material {
 	//Constructor grabs info about material
 	public Material(byte[] data) {
 		this(null, null, data);
-	}
+	}	
 	
 	//Constructor grabs info and texture files
 	public Material(String folderPath, SqPack_IndexFile currentIndex, byte[] data) {
@@ -90,7 +95,7 @@ public class Material {
 											if (extracted == null)
 												continue;
 											
-											if (fileString.endsWith("_d.tex"))
+											if (fileString.endsWith("_d.tex") || fileString.contains("catchlight"))
 												diffuse = new Texture_File(extracted);
 											else if (fileString.endsWith("_n.tex"))
 												normal = new Texture_File(extracted);
@@ -112,7 +117,36 @@ public class Material {
 							}
 					}
 				}
-			}
+			}				
+	}
+	
+	public void loadShader(GL3 gl)
+	{
+		//Load Shader
+		try {
+			if (stringArray[stringArray.length-1].equals("character.shpk"))		
+				shader = new CharacterShader(gl);
+			else if (stringArray[stringArray.length-1].equals("hair.shpk"))		
+				shader = new HairShader(gl);
+			else if (stringArray[stringArray.length-1].equals("iris.shpk"))		
+				shader = new IrisShader(gl);
+			else 		
+				shader = new DefaultShader(gl);
+		} catch (IOException e) {				
+			e.printStackTrace();
+		}
+		
+		shaderReady = true;
+	}
+	
+	public Shader getShader()
+	{
+		return shader;
+	}
+	
+	public boolean isShaderReady()
+	{
+		return shaderReady;
 	}
 	
 	public Texture_File getDiffuseMapTexture(){

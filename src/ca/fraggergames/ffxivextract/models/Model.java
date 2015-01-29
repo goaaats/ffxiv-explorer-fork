@@ -152,7 +152,6 @@ public class Model {
 			}
 		}     
         
-        //Load LoD 0 Meshes
         for (int i = 0; i < lodModels.length; i++){
         	lodModels[i].loadMeshes(bb);
         }
