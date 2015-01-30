@@ -19,7 +19,7 @@ uniform sampler2D uCatchLightTex;
 
 uniform bool uHasNormal;
 uniform bool uHasSpecular;
-uniform bool uHasCatchLightTex;
+uniform bool uHasCatchLight;
 
 void main() {
 	
@@ -30,6 +30,7 @@ void main() {
 	vec4 specularColor;	
 
 	//Other
+	vec4 finalColor;
 	vec3 normal = vNormal.xyz;
 	
 	//Texture Maps
@@ -37,7 +38,7 @@ void main() {
         mapNormal = texture2D(uNormalTex, vTexCoord.st);        
     if (uHasSpecular)
     	mapSpecular = texture2D(uSpecularTex, vTexCoord.st);
-	if (uHasCatchLightTex)	
+	//if (uHasCatchLight)	
 		mapCatchLight = texture2D(uCatchLightTex, vTexCoord.st);     
 	
     //Compute Normal Map
@@ -50,25 +51,17 @@ void main() {
 	vec3 L = normalize(vLightDir);
     vec3 E = normalize(vEyeVec);
     vec3 R = reflect(-L, normal);	
-    
-    //Diffuse    
-    if (uHasNormal){
-    	mapCatchLight = vec4(mapCatchLight.xyz, 1.0);
-    }
         
-    mapCatchLight = mapCatchLight * max(dot(normal,L),0.0);
-    mapCatchLight = clamp(mapCatchLight, 0.0, 1.0);    
+    finalColor = vec4((uEyeColor.xyz * mapSpecular.x), 1.0);
+    finalColor = finalColor * max(dot(normal,L),0.0);        
+    finalColor = clamp(finalColor, 0.0, 1.0); 
 
 	//Specular
-	float specular = 1.0;
-	if (uHasSpecular)
-	{		
-		float specular = pow( max(dot(R, E), 0.0), 1.0);
-		specular = mapSpecular.r * mapSpecular.a * specular;						
-	}	
+	float specular = pow(max(dot(R, E), 0.0), mapSpecular.y);							
 
 	//Final color
-	gl_FragColor = mapCatchLight * specular;
+	gl_FragColor = finalColor + (mapCatchLight * specular);
+	gl_FragColor.a = 1.0;
 }
 
 

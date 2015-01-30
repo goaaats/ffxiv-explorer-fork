@@ -280,9 +280,9 @@ public class OpenGL_View extends JPanel {
 		
 		
 		/////DEFAULT COLORS//////
-		float hairColor[] = {0.396f,0.263f,0.129f,1.0f};
+		float hairColor[] = {0.1f,0.1f,0.1f,1.0f};
 		float highlightColor[] = {0.650f,0.502f,0.392f,1.0f};		
-		float eyeColor[] = {0.0f,0.502f,0.0f,1.0f};
+		float eyeColor[] = {0.0f,0.302f,0.0f,1.0f};
 		/////DEFAULT COLORS//////
 		
 		@Override

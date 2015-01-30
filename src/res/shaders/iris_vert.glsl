@@ -36,7 +36,7 @@ void main(void) {
 		vec4(0.0, 0.0, 0.0, 1.0)
         );
 	
-	vLightDir = vec3(vec3(1.0,1.0,1.0)-vec3(uViewMatrix * uModelMatrix * aPosition));
+	vLightDir = vec3(inverse(uViewMatrix * uModelMatrix) * aPosition);
 	vEyeVec = -vec3(uViewMatrix * uModelMatrix * aPosition);
 	vColor = aColor;	
 

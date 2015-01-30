@@ -81,12 +81,13 @@ void main() {
 	if (uHasSpecular)
 	{
 		mapSpecular = texture2D(uSpecularTex, vTexCoord.st);
-		float specular = pow( max(dot(R, E), 0.0), 1.0);
-		specular = mapSpecular.r * mapSpecular.a * specular;
+		float specular = pow( max(dot(R, E), 0.0), mapSpecular.r);
+		specular = mapSpecular.g * mapSpecular.b * specular;
 		
 		if (uHasNormal && uHasColorSet)
 			specularColor = table_specular * specular;
-		
+		else
+			specularColor = vec4(1.0,1.0,1.0,1.0) * mapSpecular.r * mapSpecular.a * specular;
 	}	
 
     gl_FragColor = mapDiffuse + specularColor;

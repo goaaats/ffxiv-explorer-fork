@@ -43,13 +43,6 @@ void main() {
         mapNormal = texture2D(uNormalTex, vTexCoord.st);
 	if (uHasDiffuse)
     	mapDiffuse = texture2D(uDiffuseTex, vTexCoord.st);
-	if (uHasNormal && uHasColorSet)
-	{
-		table_color = texture2D(uColorSetTex, vec2(0.125, mapNormal.a));
-        table_specular = texture2D(uColorSetTex, vec2(0.375, mapNormal.a));
-        table_unknown1 = texture2D(uColorSetTex, vec2(0.625, mapNormal.a));
-        table_unknown2 = texture2D(uColorSetTex, vec2(0.875, mapNormal.a));              
-	}
 
 	//Check for Transparent	
 	if (uHasNormal) {
@@ -66,7 +59,7 @@ void main() {
         
 	vec3 L = normalize(vLightDir);
     vec3 E = normalize(vEyeVec);
-    vec3 R = reflect(-L, normal);	
+    vec3 R = reflect(L, normal);	
         
     if (uHasNormal && uHasColorSet){
     	mapDiffuse = vec4(table_color.xyz * mapDiffuse.xyz, 1.0);
@@ -78,18 +71,20 @@ void main() {
     mapDiffuse = clamp(mapDiffuse, 0.0, 1.0);    
 
 	//Specular
+	float specular = 1.0;/*
 	if (uHasSpecular)
 	{
 		mapSpecular = texture2D(uSpecularTex, vTexCoord.st);
-		float specular = pow( max(dot(R, E), 0.0), 1.0);
-		specular = mapSpecular.r * mapSpecular.a * specular;
+		specular = pow( max(dot(R, -E), 0.0), mapSpecular.r);
+		specular = specular;
 		
 		if (uHasNormal && uHasColorSet)
-			specularColor = table_specular * specular;
-		
+			specularColor = table_specular * specular_color.r * specular_color.a * specular;
+		else
+			specularColor = vec4(1.0,1.0,1.0,1.0) * specular_color.r * specular_color.a * specular;
 	}	
-
-    gl_FragColor = mapDiffuse + specularColor;
+*/
+    gl_FragColor = mapDiffuse;
 }
 
 
