@@ -410,17 +410,15 @@ public final class ImageDecoding {
 				float fb = HalfFloat_Utils.convertHalfToFloat(buffer.getShort());
 				float fa = HalfFloat_Utils.convertHalfToFloat(buffer.getShort());
 				
-				if (fr > 1)
-					fr = 1.0f;
-				if (fg > 1)
-					fg = 1.0f;
-				if (fb > 1)
-					fb = 1.0f;
+				double fr2 = Math.max(0.0, Math.min(1.0, fr));
+				int r = (int) Math.floor(fr2 == 1.0 ? 255 : fr2 * 256.0);
+				double fg2 = Math.max(0.0, Math.min(1.0, fg));
+				int g = (int) Math.floor(fg2 == 1.0 ? 255 : fg2 * 256.0);
+				double fb2 = Math.max(0.0, Math.min(1.0, fb));
+				int b = (int) Math.floor(fb2 == 1.0 ? 255 : fb2 * 256.0);
+				double fa2 = Math.max(0.0, Math.min(1.0, fa));
+				int a = (int) Math.floor(fa2 == 1.0 ? 255 : fa2 * 256.0);
 				
-				final int b = (int) (255f * fb);
-				final int g = (int) (255f * fg);
-				final int r = (int) (255f * fr);
-				final int a = 255;
 				p += 4;
 				img.setRGB(x, y, new Color(r, g, b, a).getRGB());
 			}

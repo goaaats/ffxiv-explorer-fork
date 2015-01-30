@@ -81,11 +81,11 @@ void main() {
 	if (uHasSpecular)
 	{
 		mapSpecular = texture2D(uSpecularTex, vTexCoord.st);
-		float specular = pow( max(dot(R, E), 0.0), mapSpecular.r);
+		float specular = pow( max(dot(R, E), 0.0), table_specular.a);
 		specular = mapSpecular.g * mapSpecular.b * specular;
 		
 		if (uHasNormal && uHasColorSet)
-			specularColor = table_specular * specular;
+			specularColor = table_specular  * mapSpecular.r * mapSpecular.a *  specular;
 		else
 			specularColor = vec4(1.0,1.0,1.0,1.0) * mapSpecular.r * mapSpecular.a * specular;
 	}	
