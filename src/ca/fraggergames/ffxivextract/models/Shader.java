@@ -16,7 +16,6 @@ import ca.fraggergames.ffxivextract.helpers.Matrix;
 public class Shader {
 
 	protected int shaderProgram;
-	private Hashtable<String, Object> uniforms = new Hashtable<String, Object>();
 	
 	private int modelLocation;
 	private int viewLocation;
@@ -174,5 +173,21 @@ public class Shader {
 	
 	public int getAttribTexCoord()
 	{return texCoordLocation;}
+
+	public void enableAttribs(GL3 gl) {
+		gl.glEnableVertexAttribArray(positionLocation);
+    	gl.glEnableVertexAttribArray(normalLocation);
+    	gl.glEnableVertexAttribArray(texCoordLocation);
+    	gl.glEnableVertexAttribArray(binormalLocation);
+    	gl.glEnableVertexAttribArray(colorLocation);	
+	}
+
+	public void disableAttribs(GL3 gl) {
+		gl.glDisableVertexAttribArray(positionLocation);
+    	gl.glDisableVertexAttribArray(normalLocation);
+    	gl.glDisableVertexAttribArray(texCoordLocation);
+    	gl.glDisableVertexAttribArray(binormalLocation);
+    	gl.glDisableVertexAttribArray(colorLocation);			  
+	}
 	
 }

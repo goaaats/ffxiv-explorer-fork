@@ -130,6 +130,8 @@ public class Material {
 				shader = new HairShader(gl);
 			else if (stringArray[stringArray.length-1].equals("iris.shpk"))		
 				shader = new IrisShader(gl);
+			else if (stringArray[stringArray.length-1].equals("skin.shpk"))		
+				shader = new SkinShader(gl);
 			else 		
 				shader = new DefaultShader(gl);
 		} catch (IOException e) {				

@@ -244,30 +244,7 @@ public class OpenGL_View extends JPanel {
 		private float angleX = 0;
 		private float angleY = 0;
 		
-		private int[] textureIds;
-		
-		//Shader Stuff
-		private int shaderProgram = 0;
-		
-		private int modelLocation;
-		private int viewLocation;
-		private int projLocation;
-		
-		private int positionLocation;
-		private int normalLocation;
-		private int texCoordLocation;
-		private int binormalLocation;
-		private int colorLocation;
-		
-		private int diffuseTexLocation;
-		private int normalTexLocation;
-		private int specularTexLocation;
-		private int colorSetTexLocation;
-		
-		private int usesDiffuseLocation;
-		private int usesNormalLocation;
-		private int usesSpecularLocation;
-		private int usesColorSetLocation;
+		private int[] textureIds;		
 		
 		//Matrices
 		float[] modelMatrix = new float[16];
@@ -304,7 +281,7 @@ public class OpenGL_View extends JPanel {
 		
 		/////DEFAULT COLORS//////
 		float hairColor[] = {0.396f,0.263f,0.129f,1.0f};
-		float highlightColor[] = {0.650f,0.502f,0.392f,1.0f};
+		float highlightColor[] = {0.650f,0.502f,0.392f,1.0f};		
 		float eyeColor[] = {0.0f,0.502f,0.0f,1.0f};
 		/////DEFAULT COLORS//////
 		
@@ -449,24 +426,12 @@ public class OpenGL_View extends JPanel {
 		    	if (shader instanceof HairShader)
 		    		((HairShader)shader).setHairColor(gl, hairColor, highlightColor);
 		    	else if (shader instanceof IrisShader)
-		    		((IrisShader)shader).setEyeColor(gl, eyeColor);
-		    	
-		    	//Enable
-		    	gl.glEnableVertexAttribArray(positionLocation);
-		    	gl.glEnableVertexAttribArray(normalLocation);
-		    	gl.glEnableVertexAttribArray(texCoordLocation);
-		    	gl.glEnableVertexAttribArray(binormalLocation);
-		    	gl.glEnableVertexAttribArray(colorLocation);	
+		    		((IrisShader)shader).setEyeColor(gl, eyeColor);		    	
 		    	
 		    	//Draw
-			    gl.glDrawElements(GL3.GL_TRIANGLES, mesh.numIndex, GL3.GL_UNSIGNED_SHORT, mesh.indexBuffer);
-			    
-			    //Disable
-			    gl.glDisableVertexAttribArray(positionLocation);
-		    	gl.glDisableVertexAttribArray(normalLocation);
-		    	gl.glDisableVertexAttribArray(texCoordLocation);
-		    	gl.glDisableVertexAttribArray(binormalLocation);
-		    	gl.glDisableVertexAttribArray(colorLocation);			  
+		    	shader.enableAttribs(gl);
+			    gl.glDrawElements(GL3.GL_TRIANGLES, mesh.numIndex, GL3.GL_UNSIGNED_SHORT, mesh.indexBuffer);			    
+			    shader.disableAttribs(gl);			  
 			    
 			}
 		}
