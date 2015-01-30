@@ -76,6 +76,14 @@ public class Texture_File {
 					uncompressedWidth,
 					uncompressedHeight, 0, 0);
 		}
+		case 0x3430:
+		{
+			return ImageDecoding.decodeImageDX3(data, 
+					dataStart[index], uncompressedWidth,
+					uncompressedHeight,
+					uncompressedWidth / 4,
+					uncompressedHeight / 4);
+		}
 		case 0x3431: {
 			return ImageDecoding.decodeImageDX5(data,
 					dataStart[index],
