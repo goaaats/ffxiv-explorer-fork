@@ -41,26 +41,16 @@ void main() {
 	
 	//Texture Maps
 	if (uHasNormal) 
-	{	
-        mapNormal = texture2D(uNormalTex, vTexCoord.st);
-        if (mapNormal.a < 0.2)
-        discard;
-    }                
+        mapNormal = texture2D(uNormalTex, vTexCoord.st);             
     if (uHasSpecular)
     	mapSpecular = texture2D(uSpecularTex, vTexCoord.st);
-	if (uHasNormal && uHasColorSet)
-	{
-		table_color = texture2D(uColorSetTex, vec2(0.125, mapNormal.a));
-        table_specular = texture2D(uColorSetTex, vec2(0.375, mapNormal.a));
-        table_unknown1 = texture2D(uColorSetTex, vec2(0.625, mapNormal.a));
-        table_unknown2 = texture2D(uColorSetTex, vec2(0.875, mapNormal.a));              
-	}
 	
 	//Check specular map for highlights
-	if (mapSpecular.a >= 0.5)
-		diffuseColor = uHighlightColor;
-	else
+	//if (mapSpecular.a >= 0.1)
+	//	diffuseColor = uHighlightColor;
+	//else
 		diffuseColor = uHairColor;	
+	
 	
     //Compute Normal Map
 	if (uHasNormal)	
@@ -73,14 +63,8 @@ void main() {
     vec3 E = normalize(vEyeVec);
     vec3 R = reflect(-L, normal);	
     
-    //Diffuse    
-    if (uHasNormal && uHasColorSet){
-    	diffuseColor = vec4(table_color.xyz * diffuseColor.xyz, 1.0);
-    	diffuseColor = diffuseColor + (table_unknown1 * 0.5);
-    }
-        
-    diffuseColor = diffuseColor * max(dot(normal,L),0.0);
-    diffuseColor = clamp(diffuseColor, 0.0, 1.0);    
+    //Diffuse        
+    diffuseColor = max(dot(normal,L),0.0);   
 
 	//Specular
 	float specular = 1.0;
@@ -91,10 +75,7 @@ void main() {
 	}	
 
 	//Final color
-	if (uHasNormal && uHasColorSet)
-		gl_FragColor = vec4(diffuseColor.xyz, 1.0) + (specularColor * specular);
-	else
-    	gl_FragColor = vec4(diffuseColor.xyz, 1.0) * specular;
+   	gl_FragColor = vec4(diffuseColor.xyz, mapNormal.a) * specular;
 }
 
 

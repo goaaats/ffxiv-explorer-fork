@@ -1,14 +1,21 @@
 package ca.fraggergames.ffxivextract.models;
 
+import java.awt.image.BufferedImage;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
+import javax.media.opengl.GL3;
+import javax.media.opengl.GL3bc;
+
 import ca.fraggergames.ffxivextract.Constants;
+import ca.fraggergames.ffxivextract.helpers.ImageDecoding.ImageDecodingException;
 import ca.fraggergames.ffxivextract.models.SqPack_IndexFile.SqPack_File;
 import ca.fraggergames.ffxivextract.models.SqPack_IndexFile.SqPack_Folder;
 import ca.fraggergames.ffxivextract.storage.HashDatabase;
+
+import com.jogamp.common.nio.Buffers;
 
 public class Model {
 	
@@ -80,6 +87,8 @@ public class Model {
 		numMaterialStrings = bb.getShort( );
 		numBoneStrings = bb.getShort();						
 		numShpStrings = bb.getShort();		
+		bb.getShort();
+		bb.getShort();
 
 		materials = new Material[numMaterialStrings];
 		
@@ -93,7 +102,7 @@ public class Model {
 		loadMaterials(1);
 		
 		//Skip Stuff
-		bb.position(bb.position()+0x8);
+		bb.position(bb.position()+0x4);
 		short numStructs = bb.getShort();
 		bb.position(bb.position()+0x1e);
 				
@@ -211,7 +220,7 @@ public class Model {
 		
 		String materialFolderPath = null;
 		
-		if ((modelPath.contains("face") || modelPath.contains("hair"))){
+		if ((modelPath.contains("face") || modelPath.contains("hsair"))){
 			if (variant == 1)
 				materialFolderPath = String.format("%smaterial", modelPath.substring(0, modelPath.indexOf("model")));
 			else
@@ -272,7 +281,7 @@ public class Model {
 	
 	public Material getMaterial(int index)
 	{
-		return materials[index];
+		return index < materials.length ? materials[index] : null;
 	}
 
 	public int getNumMesh(int lodLevel) {
@@ -280,12 +289,152 @@ public class Model {
 	}
 
 	public int getNumMaterials() {
-		return modelPath.contains("null") ? 0 : materials.length;
+		return modelPath == null || modelPath.contains("null") ? 0 : materials.length;
 	}
 	
 	public int getNumVariants()
 	{
 		return numVariants;
+	}
+
+	public void render(DefaultShader defaultShader, float[] viewMatrix, float[] modelMatrix,
+			float[] projMatrix, GL3bc gl, int currentLoD) {
+		for (int i = 0; i < getNumMesh(currentLoD); i++){
+	    	
+	    	Mesh mesh = getMeshes(currentLoD)[i];
+	    	Material material = getMaterial(mesh.materialNumber);		    	
+	    	Shader shader = material == null || !material.isShaderReady() ? defaultShader : material.getShader();
+	    	
+	    	gl.glUseProgram(shader.getShaderProgramID());
+	    	
+	    	mesh.vertBuffer.position(0);
+	    	mesh.indexBuffer.position(0);
+	    	
+	    	//Position
+	    	if (mesh.vertexSize == 0x10 || mesh.vertexSize == 0x8)
+	    		gl.glVertexAttribPointer(shader.getAttribPosition(), 4, GL3.GL_HALF_FLOAT, false, 0, mesh.vertBuffer);
+		    else if (mesh.vertexSize == 0x14)
+		    	gl.glVertexAttribPointer(shader.getAttribPosition(), 3, GL3.GL_FLOAT, false, 0, mesh.vertBuffer);
+	    	
+	    	//Normal
+	    	ByteBuffer normalData = mesh.vertBuffer.duplicate();			    
+		    if (mesh.vertexSize == 0x10 || mesh.vertexSize == 0x8)
+		    	normalData.position(mesh.numVerts*8);
+		    else
+		    	normalData.position(mesh.numVerts*12);		    	
+	    	gl.glVertexAttribPointer(shader.getAttribNormal(), 4, GL3.GL_HALF_FLOAT, false, 24, normalData);
+	    	
+	    	//Tex Coord
+	    	ByteBuffer texData = mesh.vertBuffer.duplicate();			    
+		    if (mesh.vertexSize == 0x10 || mesh.vertexSize == 0x8)
+		    	texData.position((mesh.numVerts*8) + 16);
+		    else
+		    	texData.position((mesh.numVerts*12)+ 16);		
+	    	gl.glVertexAttribPointer(shader.getAttribTexCoord(), 4, GL3.GL_HALF_FLOAT, false, 24, texData);
+	    	
+	    	//BiNormal
+	    	ByteBuffer binormalData = mesh.vertBuffer.duplicate();			    
+		    if (mesh.vertexSize == 0x10 || mesh.vertexSize == 0x8)
+		    	binormalData.position(mesh.numVerts*8+8);
+		    else
+		    	binormalData.position(mesh.numVerts*12+8);		    	
+	    	gl.glVertexAttribPointer(shader.getAttribBiTangent(), 4, GL3.GL_UNSIGNED_BYTE, false, 24, binormalData);
+	    	
+	    	//Color
+	    	ByteBuffer colorData = mesh.vertBuffer.duplicate();			    
+		    if (mesh.vertexSize == 0x10 || mesh.vertexSize == 0x8)
+		    	colorData.position((mesh.numVerts*8) + 12);
+		    else
+		    	colorData.position((mesh.numVerts*12)+ 12);	
+	    	gl.glVertexAttribPointer(shader.getAttribColor(), 4, GL3.GL_UNSIGNED_BYTE, false, 24, colorData);
+	    	
+	    	shader.setTextures(gl, material);
+	    	shader.setMatrix(gl, modelMatrix, viewMatrix, projMatrix);
+		    	
+	    	if (shader instanceof HairShader)
+	    		((HairShader)shader).setHairColor(gl, Constants.defaultHairColor, Constants.defaultHighlightColor);
+	    	else if (shader instanceof IrisShader)
+	    		((IrisShader)shader).setEyeColor(gl, Constants.defaultEyeColor);		    	
+	    	
+	    	//Draw
+	    	shader.enableAttribs(gl);
+		    gl.glDrawElements(GL3.GL_TRIANGLES, mesh.numIndex, GL3.GL_UNSIGNED_SHORT, mesh.indexBuffer);			    
+		    shader.disableAttribs(gl);			  
+		    
+		}
+	}
+
+	public void loadToVRAM(GL3bc gl) {
+		for (int i = 0; i < getNumMaterials(); i++){
+			
+			if (getMaterial(i) == null)
+				break;
+			
+			gl.glGenTextures(4, getMaterial(i).getGLTextureIds(),0);												
+			Material m = getMaterial(i);
+			
+			for (int j = 0; j < 4; j++){
+				
+				Texture_File tex = null;
+				
+				switch(j)
+				{
+				case 0: 
+					tex = m.getDiffuseMapTexture();
+					break;
+				case 1: 
+					tex = m.getNormalMapTexture();
+					break;
+				case 2: 
+					tex = m.getSpecularMapTexture();
+					break;
+				case 3: 
+					tex = m.getColorSetTexture();
+					break;
+				}
+				
+				if (tex == null)
+					continue;
+				
+				BufferedImage img = null;
+				try {
+					img = tex.decode(0, null);
+				} catch (ImageDecodingException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}								
+				
+				int[] pixels = new int[img.getWidth() * img.getHeight()];
+				img.getRGB(0, 0, img.getWidth(), img.getHeight(), pixels, 0, img.getWidth());				
+				
+				ByteBuffer buffer = Buffers.newDirectByteBuffer(img.getWidth() * img.getHeight() * 4);
+				
+				//Fucking Java Trash
+				for(int y = 0; y < img.getHeight(); y++){
+		            for(int x = 0; x < img.getWidth(); x++){
+		                int pixel = pixels[y * img.getWidth() + x];
+		                buffer.put((byte) ((pixel >> 16) & 0xFF));     
+		                buffer.put((byte) ((pixel >> 8) & 0xFF));      
+		                buffer.put((byte) (pixel & 0xFF));               
+		                buffer.put((byte) ((pixel >> 24) & 0xFF));
+		            }
+		        }				
+		        buffer.flip(); //FOR THE LOVE OF GOD DO NOT FORGET THIS
+				buffer.position(0);
+				
+		        //Load into VRAM
+		        gl.glBindTexture(GL3.GL_TEXTURE_2D, m.getGLTextureIds()[j]);
+				gl.glTexParameteri(GL3.GL_TEXTURE_2D, GL3.GL_TEXTURE_WRAP_S, GL3.GL_REPEAT);
+				gl.glTexParameteri(GL3.GL_TEXTURE_2D, GL3.GL_TEXTURE_WRAP_T, GL3.GL_REPEAT);
+				gl.glTexParameteri(GL3.GL_TEXTURE_2D, GL3.GL_TEXTURE_MIN_FILTER, GL3.GL_LINEAR);
+				gl.glTexParameteri(GL3.GL_TEXTURE_2D, GL3.GL_TEXTURE_MAG_FILTER, GL3.GL_LINEAR);
+				
+				gl.glTexImage2D(GL3.GL_TEXTURE_2D, 0, GL3.GL_RGBA, img.getWidth(), img.getHeight(), 0, GL3.GL_RGBA, GL3.GL_UNSIGNED_BYTE, buffer);						
+				gl.glBindTexture(GL3.GL_TEXTURE_2D, 0);
+				
+				m.loadShader(gl);
+			}					
+		}
 	}
 	
 }

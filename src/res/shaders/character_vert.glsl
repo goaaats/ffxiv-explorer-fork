@@ -27,7 +27,7 @@ void main(void) {
 	vNormal = vec4(normalize(aNormal.xyz), aNormal.a);
 	vec4 biTangent = (aBiTangent * 2.0 / 255.0) - 1.0;
 	biTangent = normalize(biTangent);
-	vec3 tangent = cross(biTangent.xyz, vNormal.xyz);
+	vec3 tangent =  biTangent.a * cross(biTangent.xyz, vNormal.xyz);
 
 	vTBNMatrix = mat4(
 		vec4(tangent.x, biTangent.x, vNormal.x,0.0),

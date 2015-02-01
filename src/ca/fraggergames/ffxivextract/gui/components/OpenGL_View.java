@@ -32,6 +32,7 @@ import javax.swing.border.TitledBorder;
 
 import ca.fraggergames.ffxivextract.helpers.Matrix;
 import ca.fraggergames.ffxivextract.helpers.ImageDecoding.ImageDecodingException;
+import ca.fraggergames.ffxivextract.models.DefaultShader;
 import ca.fraggergames.ffxivextract.models.HairShader;
 import ca.fraggergames.ffxivextract.models.IrisShader;
 import ca.fraggergames.ffxivextract.models.Material;
@@ -42,6 +43,8 @@ import ca.fraggergames.ffxivextract.models.Texture_File;
 
 import com.jogamp.common.nio.Buffers;
 import com.jogamp.opengl.util.Animator;
+import com.jogamp.opengl.util.FPSAnimator;
+
 import java.awt.FlowLayout;
 import javax.swing.DefaultComboBoxModel;
 
@@ -51,9 +54,9 @@ public class OpenGL_View extends JPanel {
 	JLabel lblVertices, lblIndices, lblMeshes;
 	JComboBox cmbLodChooser, cmbVariantChooser;
 	
-	Animator animator;
+	FPSAnimator animator;
 	ModelRenderer renderer;
-	JLabel lbl1;
+	JLabel lbl1;	
 	
 	private boolean leftMouseDown = false;
 	private boolean rightMouseDown = false;
@@ -68,7 +71,7 @@ public class OpenGL_View extends JPanel {
         final GLCanvas glcanvas = new GLCanvas( glcapabilities );
         renderer = new ModelRenderer(model);
         glcanvas.addGLEventListener(renderer);
-        animator = new Animator(glcanvas);
+        animator = new FPSAnimator(glcanvas, 30);
         animator.start();
         glcanvas.addMouseMotionListener(new MouseMotionListener() {
 			
@@ -181,9 +184,11 @@ public class OpenGL_View extends JPanel {
 			public void itemStateChanged(ItemEvent e) {
 				if (e.getStateChange() == ItemEvent.SELECTED) {
 			          currentLoD = Integer.parseInt((String)e.getItem());
+			          lblMeshes.setText("Num Meshes: " + model.getMeshes(currentLoD).length);
 			    }
 			}
 		});
+                
         
         JPanel panel_4 = new JPanel();
         FlowLayout flowLayout = (FlowLayout) panel_4.getLayout();
@@ -228,7 +233,7 @@ public class OpenGL_View extends JPanel {
         lblIndices = new JLabel("Indices:");
         panel_2.add(lblIndices);
         
-        lblMeshes = new JLabel("Meshes:");
+        lblMeshes = new JLabel("Num Meshes: " + model.getMeshes(currentLoD).length);
         panel_2.add(lblMeshes);
         
         add( glcanvas, BorderLayout.CENTER);
@@ -243,6 +248,8 @@ public class OpenGL_View extends JPanel {
 		private float panY = 0;
 		private float angleX = 0;
 		private float angleY = 0;
+		
+		DefaultShader defaultShader;
 		
 		private int[] textureIds;		
 		
@@ -276,14 +283,7 @@ public class OpenGL_View extends JPanel {
 			panY += -y * 0.05f;
 		}
 
-		boolean loaded = false;
-		
-		
-		/////DEFAULT COLORS//////
-		float hairColor[] = {0.1f,0.1f,0.1f,1.0f};
-		float highlightColor[] = {0.650f,0.502f,0.392f,1.0f};		
-		float eyeColor[] = {0.0f,0.302f,0.0f,1.0f};
-		/////DEFAULT COLORS//////
+		boolean loaded = false;		
 		
 		@Override
 		public void display(GLAutoDrawable drawable) {
@@ -291,76 +291,7 @@ public class OpenGL_View extends JPanel {
 			
 			if (!loaded)
 			{
-				for (int i = 0; i < model.getNumMaterials(); i++){
-					
-					if (model.getMaterial(i) == null)
-						break;
-					
-					gl.glGenTextures(4, model.getMaterial(i).getGLTextureIds(),0);												
-					Material m = model.getMaterial(i);
-					
-					for (int j = 0; j < 4; j++){
-						
-						Texture_File tex = null;
-						
-						switch(j)
-						{
-						case 0: 
-							tex = m.getDiffuseMapTexture();
-							break;
-						case 1: 
-							tex = m.getNormalMapTexture();
-							break;
-						case 2: 
-							tex = m.getSpecularMapTexture();
-							break;
-						case 3: 
-							tex = m.getColorSetTexture();
-							break;
-						}
-						
-						if (tex == null)
-							continue;
-						
-						BufferedImage img = null;
-						try {
-							img = tex.decode(0, null);
-						} catch (ImageDecodingException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}								
-						
-						int[] pixels = new int[img.getWidth() * img.getHeight()];
-						img.getRGB(0, 0, img.getWidth(), img.getHeight(), pixels, 0, img.getWidth());				
-						
-						ByteBuffer buffer = Buffers.newDirectByteBuffer(img.getWidth() * img.getHeight() * 4);
-						
-						//Fucking Java Trash
-						for(int y = 0; y < img.getHeight(); y++){
-				            for(int x = 0; x < img.getWidth(); x++){
-				                int pixel = pixels[y * img.getWidth() + x];
-				                buffer.put((byte) ((pixel >> 16) & 0xFF));     
-				                buffer.put((byte) ((pixel >> 8) & 0xFF));      
-				                buffer.put((byte) (pixel & 0xFF));               
-				                buffer.put((byte) ((pixel >> 24) & 0xFF));
-				            }
-				        }				
-				        buffer.flip(); //FOR THE LOVE OF GOD DO NOT FORGET THIS
-						buffer.position(0);
-						
-				        //Load into VRAM
-				        gl.glBindTexture(GL3.GL_TEXTURE_2D, m.getGLTextureIds()[j]);
-						gl.glTexParameteri(GL3.GL_TEXTURE_2D, GL3.GL_TEXTURE_WRAP_S, GL3.GL_REPEAT);
-						gl.glTexParameteri(GL3.GL_TEXTURE_2D, GL3.GL_TEXTURE_WRAP_T, GL3.GL_REPEAT);
-						gl.glTexParameteri(GL3.GL_TEXTURE_2D, GL3.GL_TEXTURE_MIN_FILTER, GL3.GL_LINEAR);
-						gl.glTexParameteri(GL3.GL_TEXTURE_2D, GL3.GL_TEXTURE_MAG_FILTER, GL3.GL_LINEAR);
-						
-						gl.glTexImage2D(GL3.GL_TEXTURE_2D, 0, GL3.GL_RGBA, img.getWidth(), img.getHeight(), 0, GL3.GL_RGBA, GL3.GL_UNSIGNED_BYTE, buffer);						
-						gl.glBindTexture(GL3.GL_TEXTURE_2D, 0);
-						
-						m.loadShader(gl);
-					}					
-				}
+				model.loadToVRAM(gl);
 				loaded = true;
 			}
 			
@@ -371,69 +302,8 @@ public class OpenGL_View extends JPanel {
 		    Matrix.rotateM(viewMatrix, 0, angleX, 0, 1, 0);
 		    Matrix.rotateM(viewMatrix, 0, angleY, 1, 0, 0);		     		   		    		    		    
 		    
-		    for (int i = 0; i < model.getNumMesh(currentLoD); i++){
-		    	
-		    	Mesh mesh = model.getMeshes(currentLoD)[i];
-		    	Material material = model.getMaterial(mesh.materialNumber);
-		    	Shader shader = material.getShader();
-		    	
-		    	gl.glUseProgram(shader.getShaderProgramID());
-		    	
-		    	mesh.vertBuffer.position(0);
-		    	mesh.indexBuffer.position(0);
-		    	
-		    	//Position
-		    	if (mesh.vertexSize == 0x10 || mesh.vertexSize == 0x8)
-		    		gl.glVertexAttribPointer(shader.getAttribPosition(), 4, GL3.GL_HALF_FLOAT, false, 0, mesh.vertBuffer);
-			    else if (mesh.vertexSize == 0x14)
-			    	gl.glVertexAttribPointer(shader.getAttribPosition(), 3, GL3.GL_FLOAT, false, 0, mesh.vertBuffer);
-		    	
-		    	//Normal
-		    	ByteBuffer normalData = mesh.vertBuffer.duplicate();			    
-			    if (mesh.vertexSize == 0x10 || mesh.vertexSize == 0x8)
-			    	normalData.position(mesh.numVerts*8);
-			    else
-			    	normalData.position(mesh.numVerts*12);		    	
-		    	gl.glVertexAttribPointer(shader.getAttribNormal(), 4, GL3.GL_HALF_FLOAT, false, 24, normalData);
-		    	
-		    	//Tex Coord
-		    	ByteBuffer texData = mesh.vertBuffer.duplicate();			    
-			    if (mesh.vertexSize == 0x10 || mesh.vertexSize == 0x8)
-			    	texData.position((mesh.numVerts*8) + 16);
-			    else
-			    	texData.position((mesh.numVerts*12)+ 16);		
-		    	gl.glVertexAttribPointer(shader.getAttribTexCoord(), 4, GL3.GL_HALF_FLOAT, false, 24, texData);
-		    	
-		    	//BiNormal
-		    	ByteBuffer binormalData = mesh.vertBuffer.duplicate();			    
-			    if (mesh.vertexSize == 0x10 || mesh.vertexSize == 0x8)
-			    	binormalData.position(mesh.numVerts*8+8);
-			    else
-			    	binormalData.position(mesh.numVerts*12+8);		    	
-		    	gl.glVertexAttribPointer(shader.getAttribBiTangent(), 4, GL3.GL_UNSIGNED_BYTE, false, 24, binormalData);
-		    	
-		    	//Color
-		    	ByteBuffer colorData = mesh.vertBuffer.duplicate();			    
-			    if (mesh.vertexSize == 0x10 || mesh.vertexSize == 0x8)
-			    	colorData.position((mesh.numVerts*8) + 12);
-			    else
-			    	colorData.position((mesh.numVerts*12)+ 12);	
-		    	gl.glVertexAttribPointer(shader.getAttribColor(), 4, GL3.GL_UNSIGNED_BYTE, false, 24, colorData);
-		    	
-		    	shader.setTextures(gl, material);
-		    	shader.setMatrix(gl, modelMatrix, viewMatrix, projMatrix);
-			    	
-		    	if (shader instanceof HairShader)
-		    		((HairShader)shader).setHairColor(gl, hairColor, highlightColor);
-		    	else if (shader instanceof IrisShader)
-		    		((IrisShader)shader).setEyeColor(gl, eyeColor);		    	
-		    	
-		    	//Draw
-		    	shader.enableAttribs(gl);
-			    gl.glDrawElements(GL3.GL_TRIANGLES, mesh.numIndex, GL3.GL_UNSIGNED_SHORT, mesh.indexBuffer);			    
-			    shader.disableAttribs(gl);			  
-			    
-			}
+		    model.render(defaultShader, viewMatrix, modelMatrix, projMatrix, gl, currentLoD);
+
 		}
 
 		@Override
@@ -449,10 +319,17 @@ public class OpenGL_View extends JPanel {
 		      gl.glEnable(GL3.GL_DEPTH_TEST); // enables depth testing
 		      gl.glDepthFunc(GL3.GL_LEQUAL);  // the type of depth test to do
 		      gl.glEnable(GL3.GL_BLEND); 
-		      gl.glBlendFunc (GL3.GL_SRC_ALPHA, GL3.GL_ONE_MINUS_SRC_ALPHA);		      
+		      gl.glCullFace(GL3.GL_CW);
+		      gl.glBlendFunc (GL3.GL_SRC_ALPHA, GL3.GL_ONE_MINUS_SRC_ALPHA);	
+		    //  gl.glBlendFuncSeparate(GL3.GL_SRC_ALPHA, GL3.GL_ONE_MINUS_SRC_ALPHA, GL3.GL_ONE_MINUS_DST_ALPHA, GL3.GL_ONE);
 		      gl.glEnable(GL3.GL_TEXTURE_2D);
 		    		      
-		      
+		      try {
+				defaultShader = new DefaultShader(gl);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 		
 		@Override
