@@ -43,14 +43,7 @@ void main() {
 	if (uHasNormal) 
         mapNormal = texture2D(uNormalTex, vTexCoord.st);             
     if (uHasSpecular)
-    	mapSpecular = texture2D(uSpecularTex, vTexCoord.st);
-	
-	//Check specular map for highlights
-	//if (mapSpecular.a >= 0.1)
-	//	diffuseColor = uHighlightColor;
-	//else
-		diffuseColor = uHairColor;	
-	
+    	mapSpecular = texture2D(uSpecularTex, vTexCoord.st);		
 	
     //Compute Normal Map
 	if (uHasNormal)	
@@ -62,20 +55,29 @@ void main() {
 	vec3 L = normalize(vLightDir);
     vec3 E = normalize(vEyeVec);
     vec3 R = reflect(-L, normal);	
+    vec3 H = normalize(L+E);   
     
-    //Diffuse        
-    diffuseColor = max(dot(normal,L),0.0);   
-
+    //Diffuse            
+    diffuseColor = (mix(uHairColor, uHighlightColor, mapSpecular.a) * mapSpecular.g) * max(dot(normal,L),0.0); 
+    diffuseColor = clamp(diffuseColor, 0.0, 1.0);    
+	
 	//Specular
-	float specular = 1.0;
 	if (uHasSpecular)
-	{		
-		float specular = pow( max(dot(R, E), 0.0), 1.0);
-		specular = mapSpecular.r * mapSpecular.a * specular;						
+	{
+		//Fresnel approximation
+		float F0 = 0.5;
+		float exp = pow(max(0, 1-dot(H, E)), 5);
+	 	float fresnel = exp+F0*(1.0-exp);
+	
+		//Specular calculation and map
+		float specular = pow( max(dot(R, E), 0.0), 32);
+		specular *= fresnel;
+			
+		specularColor = vec4(1.0,1.0,1.0,1.0) * specular;
 	}	
 
 	//Final color
-   	gl_FragColor = vec4(diffuseColor.xyz, mapNormal.a) * specular;
+   	gl_FragColor = vec4(diffuseColor.xyz, mapNormal.a);
 }
 
 

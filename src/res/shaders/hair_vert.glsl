@@ -36,8 +36,8 @@ void main(void) {
 		vec4(0.0, 0.0, 0.0, 1.0)
         );
 	
-	vLightDir =  (inverse(uViewMatrix * uModelMatrix) * vec4(0.0,0.0,20.0,1.0)).xyz;
-	vEyeVec = -vec3(uViewMatrix * uModelMatrix * aPosition);
+	vLightDir =  (inverse(uViewMatrix * uModelMatrix) * vec4(0.0,0.0,5.0,1.0)).xyz;
+	vEyeVec = vec3((inverse(uViewMatrix * uModelMatrix) * vec4(0.0,0.0,5.0,1.0)).xyz);
 	vColor = aColor;	
 
     gl_Position = uProjMatrix * uViewMatrix * uModelMatrix * aPosition;

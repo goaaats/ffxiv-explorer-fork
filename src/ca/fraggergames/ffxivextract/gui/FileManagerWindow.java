@@ -560,13 +560,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 				view = new OpenGL_View(new Model(null, currentIndexFile, data));
 			else
 				view = new OpenGL_View(new Model(HashDatabase.getFolder(file.getId2()) + "/" + file.getName(), currentIndexFile, data));
-			tabs.addTab("3D Model", view);
-			/*
-			JLabel lbl3DModelError = new JLabel("Content Type 3 files are currently not supported. I am still figuring out how they are stored.");
-			tabs.addTab("3D Model", lbl3DModelError);
-			hexView.setBytes(null);							
-			splitPane.setRightComponent(tabs);
-			return;*/
+			tabs.addTab("3D Model", view);			
 		}
 		
 		if (data == null)

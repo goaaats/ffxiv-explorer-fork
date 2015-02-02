@@ -66,23 +66,33 @@ void main() {
         
 	vec3 L = normalize(vLightDir);
     vec3 E = normalize(vEyeVec);
-    vec3 R = reflect(-L, normal);	
-        
+    vec3 R = normalize(2 * dot(L, normal) * normal - L);	
+    vec3 H = normalize(L+E);   
+    
+    float rimShading = 1.0 - max(dot(E, normal), 0.0); 
+    
     if (uHasNormal && uHasColorSet){
     	mapDiffuse = vec4(table_color.xyz * mapDiffuse.xyz, 1.0);
-    	mapDiffuse = mapDiffuse + (table_unknown1 * 0.5);
+    	mapDiffuse = vec4(table_unknown1.xyz + mapDiffuse.xyz, 1.0);
     }
     
-    //Diffuse
+    //Diffuse    
     mapDiffuse.xyz = mapDiffuse.xyz * max(dot(normal,L),0.0);
     mapDiffuse = clamp(mapDiffuse, 0.0, 1.0);    
 
 	//Specular
 	if (uHasSpecular)
 	{
+		//Fresnel approximation
+		float F0 = 0.7;
+		float exp = pow(max(0, 1-dot(H, E)), 5);
+	 	float fresnel = exp+F0*(1.0-exp);
+	
+		//Specular calculation and map
 		mapSpecular = texture2D(uSpecularTex, vTexCoord.st);
 		float specular = pow( max(dot(R, E), 0.0), table_specular.a);
 		specular = mapSpecular.g * mapSpecular.b * specular;
+		specular *= fresnel;
 		
 		if (uHasNormal && uHasColorSet)
 			specularColor = table_specular  * mapSpecular.r * mapSpecular.a *  specular;
@@ -90,7 +100,8 @@ void main() {
 			specularColor = vec4(1.0,1.0,1.0,1.0) * mapSpecular.r * mapSpecular.a * specular;
 	}	
 
-    gl_FragColor = mapDiffuse + specularColor;
+    gl_FragColor = clamp(mapDiffuse + specularColor,0.0,1.0);
+    gl_FragColor.a = 1.0;
 }
 
 

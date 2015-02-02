@@ -51,16 +51,23 @@ void main() {
 	vec3 L = normalize(vLightDir);
     vec3 E = normalize(vEyeVec);
     vec3 R = reflect(-L, normal);	
-        
+    vec3 H = normalize(L+E); 
+    
     finalColor = vec4((uEyeColor.xyz * mapSpecular.x), 1.0);
     finalColor = finalColor * max(dot(normal,L),0.0);        
     finalColor = clamp(finalColor, 0.0, 1.0); 
 
-	//Specular
-	float specular = pow(max(dot(R, E), 0.0), mapSpecular.y);							
+	//Fresnel approximation
+	float F0 = 0.5;
+	float exp = pow(max(0, 1-dot(H, E)), 5);
+	float fresnel = exp+F0*(1.0-exp);
 
+	//Specular	
+	float specular = pow(max(dot(R, E), 0.0), mapSpecular.y);							
+	specular *= fresnel;
+	
 	//Final color
-	gl_FragColor = finalColor + (mapCatchLight * specular);
+	gl_FragColor = finalColor + (mapCatchLight) * specular;
 	gl_FragColor.a = 1.0;
 }
 

@@ -27,11 +27,11 @@ public class Constants {
 	public static final String PREF_DO_DB_UPDATE = "pref_dbupdate";
 	
 //	///DEFAULT COLORS//////
-    //float hairColor[] = {0.396f,0.263f,0.129f,1.0f};
-	//float hairColor[] = {0.2941176f,0.2117647f,0.105882f,1.0f};
-	public static float defaultHairColor[] = {1.0f,0.0f,1.0f,1.0f};
+	public static float defaultHairColor[] = {1.0f,1.0f,1.0f,1.0f};
+	//public static float defaultHairColor[] = {0.2941176f,0.2117647f,0.105882f,1.0f};
+	//public static float defaultHairColor[] = {1.0f,1.0f,1.0f,1.0f};
 	//float highlightColor[] = {0.650f,0.502f,0.392f,1.0f};		
-	public static float defaultHighlightColor[] = {1.0f,1.0f,1.0f,1.0f};
+	public static float defaultHighlightColor[] = {0.8f,0.0f,0.8f,1.0f};
 	public static float defaultEyeColor[] = {0.0f,0.302f,0.0f,1.0f};
 	/////DEFAULT COLORS//////
 	

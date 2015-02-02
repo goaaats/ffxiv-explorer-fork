@@ -298,9 +298,10 @@ public class OpenGL_View extends JPanel {
 		    gl.glClear(GL3.GL_COLOR_BUFFER_BIT | GL3.GL_DEPTH_BUFFER_BIT); 		  
 		    
 		    Matrix.setIdentityM(viewMatrix, 0);
-		    Matrix.translateM(viewMatrix, 0, panX, panY, zoom);
-		    Matrix.rotateM(viewMatrix, 0, angleX, 0, 1, 0);
-		    Matrix.rotateM(viewMatrix, 0, angleY, 1, 0, 0);		     		   		    		    		    
+		    Matrix.setIdentityM(modelMatrix, 0);
+		    Matrix.translateM(modelMatrix, 0, panX, panY, zoom);
+		    Matrix.rotateM(modelMatrix, 0, angleX, 0, 1, 0);
+		    Matrix.rotateM(modelMatrix, 0, angleY, 1, 0, 0);		     		   		    		    		    
 		    
 		    model.render(defaultShader, viewMatrix, modelMatrix, projMatrix, gl, currentLoD);
 
@@ -334,7 +335,7 @@ public class OpenGL_View extends JPanel {
 		
 		@Override
 		public void reshape(GLAutoDrawable drawable, int x, int y, int width, int height){
-			GL3bc gl = drawable.getGL().getGL3bc();  // get the OpenGL 2 graphics context
+				GL3bc gl = drawable.getGL().getGL3bc();  // get the OpenGL 2 graphics context
 			 
 		      if (height == 0) height = 1;   // prevent divide by zero
 		      float aspect = (float)width / height;
@@ -342,8 +343,7 @@ public class OpenGL_View extends JPanel {
 		      gl.glViewport(0, 0, width, height);
 		 
 		      Matrix.setIdentityM(projMatrix, 0);
-		      Matrix.perspectiveM(projMatrix, 0, 45.0f, aspect, 0.1f, 100.0f);
-		     
+		      Matrix.perspectiveM(projMatrix, 0, 45.0f, aspect, 0.1f, 100.0f);		     
 		      Matrix.setIdentityM(modelMatrix, 0);
 		      Matrix.setIdentityM(viewMatrix, 0);
 		}
