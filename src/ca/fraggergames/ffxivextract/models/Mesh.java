@@ -27,6 +27,8 @@ public class Mesh{
 		this.vertOffset = vertexBufferOffset;
 		this.indexOffset = indexBufferOffset;		
 		
+		this.materialNumber = meshNum;
+		
 		this.vertexSize = (sizeinfo >> 8*0) & 0xFF;
 		this.auxVertexSize = (sizeinfo >> 8*1) & 0xFF;
 		this.unknownSize = (sizeinfo >> 8*2) & 0xFF;

@@ -27,9 +27,7 @@ void main() {
 	vec4 mapDiffuse = vColor;		   
 	vec4 mapNormal;
 	vec4 mapSpecular;
-	vec4 specularColor;
-	
-	mapDiffuse = vec4(1.0, 1.0, 1.0, 1.0);
+	vec4 specularColor;	
 	
 	//Color Sets
 	vec4 table_color;
@@ -40,18 +38,17 @@ void main() {
 	//Other
 	vec3 normal = vNormal.xyz;
 
+	//Texture Maps
+	if (uHasNormal) 
+        mapNormal = texture2D(uNormalTex, vTexCoord.st);
+	if (uHasDiffuse)
+    	mapDiffuse = texture2D(uDiffuseTex, vTexCoord.st);
+
 	//Check for Transparent	
 	if (uHasNormal) {
-        mapNormal = texture2D(uNormalTex, vTexCoord.st);
-
-        // Alpha testing
-        if (mapNormal.b < 0.5) {
-            discard;
-        }
-    }
-        
-    if (uHasDiffuse)
-    	mapDiffuse = texture2D(uDiffuseTex, vTexCoord.st);
+        if (mapNormal.b < 0.5)
+            discard;        
+    }  
         
     //Compute Normal Map
 	if (uHasNormal)	
@@ -62,39 +59,39 @@ void main() {
         
 	vec3 L = normalize(vLightDir);
     vec3 E = normalize(vEyeVec);
-    vec3 R = reflect(-L, normal);
-
-	//Compute ColorSet Map
-	if (uHasNormal && uHasColorSet)
-	{
-		table_color = texture2D(uColorSetTex, vec2(0.125, mapNormal.a));
-        table_specular = texture2D(uColorSetTex, vec2(0.375, mapNormal.a));
-        table_unknown1 = texture2D(uColorSetTex, vec2(0.625, mapNormal.a));
-        table_unknown2 = texture2D(uColorSetTex, vec2(0.875, mapNormal.a));              
-	}
-        
+    vec3 R = reflect(L, normal);	
+    vec3 H = normalize(L+E); 
+      
     if (uHasNormal && uHasColorSet){
     	mapDiffuse = vec4(table_color.xyz * mapDiffuse.xyz, 1.0);
     	mapDiffuse = mapDiffuse + (table_unknown1 * 0.5);
     }
     
+    float rimShading = 1.0 - max(dot(E, normal), 0.0);     
+    
     //Diffuse
-    mapDiffuse = mapDiffuse * max(dot(normal,L),0.0);
+    mapDiffuse.xyz = mapDiffuse.xyz * max(dot(normal,L),0.0);
     mapDiffuse = clamp(mapDiffuse, 0.0, 1.0);    
 
 	//Specular
+	float specular = 1.0;
 	if (uHasSpecular)
 	{
 		mapSpecular = texture2D(uSpecularTex, vTexCoord.st);
-		float specular = pow( max(dot(R, E), 0.0), 1.0);
-		specular = mapSpecular.r * mapSpecular.a * specular;
+		specular = pow( max(dot(R, -E), 0.0), mapSpecular.g);
+		specular = specular;
 		
-		if (uHasNormal && uHasColorSet)
-			specularColor = table_specular * specular;
+		//Fresnel approximation
+		float F0 = 0.028;
+		float exp = pow(max(0, 1-dot(H, E)), 5);
+	 	float fresnel = exp+F0*(1.0-exp);
+	 	
+	 	specular *= fresnel;
 		
+		specularColor = vec4(1.0,1.0,1.0,1.0) * specular;
 	}	
 
-    gl_FragColor = vec4(mapDiffuse.xyz,1.0) + specularColor;
+    gl_FragColor = mapDiffuse + specularColor;
 }
 
 

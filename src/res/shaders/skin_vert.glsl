@@ -27,7 +27,7 @@ void main(void) {
 	vNormal = vec4(normalize(aNormal.xyz), aNormal.a);
 	vec4 biTangent = (aBiTangent * 2.0 / 255.0) - 1.0;
 	biTangent = normalize(biTangent);
-	vec3 tangent = cross(biTangent.xyz, vNormal.xyz);
+	vec3 tangent =  biTangent.a * cross(biTangent.xyz, vNormal.xyz);
 
 	vTBNMatrix = mat4(
 		vec4(tangent.x, biTangent.x, vNormal.x,0.0),
@@ -36,9 +36,9 @@ void main(void) {
 		vec4(0.0, 0.0, 0.0, 1.0)
         );
 	
-	vLightDir = vec3(vec3(1.0,1.0,1.0)-vec3(uViewMatrix * uModelMatrix * aPosition));
-	vEyeVec = -vec3(uViewMatrix * uModelMatrix * aPosition);
-	vColor = aColor;	
+	vLightDir =  (inverse(uViewMatrix * uModelMatrix) * vec4(0.0,0.0,5.0,1.0)).xyz;
+	vEyeVec = vec3((inverse(uViewMatrix * uModelMatrix) * vec4(0.0,0.0,5.0,1.0)).xyz);
+	vColor = aColor;
 
     gl_Position = uProjMatrix * uViewMatrix * uModelMatrix * aPosition;
 }
