@@ -65,11 +65,11 @@ public class OpenGL_View extends JPanel {
 	private int lastOriginX, lastOriginY;
 	private int lastX, lastY;		
 	
-	public OpenGL_View(final Model model) {
+	public OpenGL_View(final Model model, Model model2) {
 		GLProfile glProfile = GLProfile.getDefault();
 		GLCapabilities glcapabilities = new GLCapabilities( glProfile );
         final GLCanvas glcanvas = new GLCanvas( glcapabilities );
-        renderer = new ModelRenderer(model);
+        renderer = new ModelRenderer(model, model2);
         glcanvas.addGLEventListener(renderer);
         animator = new FPSAnimator(glcanvas, 30);
         animator.start();
@@ -241,7 +241,7 @@ public class OpenGL_View extends JPanel {
 	
 	class ModelRenderer implements GLEventListener{
 
-		private Model model;
+		private Model model, model2;
 		private GLU glu;
 		private float zoom = -7;
 		private float panX = 0;
@@ -258,8 +258,9 @@ public class OpenGL_View extends JPanel {
 		float[] viewMatrix = new float[16];
 		float[] projMatrix = new float[16];
 		
-		public ModelRenderer(Model model) {
+		public ModelRenderer(Model model, Model model2) {
 			this.model = model;
+			this.model2 = model2;
 			textureIds = new int[model.getNumMaterials() * 4];
 		}
 
@@ -292,6 +293,7 @@ public class OpenGL_View extends JPanel {
 			if (!loaded)
 			{
 				model.loadToVRAM(gl);
+				model2.loadToVRAM(gl);
 				loaded = true;
 			}
 			
@@ -304,7 +306,8 @@ public class OpenGL_View extends JPanel {
 		    Matrix.rotateM(modelMatrix, 0, angleY, 1, 0, 0);		     		   		    		    		    
 		    
 		    model.render(defaultShader, viewMatrix, modelMatrix, projMatrix, gl, currentLoD);
-
+		    if (model2 != null)
+		    	model2.render(defaultShader, viewMatrix, modelMatrix, projMatrix, gl, currentLoD);
 		}
 
 		@Override
@@ -319,9 +322,9 @@ public class OpenGL_View extends JPanel {
 		      gl.glClearDepth(1.0f);      // set clear depth value to farthest
 		      gl.glEnable(GL3.GL_DEPTH_TEST); // enables depth testing
 		      gl.glDepthFunc(GL3.GL_LEQUAL);  // the type of depth test to do
-		      gl.glEnable(GL3.GL_BLEND); 
+		      gl.glEnable(GL3.GL_BLEND);
+		      gl.glEnable(GL3.GL_CULL_FACE);
 		      gl.glBlendFunc (GL3.GL_SRC_ALPHA, GL3.GL_ONE_MINUS_SRC_ALPHA);	
-		    //  gl.glBlendFuncSeparate(GL3.GL_SRC_ALPHA, GL3.GL_ONE_MINUS_SRC_ALPHA, GL3.GL_ONE_MINUS_DST_ALPHA, GL3.GL_ONE);
 		      gl.glEnable(GL3.GL_TEXTURE_2D);
 		    		      
 		      try {

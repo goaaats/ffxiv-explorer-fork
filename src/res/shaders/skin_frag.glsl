@@ -1,4 +1,4 @@
-#version 110
+#version 150
 precision highp float;
 
 varying vec4 vPosition;
@@ -75,11 +75,11 @@ void main() {
 	if(lambertian > 0.0) { 
 		// this is blinn phong
 		float specAngle = max(dot(H, normal), 0.0);
-		specular = pow(specAngle, 128);
+		specular = pow(specAngle, 128.0);
 		
 		//Fresnel approximation
 		float F0 = 0.028;
-		float exp = pow(max(0, 1-dot(H, E)), 5);
+		float exp = pow(max(0.0, 1.0-dot(H, E)), 5.0);
 	 	float fresnel = exp+F0*(1.0-exp);
 		specular *= fresnel;
 	}
@@ -87,8 +87,8 @@ void main() {
     float rimShading = smoothstep(0.6, 1.0, (1.0 - max(dot(E, normal), 0.0)));    
 
 	gl_FragColor = vec4(ambientColor +
-                      lambertian * mapDiffuse +
-                      rimShading * mapDiffuse +
+                      lambertian * mapDiffuse.xyz +
+                      rimShading * mapDiffuse.xyz +
                       specular * specColor, 1.0);
 }
 

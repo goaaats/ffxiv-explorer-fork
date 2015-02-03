@@ -405,10 +405,10 @@ public final class ImageDecoding {
 		for (int y = 0; y < targetHeight; y++) {
 			for (int x = 0; x < targetWidth; x++) {
 				
-				float fr = HalfFloat_Utils.convertHalfToFloat(buffer.getShort());
-				float fg = HalfFloat_Utils.convertHalfToFloat(buffer.getShort());
-				float fb = HalfFloat_Utils.convertHalfToFloat(buffer.getShort());
-				float fa = HalfFloat_Utils.convertHalfToFloat(buffer.getShort());
+				float fr = Utils.convertHalfToFloat(buffer.getShort());
+				float fg = Utils.convertHalfToFloat(buffer.getShort());
+				float fb = Utils.convertHalfToFloat(buffer.getShort());
+				float fa = Utils.convertHalfToFloat(buffer.getShort());
 				
 				double fr2 = Math.max(0.0, Math.min(1.0, fr));
 				int r = (int) Math.floor(fr2 == 1.0 ? 255 : fr2 * 256.0);

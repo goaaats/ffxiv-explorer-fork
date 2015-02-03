@@ -1,6 +1,6 @@
 package ca.fraggergames.ffxivextract.helpers;
 
-public class HalfFloat_Utils {
+public class Utils {
 
 	/**
      * Converts a single precision (32 bit) floating point value
@@ -57,4 +57,26 @@ public class HalfFloat_Utils {
              | ( (f >> 13) & 0x03ff));
     }
 	
+    public static String getRegexpFromFormatString(String format)
+    {
+        String toReturn = format;
+
+        // escape some special regexp chars
+        toReturn = toReturn.replaceAll("\\.", "\\\\.");
+        toReturn = toReturn.replaceAll("\\!", "\\\\!");
+
+        if (toReturn.indexOf("%") >= 0)
+        {
+            toReturn = toReturn.replaceAll("%s", "[\\\\w]+"); //accepts 0-9 A-Z a-z _
+
+            while (toReturn.matches(".*%([0-9]+)[d]{1}.*"))
+            {
+                String digitStr = toReturn.replaceFirst(".*%([0-9]+)[d]{1}.*", "$1");
+                int numDigits = Integer.parseInt(digitStr);
+                toReturn = toReturn.replaceFirst("(.*)(%[0-9]+[d]{1})(.*)", "$1[0-9]{" + numDigits + "}$3");
+            }
+        }
+
+        return "^" + toReturn + "$";
+    }
 }

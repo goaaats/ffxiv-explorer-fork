@@ -1,4 +1,4 @@
-#version 110
+#version 150
 precision highp float;
 
 varying vec4 vPosition;

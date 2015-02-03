@@ -11,6 +11,7 @@ import javax.media.opengl.GL3bc;
 
 import ca.fraggergames.ffxivextract.Constants;
 import ca.fraggergames.ffxivextract.helpers.ImageDecoding.ImageDecodingException;
+import ca.fraggergames.ffxivextract.helpers.Utils;
 import ca.fraggergames.ffxivextract.models.SqPack_IndexFile.SqPack_File;
 import ca.fraggergames.ffxivextract.models.SqPack_IndexFile.SqPack_Folder;
 import ca.fraggergames.ffxivextract.storage.HashDatabase;
@@ -225,33 +226,85 @@ public class Model {
 				materialFolderPath = String.format("%smaterial", modelPath.substring(0, modelPath.indexOf("model")));
 			else
 				materialFolderPath = String.format("%smaterial/v%04d", modelPath.substring(0, modelPath.indexOf("model")), variant-1);
-		}
+		}		
 		else
 			materialFolderPath = String.format("%smaterial/v%04d", modelPath.substring(0, modelPath.indexOf("model")), variant);
 		
 		int hash1 = HashDatabase.computeCRC(materialFolderPath.getBytes(), 0, materialFolderPath.getBytes().length);			
 		
-		for (SqPack_Folder f : currentIndex.getPackFolders())
-		{			
-			if (f.getId() == hash1)
-			{
-					for (int i = 0; i < numMaterialStrings; i++)
-					{
-						String fileString = null;
-						
-						if (stringArray[numAtrStrings+numBoneStrings+i].startsWith("/"))
-							fileString = stringArray[numAtrStrings+numBoneStrings+i].substring(1);
-						else
-							fileString = stringArray[numAtrStrings+numBoneStrings+i].substring(stringArray[numAtrStrings+numBoneStrings+i].lastIndexOf("/")+1);
+		//HACK HERE
+		int bodyMaterialSpot = -1;
+		
+		if (materialFolderPath.contains("body") && materialFolderPath.contains("human"))
+		{
+			bodyMaterialSpot = 0;
+		}
+		else
+		{
+			for (SqPack_Folder f : currentIndex.getPackFolders())
+			{			
+				if (f.getId() == hash1)
+				{
+						for (int i = 0; i < numMaterialStrings; i++)
+						{
+							String fileString = null;
 							
-						int hash2 = HashDatabase.computeCRC(fileString.getBytes(), 0, fileString.getBytes().length);
+							if (stringArray[numAtrStrings+numBoneStrings+i].startsWith("/"))
+								fileString = stringArray[numAtrStrings+numBoneStrings+i].substring(1);
+							else
+								fileString = stringArray[numAtrStrings+numBoneStrings+i].substring(stringArray[numAtrStrings+numBoneStrings+i].lastIndexOf("/")+1);
+								
+							//HACK HERE
+							if (fileString.matches(Utils.getRegexpFromFormatString("mt_c%04db%04d_%s.mtrl")))
+							{
+								bodyMaterialSpot = i;
+								continue;
+							}
+							
+							int hash2 = HashDatabase.computeCRC(fileString.getBytes(), 0, fileString.getBytes().length);
+							for (SqPack_File file : f.getFiles())
+							{
+								if (file.id == hash2)
+								{
+									try {
+										HashDatabase.addPathToDB(materialFolderPath+"/"+fileString);
+										materials[i] = new Material(materialFolderPath, currentIndex, currentIndex.extractFile(file.dataoffset, null));
+									} catch (FileNotFoundException e) {
+										e.printStackTrace();
+									} catch (IOException e) {
+										e.printStackTrace();
+									}
+									break;
+								}
+							}
+						}
+					break;
+				}
+			}	
+		}
+		
+		//If there was a body material, grab it HACK HERE
+		if (bodyMaterialSpot != -1)
+		{	
+			String s = stringArray[numAtrStrings+numBoneStrings+bodyMaterialSpot].substring(1);
+			String s1 = s.replace("mt_c", "").substring(0, 9);					
+			int chara = Integer.parseInt(s1.substring(0, 4));
+			int body = Integer.parseInt(s1.substring(5, 9));
+			materialFolderPath = String.format("chara/human/c%04d/obj/body/b%04d/material",chara,body);
+			hash1 = HashDatabase.computeCRC(materialFolderPath.getBytes(), 0, materialFolderPath.getBytes().length);
+			
+			for (SqPack_Folder f : currentIndex.getPackFolders())
+			{			
+				if (f.getId() == hash1)
+				{
+						int hash2 = HashDatabase.computeCRC(s.getBytes(), 0, s.getBytes().length);
 						for (SqPack_File file : f.getFiles())
 						{
 							if (file.id == hash2)
 							{
 								try {
-									HashDatabase.addPathToDB(materialFolderPath+"/"+fileString);
-									materials[i] = new Material(materialFolderPath, currentIndex, currentIndex.extractFile(file.dataoffset, null));
+									HashDatabase.addPathToDB(materialFolderPath+"/"+s);
+									materials[bodyMaterialSpot] = new Material(materialFolderPath, currentIndex, currentIndex.extractFile(file.dataoffset, null));
 								} catch (FileNotFoundException e) {
 									e.printStackTrace();
 								} catch (IOException e) {
@@ -260,9 +313,10 @@ public class Model {
 								break;
 							}
 						}
-					}
-			}
-		}		
+					
+				}
+			}	 
+		}
 	}
 	
 	public Mesh[] getMeshes(int lodLevel)

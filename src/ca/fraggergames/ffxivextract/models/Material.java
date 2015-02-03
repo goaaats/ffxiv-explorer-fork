@@ -7,6 +7,7 @@ import java.nio.ByteOrder;
 
 import javax.media.opengl.GL3;
 
+import ca.fraggergames.ffxivextract.helpers.Utils;
 import ca.fraggergames.ffxivextract.models.SqPack_IndexFile.SqPack_File;
 import ca.fraggergames.ffxivextract.models.SqPack_IndexFile.SqPack_Folder;
 import ca.fraggergames.ffxivextract.storage.HashDatabase;
@@ -74,7 +75,9 @@ public class Material {
 			for (int i = 0; i < numPaths; i++)
 			{				
 				String s = stringArray[i];
-				String folderName = s.substring(0, s.lastIndexOf("/"));
+								
+				String folderName = s.substring(0, s.lastIndexOf("/"));				
+				
 				int hash1 = HashDatabase.computeCRC(folderName.getBytes(), 0, folderName.getBytes().length);			
 				
 				for (SqPack_Folder f : currentIndex.getPackFolders())

@@ -1,4 +1,4 @@
-#version 110
+#version 150
 precision highp float;
 
 varying vec4 vPosition;
@@ -59,7 +59,7 @@ void main() {
 
 	//Fresnel approximation
 	float F0 = 0.5;
-	float exp = pow(max(0, 1-dot(H, E)), 5);
+	float exp = pow(max(0.0, 1.0-dot(H, E)), 5.0);
 	float fresnel = exp+F0*(1.0-exp);
 
 	//Specular	
