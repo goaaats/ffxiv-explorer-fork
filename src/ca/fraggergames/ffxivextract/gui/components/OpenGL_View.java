@@ -320,7 +320,6 @@ public class OpenGL_View extends JPanel {
 		      gl.glEnable(GL3.GL_DEPTH_TEST); // enables depth testing
 		      gl.glDepthFunc(GL3.GL_LEQUAL);  // the type of depth test to do
 		      gl.glEnable(GL3.GL_BLEND); 
-		      gl.glCullFace(GL3.GL_CW);
 		      gl.glBlendFunc (GL3.GL_SRC_ALPHA, GL3.GL_ONE_MINUS_SRC_ALPHA);	
 		    //  gl.glBlendFuncSeparate(GL3.GL_SRC_ALPHA, GL3.GL_ONE_MINUS_SRC_ALPHA, GL3.GL_ONE_MINUS_DST_ALPHA, GL3.GL_ONE);
 		      gl.glEnable(GL3.GL_TEXTURE_2D);

@@ -18,15 +18,12 @@ public class Texture_File {
 
 	final public int numMipMaps;
 
-	final public int dataStart[];
-	final public int dataLength[];
 
 	final public int uncompressedWidth;
 	final public int uncompressedHeight;
 
+	final public int mipmapOffsets[];
 	final public byte data[];
-
-	final public short numFrames;
 
 	
 	public Texture_File(byte data[]) {
@@ -37,20 +34,18 @@ public class Texture_File {
 		bb.order(ByteOrder.LITTLE_ENDIAN);
 		bb.getInt(); // Uknown
 		compressionType = bb.getShort();
-		numMipMaps = bb.get();		
+		bb.get();		
 		bb.get();
 		uncompressedWidth = bb.getShort();
 		uncompressedHeight = bb.getShort();
 		bb.getShort();
-		numFrames = bb.getShort();
+		numMipMaps = bb.getShort();
+		mipmapOffsets = new int[numMipMaps];
 		
 		bb.position(0x1c);
 		
-		dataStart = new int[numFrames];
-		dataLength = new int[numFrames];
-		
-		for (int i = 0; i < numFrames; i++)
-			dataStart[i] = bb.getInt();
+		for (int i = 0; i < numMipMaps; i++)		
+			mipmapOffsets[i] = bb.getInt();		
 		
 	}
 	
@@ -63,7 +58,7 @@ public class Texture_File {
 		switch (compressionType) {
 		case 0x3420: {
 			return ImageDecoding.decodeImageDX1(data,
-					dataStart[index],
+					mipmapOffsets[index],
 					uncompressedWidth,
 					uncompressedHeight,
 					uncompressedWidth / 4,
@@ -72,21 +67,21 @@ public class Texture_File {
 		case 0x1130:
 		case 0x1131: {
 			return ImageDecoding.decodeImageRaw(data,
-					dataStart[index],
+					mipmapOffsets[index],
 					uncompressedWidth,
 					uncompressedHeight, 0, 0);
 		}
 		case 0x3430:
 		{
 			return ImageDecoding.decodeImageDX3(data, 
-					dataStart[index], uncompressedWidth,
+					mipmapOffsets[index], uncompressedWidth,
 					uncompressedHeight,
 					uncompressedWidth / 4,
 					uncompressedHeight / 4);
 		}
 		case 0x3431: {
 			return ImageDecoding.decodeImageDX5(data,
-					dataStart[index],
+					mipmapOffsets[index],
 					uncompressedWidth,
 					uncompressedHeight,
 					uncompressedWidth / 4,
@@ -97,7 +92,7 @@ public class Texture_File {
 				if (parameters.containsKey("4444.channel")) {
 					Object q = parameters.get("4444.channel");
 					return ImageDecoding.decodeImage4444split1channel(data,
-							dataStart[index],
+							mipmapOffsets[index],
 							uncompressedWidth,
 							uncompressedHeight, 0, 0,
 							(q instanceof Integer ? (Integer) q : 0));
@@ -106,31 +101,31 @@ public class Texture_File {
 						&& parameters.get("1008.4444.mergedSplit").equals(
 								ImageDecoding.ON_VALUE)) {
 					return ImageDecoding.decodeImage4444split(data,
-							dataStart[index],
+							mipmapOffsets[index],
 							uncompressedWidth,
 							uncompressedHeight, 0, 0);
 				}
 			}
 			return ImageDecoding.decodeImage4444(data,
-					dataStart[index],
+					mipmapOffsets[index],
 					uncompressedWidth,
 					uncompressedHeight, 0, 0);
 		}
 		case 0x1441: {
 			return ImageDecoding.decodeImage5551(data,
-					dataStart[index],
+					mipmapOffsets[index],
 					uncompressedWidth,
 					uncompressedHeight, 0, 0, parameters);
 		}
 		case 0x1450:
 		case 0x1451:{
 			return ImageDecoding.decodeImageRGBA(data,
-					dataStart[index],
+					mipmapOffsets[index],
 					uncompressedWidth,
 					uncompressedHeight, 0, 0);
 		}		
 		case 0x2460: {
-			return ImageDecoding.decodeImageRGBAF(data, dataStart[index], uncompressedWidth, uncompressedHeight, 0, 0);
+			return ImageDecoding.decodeImageRGBAF(data, mipmapOffsets[index], uncompressedWidth, uncompressedHeight, 0, 0);
 		}
 		}
 		throw new ImageDecodingException("Unsupported format: "

@@ -22,6 +22,11 @@ uniform bool uHasNormal;
 uniform bool uHasSpecular;
 uniform bool uHasColorSet;
 
+const vec3 lightPos = vec3(1.0,1.0,1.0);
+const vec3 ambientColor = vec3(0.1, 0.1, 0.1);
+const vec3 diffuseColor = vec3(0.7, 0.7, 0.7);
+const vec3 specColor = vec3(1.0, 1.0, 1.0);
+
 void main() {
 	
 	//Color Maps			  
@@ -58,26 +63,30 @@ void main() {
     vec3 H = normalize(L+E);   
     
     //Diffuse            
-    diffuseColor = (mix(uHairColor, uHighlightColor, mapSpecular.a) * mapSpecular.g) * max(dot(normal,L),0.0); 
+    diffuseColor = mix(uHairColor, uHighlightColor, mapSpecular.a) * mapSpecular.r; 
     diffuseColor = clamp(diffuseColor, 0.0, 1.0);    
-	
-	//Specular
-	if (uHasSpecular)
-	{
+		
+   	float lambertian = max(dot(L,normal), 0.0);
+	float specular = 0.0;
+ 
+	if(lambertian > 0.0) { 
+		// this is blinn phong
+		float specAngle = max(dot(H, normal), 0.0);
+		specular = pow(specAngle, 128);
+		
 		//Fresnel approximation
-		float F0 = 0.5;
+		float F0 = 0.028;
 		float exp = pow(max(0, 1-dot(H, E)), 5);
 	 	float fresnel = exp+F0*(1.0-exp);
-	
-		//Specular calculation and map
-		float specular = pow( max(dot(R, E), 0.0), 32);
 		specular *= fresnel;
-			
-		specularColor = vec4(1.0,1.0,1.0,1.0) * specular;
-	}	
+	}
+    
+    float rimShading = smoothstep(0.6, 1.0, (1.0 - max(dot(E, normal), 0.0)));    
 
-	//Final color
-   	gl_FragColor = vec4(diffuseColor.xyz, mapNormal.a);
+	gl_FragColor = vec4(ambientColor +
+                      lambertian * diffuseColor +
+                      rimShading * diffuseColor +
+                      specular * specColor, mapNormal.a);
 }
 
 

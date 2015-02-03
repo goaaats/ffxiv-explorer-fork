@@ -370,10 +370,10 @@ public class Model {
 			if (getMaterial(i) == null)
 				break;
 			
-			gl.glGenTextures(4, getMaterial(i).getGLTextureIds(),0);												
+			gl.glGenTextures(5, getMaterial(i).getGLTextureIds(),0);												
 			Material m = getMaterial(i);
 			
-			for (int j = 0; j < 4; j++){
+			for (int j = 0; j < 5; j++){
 				
 				Texture_File tex = null;
 				
@@ -390,6 +390,9 @@ public class Model {
 					break;
 				case 3: 
 					tex = m.getColorSetTexture();
+					break;
+				case 4: 
+					tex = m.getMaskTexture();
 					break;
 				}
 				

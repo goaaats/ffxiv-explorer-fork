@@ -21,6 +21,11 @@ uniform bool uHasNormal;
 uniform bool uHasSpecular;
 uniform bool uHasColorSet;
 
+const vec3 lightPos = vec3(1.0,1.0,1.0);
+const vec3 ambientColor = vec3(0.1, 0.1, 0.1);
+const vec3 diffuseColor = vec3(0.7, 0.7, 0.7);
+const vec3 specColor = vec3(1.0, 1.0, 1.0);
+
 void main() {
 	
 	//Color Maps
@@ -43,7 +48,9 @@ void main() {
         mapNormal = texture2D(uNormalTex, vTexCoord.st);
 	if (uHasDiffuse)
     	mapDiffuse = texture2D(uDiffuseTex, vTexCoord.st);
-
+	if (uHasSpecular)
+    	mapSpecular = texture2D(uSpecularTex, vTexCoord.st);
+    	
 	//Check for Transparent	
 	if (uHasNormal) {
         if (mapNormal.b < 0.5)
@@ -56,42 +63,33 @@ void main() {
 		vec4 normal_raw = mapNormal;
         normal = normalize(((normal_raw * 2.0 - 1.0) * vTBNMatrix).xyz);
 	}
-        
+     
 	vec3 L = normalize(vLightDir);
     vec3 E = normalize(vEyeVec);
     vec3 R = reflect(L, normal);	
     vec3 H = normalize(L+E); 
-      
-    if (uHasNormal && uHasColorSet){
-    	mapDiffuse = vec4(table_color.xyz * mapDiffuse.xyz, 1.0);
-    	mapDiffuse = mapDiffuse + (table_unknown1 * 0.5);
-    }
-    
-    float rimShading = 1.0 - max(dot(E, normal), 0.0);     
-    
-    //Diffuse
-    mapDiffuse.xyz = mapDiffuse.xyz * max(dot(normal,L),0.0);
-    mapDiffuse = clamp(mapDiffuse, 0.0, 1.0);    
-
-	//Specular
-	float specular = 1.0;
-	if (uHasSpecular)
-	{
-		mapSpecular = texture2D(uSpecularTex, vTexCoord.st);
-		specular = pow( max(dot(R, -E), 0.0), mapSpecular.g);
-		specular = specular;
+	 
+	float lambertian = max(dot(L,normal), 0.0);
+	float specular = 0.0;
+ 
+	if(lambertian > 0.0) { 
+		// this is blinn phong
+		float specAngle = max(dot(H, normal), 0.0);
+		specular = pow(specAngle, 128);
 		
 		//Fresnel approximation
 		float F0 = 0.028;
 		float exp = pow(max(0, 1-dot(H, E)), 5);
 	 	float fresnel = exp+F0*(1.0-exp);
-	 	
-	 	specular *= fresnel;
-		
-		specularColor = vec4(1.0,1.0,1.0,1.0) * specular;
-	}	
+		specular *= fresnel;
+	}
+    
+    float rimShading = smoothstep(0.6, 1.0, (1.0 - max(dot(E, normal), 0.0)));    
 
-    gl_FragColor = mapDiffuse + specularColor;
+	gl_FragColor = vec4(ambientColor +
+                      lambertian * mapDiffuse +
+                      rimShading * mapDiffuse +
+                      specular * specColor, 1.0);
 }
 
 

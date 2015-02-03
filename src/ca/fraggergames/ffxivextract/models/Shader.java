@@ -28,14 +28,18 @@ public class Shader {
 	private int colorLocation;
 	
 	private int diffuseTexLocation;
+	private int maskTexLocation;
 	private int normalTexLocation;
 	private int specularTexLocation;
 	private int colorSetTexLocation;
 	
 	private int usesDiffuseLocation;
+	private int usesMaskLocation;
 	private int usesNormalLocation;
 	private int usesSpecularLocation;
 	private int usesColorSetLocation;	
+	
+	private int numSampler = 4;
 	
 	public Shader(GL3 gl, String vertPath, String fragPath) throws IOException
 	{
@@ -69,11 +73,13 @@ public class Shader {
 
 		//Set Uniform Tex Locations
 		diffuseTexLocation = gl.glGetUniformLocation(shaderProgram, "uDiffuseTex");
+		maskTexLocation = gl.glGetUniformLocation(shaderProgram, "uMaskTex");
 		normalTexLocation = gl.glGetUniformLocation(shaderProgram, "uNormalTex");
 		specularTexLocation = gl.glGetUniformLocation(shaderProgram, "uSpecularTex");
 		colorSetTexLocation = gl.glGetUniformLocation(shaderProgram, "uColorSetTex");
 		
 		usesDiffuseLocation = gl.glGetUniformLocation(shaderProgram, "uHasDiffuse");
+		usesMaskLocation = gl.glGetUniformLocation(shaderProgram, "uHasMask");
 		usesNormalLocation = gl.glGetUniformLocation(shaderProgram, "uHasNormal");
 		usesSpecularLocation = gl.glGetUniformLocation(shaderProgram, "uHasSpecular");
 		usesColorSetLocation = gl.glGetUniformLocation(shaderProgram, "uHasColorSet");
@@ -122,6 +128,8 @@ public class Shader {
     		
     		if (mat.getDiffuseMapTexture() != null)
     			gl.glUniform1i(usesDiffuseLocation, 1);
+    		if (mat.getMaskTexture() != null)
+    			gl.glUniform1i(usesMaskLocation, 1);
     		if (mat.getNormalMapTexture() != null)
     			gl.glUniform1i(usesNormalLocation, 1);
     		if (mat.getSpecularMapTexture() != null)
@@ -133,6 +141,7 @@ public class Shader {
 	    	gl.glUniform1i(normalTexLocation, 1);
 	    	gl.glUniform1i(specularTexLocation, 2);
 	    	gl.glUniform1i(colorSetTexLocation, 3);
+	    	gl.glUniform1i(maskTexLocation, 4);
     			    	
 	    	gl.glActiveTexture(GL3.GL_TEXTURE0);
 	    	gl.glBindTexture(GL3.GL_TEXTURE_2D, mat.getGLTextureIds()[0]);
@@ -142,7 +151,8 @@ public class Shader {
 	    	gl.glBindTexture(GL3.GL_TEXTURE_2D, mat.getGLTextureIds()[2]);
 	    	gl.glActiveTexture(GL3.GL_TEXTURE3);
 	    	gl.glBindTexture(GL3.GL_TEXTURE_2D, mat.getGLTextureIds()[3]);		    	
-	    		    	    	
+	    	gl.glActiveTexture(GL3.GL_TEXTURE4);
+	    	gl.glBindTexture(GL3.GL_TEXTURE_2D, mat.getGLTextureIds()[4]);	    	    	
     	}
     	    	
 	}
@@ -188,6 +198,11 @@ public class Shader {
     	gl.glDisableVertexAttribArray(texCoordLocation);
     	gl.glDisableVertexAttribArray(binormalLocation);
     	gl.glDisableVertexAttribArray(colorLocation);			  
+	}
+	
+	public int getNextSamplerId()
+	{
+		return numSampler+1;
 	}
 	
 }

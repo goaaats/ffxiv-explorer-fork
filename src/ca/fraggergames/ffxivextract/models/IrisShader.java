@@ -22,8 +22,8 @@ public class IrisShader extends Shader {
 	public void setEyeCatchTexture(GL3 gl, Material mat)
 	{		
 		gl.glUniform1i(usesCatchLightTexLocation, 1);
-    	gl.glUniform1i(eyeCatchTexLocation, 4);			    	
-    	gl.glActiveTexture(GL3.GL_TEXTURE4);
+    	gl.glUniform1i(eyeCatchTexLocation, getNextSamplerId());			    	
+    	gl.glActiveTexture(GL3.GL_TEXTURE0 + getNextSamplerId());
     	gl.glBindTexture(GL3.GL_TEXTURE_2D, mat.getGLTextureIds()[0]);
 	}
 	

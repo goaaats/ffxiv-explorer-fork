@@ -19,14 +19,14 @@ public class Material {
 	short numPaths, numMaps, numColorSets, numUnknown;	
 	String stringArray[];
 	
-	Texture_File diffuse, normal, specular;
+	Texture_File diffuse, mask, normal, specular;
 	Texture_File colorSet;
 	private boolean shaderReady = false;
 	
 	Shader shader;
 	
 	//Rendering
-	int textureIds[] = new int[4];
+	int textureIds[] = new int[5];
 	
 	//Constructor grabs info about material
 	public Material(byte[] data) {
@@ -102,7 +102,7 @@ public class Material {
 											else if (fileString.endsWith("_s.tex"))
 												specular = new Texture_File(extracted);
 											else if (fileString.endsWith("_m.tex"))
-												diffuse = new Texture_File(extracted);
+												mask = new Texture_File(extracted);
 											else
 												colorSet = new Texture_File(extracted);
 											
@@ -155,6 +155,10 @@ public class Material {
 		return diffuse;
 	}
 	
+	public Texture_File getMaskTexture() {
+		return mask;
+	}
+	
 	public Texture_File getNormalMapTexture(){
 		return normal;
 	}
@@ -170,5 +174,6 @@ public class Material {
 	public int[] getGLTextureIds() {
 		return textureIds;
 	}
+	
 	
 }
