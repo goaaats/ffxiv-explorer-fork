@@ -293,7 +293,7 @@ public class OpenGL_View extends JPanel {
 			if (!loaded)
 			{
 				model.loadToVRAM(gl);
-				model2.loadToVRAM(gl);
+			//	model2.loadToVRAM(gl);
 				loaded = true;
 			}
 			

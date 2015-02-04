@@ -25,7 +25,7 @@ uniform bool uHasColorSet;
 
 vec3 lightPos = vec3(1.0,1.0,1.0);
 vec3 ambientColor = vec3(0.1, 0.1, 0.1);
-vec3 diffuseColor = vec3(0.7, 0.7, 0.7);
+vec3 diffuseColor = vec3(0.8, 0.8, 0.8);
 vec3 specColor = vec3(1.0, 1.0, 1.0);
 
 void main() {
@@ -79,37 +79,39 @@ void main() {
     vec3 E = normalize(vEyeVec);
     vec3 H = normalize(L+E);       
     
-    if (uHasDiffuse && uHasNormal && uHasColorSet){
-    
-    	mapDiffuse = vec4(mix(table_color.xyz, table_specular.xyz, mapSpecular.x) * mapDiffuse.xyz,1.0);
-
-    	//mapDiffuse = vec4(table_unknown1.xyz + mapDiffuse.xyz, 1.0);
+    //Diffuse
+    if (uHasDiffuse && uHasNormal && uHasColorSet){    
+    	mapDiffuse = vec4(table_color.xyz * mapDiffuse.xyz,1.0);
+		specColor = table_specular.xyz;
     } 
-	else if (uHasMask && uHasNormal && uHasColorSet){
-		specColor = table_specular.xyz;	
-    	mapDiffuse = vec4(mix(table_specular.xyz,table_color.xyz, mapDiffuse.x), 1.0);
+	else if (uHasMask && uHasNormal && uHasColorSet){		
+    	mapDiffuse = vec4(table_color.xyz * mapDiffuse.x, 1.0);
+    	specColor = table_specular.xyz;	
     }
     
-    //Diffuse    
+    //Bump Mapping
     mapDiffuse.xyz = mapDiffuse.xyz * max(dot(normal,L),0.0);
     mapDiffuse = clamp(mapDiffuse, 0.0, 1.0);    
-	
+		
+	//Specular
     float lambertian = max(dot(L,normal), 0.0);
-	float specular = 0.0;
- 
+	float specular = 0.0; 
 	if(lambertian > 0.0) {
 		// this is blinn phong
 		float specAngle = max(dot(H, normal), 0.0);
-		specular = pow(specAngle, mapSpecular.z*255.0);
 		
-		if (!uHasMask)
-			specular = mapSpecular.g * mapSpecular.b * specular;				
+		if (uHasDiffuse){
+			specular = pow(specAngle, mapSpecular.z*255.0);
+			specular = mapSpecular.g * mapSpecular.b * specular;
+		}
+		else if (uHasMask)
+			specular = pow(specAngle, mapDiffuse.y*255.0);		
 		
 		//Fresnel approximation
 		float F0 = 0.028;
 		float exp = pow(max(0.0, 1.0-dot(H, E)), 5.0);
 	 	float fresnel = exp+F0*(1.0-exp);
-		//specular *= fresnel;				
+	//	specular *= fresnel;				
 	}
     
     float rimShading = smoothstep(0.8, 1.0, (1.0 - max(dot(E, normal), 0.0)));    
