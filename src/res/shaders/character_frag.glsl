@@ -24,7 +24,7 @@ uniform bool uHasSpecular;
 uniform bool uHasColorSet;
 
 vec3 lightPos = vec3(1.0,1.0,1.0);
-vec3 ambientColor = vec3(0.1, 0.1, 0.1);
+vec3 ambientColor = vec3(0.0, 0.0, 0.0);
 vec3 diffuseColor = vec3(0.8, 0.8, 0.8);
 vec3 specColor = vec3(1.0, 1.0, 1.0);
 
@@ -32,6 +32,7 @@ void main() {
 	
 	//Color Maps
 	vec4 mapDiffuse = vColor;		
+	vec4 mapMask;
 	vec4 mapNormal;
 	vec4 mapSpecular;
 	vec4 specularColor;	
@@ -51,7 +52,7 @@ void main() {
 	if (uHasDiffuse)
     	mapDiffuse = texture2D(uDiffuseTex, vTexCoord.st);
     if (uHasMask)
-    	mapDiffuse = texture2D(uMaskTex, vTexCoord.st);
+    	mapMask = texture2D(uMaskTex, vTexCoord.st);
     if (uHasSpecular)
     	mapSpecular = texture2D(uSpecularTex, vTexCoord.st);
 	if (uHasNormal && uHasColorSet)
@@ -85,7 +86,8 @@ void main() {
 		specColor = table_specular.xyz;
     } 
 	else if (uHasMask && uHasNormal && uHasColorSet){		
-    	mapDiffuse = vec4(table_color.xyz * mapDiffuse.x, 1.0);
+    	mapDiffuse = vec4(table_color.xyz * mapMask.x, 1.0);
+    	mapDiffuse = vec4(mapDiffuse.xyz * 0.9, 1.0);
     	specColor = table_specular.xyz;	
     }
     
@@ -105,7 +107,7 @@ void main() {
 			specular = mapSpecular.g * mapSpecular.b * specular;
 		}
 		else if (uHasMask)
-			specular = pow(specAngle, mapDiffuse.y*255.0);		
+			specular = mapSpecular.y;
 		
 		//Fresnel approximation
 		float F0 = 0.028;
