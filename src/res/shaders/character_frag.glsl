@@ -25,7 +25,7 @@ uniform bool uHasColorSet;
 
 vec3 lightPos = vec3(1.0,1.0,1.0);
 vec3 ambientColor = vec3(0.0, 0.0, 0.0);
-vec3 diffuseColor = vec3(0.8, 0.8, 0.8);
+vec3 diffuseColor = vec3(0.3, 0.3, 0.3 );
 vec3 specColor = vec3(1.0, 1.0, 1.0);
 
 void main() {
@@ -80,19 +80,17 @@ void main() {
     vec3 E = normalize(vEyeVec);
     vec3 H = normalize(L+E);       
     
-    //Diffuse
-    if (uHasDiffuse && uHasNormal && uHasColorSet){    
-    	mapDiffuse = vec4(table_color.xyz * mapDiffuse.xyz,1.0);
-		specColor = table_specular.xyz;
+    //Diffuse        
+    vec3 color = table_color.xyz + table_specular.xyz; mix(table_color.xyz, table_specular.xyz, mapNormal.a);
+    if (uHasDiffuse && uHasNormal && uHasColorSet){            
+    	mapDiffuse = vec4(color * mapDiffuse.xyz,1.0);		
     } 
-	else if (uHasMask && uHasNormal && uHasColorSet){		
-    	mapDiffuse = vec4(table_color.xyz * mapMask.x, 1.0);
-    	mapDiffuse = vec4(mapDiffuse.xyz * 0.9, 1.0);
-    	specColor = table_specular.xyz;	
-    }
+	else if (uHasMask && uHasNormal && uHasColorSet){	
+    	mapDiffuse = vec4(color * mapMask.x, 1.0); //Red Channel Masks Color    	    	
+    }    
     
-    //Bump Mapping
-    mapDiffuse.xyz = mapDiffuse.xyz * max(dot(normal,L),0.0);
+    specColor = table_specular.xyz;
+           
     mapDiffuse = clamp(mapDiffuse, 0.0, 1.0);    
 		
 	//Specular
@@ -118,10 +116,13 @@ void main() {
     
     float rimShading = smoothstep(0.8, 1.0, (1.0 - max(dot(E, normal), 0.0)));    
 
-	gl_FragColor = vec4(ambientColor +
-                      rimShading * mapDiffuse.xyz + 
+	vec3 calcedSpecular = specular * specColor;
+		
+	mapDiffuse *= 0.9;
+		
+	gl_FragColor = vec4(ambientColor +                      
                       lambertian * mapDiffuse.xyz +
-                      specular * specColor, 1.0);
+                      calcedSpecular, 1.0);
 }
 
 
