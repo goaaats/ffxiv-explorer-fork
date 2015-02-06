@@ -186,6 +186,9 @@ public class EXD_Searcher {
 				String typePath = "";
 				String imcPath = null, modelPath = null, skelPath = null;
 				
+				if (type != 3)
+					type = 20;
+				
 				switch(type){
 				case 3:
 					typePath = "chara/monster/m";
@@ -195,7 +198,7 @@ public class EXD_Searcher {
 					//System.out.println(modelPath);								
 					//HashDatabase.addPathToDB(imcPath);
 					//HashDatabase.addPathToDB(modelPath);
-					
+					/*
 					skelPath = String.format("%s%04d/skeleton/base/b%04d/eid_m%04db%04d.eid", typePath,id,model,id,model);
 					System.out.println(skelPath);
 					HashDatabase.addPathToDB(skelPath);
@@ -203,6 +206,14 @@ public class EXD_Searcher {
 					System.out.println(skelPath);
 					HashDatabase.addPathToDB(skelPath);
 					skelPath = String.format("%s%04d/skeleton/base/b%04d/skl_m%04db%04d.sklb", typePath,id,model,id,model);
+					System.out.println(skelPath);*/
+					skelPath = String.format("%s%04d/animation/a%04d/bt_common/resident/monster.pap", typePath,id,0);
+					System.out.println(skelPath);
+					HashDatabase.addPathToDB(skelPath);
+					skelPath = String.format("%s%04d/animation/a%04d/bt_common/event/event_wandering_action.pap", typePath,id,0);
+					System.out.println(skelPath);
+					HashDatabase.addPathToDB(skelPath);
+					skelPath = String.format("%s%04d/animation/a%04d/bt_common/mon_sp/m%04d/mon_sp001.pap", typePath,id,0,id);
 					System.out.println(skelPath);
 					HashDatabase.addPathToDB(skelPath);
 					break;

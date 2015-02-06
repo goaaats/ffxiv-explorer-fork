@@ -530,6 +530,58 @@ public class EXDF_View extends JScrollPane implements ItemListener{
 		return exhName.equals(checkString);			
 	}
 
+	public void addAllWeaponModels()
+	{
+		//Write data
+		for (int row = 0; row < table.getRowCount(); row++) {
+						
+			int slot = (Integer) table.getValueAt(row, 47);
+			String model1[] = ((String) table.getValueAt(row, 10)).split(",");
+			String model2[] = ((String) table.getValueAt(row, 11)).split(",");
+			
+			String path, path2;
+			
+			switch(slot)
+			{
+			case 13: //Weapon
+			case 2:
+			case 1:
+				
+				break;
+			case 3: //Equipment
+				path = String.format("chara/equipment/e%04d/model/c0101e%04d_%s.mdl", model1[0], model1[0], "met");
+				break;
+			case 4:
+				path = String.format("chara/equipment/e%04d/model/c0101e%04d_%s.mdl", model1[0], model1[0], "top");
+				break;
+			case 5:
+				path = String.format("chara/equipment/e%04d/model/c0101e%04d_%s.mdl", model1[0], model1[0], "glv");
+				break;
+			case 6:
+				break;
+			case 7:
+				path = String.format("chara/equipment/e%04d/model/c0101e%04d_%s.mdl", model1[0], model1[0], "dwn");
+				break;
+			case 8:
+				path = String.format("chara/equipment/e%04d/model/c0101e%04d_%s.mdl", model1[0], model1[0], "met");
+				break;				
+			case 9: //Accessory
+				path = String.format("chara/accessory/a%04d/model/c0101a%04d_%s.mdl", model1[0], model1[0], "ear");
+				break;
+			case 10:
+				path = String.format("chara/accessory/a%04d/model/c0101a%04d_%s.mdl", model1[0], model1[0], "nek");
+				break;
+			case 11:
+				path = String.format("chara/accessory/a%04d/model/c0101a%04d_%s.mdl", model1[0], model1[0], "wrs");
+				break;
+			case 12:									
+				path = String.format("chara/accessory/a%04d/model/c0101a%04d_%s.mdl", model1[0], model1[0], "rir");
+				path2 = String.format("chara/accessory/a%04d/model/c0101a%04d_%s.mdl", model1[0], model1[0], "ril");
+				break;
+			}
+		}
+	}
+	
 	public void saveCSV(String path, int lang) throws IOException
 	{
 		langOverride = lang;

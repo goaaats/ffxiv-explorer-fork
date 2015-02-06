@@ -171,7 +171,7 @@ public class Model {
 	
 	private short loadNumberOfVariants()
 	{
-		if (modelPath == null || modelPath.contains("null"))
+		if (modelPath == null || modelPath.contains("null") || !modelPath.contains("chara"))
 			return -1;
 		
 		String incFolderPath = String.format("%s", modelPath.substring(0, modelPath.indexOf("model")-1));			
@@ -191,6 +191,7 @@ public class Model {
 						{
 							if (file.id == hash2)
 							{
+								System.out.println("Adding Entry: " + incFolderPath+"/"+fileString);
 								HashDatabase.addPathToDB(incFolderPath+"/"+fileString);
 								
 								try {
@@ -215,7 +216,7 @@ public class Model {
 	
 	public void loadMaterials(int variant)
 	{		
-		if (modelPath == null || modelPath.contains("null"))
+		if (modelPath == null || modelPath.contains("null") || !modelPath.contains("chara"))
 			return;
 		
 		String split[] = modelPath.split("/");		
@@ -250,11 +251,18 @@ public class Model {
 						{
 							String fileString = null;
 							
+							try{
 							if (stringArray[numAtrStrings+numBoneStrings+i].startsWith("/"))
 								fileString = stringArray[numAtrStrings+numBoneStrings+i].substring(1);
 							else
 								fileString = stringArray[numAtrStrings+numBoneStrings+i].substring(stringArray[numAtrStrings+numBoneStrings+i].lastIndexOf("/")+1);
-								
+							}
+							catch (ArrayIndexOutOfBoundsException e)
+							{
+								System.out.println("Num Materials was a LIE!");
+								break;
+							}
+							
 							//HACK HERE
 							if (fileString.matches(Utils.getRegexpFromFormatString("mt_c%04db%04d_%s.mtrl")))
 							{

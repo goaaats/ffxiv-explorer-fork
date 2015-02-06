@@ -15,6 +15,7 @@ import ca.fraggergames.ffxivextract.helpers.EXD_Searcher;
 import ca.fraggergames.ffxivextract.helpers.PathSearcher;
 import ca.fraggergames.ffxivextract.helpers.VersionUpdater;
 import ca.fraggergames.ffxivextract.helpers.VersionUpdater.VersionCheckObject;
+import ca.fraggergames.ffxivextract.models.Model;
 import ca.fraggergames.ffxivextract.models.SqPack_IndexFile;
 import ca.fraggergames.ffxivextract.models.SqPack_IndexFile.SqPack_Folder;
 import ca.fraggergames.ffxivextract.storage.HashDatabase;
@@ -22,6 +23,30 @@ import ca.fraggergames.ffxivextract.storage.HashDatabase;
 public class Main {
 
 	public static void main(String[] args) {		
+		
+//		try {
+//			SqPack_IndexFile currentIndex = new SqPack_IndexFile("c:\\Program Files (x86)\\SquareEnix\\FINAL FANTASY XIV - A Realm Reborn\\game\\sqpack\\ffxiv\\040000.win32.index");
+//			
+//			for (int i = 0; i < currentIndex.getPackFolders().length; i++)
+//			{
+//				SqPack_Folder folder = currentIndex.getPackFolders()[i];
+//				for (int j = 0; j < folder.getFiles().length; j++)
+//				{
+//					if (folder.getFiles()[j].getName().contains(".mdl"))
+//					{
+//						System.out.println("->Getting model " + folder.getFiles()[j].getName());
+//						Model m = new Model(folder.getName() + "/" + folder.getFiles()[j].getName(), currentIndex, currentIndex.extractFile(folder.getFiles()[j].dataoffset, null));
+//						for (int x = 0; x < m.getNumVariants(); x++)
+//							m.loadMaterials(x);
+//					}
+//				}
+//			}
+//						
+//		} catch (IOException e2) {
+//			// TODO Auto-generated catch block
+//			e2.printStackTrace();
+//		}
+//		System.exit(0);
 		
 		//Set to windows UI
 		try {

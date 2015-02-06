@@ -80,20 +80,22 @@ void main() {
     vec3 E = normalize(vEyeVec);
     vec3 H = normalize(L+E);       
     
-    //Diffuse        
-    vec3 color = table_color.xyz + table_specular.xyz; mix(table_color.xyz, table_specular.xyz, mapNormal.a);
+    //Color
+    vec3 color = table_color.xyz + table_specular.xyz;
+    color = mix(color, table_unknown1.xyz, table_unknown1.a); 
+    
+    //Diffuse         
     if (uHasDiffuse && uHasNormal && uHasColorSet){            
     	mapDiffuse = vec4(color * mapDiffuse.xyz,1.0);		
     } 
 	else if (uHasMask && uHasNormal && uHasColorSet){	
     	mapDiffuse = vec4(color * mapMask.x, 1.0); //Red Channel Masks Color    	    	
     }    
-    
-    specColor = table_specular.xyz;
-           
+                  
     mapDiffuse = clamp(mapDiffuse, 0.0, 1.0);    
 		
 	//Specular
+	specColor = table_specular.xyz;
     float lambertian = max(dot(L,normal), 0.0);
 	float specular = 0.0; 
 	if(lambertian > 0.0) {

@@ -76,6 +76,12 @@ public class Material {
 			{				
 				String s = stringArray[i];
 								
+				if (!s.contains("/"))
+				{
+					System.out.println("Can't load: " + s);
+					continue;
+				}
+				
 				String folderName = s.substring(0, s.lastIndexOf("/"));				
 				
 				int hash1 = HashDatabase.computeCRC(folderName.getBytes(), 0, folderName.getBytes().length);			
@@ -91,6 +97,7 @@ public class Material {
 								{
 									if (file.id == hash2)
 									{
+										System.out.println("Adding Entry: " + s);
 										HashDatabase.addPathToDB(s);																			
 										
 										try {
