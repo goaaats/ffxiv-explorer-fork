@@ -249,8 +249,7 @@ public class SqPack_DatFile {
 		if (fileSize + extraHeaderSize < 0)
 			return null;
 				
-		decompressedFile = new byte[fileSize + extraHeaderSize];
-		currentFileOffset = extraHeaderSize;
+		decompressedFile = new byte[fileSize];
 		}
 		catch (Exception e)
 		{
@@ -264,35 +263,57 @@ public class SqPack_DatFile {
 		if (dataBlocks == null || dataBlocks[0] == null)
 			return null;
 		
-		//Extract File
-		for (int i = 0; i < dataBlocks[0].length; i++)
+		int mipmapPosTable[] = null;
+		
+		//Load in file offsets for mipmaps
+		if (extraHeader != null && contentType == TYPE_TEXTURE)
 		{
-			// Block Header
-			currentFilePointer.seek(fileOffset + headerLength + dataBlocks[0][i].offset);
-			int blockHeaderLength = currentFilePointer.readInt();
-			currentFilePointer.readInt(); // NULL
-			int compressedBlockSize = currentFilePointer.readInt(); 
-			int decompressedBlockSize = currentFilePointer.readInt();
-				
-			if (Constants.DEBUG)
-				System.out.println("Decompressing block " + i + " @ file offset: " + currentFilePointer.getFilePointer() + " @ block offset: " + String.format("%X", dataBlocks[0][i].offset) + ". Compressed Size: " + compressedBlockSize + " and Decompressed Size: " + decompressedBlockSize + ". Block Size: " + dataBlocks[0][i].padding);
+			ByteBuffer bb = ByteBuffer.wrap(extraHeader);
+			bb.order(ByteOrder.LITTLE_ENDIAN);
 			
-			byte[] decompressedBlock = null;			
-			if (compressedBlockSize == 32000 || decompressedBlockSize == 1) //Not actually compressed, just read decompressed size
-			{
-				decompressedBlock = new byte[decompressedBlockSize];
-				currentFilePointer.readFully(decompressedBlock);
-			}
-			else //Gotta decompress
-				decompressedBlock = decompressBlock(compressedBlockSize, decompressedBlockSize);
-			
-			System.arraycopy(decompressedBlock, 0, decompressedFile, currentFileOffset, decompressedBlockSize);
-			currentFileOffset+=decompressedBlockSize;
-			
-			if (loadingDialog != null)			
-				loadingDialog.nextBlock(i+1);			
+			bb.position(0x0E);			
+			int numMipmaps = bb.getShort();
+			mipmapPosTable = new int[numMipmaps];
+			bb.position(0x1C);
+			for (int i = 0; i < numMipmaps; i++)
+				mipmapPosTable[i] = bb.getInt();
 		}
 		
+		//Extract File
+		for (int j = 0; j < (contentType == TYPE_TEXTURE ? blockCount : 1); j++){
+			if (mipmapPosTable != null)
+				currentFileOffset = mipmapPosTable[j];
+			else
+				currentFileOffset = 0;
+			
+			for (int i = 0; i < dataBlocks[j].length; i++)
+			{
+				// Block Header
+				currentFilePointer.seek(fileOffset + headerLength + dataBlocks[j][i].offset);
+				int blockHeaderLength = currentFilePointer.readInt();
+				currentFilePointer.readInt(); // NULL
+				int compressedBlockSize = currentFilePointer.readInt(); 
+				int decompressedBlockSize = currentFilePointer.readInt();
+					
+				if (Constants.DEBUG)
+					System.out.println("Decompressing block " + i + " @ file offset: " + currentFilePointer.getFilePointer() + " @ block offset: " + String.format("%X", dataBlocks[j][i].offset) + ". Compressed Size: " + compressedBlockSize + " and Decompressed Size: " + decompressedBlockSize + ". Block Size: " + dataBlocks[j][i].padding);
+				
+				byte[] decompressedBlock = null;			
+				if (compressedBlockSize == 32000 || decompressedBlockSize == 1) //Not actually compressed, just read decompressed size
+				{
+					decompressedBlock = new byte[decompressedBlockSize];
+					currentFilePointer.readFully(decompressedBlock);
+				}
+				else //Gotta decompress
+					decompressedBlock = decompressBlock(compressedBlockSize, decompressedBlockSize);
+				
+				System.arraycopy(decompressedBlock, 0, decompressedFile, currentFileOffset, decompressedBlockSize);
+				currentFileOffset+=decompressedBlockSize;
+				
+				if (loadingDialog != null)			
+					loadingDialog.nextBlock(i+1);			
+			}
+		}
 		if (extraHeader != null)
 			System.arraycopy(extraHeader, 0, decompressedFile, 0, extraHeaderSize);
 		

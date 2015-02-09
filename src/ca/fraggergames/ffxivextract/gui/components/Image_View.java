@@ -1,30 +1,30 @@
 package ca.fraggergames.ffxivextract.gui.components;
 
-import javax.swing.ImageIcon;
-import javax.swing.JPanel;
-import javax.swing.BoxLayout;
-import javax.swing.JLabel;
-import javax.swing.SwingConstants;
-
 import java.awt.BorderLayout;
-import javax.swing.border.TitledBorder;
-import javax.swing.JScrollPane;
-import javax.swing.JList;
+import java.awt.FlowLayout;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+
 import javax.swing.AbstractListModel;
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.border.TitledBorder;
 
 import ca.fraggergames.ffxivextract.helpers.ImageDecoding.ImageDecodingException;
 import ca.fraggergames.ffxivextract.models.Texture_File;
 
-import java.awt.FlowLayout;
-import java.awt.Dimension;
-import java.awt.image.BufferedImage;
-import java.io.IOException;
-
 public class Image_View extends JPanel {
 
+	Texture_File currentTexture;
 	NavigableImagePanel imgPreviewCanvas;
 
 	public Image_View(Texture_File texture) {
+		currentTexture = texture;
 		setLayout(new BorderLayout(0, 0));
 		
 		JPanel pnlTexInfo = new JPanel();
@@ -33,13 +33,13 @@ public class Image_View extends JPanel {
 		pnlTexInfo.setLayout(new BorderLayout(0, 0));
 		
 		JScrollPane scrollPane_1 = new JScrollPane();
-		pnlTexInfo.add(scrollPane_1, BorderLayout.NORTH);
+		pnlTexInfo.add(scrollPane_1, BorderLayout.CENTER);
 		
 		JList list = new JList();
 		list.setAutoscrolls(false);
 		list.setEnabled(false);
 		
-		final String[] values = new String[] {"Compression Type: " + texture.getCompressionTypeString(), "Width: " + texture.uncompressedWidth, "Height: " + texture.uncompressedHeight};
+		final String[] values = new String[] {"Compression Type: " + texture.getCompressionTypeString(), "Width: " + texture.uncompressedWidth, "Height: " + texture.uncompressedHeight, "Number of MipMaps: " + texture.numMipMaps};
 		
 		list.setModel(new AbstractListModel() {
 			
@@ -55,25 +55,35 @@ public class Image_View extends JPanel {
 		JPanel pnlTexPreview = new JPanel();
 		pnlTexPreview.setBorder(new TitledBorder(null, "Texture Preview", TitledBorder.LEADING, TitledBorder.TOP, null, null));
 		add(pnlTexPreview, BorderLayout.CENTER);
-		pnlTexPreview.setLayout(new BoxLayout(pnlTexPreview, BoxLayout.X_AXIS));
+		pnlTexPreview.setLayout(new BorderLayout(0, 0));
+		
+		JPanel panel = new JPanel();
+		pnlTexPreview.add(panel, BorderLayout.NORTH);
+		FlowLayout flowLayout = (FlowLayout) panel.getLayout();
+		flowLayout.setAlignment(FlowLayout.LEFT);
+		
+		JLabel lblCurrentMipmap = new JLabel("Current MipMap: ");
+		panel.add(lblCurrentMipmap);		
 		
 		JScrollPane scrollPane = new JScrollPane();
-		pnlTexPreview.add(scrollPane);		
+		pnlTexPreview.add(scrollPane);				
+		imgPreviewCanvas = new NavigableImagePanel();
+		scrollPane.setViewportView(imgPreviewCanvas);
 		
+		setImage(0);
+	}
+	
+	private void setImage(int index)
+	{
 		try {
-			BufferedImage preview = texture.decode(0, null);
-			imgPreviewCanvas = new NavigableImagePanel(preview);
-			if (texture.compressionType == 0x2460)
-				imgPreviewCanvas.setHighQualityRenderingEnabled(false);
-			scrollPane.setViewportView(imgPreviewCanvas);
+			BufferedImage preview = currentTexture.decode(index, null);
+			imgPreviewCanvas.setImage(preview);
+			if (currentTexture.compressionType == 0x2460)
+				imgPreviewCanvas.setHighQualityRenderingEnabled(false);			
 		} catch (ImageDecodingException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
-
 	}
 
 }

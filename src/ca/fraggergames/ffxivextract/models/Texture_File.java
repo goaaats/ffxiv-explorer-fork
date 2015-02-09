@@ -55,37 +55,40 @@ public class Texture_File {
 		if (data == null) {
 			throw new NullPointerException("Data is null");
 		}
+		
+		int mipMapDivide = (int) (index == 0 ? 1 : Math.pow(2, index));
+		
 		switch (compressionType) {
 		case 0x3420: {
 			return ImageDecoding.decodeImageDX1(data,
 					mipmapOffsets[index],
-					uncompressedWidth,
-					uncompressedHeight,
-					uncompressedWidth / 4,
-					uncompressedHeight / 4);
+					uncompressedWidth/(mipMapDivide),
+					uncompressedHeight/(mipMapDivide),
+					(uncompressedWidth/(mipMapDivide))/ 4,
+					(uncompressedHeight/(mipMapDivide))/ 4);
 		}
 		case 0x1130:
 		case 0x1131: {
 			return ImageDecoding.decodeImageRaw(data,
 					mipmapOffsets[index],
-					uncompressedWidth,
-					uncompressedHeight, 0, 0);
+					uncompressedWidth/(mipMapDivide),
+					uncompressedHeight/(mipMapDivide), 0, 0);
 		}
 		case 0x3430:
 		{
 			return ImageDecoding.decodeImageDX3(data, 
-					mipmapOffsets[index], uncompressedWidth,
-					uncompressedHeight,
-					uncompressedWidth / 4,
-					uncompressedHeight / 4);
+					mipmapOffsets[index], uncompressedWidth/(mipMapDivide),
+					uncompressedHeight/(mipMapDivide),
+					(uncompressedWidth/(mipMapDivide))/ 4,
+					(uncompressedHeight/(mipMapDivide))/ 4);
 		}
 		case 0x3431: {
 			return ImageDecoding.decodeImageDX5(data,
 					mipmapOffsets[index],
-					uncompressedWidth,
-					uncompressedHeight,
-					uncompressedWidth / 4,
-					uncompressedHeight / 4);
+					uncompressedWidth/(mipMapDivide),
+					uncompressedHeight/(mipMapDivide),
+					(uncompressedWidth/(mipMapDivide))/ 4,
+					(uncompressedHeight/(mipMapDivide))/ 4);
 		}
 		case 0x1440: {
 			if (parameters != null) {
@@ -93,8 +96,8 @@ public class Texture_File {
 					Object q = parameters.get("4444.channel");
 					return ImageDecoding.decodeImage4444split1channel(data,
 							mipmapOffsets[index],
-							uncompressedWidth,
-							uncompressedHeight, 0, 0,
+							uncompressedWidth/(mipMapDivide),
+							uncompressedHeight/(mipMapDivide), 0, 0,
 							(q instanceof Integer ? (Integer) q : 0));
 				}
 				if (parameters.containsKey("1008.4444.mergedSplit")
@@ -102,30 +105,30 @@ public class Texture_File {
 								ImageDecoding.ON_VALUE)) {
 					return ImageDecoding.decodeImage4444split(data,
 							mipmapOffsets[index],
-							uncompressedWidth,
-							uncompressedHeight, 0, 0);
+							uncompressedWidth/(mipMapDivide),
+							uncompressedHeight/(mipMapDivide), 0, 0);
 				}
 			}
 			return ImageDecoding.decodeImage4444(data,
 					mipmapOffsets[index],
-					uncompressedWidth,
-					uncompressedHeight, 0, 0);
+					uncompressedWidth/(mipMapDivide),
+					uncompressedHeight/(mipMapDivide), 0, 0);
 		}
 		case 0x1441: {
 			return ImageDecoding.decodeImage5551(data,
 					mipmapOffsets[index],
-					uncompressedWidth,
-					uncompressedHeight, 0, 0, parameters);
+					uncompressedWidth/(mipMapDivide),
+					uncompressedHeight/(mipMapDivide), 0, 0, parameters);
 		}
 		case 0x1450:
 		case 0x1451:{
 			return ImageDecoding.decodeImageRGBA(data,
 					mipmapOffsets[index],
-					uncompressedWidth,
-					uncompressedHeight, 0, 0);
+					uncompressedWidth/(mipMapDivide),
+					uncompressedHeight/(mipMapDivide), 0, 0);
 		}		
 		case 0x2460: {
-			return ImageDecoding.decodeImageRGBAF(data, mipmapOffsets[index], uncompressedWidth, uncompressedHeight, 0, 0);
+			return ImageDecoding.decodeImageRGBAF(data, mipmapOffsets[index], uncompressedWidth/(mipMapDivide), uncompressedHeight/(mipMapDivide), 0, 0);
 		}
 		}
 		throw new ImageDecodingException("Unsupported format: "
