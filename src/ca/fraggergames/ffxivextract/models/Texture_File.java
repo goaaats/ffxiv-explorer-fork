@@ -167,5 +167,15 @@ public class Texture_File {
 		default: return String.format("Unknown: 0x%x", compressionType);
 		}
 	}
+
+	public int getSize() {
+		switch (compressionType)
+		{
+		case 0x3431:
+			return (uncompressedWidth * uncompressedWidth) / 2;
+		}
+		
+		return -1;
+	}
 	
 }

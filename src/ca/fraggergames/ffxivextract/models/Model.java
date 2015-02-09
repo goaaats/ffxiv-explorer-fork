@@ -460,51 +460,68 @@ public class Model {
 				}
 				
 				if (tex == null)
-					continue;
-				
-				BufferedImage img = null;
-				try {
-					img = tex.decode(0, null);
-				} catch (ImageDecodingException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}								
-				
-				int[] pixels = new int[img.getWidth() * img.getHeight()];
-				img.getRGB(0, 0, img.getWidth(), img.getHeight(), pixels, 0, img.getWidth());				
-				
-				ByteBuffer buffer = Buffers.newDirectByteBuffer(img.getWidth() * img.getHeight() * 4);
-				
-				//Fucking Java Trash
-				for(int y = 0; y < img.getHeight(); y++){
-		            for(int x = 0; x < img.getWidth(); x++){
-		                int pixel = pixels[y * img.getWidth() + x];
-		                buffer.put((byte) ((pixel >> 16) & 0xFF));     
-		                buffer.put((byte) ((pixel >> 8) & 0xFF));      
-		                buffer.put((byte) (pixel & 0xFF));               
-		                buffer.put((byte) ((pixel >> 24) & 0xFF));
-		            }
-		        }				
-		        buffer.flip(); //FOR THE LOVE OF GOD DO NOT FORGET THIS
-				buffer.position(0);
+					continue;						
 				
 		        //Load into VRAM
 		        gl.glBindTexture(GL3.GL_TEXTURE_2D, m.getGLTextureIds()[j]);
 				gl.glTexParameteri(GL3.GL_TEXTURE_2D, GL3.GL_TEXTURE_WRAP_S, GL3.GL_CLAMP_TO_EDGE);
 				gl.glTexParameteri(GL3.GL_TEXTURE_2D, GL3.GL_TEXTURE_WRAP_T, GL3.GL_CLAMP_TO_EDGE);
-				gl.glTexParameteri(GL3.GL_TEXTURE_2D, GL3.GL_TEXTURE_MIN_FILTER, j == 3 ? GL3.GL_NEAREST : GL3.GL_NEAREST_MIPMAP_NEAREST);
+				gl.glTexParameteri(GL3.GL_TEXTURE_2D, GL3.GL_TEXTURE_MIN_FILTER, j == 3 ? GL3.GL_NEAREST : GL3.GL_LINEAR);
 				gl.glTexParameteri(GL3.GL_TEXTURE_2D, GL3.GL_TEXTURE_MAG_FILTER, j == 3 ? GL3.GL_NEAREST : GL3.GL_LINEAR);
 				
-				
+				/*
 				//Anisotropic Filtering
 				float[] ansio = new float[1];
 				gl.glGetFloatv(GL3.GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, ansio,0);
 				gl.glTexParameterf(GL3.GL_TEXTURE_2D, GL3.GL_TEXTURE_MAX_ANISOTROPY_EXT, ansio[0]);
+				*/				
 				
-				gl.glTexImage2D(GL3.GL_TEXTURE_2D, 0, GL3.GL_RGBA, img.getWidth(), img.getHeight(), 0, GL3.GL_RGBA, GL3.GL_UNSIGNED_BYTE, buffer);	
+				ByteBuffer dxtBB = Buffers.newDirectByteBuffer(tex.data);
+				dxtBB.position(tex.mipmapOffsets[0]);
+				dxtBB.order(ByteOrder.LITTLE_ENDIAN);
 				
-				if (j != 3)
-					gl.glGenerateMipmap(GL3.GL_TEXTURE_2D);
+				
+				switch(tex.compressionType){
+				case 0x3420: 
+					gl.glCompressedTexImage2D(GL3.GL_TEXTURE_2D, 0, GL3.GL_COMPRESSED_RGBA_S3TC_DXT1_EXT, tex.uncompressedWidth, tex.uncompressedHeight, 0, tex.mipmapOffsets[1]-tex.mipmapOffsets[0], dxtBB);
+					break;
+				case 0x3430: 
+					gl.glCompressedTexImage2D(GL3.GL_TEXTURE_2D, 0, GL3.GL_COMPRESSED_RGBA_S3TC_DXT3_EXT, tex.uncompressedWidth, tex.uncompressedHeight, 0, tex.mipmapOffsets[1]-tex.mipmapOffsets[0], dxtBB);
+					break;
+				case 0x3431: 
+					gl.glCompressedTexImage2D(GL3.GL_TEXTURE_2D, 0, GL3.GL_COMPRESSED_RGBA_S3TC_DXT5_EXT, tex.uncompressedWidth, tex.uncompressedHeight, 0, tex.mipmapOffsets[1]-tex.mipmapOffsets[0], dxtBB);
+					break;
+				default:
+					BufferedImage img = null;
+					try {
+						img = tex.decode(0, null);
+					} catch (ImageDecodingException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}								
+					
+					int[] pixels = new int[img.getWidth() * img.getHeight()];
+					img.getRGB(0, 0, img.getWidth(), img.getHeight(), pixels, 0, img.getWidth());				
+					
+					ByteBuffer buffer = Buffers.newDirectByteBuffer(img.getWidth() * img.getHeight() * 4);
+					
+					//Fucking Java Trash
+					for(int y = 0; y < img.getHeight(); y++){
+			            for(int x = 0; x < img.getWidth(); x++){
+			                int pixel = pixels[y * img.getWidth() + x];
+			                buffer.put((byte) ((pixel >> 16) & 0xFF));     
+			                buffer.put((byte) ((pixel >> 8) & 0xFF));      
+			                buffer.put((byte) (pixel & 0xFF));               
+			                buffer.put((byte) ((pixel >> 24) & 0xFF));
+			            }
+			        }				
+			        buffer.flip(); //FOR THE LOVE OF GOD DO NOT FORGET THIS
+					buffer.position(0);
+					gl.glTexImage2D(GL3.GL_TEXTURE_2D, 0, GL3.GL_RGBA, img.getWidth(), img.getHeight(), 0, GL3.GL_RGBA, GL3.GL_UNSIGNED_BYTE, buffer);
+				}				
+				
+				//if (j != 3)
+				//	gl.glGenerateMipmap(GL3.GL_TEXTURE_2D);
 				
 				gl.glBindTexture(GL3.GL_TEXTURE_2D, 0);
 				

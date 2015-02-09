@@ -79,7 +79,7 @@ void main() {
         
 	vec3 L = normalize(vLightDir);
     vec3 E = normalize(vEyeVec);
-    vec3 R = normalize(2 * dot(L, normal) * normal - L);	
+    vec3 R = normalize(2.0 * dot(L, normal) * normal - L);	
     vec3 H = normalize(L+E);       
     
     //Color
@@ -88,12 +88,12 @@ void main() {
     	mapDiffuse = vec4(mapDiffuse.xyz,1.0);    
     } 
 	if (uHasMask && uHasNormal && uHasColorSet){		
-		color = mix(table_color, table_color+table_specular, mapMask.g);		
+		color = mix(table_color.xyz, table_color.xyz+table_specular.xyz, mapMask.g);		
     	mapDiffuse = vec4(mapDiffuse.xyz * color * mapMask.x, 1.0);
     }
     else
     {
-    	color = table_color+table_specular;		
+    	color = (table_color+table_specular).xyz;		
     	mapDiffuse = vec4(mapDiffuse.xyz * color, 1.0);
     }
     
@@ -112,14 +112,14 @@ void main() {
 		// this is blinn phong
 		specColor = mapSpecular.xyz;
 		float specAngle = max(dot(H, normal), 0.0);
-		specular = pow(specAngle, mapSpecular.b*255);
+		specular = pow(specAngle, mapSpecular.b*255.0);
 		
 	//	if (!uHasMask)
 			//specular = mapSpecular.g * mapSpecular.b * specular;				
 		
 		//Fresnel approximation
 		float F0 = 0.028;
-		float exp = pow(max(0, 1-dot(H, E)), 5);
+		float exp = pow(max(0.0, 1.0-dot(H, E)), 5.0);
 	 	float fresnel = exp+F0*(1.0-exp);
 		//specular *= fresnel;				
 	}
@@ -130,7 +130,7 @@ void main() {
                       /*rimShading * vec3(1.0,1.0,1.0) +*/
                       /*specColor * specular +*/
                       invertedLambertian * vec3(0.2,0.2, 0.2) +
-                      lambertian * mapDiffuse , 1.0);
+                      lambertian * mapDiffuse.xyz , 1.0);
 }
 
 
