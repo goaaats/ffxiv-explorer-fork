@@ -55,6 +55,9 @@ void main() {
     	mapMask = texture2D(uMaskTex, vTexCoord.st);
     if (uHasSpecular)
     	mapSpecular = texture2D(uSpecularTex, vTexCoord.st);
+    	
+    
+    	
 	if (uHasNormal && uHasColorSet)
 	{
 		normalize(mapNormal);
@@ -85,10 +88,12 @@ void main() {
     //Color
     vec3 color = table_color.xyz;       	
     if (uHasDiffuse){    
-    	mapDiffuse = vec4(mapDiffuse.xyz,1.0);    
+   		color = table_color.xyz;
+   		color += table_unknown1.xyz; 
+    	mapDiffuse = vec4(mapDiffuse.xyz * color,1.0);    
     } 
 	if (uHasMask && uHasNormal && uHasColorSet){		
-		color = mix(table_color.xyz, table_color.xyz+table_specular.xyz, mapMask.g);		
+		color = mix(table_color.xyz, table_color.xyz+table_specular.xyz, mapMask.g);
     	mapDiffuse = vec4(mapDiffuse.xyz * color * mapMask.x, 1.0);
     }
     else
@@ -96,6 +101,11 @@ void main() {
     	color = (table_color+table_specular).xyz;		
     	mapDiffuse = vec4(mapDiffuse.xyz * color, 1.0);
     }
+    
+    if (table_unknown1.rgb != vec3(0.0,0.0,0.0))
+    	mapDiffuse.rgb = table_unknown1.rgb;
+    
+   // mapDiffuse.xyz = mapDiffuse.xyz + ();
     
     //Diffuse           	
     float lambertian = max(dot(L,normal), 0.0);
@@ -105,14 +115,14 @@ void main() {
     	invertedLambertian *= mapMask.b;
     else
     	invertedLambertian = 0.0;
-    
-	float specular = 0.0;
+        
+	vec3 specular = vec3(0.0,0.0,0.0);
  
 	if(lambertian > 0.0 && uHasSpecular) {
 		// this is blinn phong
-		specColor = mapSpecular.xyz;
+		specColor = mapSpecular.rgb * table_specular.rgb;
 		float specAngle = max(dot(H, normal), 0.0);
-		specular = pow(specAngle, mapSpecular.b*255.0);
+		specular = vec3(pow(specAngle, mapSpecular.r*32.0),pow(specAngle, mapSpecular.g*32.0),pow(specAngle, mapSpecular.b*32.0));		
 		
 	//	if (!uHasMask)
 			//specular = mapSpecular.g * mapSpecular.b * specular;				
@@ -122,15 +132,18 @@ void main() {
 		float exp = pow(max(0.0, 1.0-dot(H, E)), 5.0);
 	 	float fresnel = exp+F0*(1.0-exp);
 		//specular *= fresnel;				
-	}
-    
-    float rimShading = smoothstep(0.6, 1.0, (1.0 - max(dot(E, normal), 0.0)));    
+	}      
+	
+	float rimShading = 0.0;
+	if (uHasMask)
+    	rimShading = mapMask.b * (1.0 - max(dot(E, normal), 0.0));    
 
 	gl_FragColor = vec4(ambientColor +
-                      /*rimShading * vec3(1.0,1.0,1.0) +*/
-                      /*specColor * specular +*/
-                      invertedLambertian * vec3(0.2,0.2, 0.2) +
-                      lambertian * mapDiffuse.xyz , 1.0);
+                      rimShading * vec3(1.0,1.0,1.0) +
+                      specColor * specular +
+                      /*invertedLambertian * vec3(0.2,0.2, 0.2) +*/
+                      lambertian * mapDiffuse.xyz, 1.0);
+
 }
 
 

@@ -1,6 +1,7 @@
 package ca.fraggergames.ffxivextract.gui.components;
 
 import java.awt.BorderLayout;
+import java.awt.FlowLayout;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.MouseEvent;
@@ -8,14 +9,9 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
-import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.ByteBuffer;
-import java.nio.IntBuffer;
-import java.util.Scanner;
+import java.nio.FloatBuffer;
 
-import javax.media.opengl.GL;
 import javax.media.opengl.GL3;
 import javax.media.opengl.GL3bc;
 import javax.media.opengl.GLAutoDrawable;
@@ -31,22 +27,13 @@ import javax.swing.JPanel;
 import javax.swing.border.TitledBorder;
 
 import ca.fraggergames.ffxivextract.helpers.Matrix;
-import ca.fraggergames.ffxivextract.helpers.ImageDecoding.ImageDecodingException;
+import ca.fraggergames.ffxivextract.models.BlurShader;
 import ca.fraggergames.ffxivextract.models.DefaultShader;
-import ca.fraggergames.ffxivextract.models.HairShader;
-import ca.fraggergames.ffxivextract.models.IrisShader;
-import ca.fraggergames.ffxivextract.models.Material;
-import ca.fraggergames.ffxivextract.models.Mesh;
+import ca.fraggergames.ffxivextract.models.FXAAShader;
 import ca.fraggergames.ffxivextract.models.Model;
-import ca.fraggergames.ffxivextract.models.Shader;
-import ca.fraggergames.ffxivextract.models.Texture_File;
 
 import com.jogamp.common.nio.Buffers;
-import com.jogamp.opengl.util.Animator;
 import com.jogamp.opengl.util.FPSAnimator;
-
-import java.awt.FlowLayout;
-import javax.swing.DefaultComboBoxModel;
 
 public class OpenGL_View extends JPanel {
 
@@ -250,6 +237,9 @@ public class OpenGL_View extends JPanel {
 		private float angleY = 0;
 		
 		DefaultShader defaultShader;
+		FXAAShader fxaaShader;
+		BlurShader blurShader;
+		
 		
 		private int[] textureIds;		
 		
@@ -258,10 +248,21 @@ public class OpenGL_View extends JPanel {
 		float[] viewMatrix = new float[16];
 		float[] projMatrix = new float[16];
 		
+		//Frame Buffer
+		int rboId[] = new int[2];
+		int fboId[] = new int[2];
+		int fboTexture[] = new int[2];
+		int canvasWidth, canvasHeight;
+		
+		//Frame Buffer Quad
+		FloatBuffer drawQuad;
+		
 		public ModelRenderer(Model model, Model model2) {
 			this.model = model;
 			this.model2 = model2;
 			textureIds = new int[model.getNumMaterials() * 4];
+			
+			drawQuad = Buffers.newDirectFloatBuffer(new float[]{-1.0f, -1.0f, 1.0f, -1.0f, -1.0f, 1.0f, -1.0f, 1.0f, 1.0f, -1.0f, 1.0f, 1.0f});
 		}
 
 		public void resetMaterial() {
@@ -304,10 +305,26 @@ public class OpenGL_View extends JPanel {
 		    Matrix.translateM(modelMatrix, 0, panX, panY, zoom);
 		    Matrix.rotateM(modelMatrix, 0, angleX, 0, 1, 0);
 		    Matrix.rotateM(modelMatrix, 0, angleY, 1, 0, 0);		     		   		    		    		    
+		   
 		    
+		    		  
+		    gl.glBindFramebuffer(GL3.GL_FRAMEBUFFER, fboId[1]);
+		    gl.glViewport(0,0, canvasWidth, canvasHeight);		    
+		    gl.glClear(GL3.GL_COLOR_BUFFER_BIT | GL3.GL_DEPTH_BUFFER_BIT);
+		    			    
 		    model.render(defaultShader, viewMatrix, modelMatrix, projMatrix, gl, currentLoD);
 		    if (model2 != null)
-		    	model2.render(defaultShader, viewMatrix, modelMatrix, projMatrix, gl, currentLoD);
+		    	model2.render(defaultShader, viewMatrix, modelMatrix, projMatrix, gl, currentLoD);		  		   		    		    
+		    		    		   
+		    //FXAA
+		    gl.glBindFramebuffer(GL3.GL_FRAMEBUFFER, 0);
+		    gl.glViewport(0,0, canvasWidth, canvasHeight);
+		    gl.glUseProgram(fxaaShader.getShaderProgramID());
+		    fxaaShader.setTexture(gl, fboTexture[1]);
+		    gl.glVertexAttribPointer(fxaaShader.getAttribPosition(), 2, GL3.GL_FLOAT, false, 0, drawQuad);
+			gl.glEnableVertexAttribArray(fxaaShader.getAttribPosition());		    
+		    gl.glDrawArrays(GL3.GL_TRIANGLES, 0, 6);
+		    gl.glDisableVertexAttribArray(fxaaShader.getAttribPosition());
 		}
 
 		@Override
@@ -318,7 +335,7 @@ public class OpenGL_View extends JPanel {
 		public void init(GLAutoDrawable drawable) {
 			GL3 gl = drawable.getGL().getGL3();      // get the OpenGL graphics context
 		      glu = new GLU();                         // get GL Utilities
-		      gl.glClearColor(0.3f, 0.3f, 0.3f, 0.0f); // set background (clear) color
+		      gl.glClearColor(0.3f, 0.3f, 0.3f, 0.3f); // set background (clear) color
 		      gl.glClearDepth(1.0f);      // set clear depth value to farthest
 		      gl.glEnable(GL3.GL_DEPTH_TEST); // enables depth testing
 		      gl.glDepthFunc(GL3.GL_LEQUAL);  // the type of depth test to do
@@ -326,9 +343,11 @@ public class OpenGL_View extends JPanel {
 		      gl.glEnable(GL3.GL_CULL_FACE);
 		      gl.glBlendFunc (GL3.GL_SRC_ALPHA, GL3.GL_ONE_MINUS_SRC_ALPHA);	
 		      gl.glEnable(GL3.GL_TEXTURE_2D);
-		    		      
+
 		      try {
 				defaultShader = new DefaultShader(gl);
+				fxaaShader = new FXAAShader(gl);
+				blurShader = new BlurShader(gl);
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -342,12 +361,62 @@ public class OpenGL_View extends JPanel {
 		      if (height == 0) height = 1;   // prevent divide by zero
 		      float aspect = (float)width / height;
 		 
+		      canvasWidth = width;
+		      canvasHeight = height;
+		      
 		      gl.glViewport(0, 0, width, height);
 		 
+		      deleteFrameBuffers(gl);
+		      genFrameBuffers(gl);
+		      initFrameBuffer(gl, 0, width, height);
+		      initFrameBuffer(gl, 1, width, height);
+		      
 		      Matrix.setIdentityM(projMatrix, 0);
 		      Matrix.perspectiveM(projMatrix, 0, 45.0f, aspect, 0.1f, 100.0f);		     
 		      Matrix.setIdentityM(modelMatrix, 0);
 		      Matrix.setIdentityM(viewMatrix, 0);
+		}
+		
+		private void deleteFrameBuffers(GL3 gl)
+		{
+			gl.glDeleteTextures(fboTexture.length, fboTexture, 0);
+			gl.glDeleteFramebuffers(fboId.length, fboId, 0);
+			gl.glDeleteRenderbuffers(rboId.length, rboId, 0);
+		}
+		
+		private void genFrameBuffers(GL3 gl)
+		{			
+		
+		    gl.glGenTextures(fboTexture.length, fboTexture,0);		    
+		    gl.glGenFramebuffers(fboId.length, fboId, 0);		    
+		    gl.glGenRenderbuffers(rboId.length, rboId, 0);
+		}
+		
+		private void initFrameBuffer(GL3 gl, int id, int width, int height)
+		{ 				
+		    gl.glBindTexture(GL3.GL_TEXTURE_2D, fboTexture[id]);
+		    
+		    gl.glTexParameteri(GL3.GL_TEXTURE_2D, GL3.GL_TEXTURE_WRAP_S, GL3.GL_CLAMP_TO_EDGE);
+		    gl.glTexParameteri(GL3.GL_TEXTURE_2D, GL3.GL_TEXTURE_WRAP_T, GL3.GL_CLAMP_TO_EDGE);
+		    gl.glTexParameteri(GL3.GL_TEXTURE_2D, GL3.GL_TEXTURE_MAG_FILTER, GL3.GL_NEAREST);
+		    gl.glTexParameteri(GL3.GL_TEXTURE_2D, GL3.GL_TEXTURE_MIN_FILTER, GL3.GL_NEAREST);
+		    
+		    gl.glTexImage2D(GL3.GL_TEXTURE_2D, 0,GL3.GL_RGBA, width, height, 0,GL3.GL_RGBA, GL3.GL_UNSIGNED_BYTE, null);		     		    		    
+		 
+		    //Init FBO/RBO		    
+		    gl.glBindFramebuffer(GL3.GL_FRAMEBUFFER, fboId[id]);
+		    gl.glBindRenderbuffer(GL3.GL_RENDERBUFFER, rboId[id]);
+		    gl.glRenderbufferStorage(GL3.GL_RENDERBUFFER, GL3.GL_DEPTH_COMPONENT, width, height);
+		    		    
+		    gl.glFramebufferTexture2D(GL3.GL_FRAMEBUFFER, GL3.GL_COLOR_ATTACHMENT0, GL3.GL_TEXTURE_2D, fboTexture[id], 0);
+		    gl.glFramebufferRenderbuffer(GL3.GL_FRAMEBUFFER, GL3.GL_DEPTH_ATTACHMENT, GL3.GL_RENDERBUFFER, rboId[id]); 
+		    
+		    gl.glBindTexture(GL3.GL_TEXTURE_2D, 0);
+		    gl.glBindFramebuffer(GL3.GL_FRAMEBUFFER, 0);
+		    gl.glBindRenderbuffer(GL3.GL_RENDERBUFFER, 0);
+		    
+		    if(gl.glCheckFramebufferStatus(GL3.GL_FRAMEBUFFER) != GL3.GL_FRAMEBUFFER_COMPLETE)
+		    	System.out.println("Error creating framebuffer!");
 		}
 		
 	}

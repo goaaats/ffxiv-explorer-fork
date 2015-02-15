@@ -403,21 +403,25 @@ public final class ImageDecoding {
 
 		int p = 0;
 		for (int y = 0; y < targetHeight; y++) {
-			for (int x = 0; x < targetWidth; x++) {
-				
+			for (int x = 0; x < targetWidth; x++) {				
+
 				float fr = Utils.convertHalfToFloat(buffer.getShort());
 				float fg = Utils.convertHalfToFloat(buffer.getShort());
 				float fb = Utils.convertHalfToFloat(buffer.getShort());
 				float fa = Utils.convertHalfToFloat(buffer.getShort());
 				
-				double fr2 = Math.max(0.0, Math.min(1.0, fr));
-				int r = (int) Math.floor(fr2 == 1.0 ? 255 : fr2 * 256.0);
-				double fg2 = Math.max(0.0, Math.min(1.0, fg));
-				int g = (int) Math.floor(fg2 == 1.0 ? 255 : fg2 * 256.0);
-				double fb2 = Math.max(0.0, Math.min(1.0, fb));
-				int b = (int) Math.floor(fb2 == 1.0 ? 255 : fb2 * 256.0);
-				double fa2 = Math.max(0.0, Math.min(1.0, fa));
-				int a = (int) Math.floor(fa2 == 1.0 ? 255 : fa2 * 256.0);
+				if (fr > 1)
+					fr = 1.0f;
+				if (fg > 1)
+					fg = 1.0f;
+				if (fb > 1)
+					fb = 1.0f;
+				if (fa > 1)
+					fa = 1.0f;
+				final int b = (int) (255f * fb);
+				final int g = (int) (255f * fg);
+				final int r = (int) (255f * fr);
+				final int a = (int) (255f * fa);
 				
 				p += 4;
 				img.setRGB(x, y, new Color(r, g, b, a).getRGB());
@@ -425,6 +429,7 @@ public final class ImageDecoding {
 		}
 		return img;
 	}
+
 
 	/**
 	 * @param data

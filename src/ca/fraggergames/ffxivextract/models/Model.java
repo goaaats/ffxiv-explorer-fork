@@ -419,7 +419,7 @@ public class Model {
 	    	else if (shader instanceof IrisShader)
 	    		((IrisShader)shader).setEyeColor(gl, Constants.defaultEyeColor);		    	
 	    	
-	    	//Draw
+	    	//Draw	    	
 	    	shader.enableAttribs(gl);
 		    gl.glDrawElements(GL3.GL_TRIANGLES, mesh.numIndex, GL3.GL_UNSIGNED_SHORT, mesh.indexBuffer);			    
 		    shader.disableAttribs(gl);			  
@@ -490,6 +490,9 @@ public class Model {
 					break;
 				case 0x3431: 
 					gl.glCompressedTexImage2D(GL3.GL_TEXTURE_2D, 0, GL3.GL_COMPRESSED_RGBA_S3TC_DXT5_EXT, tex.uncompressedWidth, tex.uncompressedHeight, 0, tex.mipmapOffsets[1]-tex.mipmapOffsets[0], dxtBB);
+					break;
+				case 0x2460:
+					gl.glTexImage2D(GL3.GL_TEXTURE_2D, 0, GL3.GL_RGBA, tex.uncompressedWidth, tex.uncompressedHeight, 0, GL3.GL_RGBA, GL3.GL_HALF_FLOAT, dxtBB);
 					break;
 				default:
 					BufferedImage img = null;

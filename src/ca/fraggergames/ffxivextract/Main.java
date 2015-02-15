@@ -24,6 +24,8 @@ public class Main {
 
 	public static void main(String[] args) {		
 		
+		
+		
 //		try {
 //			SqPack_IndexFile currentIndex = new SqPack_IndexFile("c:\\Program Files (x86)\\SquareEnix\\FINAL FANTASY XIV - A Realm Reborn\\game\\sqpack\\ffxiv\\040000.win32.index");
 //			
@@ -69,7 +71,10 @@ public class Main {
 			e1.printStackTrace();
 		}
 		
-	//	EXD_Searcher.getModelsFromModelChara("C:\\Users\\Filip\\Desktop\\exd\\modelchara.csv");
+		for (int i = 0; i < 121; i++)
+		HashDatabase.addPathToDB(String.format("chara/equipment/e0042/material/v0001/staining/-v0001_c0101e0042_top_a_s%04d.tex", i));
+		
+		//EXD_Searcher.getModelsFromModelChara("C:\\Users\\Filip\\Desktop\\exd\\modelchara.csv");
 		
 /*		
 		try {

@@ -10,6 +10,7 @@ import java.util.Hashtable;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 
+import ca.fraggergames.ffxivextract.helpers.FFXIV_String;
 import ca.fraggergames.ffxivextract.helpers.LERandomAccessFile;
 import ca.fraggergames.ffxivextract.models.EXDF_File;
 import ca.fraggergames.ffxivextract.models.EXDF_File.EXDF_Entry;
@@ -492,7 +493,7 @@ public class EXDF_View extends JScrollPane implements ItemListener{
 				case 0x01: // BOOL
 					return entry.getBoolean(dataset.offset);
 				case 0x00: // STRING; Points to offset from end of dataset part. Read until 0x0.
-					return entry.getString(exhFile.getDatasetChunkSize(), dataset.offset);				
+					return FFXIV_String.parseFFXIVString(entry.getString(exhFile.getDatasetChunkSize(), dataset.offset));				
 				default:
 					return "?";// Value: " + ((int)entry.getByte(dataset.offset)&0xFF);
 				}

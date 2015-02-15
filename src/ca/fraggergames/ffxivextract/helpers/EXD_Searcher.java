@@ -176,7 +176,7 @@ public class EXD_Searcher {
 				String in = reader.readLine();
 				if (in == null)
 					break;
-				String[] split = in.split(":");
+				String[] split = in.split(",");
 				
 				int id = Integer.parseInt(split[1]);
 				int type = Integer.parseInt(split[3]);
@@ -192,13 +192,13 @@ public class EXD_Searcher {
 				switch(type){
 				case 3:
 					typePath = "chara/monster/m";
-					//imcPath = String.format("%s%04d/obj/body/b%04d/b%04d.imc", typePath,id,model,model);
-					//modelPath = String.format("%s%04d/obj/body/b%04d/model/m%04db%04d.mdl", typePath,id,model,id,model);
-					//System.out.println(imcPath);
-					//System.out.println(modelPath);								
-					//HashDatabase.addPathToDB(imcPath);
-					//HashDatabase.addPathToDB(modelPath);
-					/*
+					imcPath = String.format("%s%04d/obj/body/b%04d/b%04d.imc", typePath,id,model,model);
+					modelPath = String.format("%s%04d/obj/body/b%04d/model/m%04db%04d.mdl", typePath,id,model,id,model);
+					System.out.println(imcPath);
+					System.out.println(modelPath);								
+					HashDatabase.addPathToDB(imcPath);
+					HashDatabase.addPathToDB(modelPath);
+					
 					skelPath = String.format("%s%04d/skeleton/base/b%04d/eid_m%04db%04d.eid", typePath,id,model,id,model);
 					System.out.println(skelPath);
 					HashDatabase.addPathToDB(skelPath);
@@ -206,7 +206,7 @@ public class EXD_Searcher {
 					System.out.println(skelPath);
 					HashDatabase.addPathToDB(skelPath);
 					skelPath = String.format("%s%04d/skeleton/base/b%04d/skl_m%04db%04d.sklb", typePath,id,model,id,model);
-					System.out.println(skelPath);*/
+					System.out.println(skelPath);
 					skelPath = String.format("%s%04d/animation/a%04d/bt_common/resident/monster.pap", typePath,id,0);
 					System.out.println(skelPath);
 					HashDatabase.addPathToDB(skelPath);
@@ -217,7 +217,7 @@ public class EXD_Searcher {
 					System.out.println(skelPath);
 					HashDatabase.addPathToDB(skelPath);
 					break;
-				case 4:/*
+				case 4:
 					typePath = "chara/demihuman/d";
 					imcPath = String.format("%s%04d/obj/equipment/e%04d/e%04d.imc", typePath,id,model,model);
 					System.out.println(imcPath);
@@ -235,7 +235,7 @@ public class EXD_Searcher {
 					modelPath = String.format("%s%04d/obj/equipment/e%04d/model/d%04de%04d_sho.mdl", typePath,id,model,id,model);					
 					System.out.println(modelPath);												
 					HashDatabase.addPathToDB(modelPath);
-					break;*/
+					break;
 				}
 				
 					
