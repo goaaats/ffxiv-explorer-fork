@@ -154,7 +154,7 @@ public class EXDF_File {
 			return buffer.getFloat();
 		}
 
-		public String getString(int datasetChunkSize, short offset) {
+		public byte[] getString(int datasetChunkSize, short offset) {
 			ByteBuffer buffer = ByteBuffer.wrap(dataChunk);
 			buffer.position(offset);
 			int stringOffset = buffer.getInt();
@@ -177,13 +177,7 @@ public class EXDF_File {
 			buffer.position(datasetChunkSize + stringOffset);
 			buffer.get(stringBytes);
 			
-			try {
-				return new String(stringBytes, "UTF-8");
-			} catch (UnsupportedEncodingException e) {
-				e.printStackTrace();
-			}
-			
-			return "";
+			return stringBytes;
 		}
 
 		public boolean getBoolean(short offset) {
