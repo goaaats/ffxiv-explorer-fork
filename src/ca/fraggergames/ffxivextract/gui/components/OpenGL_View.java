@@ -306,8 +306,6 @@ public class OpenGL_View extends JPanel {
 		    Matrix.rotateM(modelMatrix, 0, angleX, 0, 1, 0);
 		    Matrix.rotateM(modelMatrix, 0, angleY, 1, 0, 0);		     		   		    		    		    
 		   
-		    
-		    		  
 		    gl.glBindFramebuffer(GL3.GL_FRAMEBUFFER, fboId[1]);
 		    gl.glViewport(0,0, canvasWidth, canvasHeight);		    
 		    gl.glClear(GL3.GL_COLOR_BUFFER_BIT | GL3.GL_DEPTH_BUFFER_BIT);

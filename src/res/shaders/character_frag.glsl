@@ -87,25 +87,28 @@ void main() {
     
     //Color
     vec3 color = table_color.xyz;       	
-    if (uHasDiffuse){    
+    if (uHasDiffuse && uHasColorSet){    
    		color = table_color.xyz;
    		color += table_unknown1.xyz; 
-    	mapDiffuse = vec4(mapDiffuse.xyz * color,1.0);    
+    	//mapDiffuse = vec4(mapDiffuse.xyz * color,1.0);    
     } 
 	if (uHasMask && uHasNormal && uHasColorSet){		
 		color = mix(table_color.xyz, table_color.xyz+table_specular.xyz, mapMask.g);
     	mapDiffuse = vec4(mapDiffuse.xyz * color * mapMask.x, 1.0);
     }
-    else
+    
+    if (uHasDiffuse && uHasColorSet)
     {
     	color = (table_color+table_specular).xyz;		
     	mapDiffuse = vec4(mapDiffuse.xyz * color, 1.0);
     }
     
-    if (table_unknown1.rgb != vec3(0.0,0.0,0.0))
-    	mapDiffuse.rgb = table_unknown1.rgb;
+   // if (table_unknown1.a > 0.1)
+    	//mapDiffuse.rgb = table_unknown1.rgb;
     
-   // mapDiffuse.xyz = mapDiffuse.xyz + ();
+    //mapDiffuse.r = 0.0;
+    //mapDiffuse.g = 0.0;
+    //mapDiffuse.b = 0.0;
     
     //Diffuse           	
     float lambertian = max(dot(L,normal), 0.0);
@@ -121,11 +124,12 @@ void main() {
 	if(lambertian > 0.0 && uHasSpecular) {
 		// this is blinn phong
 		specColor = mapSpecular.rgb * table_specular.rgb;
-		float specAngle = max(dot(H, normal), 0.0);
-		specular = vec3(pow(specAngle, mapSpecular.r*32.0),pow(specAngle, mapSpecular.g*32.0),pow(specAngle, mapSpecular.b*32.0));		
+		float specAngle = max(dot(H, normal), 0.0);			
 		
-	//	if (!uHasMask)
-			//specular = mapSpecular.g * mapSpecular.b * specular;				
+		if (uHasSpecular)
+		{
+			specular = vec3(pow(specAngle, mapSpecular.r*64.0),pow(specAngle, mapSpecular.g*74.0),pow(specAngle, mapSpecular.b*32.0));						
+		}
 		
 		//Fresnel approximation
 		float F0 = 0.028;

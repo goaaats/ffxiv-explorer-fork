@@ -370,6 +370,8 @@ public class EXDF_View extends JScrollPane implements ItemListener{
 		}
 		table.setModel(new EXDTableModel(exhFile, exdFile));
 		table.setAutoResizeMode( JTable.AUTO_RESIZE_OFF );
+		
+
 	}
 	
 	//Setup UI to complain that the EXH file was not found
@@ -493,7 +495,7 @@ public class EXDF_View extends JScrollPane implements ItemListener{
 				case 0x01: // BOOL
 					return entry.getBoolean(dataset.offset);
 				case 0x00: // STRING; Points to offset from end of dataset part. Read until 0x0.
-					//return entry.getString(exhFile.getDatasetChunkSize(), dataset.offset);
+					//return new String(entry.getString(exhFile.getDatasetChunkSize(), dataset.offset));
 					return FFXIV_String.parseFFXIVString(entry.getString(exhFile.getDatasetChunkSize(), dataset.offset));				
 				default:
 					return "?";// Value: " + ((int)entry.getByte(dataset.offset)&0xFF);
