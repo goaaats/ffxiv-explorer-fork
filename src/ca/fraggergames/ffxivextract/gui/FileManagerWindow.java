@@ -60,6 +60,7 @@ import ca.fraggergames.ffxivextract.gui.components.Sound_View;
 import ca.fraggergames.ffxivextract.helpers.LERandomAccessFile;
 import ca.fraggergames.ffxivextract.helpers.LuaDec;
 import ca.fraggergames.ffxivextract.helpers.OggVorbisPlayer;
+import ca.fraggergames.ffxivextract.helpers.WavefrontObjectWriter;
 import ca.fraggergames.ffxivextract.models.EXDF_File;
 import ca.fraggergames.ffxivextract.models.EXHF_File;
 import ca.fraggergames.ffxivextract.models.Model;
@@ -663,7 +664,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 			
 			@Override
 			public boolean accept(File f) {
-				return f.getName().endsWith(".csv") || f.getName().endsWith(".ogg") || f.getName().endsWith(".wav") ||f.getName().endsWith(".png") || f.isDirectory();
+				return f.getName().endsWith(".csv") || f.getName().endsWith(".ogg") || f.getName().endsWith(".wav") ||f.getName().endsWith(".png") ||f.getName().endsWith(".obj") || f.isDirectory();
 			}				
 		};
 		fileChooser.addChoosableFileFilter(filter);
@@ -697,6 +698,10 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 			return ".luab";
 		else if (data.length >= 4 && data[0] == 'S' && data[1] == 'E' && data[2] == 'D' && data[3] == 'B' )
 			return ".scd";
+		else if (contentType == 3)
+		{
+			return ".obj";
+		}
 		else if (contentType == 4)
 		{
 			return ".png";
@@ -848,6 +853,27 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 							path += "\\" + fileName;	
 							tempView.saveCSV(path + (tempView.getNumLangs()==1 ? "" : "_" + EXDF_View.langs[l]) + ".csv", l);
 						}
+						
+						continue;
+					}
+					else if (extension.equals(".obj") && doConvert)
+					{						
+						Model model = new Model(folderName + "/" + fileName, currentIndexFile, data);
+						
+						String path = lastSaveLocation.getCanonicalPath();
+						
+						if (fileName == null)				
+							fileName = String.format("%X", files.get(i).getId() & 0xFFFFFFFF);
+														
+						if (folderName == null)
+							folderName = String.format("%X", files.get(i).getId2() & 0xFFFFFFFF);
+						
+						path = lastSaveLocation.getCanonicalPath() + "\\" + folderName + "\\" + fileName;
+						
+						File mkDirPath = new File(path);
+						mkDirPath.getParentFile().mkdirs();																															
+									
+						WavefrontObjectWriter.writeObj(path, model);
 						
 						continue;
 					}
