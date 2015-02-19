@@ -27,10 +27,10 @@ import javax.swing.JPanel;
 import javax.swing.border.TitledBorder;
 
 import ca.fraggergames.ffxivextract.helpers.Matrix;
-import ca.fraggergames.ffxivextract.models.BlurShader;
-import ca.fraggergames.ffxivextract.models.DefaultShader;
-import ca.fraggergames.ffxivextract.models.FXAAShader;
 import ca.fraggergames.ffxivextract.models.Model;
+import ca.fraggergames.ffxivextract.shaders.BlurShader;
+import ca.fraggergames.ffxivextract.shaders.DefaultShader;
+import ca.fraggergames.ffxivextract.shaders.FXAAShader;
 
 import com.jogamp.common.nio.Buffers;
 import com.jogamp.opengl.util.FPSAnimator;

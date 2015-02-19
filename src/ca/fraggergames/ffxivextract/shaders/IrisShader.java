@@ -1,8 +1,10 @@
-package ca.fraggergames.ffxivextract.models;
+package ca.fraggergames.ffxivextract.shaders;
 
 import java.io.IOException;
 
 import javax.media.opengl.GL3;
+
+import ca.fraggergames.ffxivextract.models.Material;
 
 public class IrisShader extends Shader {
 	

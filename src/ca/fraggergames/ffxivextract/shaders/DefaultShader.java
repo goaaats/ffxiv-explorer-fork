@@ -1,4 +1,4 @@
-package ca.fraggergames.ffxivextract.models;
+package ca.fraggergames.ffxivextract.shaders;
 
 import java.io.IOException;
 

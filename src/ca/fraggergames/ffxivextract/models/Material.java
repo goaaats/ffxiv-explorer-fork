@@ -10,6 +10,12 @@ import javax.media.opengl.GL3;
 import ca.fraggergames.ffxivextract.helpers.Utils;
 import ca.fraggergames.ffxivextract.models.SqPack_IndexFile.SqPack_File;
 import ca.fraggergames.ffxivextract.models.SqPack_IndexFile.SqPack_Folder;
+import ca.fraggergames.ffxivextract.shaders.CharacterShader;
+import ca.fraggergames.ffxivextract.shaders.DefaultShader;
+import ca.fraggergames.ffxivextract.shaders.HairShader;
+import ca.fraggergames.ffxivextract.shaders.IrisShader;
+import ca.fraggergames.ffxivextract.shaders.Shader;
+import ca.fraggergames.ffxivextract.shaders.SkinShader;
 import ca.fraggergames.ffxivextract.storage.HashDatabase;
 
 public class Material {

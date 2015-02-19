@@ -1,4 +1,4 @@
-package ca.fraggergames.ffxivextract.models;
+package ca.fraggergames.ffxivextract.shaders;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -11,6 +11,7 @@ import javax.media.opengl.GLAutoDrawable;
 
 import ca.fraggergames.ffxivextract.gui.components.OpenGL_View;
 import ca.fraggergames.ffxivextract.helpers.Matrix;
+import ca.fraggergames.ffxivextract.models.Material;
 
 
 public class Shader {
