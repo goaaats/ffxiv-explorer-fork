@@ -22,11 +22,11 @@ public class WavefrontObjectWriter {
 		{
 			BufferedWriter out = new BufferedWriter(new FileWriter(path.replace(".obj", "_"+i+".obj")));
 		
-			out.write("#FFXIV Model\r\n\r\n");
+			out.write("#FFXIV Model\r\n#Exported using FFXIV Explorer by Ioncannon\r\n\r\n");
 				
-			out.write("mtllib " + path.replace(".obj", ".mtl").substring(path.lastIndexOf("\\")+1) + "\r\n");
+			//out.write("mtllib " + path.replace(".obj", ".mtl").substring(path.lastIndexOf("\\")+1) + "\r\n");
 			
-			out.write("usemtl mesh"+i+"\r\n");
+			//out.write("usemtl mesh"+i+"\r\n");
 			
 			writeVerts(model.getMeshes(0)[i], out);
 			writeTexCoords(model.getMeshes(0)[i], out);
@@ -36,7 +36,7 @@ public class WavefrontObjectWriter {
 			out.close();
 		}
 				
-		writeMtl(path, model);
+		//writeMtl(path, model);
 		
 	}
 	
@@ -123,7 +123,7 @@ public class WavefrontObjectWriter {
 		    else
 		    	vertBuffer.position((mesh.numVerts*12) + (i*24) + 16);
 				
-			out.write(String.format("vt %f %f \r\n", Utils.convertHalfToFloat(vertBuffer.getShort()), Utils.convertHalfToFloat(vertBuffer.getShort())));
+			out.write(String.format("vt %f %f \r\n", Utils.convertHalfToFloat(vertBuffer.getShort()), Utils.convertHalfToFloat(vertBuffer.getShort())*-1));
 		}		
 		
 		out.write("\r\n");
