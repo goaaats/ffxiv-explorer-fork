@@ -143,9 +143,8 @@ void main() {
     	rimShading = mapMask.b * (1.0 - max(dot(E, normal), 0.0));    
 
 	gl_FragColor = vec4(ambientColor +
-                      rimShading * vec3(1.0,1.0,1.0) +
-                      specColor * specular +
-                      /*invertedLambertian * vec3(0.2,0.2, 0.2) +*/
+                      /*rimShading * vec3(1.0,1.0,1.0) +*/
+                      specColor * specular +                      
                       lambertian * mapDiffuse.xyz, 1.0);
 
 }

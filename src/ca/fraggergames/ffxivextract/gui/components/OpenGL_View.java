@@ -27,6 +27,7 @@ import javax.swing.JPanel;
 import javax.swing.border.TitledBorder;
 
 import ca.fraggergames.ffxivextract.helpers.Matrix;
+import ca.fraggergames.ffxivextract.models.Mesh;
 import ca.fraggergames.ffxivextract.models.Model;
 import ca.fraggergames.ffxivextract.shaders.BlurShader;
 import ca.fraggergames.ffxivextract.shaders.DefaultShader;
@@ -170,8 +171,18 @@ public class OpenGL_View extends JPanel {
 			@Override
 			public void itemStateChanged(ItemEvent e) {
 				if (e.getStateChange() == ItemEvent.SELECTED) {
-			          currentLoD = Integer.parseInt((String)e.getItem());
-			          lblMeshes.setText("Num Meshes: " + model.getMeshes(currentLoD).length);
+		          currentLoD = Integer.parseInt((String)e.getItem());
+		          String vertList = "Vertices: ";
+		          String indicesList = "Indices: ";
+		          for (Mesh m : model.getMeshes(currentLoD))
+		          {
+		        	  vertList+= "("+m.numVerts+") ";
+		        	  indicesList+= "("+m.numIndex+") ";
+		          }		        		          
+		          
+		          lblVertices.setText("Vertices: " + vertList);
+		          lblIndices.setText("Indices: " + indicesList);
+		          lblMeshes.setText("Num Meshes: " + model.getMeshes(currentLoD).length);
 			    }
 			}
 		});

@@ -9,6 +9,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 
+import ca.fraggergames.ffxivextract.models.Model;
 import ca.fraggergames.ffxivextract.models.SqPack_IndexFile;
 import ca.fraggergames.ffxivextract.models.SqPack_IndexFile.SqPack_File;
 import ca.fraggergames.ffxivextract.models.SqPack_IndexFile.SqPack_Folder;
@@ -354,4 +355,31 @@ public class EXD_Searcher {
 		
 		writer.close();
 	}
+	
+	public static void openEveryModel()
+	{
+		try {
+			SqPack_IndexFile currentIndex = new SqPack_IndexFile("c:\\Program Files (x86)\\SquareEnix\\FINAL FANTASY XIV - A Realm Reborn\\game\\sqpack\\ffxiv\\040000.win32.index");
+			
+			for (int i = 0; i < currentIndex.getPackFolders().length; i++)
+			{
+					SqPack_Folder folder = currentIndex.getPackFolders()[i];
+					for (int j = 0; j < folder.getFiles().length; j++)
+					{
+						if (folder.getFiles()[j].getName().contains(".mdl"))
+						{
+							System.out.println("->Getting model " + folder.getFiles()[j].getName());
+							Model m = new Model(folder.getName() + "/" + folder.getFiles()[j].getName(), currentIndex, currentIndex.extractFile(folder.getFiles()[j].dataoffset, null));
+							for (int x = 0; x < m.getNumVariants(); x++)
+								m.loadMaterials(x);
+						}
+					}
+			}
+						
+		} catch (IOException e2) {
+			// TODO Auto-generated catch block
+			e2.printStackTrace();
+		}
+	}
+	
 }
