@@ -381,5 +381,59 @@ public class EXD_Searcher {
 			e2.printStackTrace();
 		}
 	}
+
+	public static void findStains()
+	{
+		try {
+			SqPack_IndexFile currentIndex = new SqPack_IndexFile("e:\\Program Files (x86)\\SquareEnix\\FINAL FANTASY XIV - A Realm Reborn\\game\\sqpack\\ffxiv\\040000.win32.index");
+			
+			for (int i = 0; i < currentIndex.getPackFolders().length; i++)
+			{
+					SqPack_Folder folder = currentIndex.getPackFolders()[i];
+					String folderName = folder.getName();
+					if (folderName.contains("equipment") && folderName.contains("material/v"))
+					{											
+						String newfolder = folderName + "/staining";
+						//Check if exists
+						int folderHash = HashDatabase.computeCRC(newfolder.getBytes(), 0, newfolder.getBytes().length);
+						for (int j = 0; j < currentIndex.getPackFolders().length; j++)
+						{							
+							SqPack_Folder folder2 = currentIndex.getPackFolders()[j];
+							if (folder2.getId() == folderHash)
+							{
+								
+								for (int y = 0; y < folder2.getFiles().length; y++)
+								{
+									SqPack_File file = folder2.getFiles()[y];
+								
+									if (!file.getName().endsWith(".tex") && !file.getName().endsWith(".mtrl"))
+										continue;
+								
+									if (file.getName().contains(".tex")){
+										for (int x = 1; x <= 85; x++)
+											HashDatabase.addPathToDB(newfolder + "/" + file.getName().replace(".tex", String.format("_s%04d.tex", x)));
+										
+										for (int x = 101; x <= 120; x++)
+											HashDatabase.addPathToDB(newfolder + "/" + file.getName().replace(".tex", String.format("_s%04d.tex", x)));
+									}
+									else if (file.getName().contains(".mtrl")){
+										for (int x = 1; x <= 85; x++)
+											HashDatabase.addPathToDB(newfolder + "/" + file.getName().replace(".mtrl", String.format("_s%04d.mtrl", x)));
+										
+										for (int x = 101; x <= 120; x++)
+											HashDatabase.addPathToDB(newfolder + "/" + file.getName().replace(".mtrl", String.format("_s%04d.mtrl", x)));
+									}
+								}
+								
+							}
+						}
+					}
+			}
+						
+		} catch (IOException e2) {
+			// TODO Auto-generated catch block
+			e2.printStackTrace();
+		}
+	}
 	
 }

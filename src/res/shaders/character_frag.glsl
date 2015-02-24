@@ -142,9 +142,9 @@ void main() {
 	if (uHasMask)
     	rimShading = mapMask.b * (1.0 - max(dot(E, normal), 0.0));    
 
-	gl_FragColor = vec4(ambientColor +
+	gl_FragColor = vec4(
                       /*rimShading * vec3(1.0,1.0,1.0) +*/
-                      specColor * specular +                      
+                     /* specColor * specular +*/                      
                       lambertian * mapDiffuse.xyz, 1.0);
 
 }
