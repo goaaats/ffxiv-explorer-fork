@@ -47,5 +47,6 @@ Known Types:
 Examples:
 
 <Player First Name>: 02 2C 0D FF 07 02 29 03 EB 02 03 FF 02 20 02 03 (File 0x67A9C0A, 0x1A79)
+<Player Last Name>:  02 2C 0D FF 07 02 29 03 EB 02 03 FF 02 20 03 03
 <HQ ICON> 02 28 0A FF 06 41 64 64 6F 6E 0A 01 03
 <Gil Amount> 02 20 03 E8 03 03 
