@@ -25,7 +25,7 @@ uniform bool uHasColorSet;
 
 vec3 lightPos = vec3(1.0,1.0,1.0);
 vec3 ambientColor = vec3(0.0, 0.0, 0.0);
-vec3 diffuseColor = vec3(0.7, 0.7, 0.7);
+vec3 diffuseColor = vec3(255.0/255.0, 255.0/255.0, 255.0/255.0);
 vec3 specColor = vec3(1.0, 1.0, 1.0);
 
 void main() {
@@ -144,8 +144,8 @@ void main() {
 
 	gl_FragColor = vec4(
                       /*rimShading * vec3(1.0,1.0,1.0) +*/
-                     /* specColor * specular +*/                      
-                      lambertian * mapDiffuse.xyz, 1.0);
+                      specColor * specular +                     
+                      diffuseColor * lambertian * mapDiffuse.xyz, 1.0);
 
 }
 

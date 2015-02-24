@@ -239,12 +239,12 @@ public class FFXIV_String {
 
 					if(stringSize == 1)
 					{
-						switchString1 += "none";
+						ifString += "none";
 						if (payload[pos1] == 3 || payload[pos1] != -1 || (pos1+1 < payload.length && payload[pos1+1] == 3))
 							break;
 						else
 						{
-							switchString1 +="/";
+							ifString +="/";
 							continue;
 						}
 					}
@@ -270,9 +270,9 @@ public class FFXIV_String {
 				}
 
 				buffOut.put((ifString+">").getBytes("UTF-8"));
-			}
-			else
-				buffOut.put("<if?>".getBytes("UTF-8"));*/
+			//}
+			//else
+				//buffOut.put("<if?>".getBytes("UTF-8"));*/
 			break;
 		case TYPE_SWITCH:
 			int pos2 = 1;
