@@ -142,7 +142,7 @@ public class FFXIV_String {
 			break;
 		case TYPE_IF:
 			int pos1 = 2;
-			String switchString1 = "<if:";
+			String ifString = "<if:";
 			
 			if ((((int)payload[0])&0xFF) == 0xE9)
 			{
@@ -161,16 +161,16 @@ public class FFXIV_String {
 						byte[] outProcessBuffer = new byte[512];
 						ByteBuffer outProcessBB = ByteBuffer.wrap(outProcessBuffer);
 						processPacket(switchBB, outProcessBB);
-						switchString1 += new String(outProcessBuffer, 0, outProcessBB.position(), "UTF-8");
+						ifString += new String(outProcessBuffer, 0, outProcessBB.position(), "UTF-8");
 					}
 					else
-						switchString1 += new String(switchBuffer, "UTF-8");
+						ifString += new String(switchBuffer, "UTF-8");
 					pos1+=stringSize-1;
 					if (payload[pos1] == 3 && ((((int)payload[pos1-1])&0xFF) != 0xFF) || (pos1+1 <= payload.length-1 &&payload[pos1+1] == 3))
 						break;				
-					switchString1 += "/";				
+					ifString += "/";				
 				}
-				buffOut.put((switchString1+">").getBytes("UTF-8"));
+				buffOut.put((ifString+">").getBytes("UTF-8"));
 			}
 			else
 				buffOut.put("<if?>".getBytes("UTF-8"));
