@@ -1,0 +1,15 @@
+#### AVFX RESEARCH #### By Ioncannon
+
+0x00 Signature 		Int32; (AVFX) 
+0x04 Filesize  		Int32; Starting after this
+0x08 Data Stream		 ; Size of Filesize
+
+After this point, data is packed one after another. It follows the format of:
+
+0x00 Code			Int32; !These seem to be strings, but backwards!
+0x04 Size			Int32;
+0x08 Data				 ;
+
+-----------
+0x546578 seems to be strings/paths.
+0x4d6f646c seems to be a chunk of 3d geo data.

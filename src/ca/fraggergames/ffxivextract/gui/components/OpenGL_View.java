@@ -187,7 +187,6 @@ public class OpenGL_View extends JPanel {
 			}
 		});
                 
-        
         JPanel panel_4 = new JPanel();
         FlowLayout flowLayout = (FlowLayout) panel_4.getLayout();
         flowLayout.setAlignment(FlowLayout.RIGHT);
@@ -233,6 +232,18 @@ public class OpenGL_View extends JPanel {
         
         lblMeshes = new JLabel("Num Meshes: " + model.getMeshes(currentLoD).length);
         panel_2.add(lblMeshes);
+        
+        String vertList = "Vertices: ";
+        String indicesList = "Indices: ";
+        for (Mesh m : model.getMeshes(currentLoD))
+        {
+      	  vertList+= "("+m.numVerts+") ";
+      	  indicesList+= "("+m.numIndex+") ";
+        }		        		          
+        
+        lblVertices.setText("Vertices: " + vertList);
+        lblIndices.setText("Indices: " + indicesList);
+        lblMeshes.setText("Num Meshes: " + model.getMeshes(currentLoD).length);
         
         add( glcanvas, BorderLayout.CENTER);
 	}

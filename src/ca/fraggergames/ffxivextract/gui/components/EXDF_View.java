@@ -482,7 +482,7 @@ public class EXDF_View extends JScrollPane implements ItemListener{
 				{									
 				case 0x0b: // QUAD
 					int quad[] = entry.getQuad(dataset.offset);
-					return quad[0] + ", " + quad[1] + ", " + quad[2] + ", " + quad[3];
+					return quad[3] + ", " + quad[2] + ", " + quad[1] + ", " + quad[0];
 				case 0x09: // FLOAT
 				case 0x08:
 					return entry.getFloat(dataset.offset);
@@ -546,7 +546,7 @@ public class EXDF_View extends JScrollPane implements ItemListener{
 			String model1String[] = ((String) table.getValueAt(row, 11)).split(",");
 			int model1[] = new int[model1String.length];
 			for (int i = 0; i < model1.length; i++)
-				model1[i] = Integer.parseInt(model1String[model1String.length-1-i].trim());
+				model1[i] = Integer.parseInt(model1String[i].trim());
 			String model2[] = ((String) table.getValueAt(row, 12)).split(",");
 			
 			String path = null, path2;			
