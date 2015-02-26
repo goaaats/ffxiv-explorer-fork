@@ -56,7 +56,7 @@ public class PathSearcher extends JFrame {
 	*/
 	
 	static String folders[] = {
-		"sound/"
+		"ui/"
 	};
 	
  	public static void doPathSearch(String path) throws IOException {
@@ -130,18 +130,18 @@ public class PathSearcher extends JFrame {
 										String fullpath = new String(data, i2, endString-i2);
 																				
 										//Add to list
-										if (HashDatabase.getFolder(f.getId()) == null)
-										{						
+										//if (HashDatabase.getFolder(f.getId()) == null)
+										//{						
 											System.out.println("NEW->"+fullpath);
 											numNewFound++;
 											numNewFoundFolder++;
 											HashDatabase.addPathToDB(fullpath, conn);										
-										}
-										else
-										{
-											numFound++;
-											numFoundFolder++;
-										}
+										//}
+										//else
+										//{
+										//	numFound++;
+										//	numFoundFolder++;
+										//}
 																										
 									} else
 										continue;
