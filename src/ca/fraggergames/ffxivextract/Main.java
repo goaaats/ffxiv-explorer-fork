@@ -45,26 +45,21 @@ public class Main {
 			e1.printStackTrace();
 		}
 		
-		//HashDatabase.addPathToDB("music/ffxiv/BGM_ChocoboRace_Win1st.scd");
-		HashDatabase.addPathToDB("music/ffxiv/BGM_ChocoboRace_Win2nd.scd");
-		//HashDatabase.addPathToDB("music/ffxiv/BGM_ChocoboRace_Lose.scd");
-		//HashDatabase.addPathToDB("music/ffxiv/BGM_ChocoboRace_Fanfare.scd");
-		
 		//EXD_Searcher.findStains();		
 		
 		//EXD_Searcher.openEveryModel();
-		System.exit(0);
+		//System.exit(0);
 		
 		//EXD_Searcher.getModelsFromModelChara("C:\\Users\\Filip\\Desktop\\exd\\modelchara.csv");
 		
-/*		
-		try {
-			PathSearcher.doPathSearch("E:\\Program Files (x86)\\SquareEnix\\FINAL FANTASY XIV - A Realm Reborn\\game\\sqpack\\ffxiv\\080000.win32.index");
+		
+		/*try {
+			PathSearcher.doPathSearch("E:\\Program Files (x86)\\SquareEnix\\FINAL FANTASY XIV - A Realm Reborn\\game\\sqpack\\ffxiv\\060000.win32.index");
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
-		}ww
-		*/
+		}
+		
 		/*
 		SqPack_IndexFile index = null;
 		try {

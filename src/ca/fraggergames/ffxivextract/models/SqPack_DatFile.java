@@ -274,6 +274,10 @@ public class SqPack_DatFile {
 			bb.position(0x0E);			
 			int numMipmaps = bb.getShort();
 			mipmapPosTable = new int[numMipmaps];
+			
+			if (numMipmaps < blockCount)
+				mipmapPosTable = new int[blockCount];
+			
 			bb.position(0x1C);
 			for (int i = 0; i < numMipmaps; i++)
 				mipmapPosTable[i] = bb.getInt();
@@ -281,7 +285,7 @@ public class SqPack_DatFile {
 		
 		//Extract File
 		for (int j = 0; j < (contentType == TYPE_TEXTURE ? blockCount : 1); j++){
-			if (mipmapPosTable != null)
+			if (mipmapPosTable != null)				
 				currentFileOffset = mipmapPosTable[j];
 			else
 				currentFileOffset = 0;

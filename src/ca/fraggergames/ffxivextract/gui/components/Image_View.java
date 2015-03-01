@@ -57,14 +57,6 @@ public class Image_View extends JPanel {
 		add(pnlTexPreview, BorderLayout.CENTER);
 		pnlTexPreview.setLayout(new BorderLayout(0, 0));
 		
-		JPanel panel = new JPanel();
-		pnlTexPreview.add(panel, BorderLayout.NORTH);
-		FlowLayout flowLayout = (FlowLayout) panel.getLayout();
-		flowLayout.setAlignment(FlowLayout.LEFT);
-		
-		JLabel lblCurrentMipmap = new JLabel("Current MipMap: ");
-		panel.add(lblCurrentMipmap);		
-		
 		JScrollPane scrollPane = new JScrollPane();
 		pnlTexPreview.add(scrollPane);				
 		imgPreviewCanvas = new NavigableImagePanel();

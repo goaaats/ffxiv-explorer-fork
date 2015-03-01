@@ -119,7 +119,7 @@ public class FFXIV_String {
 				buffOut.put("<value>".getBytes("UTF-8"));
 			break;
 		case TYPE_SPLIT:
-			/*
+			
 			if (Arrays.equals(payload, forenamePayload))
 			{
 				buffOut.put("<forename>".getBytes("UTF-8"));
@@ -130,7 +130,7 @@ public class FFXIV_String {
 				buffOut.put("<surname>".getBytes("UTF-8"));
 				break;
 			}
-			*/
+			
 			buffOut.put("<split:".getBytes("UTF-8"));
 
 			int contentsSize = payload[1];
@@ -192,14 +192,15 @@ public class FFXIV_String {
 			break;
 		case TYPE_UNKNOWN2:
 
-			byte unknownBuffer[] = new byte[payload[1]];
+			/*byte unknownBuffer[] = new byte[payload[1]];
 			System.arraycopy(payload, 2, unknownBuffer, 0, unknownBuffer.length);
 			ByteBuffer unknownBB = ByteBuffer.wrap(unknownBuffer);
 			unknownBB.position(1);
 			byte[] outUnknownProcessBuffer = new byte[512];
 			ByteBuffer outUnknownProcessBB = ByteBuffer.wrap(outUnknownProcessBuffer);
-			processPacket(unknownBB, outUnknownProcessBB);
-			buffOut.put((new String(outUnknownProcessBuffer, 0, outUnknownProcessBB.position(), "UTF-8").getBytes("UTF-8")));
+			processPacket(unknownBB, outUnknownProcessBB);*/
+						
+			buffOut.put(String.format("<2b?:0x%x, 0x%x, 0x%x>", payload[0], payload[1], payload[2]).getBytes("UTF-8"));
 
 			break;
 		case TYPE_REFERENCE:
@@ -249,22 +250,11 @@ public class FFXIV_String {
 						}
 					}
 
-					byte switchBuffer[] = new byte[stringSize-1];
-					System.arraycopy(payload, pos1, switchBuffer, 0, stringSize-1);
-					if (switchBuffer[0] == 0x02)
-					{
-						ByteBuffer switchBB = ByteBuffer.wrap(switchBuffer);
-						switchBB.position(1);
-						byte[] outProcessBuffer = new byte[512];
-						ByteBuffer outProcessBB = ByteBuffer.wrap(outProcessBuffer);
-
-						processPacket(switchBB, outProcessBB);
-						ifString += new String(outProcessBuffer, 0, outProcessBB.position(), "UTF-8");
-					}
-					else
-						ifString += new String(switchBuffer, "UTF-8");
+					byte ifBuffer[] = new byte[stringSize-1];
+					System.arraycopy(payload, pos1, ifBuffer, 0, stringSize-1);
+					ifString += parseFFXIVString(ifBuffer);
 					pos1+=stringSize-1;
-					if (payload[pos1] != -1 && (payload[pos1] == 3 || (pos1+1 < payload.length && payload[pos1+1] == 3)))
+					if (payload[pos1] != -1 && (payload[pos1] == 3 || (pos1+1 < payload.length && (payload[pos1+1] == 3) || (pos1+2 < payload.length && (payload[pos1+2] == 3)))))
 						break;
 					ifString += "/";
 				}
