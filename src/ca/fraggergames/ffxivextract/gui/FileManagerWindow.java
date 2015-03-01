@@ -619,11 +619,11 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 				e.printStackTrace();
 			}
 		}
-		else if (data.length >= 4 && data[0] == 'X' && data[1] == 'F' && data[2] == 'V' && data[3] == 'A')
+		/*else if (data.length >= 4 && data[0] == 'X' && data[1] == 'F' && data[2] == 'V' && data[3] == 'A')
 		{
 			AVFX_File avfxFile = new AVFX_File(data);
 			avfxFile.printOut();
-		}
+		}*/
 		else if (contentType == 4 || file.getName().endsWith("atex"))
 		{
 			Image_View imageComponent = new Image_View(new Texture_File(data));
