@@ -643,4 +643,26 @@ public class HashDatabase {
 
 			return dwCRC;
 		}
+
+		static public Connection connection;
+		
+		public static void flagFileNameAsUsed(int id) {
+			try{
+				Statement statement = connection.createStatement();
+				statement.setQueryTimeout(30); // set timeout to 30 sec.
+				statement.executeUpdate("update 'filenames' set used = 1 where hash = " + id);				
+			} catch (SQLException e) {
+				System.err.println(e.getMessage());
+			} 
+		}
+		
+		public static void flagFolderNameAsUsed(int id) {
+			try{
+				Statement statement = connection.createStatement();
+				statement.setQueryTimeout(30); // set timeout to 30 sec.
+				statement.executeUpdate("update 'folders' set used = 1 where hash = " + id);				
+			} catch (SQLException e) {
+				System.err.println(e.getMessage());
+			} 
+		}
 }

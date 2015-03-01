@@ -231,6 +231,8 @@ public class SqPack_IndexFile {
 			this.name = HashDatabase.getFolder(id);
 			if (this.name == null)
 				this.name = String.format("~%x", id);
+			//else
+				//HashDatabase.flagFolderNameAsUsed(id);
 		}
 		
 		protected void readFiles(LERandomAccessFile ref, JProgressBar prgLoadingBar, JLabel lblLoadingBarString) throws IOException{
@@ -302,6 +304,8 @@ public class SqPack_IndexFile {
 			this.name = HashDatabase.getFileName(id);
 			if (this.name == null)
 				this.name = String.format("~%x", id);
+			//else
+				//HashDatabase.flagFileNameAsUsed(id);
 		}
 		
 		public int getId()
