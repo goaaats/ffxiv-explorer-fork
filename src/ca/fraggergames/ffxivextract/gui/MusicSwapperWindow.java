@@ -1,42 +1,12 @@
 package ca.fraggergames.ffxivextract.gui;
 
 import java.awt.BorderLayout;
-import java.awt.EventQueue;
-
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.border.EmptyBorder;
-import javax.swing.border.TitledBorder;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
-import javax.swing.filechooser.FileFilter;
-import javax.swing.DefaultListCellRenderer;
-import javax.swing.DefaultListModel;
-import javax.swing.ImageIcon;
-import javax.swing.JComboBox;
-import javax.swing.JFileChooser;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JTextField;
-import javax.swing.JButton;
-import javax.swing.BoxLayout;
-import javax.swing.ListCellRenderer;
-
-import java.awt.Component;
-import javax.swing.JList;
-
 import java.awt.Color;
-import java.awt.GridLayout;
-import java.awt.GridBagLayout;
-import java.awt.GridBagConstraints;
-import java.awt.Insets;
-import javax.swing.AbstractListModel;
-import javax.swing.JScrollPane;
-import javax.swing.SwingConstants;
+import java.awt.Component;
 import java.awt.FlowLayout;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -44,27 +14,39 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.net.URL;
 import java.nio.channels.FileChannel;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.Hashtable;
 
+import javax.swing.BoxLayout;
+import javax.swing.DefaultListCellRenderer;
+import javax.swing.DefaultListModel;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
+import javax.swing.SwingConstants;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.TitledBorder;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.filechooser.FileFilter;
 
 import ca.fraggergames.ffxivextract.Strings;
 import ca.fraggergames.ffxivextract.helpers.DatBuilder;
 import ca.fraggergames.ffxivextract.helpers.LERandomAccessFile;
-import ca.fraggergames.ffxivextract.helpers.LittleEndianInputStream;
 import ca.fraggergames.ffxivextract.models.SqPack_IndexFile;
-import ca.fraggergames.ffxivextract.models.SqPack_IndexFile.SqPack_DataSegment;
 import ca.fraggergames.ffxivextract.models.SqPack_IndexFile.SqPack_File;
-import javax.swing.UIManager;
 
 import com.google.gson.Gson;
 
@@ -94,12 +76,12 @@ public class MusicSwapperWindow extends JFrame {
 	private JButton btnBackup, btnRestore;
 	private JLabel txtSetTo;
 	private JLabel lblOriginal, lblSetId;
-	private JList<String> lstOriginal = new JList<String>();
-	private JList<String> lstSet = new JList<String>();
+	private JList lstOriginal = new JList();
+	private JList lstSet = new JList();
 	private JButton btnSwap, btnRevert;
 	private JPanel pnlCustomMusic;
 	private JPanel panel_1;
-	private JList<String> lstCustomMusic;
+	private JList lstCustomMusic;
 	private JScrollPane scrollPane_2;
 	private JPanel panel_2;
 	private JButton btnAdd;
@@ -172,9 +154,9 @@ public class MusicSwapperWindow extends JFrame {
 		scrollPane_2 = new JScrollPane();
 		panel_1.add(scrollPane_2);
 		
-		lstCustomMusic = new JList<String>();		
+		lstCustomMusic = new JList();		
 		lstCustomMusic.setVisibleRowCount(5);
-		lstCustomMusic.setModel(new DefaultListModel<String>());
+		lstCustomMusic.setModel(new DefaultListModel());
 		scrollPane_2.setViewportView(lstCustomMusic);
 		
 		panel_7 = new JPanel();
@@ -222,7 +204,7 @@ public class MusicSwapperWindow extends JFrame {
 		panel_6.add(scrollPane);
 			
 		lstOriginal.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		lstOriginal.setModel(new DefaultListModel<String>());
+		lstOriginal.setModel(new DefaultListModel());
 		lstOriginal.setCellRenderer(new SwapperCellRenderer());
 		lstOriginal.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
 			
@@ -260,7 +242,7 @@ public class MusicSwapperWindow extends JFrame {
 		scrollPane_1.setAlignmentX(Component.LEFT_ALIGNMENT);
 		panel_5.add(scrollPane_1);
 		
-		lstSet.setModel(new DefaultListModel<String>());
+		lstSet.setModel(new DefaultListModel());
 		lstSet.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		scrollPane_1.setViewportView(lstSet);
 		
@@ -300,7 +282,7 @@ public class MusicSwapperWindow extends JFrame {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				
-				if (((DefaultListModel<String>)lstSet.getModel()).getElementAt(lstSet.getSelectedIndex()).equals("-----------"))
+				if (((DefaultListModel)lstSet.getModel()).getElementAt(lstSet.getSelectedIndex()).equals("-----------"))
 					return;
 				
 				swapMusic(lstOriginal.getSelectedIndex(),
@@ -373,7 +355,7 @@ public class MusicSwapperWindow extends JFrame {
 				if (retunval == JFileChooser.APPROVE_OPTION) {
 					
 					for (int i = 0; i < fileChooser.getSelectedFiles().length; i++)					
-						((DefaultListModel<String>)lstCustomMusic.getModel()).addElement(fileChooser.getSelectedFiles()[i].getAbsolutePath());
+						((DefaultListModel)lstCustomMusic.getModel()).addElement(fileChooser.getSelectedFiles()[i].getAbsolutePath());
 				}
 				
 				btnGenerateDat.setEnabled(true);
@@ -386,7 +368,7 @@ public class MusicSwapperWindow extends JFrame {
 			public void actionPerformed(ActionEvent arg0) {
 				int selected = lstCustomMusic.getSelectedIndex();
 				if (selected >= 0)
-					((DefaultListModel<String>)lstCustomMusic.getModel()).remove(selected);							
+					((DefaultListModel)lstCustomMusic.getModel()).remove(selected);							
 												
 					btnGenerateDat.setEnabled(true);
 			}
@@ -400,11 +382,11 @@ public class MusicSwapperWindow extends JFrame {
 				if (customIndexes.size() != 0)
 				{
 					for (int i = 0; i < customIndexes.size(); i++)
-						((DefaultListModel<String>)lstSet.getModel()).removeElementAt(0);					
+						((DefaultListModel)lstSet.getModel()).removeElementAt(0);					
 				}
 				
-				if (((DefaultListModel<String>)lstSet.getModel()).get(0).equals("-----------"))
-					((DefaultListModel<String>)lstSet.getModel()).removeElementAt(0);
+				if (((DefaultListModel)lstSet.getModel()).get(0).equals("-----------"))
+					((DefaultListModel)lstSet.getModel()).removeElementAt(0);
 				
 				customPaths.clear();
 				customIndexes.clear();
@@ -419,9 +401,9 @@ public class MusicSwapperWindow extends JFrame {
 					DatBuilder builder = new DatBuilder(currentDatIndex, customDatPath);					
 					for (int i = 0; i < lstCustomMusic.getModel().getSize(); i++)
 					{
-						lastLoaded = lstCustomMusic.getModel().getElementAt(i);
-						customPaths.add(lstCustomMusic.getModel().getElementAt(i));
-						customIndexes.add(builder.addFile(lstCustomMusic.getModel().getElementAt(i)));
+						lastLoaded = (String) lstCustomMusic.getModel().getElementAt(i);
+						customPaths.add((String)lstCustomMusic.getModel().getElementAt(i));
+						customIndexes.add(builder.addFile((String)lstCustomMusic.getModel().getElementAt(i)));
 					}
 					builder.finish();
 				} catch (FileNotFoundException e) {
@@ -463,9 +445,9 @@ public class MusicSwapperWindow extends JFrame {
 				saveCustomDatIndexList();
 				
 				//Put new songs into list
-				((DefaultListModel<String>)lstSet.getModel()).add(0,"-----------");				
+				((DefaultListModel)lstSet.getModel()).add(0,"-----------");				
 				for (int i = lstCustomMusic.getModel().getSize() - 1; i >= 0; i--)	
-					((DefaultListModel<String>)lstSet.getModel()).add(0, ((DefaultListModel<String>)lstCustomMusic.getModel()).elementAt(i));
+					((DefaultListModel)lstSet.getModel()).add(0, ((DefaultListModel)lstCustomMusic.getModel()).elementAt(i));
 				
 				btnGenerateDat.setEnabled(false);
 				datWasGenerated = true;
@@ -528,11 +510,11 @@ public class MusicSwapperWindow extends JFrame {
 		setSwapperEnabled(true);
 		SqPack_File[] originalFiles;
 
-		((DefaultListModel<String>)lstOriginal.getModel()).clear();
-		((DefaultListModel<String>)lstSet.getModel()).clear();
+		((DefaultListModel)lstOriginal.getModel()).clear();
+		((DefaultListModel)lstSet.getModel()).clear();
 		
 		datWasGenerated = false;
-		((DefaultListModel<String>)lstCustomMusic.getModel()).clear();
+		((DefaultListModel)lstCustomMusic.getModel()).clear();
 		customPaths.clear();
 		customIndexes.clear();
 		
@@ -637,9 +619,9 @@ public class MusicSwapperWindow extends JFrame {
 			txtSetTo.setForeground(Color.decode("#006400"));
 	}
 
-	private void loadDropDown(JList<String> list, SqPack_File[] files,
+	private void loadDropDown(JList list, SqPack_File[] files,
 			int selectedSpot) {
-		DefaultListModel<String> listModel = (DefaultListModel<String>)list.getModel();
+		DefaultListModel listModel = (DefaultListModel)list.getModel();
 		
 		for (int i = 0; i < files.length; i++)
 		{
@@ -727,7 +709,7 @@ public class MusicSwapperWindow extends JFrame {
 		setSwapperEnabled(false);
 		
 		datWasGenerated = false;
-		((DefaultListModel<String>)lstCustomMusic.getModel()).clear();
+		((DefaultListModel)lstCustomMusic.getModel()).clear();
 		customPaths.clear();
 		customIndexes.clear();
 	}
@@ -738,8 +720,8 @@ public class MusicSwapperWindow extends JFrame {
 		lstSet.clearSelection();
 		
 		if (!isEnabled){			
-			((DefaultListModel<String>)lstOriginal.getModel()).clear();
-			((DefaultListModel<String>)lstSet.getModel()).clear();
+			((DefaultListModel)lstOriginal.getModel()).clear();
+			((DefaultListModel)lstSet.getModel()).clear();
 			txtSetTo.setText(Strings.MUSICSWAPPER_CURRENTSETTO);
 			txtSetTo.setForeground(Color.decode("#000000"));
 		}
@@ -885,7 +867,7 @@ public class MusicSwapperWindow extends JFrame {
 		
 		        while (line != null) {
 		            sb.append(line);
-		            sb.append(System.lineSeparator());
+		            sb.append("\r\n");
 		            line = br.readLine();
 		        }
 		        json = sb.toString();
@@ -908,12 +890,12 @@ public class MusicSwapperWindow extends JFrame {
 		customIndexes = toLoad.musicOffsets;
 		
 		for (int i = 0; i < customPaths.size(); i++)
-			((DefaultListModel<String>)lstCustomMusic.getModel()).addElement(customPaths.get(i));
+			((DefaultListModel)lstCustomMusic.getModel()).addElement(customPaths.get(i));
 		
 		//Put new songs into list
-		((DefaultListModel<String>)lstSet.getModel()).add(0,"-----------");				
+		((DefaultListModel)lstSet.getModel()).add(0,"-----------");				
 		for (int i = lstCustomMusic.getModel().getSize() - 1; i >= 0; i--)	
-			((DefaultListModel<String>)lstSet.getModel()).add(0, ((DefaultListModel<String>)lstCustomMusic.getModel()).elementAt(i));
+			((DefaultListModel)lstSet.getModel()).add(0, ((DefaultListModel)lstCustomMusic.getModel()).elementAt(i));
 		
 		btnGenerateDat.setEnabled(false);
 		datWasGenerated = true;
@@ -945,7 +927,7 @@ public class MusicSwapperWindow extends JFrame {
 	     }
 
 		@Override
-		public Component getListCellRendererComponent(JList<?> list,
+		public Component getListCellRendererComponent(JList list,
 				Object value, int index, boolean isSelected,
 				boolean cellHasFocus) {
 			setText(value.toString());
@@ -999,7 +981,7 @@ public class MusicSwapperWindow extends JFrame {
 	private class CustomDatPOJO
 	{
 		public String datPath;
-		public ArrayList<String> musicPaths;
+		public ArrayList musicPaths;
 		public ArrayList<Long> musicOffsets;		
 	}
 }
