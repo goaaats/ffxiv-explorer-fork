@@ -21,11 +21,11 @@ class ModelRenderer implements GLEventListener{
 
 	private Model model, model2;
 	private GLU glu;
-	static private float zoom = -7;
-	static private float panX = 0;
-	static private float panY = 0;
-	static private float angleX = 0;
-	static private float angleY = 0;
+	private float zoom = -7;
+	private float panX = 0;
+	private float panY = 0;
+	private float angleX = 0;
+	private float angleY = 0;
 	
 	DefaultShader defaultShader;
 	FXAAShader fxaaShader;

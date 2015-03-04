@@ -183,6 +183,7 @@ public class OpenGL_View extends JPanel {
 		          lblVertices.setText("Vertices: " + vertList);
 		          lblIndices.setText("Indices: " + indicesList);
 		          lblMeshes.setText("Num Meshes: " + model.getMeshes(currentLoD).length);
+		          renderer.setLoD(currentLoD);	
 			    }
 			}
 		});
