@@ -42,14 +42,24 @@ public class Shader {
 	
 	private int numSampler = 4;
 	
-	public Shader(GL3 gl, String vertPath, String fragPath) throws IOException
+	public Shader(GL3 gl, String vert, String frag, boolean isPath) throws IOException
 	{
 		//Build shader
-		String vsrc = readFromStream(OpenGL_View.class
-				 .getResourceAsStream(vertPath)); 
-		 
-		String fsrc = readFromStream(OpenGL_View.class
-				 .getResourceAsStream(fragPath)); 
+		String vsrc, fsrc;
+		
+		if (isPath)
+		{
+			vsrc = readFromStream(OpenGL_View.class
+					 .getResourceAsStream(vert)); 
+			 
+			fsrc = readFromStream(OpenGL_View.class
+					 .getResourceAsStream(frag));
+		}
+		else
+		{
+			vsrc = vert;
+			fsrc = frag;
+		}
 		
 		int vertShader = createShader(gl, GL3.GL_VERTEX_SHADER, vsrc);
 		int fragShader = createShader(gl, GL3.GL_FRAGMENT_SHADER, fsrc);

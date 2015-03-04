@@ -11,7 +11,8 @@ public class HairShader extends Shader {
 	
 	public HairShader(GL3 gl)
 			throws IOException {
-		super(gl, "/res/shaders/hair_vert.glsl", "/res/shaders/hair_frag.glsl");
+		//super(gl, "/res/shaders/model_vert.glsl", "/res/shaders/hair_frag.glsl", true);	
+		super(gl, MinifiedShaders.model_vert_glsl, MinifiedShaders.hair_frag_glsl, false);		
 		
 		hairColorLocation = gl.glGetUniformLocation(shaderProgram, "uHairColor");
 		highlightColorLocation = gl.glGetUniformLocation(shaderProgram, "uHighlightColor");
