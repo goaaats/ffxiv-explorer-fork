@@ -1,5 +1,7 @@
 package ca.fraggergames.ffxivextract.models;
 
+import java.nio.BufferOverflowException;
+import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 
 import ca.fraggergames.ffxivextract.Constants;
@@ -47,7 +49,7 @@ public class LoDSubModel {
 		meshList = list;
 	}
 
-	public void loadMeshes(ByteBuffer bb) {
+	public void loadMeshes(ByteBuffer bb)  throws BufferOverflowException, BufferUnderflowException{
 		for (Mesh m : meshList)
 			m.loadMeshes(bb, vertTableOffset, indexTableOffset);
 	}

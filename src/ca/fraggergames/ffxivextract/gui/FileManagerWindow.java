@@ -61,7 +61,6 @@ import ca.fraggergames.ffxivextract.helpers.LERandomAccessFile;
 import ca.fraggergames.ffxivextract.helpers.LuaDec;
 import ca.fraggergames.ffxivextract.helpers.OggVorbisPlayer;
 import ca.fraggergames.ffxivextract.helpers.WavefrontObjectWriter;
-import ca.fraggergames.ffxivextract.models.AVFX_File;
 import ca.fraggergames.ffxivextract.models.EXDF_File;
 import ca.fraggergames.ffxivextract.models.EXHF_File;
 import ca.fraggergames.ffxivextract.models.Model;
@@ -208,7 +207,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 		prgLoadingBar = new JProgressBar();
 		prgLoadingBar.setVisible(false);
 		
-		lblLoadingBarString = new JLabel("100%");
+		lblLoadingBarString = new JLabel("0%");
 		lblLoadingBarString.setHorizontalAlignment(SwingConstants.RIGHT);
 		lblLoadingBarString.setVisible(false);
 		pnlProgBar.add(lblLoadingBarString);
@@ -571,10 +570,22 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 				e.printStackTrace();
 			}
 			*/
-			if (HashDatabase.getFolder(file.getId2()) == null)
-				view = new OpenGL_View(new Model(null, currentIndexFile, data), model);
-			else
-				view = new OpenGL_View(new Model(HashDatabase.getFolder(file.getId2()) + "/" + file.getName(), currentIndexFile, data), model);
+			try{
+				if (HashDatabase.getFolder(file.getId2()) == null)
+					view = new OpenGL_View(new Model(null, currentIndexFile, data), model);
+				else
+					view = new OpenGL_View(new Model(HashDatabase.getFolder(file.getId2()) + "/" + file.getName(), currentIndexFile, data), model);				
+			}catch(Exception modelException)
+			{
+				modelException.printStackTrace();	
+				JLabel lblLoadError = new JLabel("Error loading Model.");
+				tabs.addTab("Error", lblLoadError);
+				hexView.setBytes(data);							
+				tabs.addTab("Raw Hex", hexView);			
+				splitPane.setRightComponent(tabs);
+				return;
+			}
+			
 			tabs.addTab("3D Model", view);			
 		}
 		
@@ -735,14 +746,14 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 		protected Void doInBackground() throws Exception {
 			try {				
 				HashDatabase.beginConnection();
-				HashDatabase.globalConnection.setReadOnly(true);
 				currentIndexFile = new SqPack_IndexFile(selectedFile.getAbsolutePath(), prgLoadingBar, lblLoadingBarString);
 				HashDatabase.closeConnection();
-			} catch (IOException e) {
+			} catch (Exception e) {
 				JOptionPane.showMessageDialog(FileManagerWindow.this,
 						"There was an error opening this index file.",
 					    "File Open Error",
-					    JOptionPane.ERROR_MESSAGE);		
+					    JOptionPane.ERROR_MESSAGE);
+				e.printStackTrace();
 				return null;
 			}			
 			return null;		

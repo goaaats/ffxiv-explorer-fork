@@ -1,5 +1,7 @@
 package ca.fraggergames.ffxivextract.models;
 
+import java.nio.BufferOverflowException;
+import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 
 import com.jogamp.common.nio.Buffers;
@@ -38,7 +40,7 @@ public class Mesh{
 		this.indexBuffer = Buffers.newDirectByteBuffer(numIndex * indexSize);
 	}
 
-	public void loadMeshes(ByteBuffer bb, int lodVertexOffset, int lodIndexOffset){
+	public void loadMeshes(ByteBuffer bb, int lodVertexOffset, int lodIndexOffset) throws BufferOverflowException, BufferUnderflowException{
 		
     	boneWeight = new int[numVerts];
     	boneIndex = new int[numVerts];

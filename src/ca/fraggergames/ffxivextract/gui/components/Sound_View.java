@@ -34,7 +34,7 @@ public class Sound_View extends JPanel {
 	private JTable tblSoundEntyList;
 	SCD_File file;
 	
-	OggVorbisPlayer currentlyPlayingSong;
+	//OggVorbisPlayer currentlyPlayingSong;
 	
 	public Sound_View(SCD_File scdFile) {		
 		
@@ -65,12 +65,6 @@ public class Sound_View extends JPanel {
 				
 				if (!e.getValueIsAdjusting()){
 			
-					if (currentlyPlayingSong != null)
-					{
-						currentlyPlayingSong.stop();
-						currentlyPlayingSong = null;						
-					}
-				
 					SCD_Sound_Info info = file.getSoundInfo(tblSoundEntyList.getSelectedRow());
 					if (info != null)
 					{

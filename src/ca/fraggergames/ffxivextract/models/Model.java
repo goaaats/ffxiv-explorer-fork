@@ -4,6 +4,8 @@ import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.BufferOverflowException;
+import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
@@ -42,7 +44,7 @@ public class Model {
 		this(null, null, data);
 	}
 	
-	public Model(String modelPath, SqPack_IndexFile index, byte[] data)
+	public Model(String modelPath, SqPack_IndexFile index, byte[] data) throws BufferOverflowException, BufferUnderflowException
 	{		
 		this.modelPath = modelPath;
 		this.currentIndex = index; 
@@ -167,7 +169,7 @@ public class Model {
 			}
 		}     
         
-        for (int i = 0; i < lodModels.length; i++){
+        for (int i = 0; i < lodModels.length; i++) {
         	lodModels[i].loadMeshes(bb);
         }
         	       
