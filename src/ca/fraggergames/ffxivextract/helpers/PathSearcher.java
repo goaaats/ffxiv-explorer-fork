@@ -77,16 +77,16 @@ public class PathSearcher extends JFrame {
 		{
 		
 			System.out.println("Searching for folder " + folders[folderIndex] + "....");
-			Connection conn = HashDatabase.getConnection();
+			HashDatabase.beginConnection();
 			try {
-				conn.setAutoCommit(false);
+				HashDatabase.setAutoCommit(false);
 			} catch (SQLException e1) {
 				e1.printStackTrace();
 			}
 			String string = folders[folderIndex];
 			for (int i = 0; i < currentIndexFile.getPackFolders().length; i++) {
 				try {
-					conn.commit();
+					HashDatabase.commit();
 				} catch (SQLException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
@@ -135,7 +135,7 @@ public class PathSearcher extends JFrame {
 											System.out.println("NEW->"+fullpath);
 											numNewFound++;
 											numNewFoundFolder++;
-											HashDatabase.addPathToDB(fullpath, conn);										
+											HashDatabase.addPathToDB(fullpath);										
 										//}
 										//else
 										//{
@@ -160,11 +160,11 @@ public class PathSearcher extends JFrame {
 			numFoundFolder = 0;
 			numNewFoundFolder = 0;
 			try {
-				conn.commit();
+				HashDatabase.commit();
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
-			HashDatabase.closeConnection(conn);
+			HashDatabase.closeConnection();
 		}
 		System.out.println("Done search on " + path + ". Found " + numFound + " paths, " + numNewFound + " were new.");
 		System.out.println("========================================");

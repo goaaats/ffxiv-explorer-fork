@@ -516,6 +516,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 	}	
 	
 	private void openData(SqPack_File file) {
+		
 		JTabbedPane tabs = new JTabbedPane();
 				
 		byte data[] = null;		
@@ -733,7 +734,10 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 		@Override
 		protected Void doInBackground() throws Exception {
 			try {				
-				currentIndexFile = new SqPack_IndexFile(selectedFile.getAbsolutePath(), prgLoadingBar, lblLoadingBarString);			
+				HashDatabase.beginConnection();
+				HashDatabase.globalConnection.setReadOnly(true);
+				currentIndexFile = new SqPack_IndexFile(selectedFile.getAbsolutePath(), prgLoadingBar, lblLoadingBarString);
+				HashDatabase.closeConnection();
 			} catch (IOException e) {
 				JOptionPane.showMessageDialog(FileManagerWindow.this,
 						"There was an error opening this index file.",

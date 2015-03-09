@@ -8,16 +8,18 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Enumeration;
 
 import ca.fraggergames.ffxivextract.Constants;
 import ca.fraggergames.ffxivextract.helpers.LERandomAccessFile;
 
 public class HashDatabase {
 
+	public static Connection globalConnection = null;	
+	
 	// Hashing
 	static int[] crc_table_0f085d0 = new int[] { 0x00000000, 0x77073096,
 			0xEE0E612C, 0x990951BA, 0x076DC419, 0x706AF48F, 0xE963A535,
@@ -249,6 +251,8 @@ public class HashDatabase {
 			if (getHashDBVersion() == -1)
 				statement
 						.executeUpdate("insert into dbinfo  values ('version', '-1')");
+			
+			statement.close();			
 		} catch (SQLException e) {
 			// if the error message is "out of memory",
 			// it probably means no database file is found
@@ -278,6 +282,9 @@ public class HashDatabase {
 						
 			while (rs.next())
 				version = rs.getString("value");
+			
+			rs.close();
+			statement.close();
 		} catch (SQLException e) {
 			System.err.println(e.getMessage());
 			return -1;
@@ -311,6 +318,7 @@ public class HashDatabase {
 			Statement statement = connection.createStatement();
 			statement.setQueryTimeout(30); // set timeout to 30 sec.
 			statement.executeUpdate("insert or ignore into folders values(" + folderHash + ", '" + folderName + "', '0')");			
+			statement.close();
 		} catch (SQLException e) {
 			System.err.println(e.getMessage());
 			return false;
@@ -349,6 +357,7 @@ public class HashDatabase {
 			statement.setQueryTimeout(30); // set timeout to 30 sec.
 			statement.executeUpdate("insert or ignore into folders values(" + folderHash + ", '" + folder + "', '0')");
 			statement.executeUpdate("insert or ignore into filenames values(" + fileHash + ", '" + filename + "', '0')");
+			statement.close();
 		} catch (SQLException e) {
 			System.err.println(e.getMessage());
 			return false;
@@ -383,6 +392,7 @@ public class HashDatabase {
 			statement.setQueryTimeout(30); // set timeout to 30 sec.
 			statement.executeUpdate("insert or ignore into folders values(" + folderHash + ", '" + folder + "', 0)");
 			statement.executeUpdate("insert or ignore into filenames values(" + fileHash + ", '" + filename + "', 0)");
+			statement.close();
 		} catch (SQLException e) {
 			System.err.println(e.getMessage());
 			return false;
@@ -538,22 +548,19 @@ public class HashDatabase {
 		}
 	}
 
-	public static Connection getConnection() {
-		Connection connection = null;		
+	public static void beginConnection() {		
 			try {
-				connection = DriverManager
+				globalConnection = DriverManager
 						.getConnection("jdbc:sqlite:./hashlist.db");
-				return connection;
 			} catch (SQLException e) {
 				e.printStackTrace();
-				return null;
 			}				
 	}
 	
-	public static void closeConnection(Connection conn) {
-		
+	public static void closeConnection() {		
 		try {
-			conn.close();
+			globalConnection.close();
+			globalConnection = null;
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -563,8 +570,11 @@ public class HashDatabase {
 		Connection connection = null;
 		String path = null;
 		try{
-			connection = DriverManager
-					.getConnection("jdbc:sqlite:./hashlist.db");
+			if (globalConnection == null)
+				connection = DriverManager
+						.getConnection("jdbc:sqlite:./hashlist.db");
+			else
+				connection = globalConnection;
 			Statement statement = connection.createStatement();
 			//statement.executeUpdate("UPDATE `folders` SET `used`= 1 WHERE hash="+hash+";");
 			ResultSet rs = statement
@@ -572,12 +582,17 @@ public class HashDatabase {
 						
 			while (rs.next())
 				path = rs.getString("path");
+			
+			
+			connection.clearWarnings();
+			statement.close();
+			rs.close();
 		} catch (SQLException e) {
 			System.err.println(e.getMessage());
 			return null;
 		} finally {
 			try {
-				if (connection != null)
+				if (globalConnection == null && connection != null)
 					connection.close();
 			} catch (SQLException e) {
 				System.err.println(e);
@@ -599,20 +614,26 @@ public class HashDatabase {
 		Connection connection = null;
 		String path = null;
 		try{
-			connection = DriverManager
-					.getConnection("jdbc:sqlite:./hashlist.db");
+			if (globalConnection == null)
+				connection = DriverManager
+						.getConnection("jdbc:sqlite:./hashlist.db");
+			else
+				connection = globalConnection;
 			Statement statement = connection.createStatement();
 			//statement.executeUpdate("UPDATE `filenames` SET `used`= 1 WHERE hash="+hash+";");
 			ResultSet rs = statement
 					.executeQuery("select * from filenames where hash = " + hash);						
 			while (rs.next())
 				path = rs.getString("path");
+			statement.close();
+			rs.close();
+			
 		} catch (SQLException e) {
 			System.err.println(e.getMessage());
 			return null;
 		} finally {
 			try {
-				if (connection != null)
+				if (globalConnection == null && connection != null)
 					connection.close();
 			} catch (SQLException e) {
 				System.err.println(e);
@@ -643,12 +664,10 @@ public class HashDatabase {
 
 			return dwCRC;
 		}
-
-		static public Connection connection;
 		
 		public static void flagFileNameAsUsed(int id) {
 			try{
-				Statement statement = connection.createStatement();
+				Statement statement = globalConnection.createStatement();
 				statement.setQueryTimeout(30); // set timeout to 30 sec.
 				statement.executeUpdate("update 'filenames' set used = 1 where hash = " + id);				
 			} catch (SQLException e) {
@@ -658,11 +677,21 @@ public class HashDatabase {
 		
 		public static void flagFolderNameAsUsed(int id) {
 			try{
-				Statement statement = connection.createStatement();
+				Statement statement = globalConnection.createStatement();
 				statement.setQueryTimeout(30); // set timeout to 30 sec.
 				statement.executeUpdate("update 'folders' set used = 1 where hash = " + id);				
 			} catch (SQLException e) {
 				System.err.println(e.getMessage());
 			} 
+		}
+
+		public static void setAutoCommit(boolean flag) throws SQLException {
+			if (globalConnection != null)
+				globalConnection.setAutoCommit(flag);
+		}
+		
+		public static void commit() throws SQLException {
+			if (globalConnection != null)
+				globalConnection.commit();
 		}
 }

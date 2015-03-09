@@ -1,11 +1,17 @@
 package ca.fraggergames.ffxivextract.gui.components;
 
 import java.awt.BorderLayout;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
+import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
 import javax.sound.sampled.AudioFormat;
+import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
 import javax.sound.sampled.DataLine;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
@@ -20,6 +26,7 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.table.AbstractTableModel;
 
 import ca.fraggergames.ffxivextract.helpers.MSADPCM_Decode;
+import ca.fraggergames.ffxivextract.helpers.OggVorbisPlayer;
 import ca.fraggergames.ffxivextract.models.SCD_File;
 import ca.fraggergames.ffxivextract.models.SCD_File.SCD_Sound_Info;
 
@@ -27,7 +34,10 @@ public class Sound_View extends JPanel {
 	private JTable tblSoundEntyList;
 	SCD_File file;
 	
-	public Sound_View(SCD_File scdFile) {
+	OggVorbisPlayer currentlyPlayingSong;
+	
+	public Sound_View(SCD_File scdFile) {		
+		
 		setLayout(new BorderLayout(0, 0));
 		
 		file = scdFile;
@@ -55,13 +65,18 @@ public class Sound_View extends JPanel {
 				
 				if (!e.getValueIsAdjusting()){
 			
+					if (currentlyPlayingSong != null)
+					{
+						currentlyPlayingSong.stop();
+						currentlyPlayingSong = null;						
+					}
 				
-					SCD_Sound_Info info = file.getSoundInfo(e.getLastIndex());
+					SCD_Sound_Info info = file.getSoundInfo(tblSoundEntyList.getSelectedRow());
 					if (info != null)
 					{
 						if (info.dataType == 0x0C){
-							final byte[] header = file.getADPCMHeader(e.getLastIndex());
-							final byte[] body = file.getADPCMData(e.getLastIndex());
+							final byte[] header = file.getADPCMHeader(tblSoundEntyList.getSelectedRow());
+							final byte[] body = file.getADPCMData(tblSoundEntyList.getSelectedRow());
 							new Thread() {
 								
 								@Override
@@ -70,12 +85,39 @@ public class Sound_View extends JPanel {
 								}
 							}.start();						
 						}
+						else
+						{
+					
+						}
 					}
 				}
 			}
 		});
-
 		
+		this.addComponentListener(new ComponentListener() {
+			
+			@Override
+			public void componentShown(ComponentEvent arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void componentResized(ComponentEvent arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void componentMoved(ComponentEvent arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void componentHidden(ComponentEvent arg0) {
+			}
+		});
 	}
 
 	class SCDTableModel extends AbstractTableModel {
@@ -143,10 +185,9 @@ public class Sound_View extends JPanel {
 		}
 
 	}	
-	
 
 	public void play(byte[] header, byte[] body)
-	{
+	{		
 		if (header == null || body == null)
 			return;
 		
@@ -201,8 +242,8 @@ public class Sound_View extends JPanel {
 		
 		int bufferSize = MSADPCM_Decode.getBufferSize(body.length, channels, blockAlign, bitsPerSample);
 		
-		if (bufferSize % 2 != 0)
-			bufferSize+=1;
+		if (bufferSize % 4 != 0)
+			bufferSize+=bufferSize % 4;
 		
 		byte outputBuffer[] = new byte[bufferSize];
 		
