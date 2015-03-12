@@ -14,6 +14,7 @@ import javax.media.opengl.GL3bc;
 
 import ca.fraggergames.ffxivextract.Constants;
 import ca.fraggergames.ffxivextract.helpers.ImageDecoding.ImageDecodingException;
+import ca.fraggergames.ffxivextract.helpers.GLHelper;
 import ca.fraggergames.ffxivextract.helpers.Utils;
 import ca.fraggergames.ffxivextract.models.SqPack_IndexFile.SqPack_File;
 import ca.fraggergames.ffxivextract.models.SqPack_IndexFile.SqPack_Folder;
@@ -26,11 +27,13 @@ import ca.fraggergames.ffxivextract.storage.HashDatabase;
 import com.jogamp.common.nio.Buffers;
 
 public class Model {
-	
+			
 	//Used to find other files
 	String modelPath;
 	SqPack_IndexFile currentIndex;
-	
+		
+	//Model Info
+	private DX9VertexElement vertexElements[][];
 	private String stringArray[];
 	private short numAtrStrings, numBoneStrings, numMaterialStrings, numShpStrings;	
 	
@@ -54,7 +57,30 @@ public class Model {
 		
 		int numTotalMeshes = bb.getShort();				
 		
-		//DirectX Structs
+		//Count DirectX Vertex Elements
+		vertexElements = new DX9VertexElement[numTotalMeshes][];		
+		for (int i = 0; i < numTotalMeshes; i++){
+			bb.position(0x44 + (0x88 * i));
+			int count = 0;
+			while (true)
+			{				
+				byte stream = bb.get();				
+				if (stream == -1)
+					break;
+				count++;
+				bb.position(bb.position()+7);
+			}
+			vertexElements[i] = new DX9VertexElement[count];
+		}
+		//Load DirextX Vertex Elements
+		for (int i = 0; i < numTotalMeshes; i++){
+			bb.position(0x44 + (0x88 * i));
+			for (int j = 0; j < vertexElements[i].length; j++)
+			{
+				vertexElements[i][j] = new DX9VertexElement(bb.get(), bb.get(), bb.get(), bb.get());
+				bb.position(bb.position()+0x4);
+			}
+		}
 		bb.position(0x44 + (0x88 * numTotalMeshes));
 		
 		//Strings
@@ -128,6 +154,8 @@ public class Model {
         //Load Mesh Info
 		if (Constants.DEBUG)
 			System.out.println("-----LoD Mesh Info-----");
+		
+		int vertElementNumber = 0;
 		for (int i = 0; i < lodModels.length; i++)
 		{
 			if (Constants.DEBUG)
@@ -151,9 +179,11 @@ public class Model {
 	        	
 	        	bb.getInt();bb.getInt();        	
 	        		        	        	        	
-	        	int sizeInfo = bb.getInt();
+	        	int sizeInfo = bb.getInt();	        	
 	        	
-	        	meshList[j] = new Mesh(vertCount, indexCount, meshNum, vertexBufferOffset, indexBufferOffset, sizeInfo);
+	        	meshList[j] = new Mesh(vertCount, indexCount, meshNum, vertexBufferOffset, indexBufferOffset, sizeInfo, vertElementNumber);
+	        	
+	        	vertElementNumber++;
 	        	
 	        	lodModels[i].setMeshList(meshList);
 	        	
@@ -379,39 +409,56 @@ public class Model {
 	    	gl.glUseProgram(shader.getShaderProgramID());
 	    	
 	    	mesh.vertBuffer.position(0);
-	    	mesh.indexBuffer.position(0);
+	    	mesh.indexBuffer.position(0);	    	
 	    	
-	    	//Position
-	    	if (mesh.vertexSize == 0x10 || mesh.vertexSize == 0x8)
-	    		gl.glVertexAttribPointer(shader.getAttribPosition(), 4, GL3.GL_HALF_FLOAT, false, mesh.vertexSize, mesh.vertBuffer);
-		    else if (mesh.vertexSize == 0x14)
-		    	gl.glVertexAttribPointer(shader.getAttribPosition(), 3, GL3.GL_FLOAT, false, mesh.vertexSize, mesh.vertBuffer);
-	    	
-	    	//Normal
-	    	ByteBuffer normalData = mesh.vertBuffer.duplicate();			    
-		    normalData.position(mesh.numVerts*mesh.vertexSize + 0);		    	
-	    	gl.glVertexAttribPointer(shader.getAttribNormal(), 4, GL3.GL_HALF_FLOAT, false, mesh.auxVertexSize, normalData);
-	    	
-	    	//Tex Coord
-	    	ByteBuffer texData = mesh.vertBuffer.duplicate();			    		    
-		    texData.position((mesh.numVerts*mesh.vertexSize)+ 16);		
-	    	gl.glVertexAttribPointer(shader.getAttribTexCoord(), 4, GL3.GL_HALF_FLOAT, false, mesh.auxVertexSize, texData);
-	    	
-	    	//BiNormal
-	    	ByteBuffer binormalData = mesh.vertBuffer.duplicate();			    
-		    if (mesh.vertexSize == 0x10 || mesh.vertexSize == 0x8)
-		    	binormalData.position(mesh.numVerts*mesh.vertexSize+8);
-		    else
-		    	binormalData.position(mesh.numVerts*mesh.vertexSize+8);		    	
-	    	gl.glVertexAttribPointer(shader.getAttribBiTangent(), 4, GL3.GL_UNSIGNED_BYTE, false, mesh.auxVertexSize, binormalData);
-	    	
-	    	//Color
-	    	ByteBuffer colorData = mesh.vertBuffer.duplicate();			    
-		    if (mesh.vertexSize == 0x10 || mesh.vertexSize == 0x8)
-		    	colorData.position((mesh.numVerts*mesh.vertexSize) + 12);
-		    else
-		    	colorData.position((mesh.numVerts*mesh.vertexSize)+ 12);	
-	    	gl.glVertexAttribPointer(shader.getAttribColor(), 4, GL3.GL_UNSIGNED_BYTE, false, mesh.auxVertexSize, colorData);
+	    	for (int e = 0; e < vertexElements[mesh.getVertexElementIndex()].length; e++)
+	    	{
+	    		DX9VertexElement element = vertexElements[mesh.getVertexElementIndex()][e];
+	    		
+	    		int components = GLHelper.getComponents(element.datatype);
+	    		int datatype = GLHelper.getDatatype(element.datatype);	    				
+	    		int size = 0;
+	    		
+	    		//Set offset and size of buffer
+	    		ByteBuffer origin = mesh.vertBuffer.duplicate();	
+	    		if (element.stream == 0)	    	
+	    		{
+	    			origin.position(element.offset);
+	    			size = mesh.vertexSize;
+	    		}
+	    		else	    
+	    		{
+	    			origin.position(mesh.numVerts*mesh.vertexSize + element.offset);
+	    			size = mesh.auxVertexSize;
+	    		}
+	    		
+	    		//Set Pointer
+	    		switch (element.usage)
+	    		{
+	    		case 0://Position
+	    			gl.glVertexAttribPointer(shader.getAttribPosition(), components, datatype, false, size, origin);
+	    			break;
+	    		case 1://Blend Weights	    
+	    			//gl.glVertexAttribPointer(shader.getAttribBlendWeight(), components, datatype, false, size, origin);
+	    			break;
+	    		case 2://Blend Indices
+	    			//gl.glVertexAttribPointer(shader.getAttribBlendIndex(), components, datatype, false, size, origin);
+	    			break;
+	    		case 3://Normal
+	    			gl.glVertexAttribPointer(shader.getAttribNormal(), components, datatype, false, size, origin);
+	    			break;
+	    		case 4://Tex Coord
+	    			gl.glVertexAttribPointer(shader.getAttribTexCoord(), components, datatype, false, size, origin);
+	    			break;
+	    		case 6://Tangent
+	    			gl.glVertexAttribPointer(shader.getAttribBiTangent(), components, datatype, false, size, origin);
+	    			break;
+	    		case 7://Color
+	    			gl.glVertexAttribPointer(shader.getAttribColor(), components, datatype, false, size, origin);
+	    			break;
+	    		}
+	    		
+	    	}
 	    	
 	    	shader.setTextures(gl, material);
 	    	shader.setMatrix(gl, modelMatrix, viewMatrix, projMatrix);

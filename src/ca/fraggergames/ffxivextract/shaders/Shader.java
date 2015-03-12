@@ -23,6 +23,8 @@ public class Shader {
 	private int projLocation;
 	
 	private int positionLocation;
+	private int blendWeightLocation;
+	private int blendIndexLocation;
 	private int normalLocation;
 	private int texCoordLocation;
 	private int binormalLocation;
@@ -72,6 +74,8 @@ public class Shader {
 		
 		//Set Attrib Locations
 		positionLocation = gl.glGetAttribLocation(shaderProgram, "aPosition");
+		blendWeightLocation = gl.glGetAttribLocation(shaderProgram, "aBlendWeight");
+		blendIndexLocation = gl.glGetAttribLocation(shaderProgram, "aBlendIndex");
 		normalLocation = gl.glGetAttribLocation(shaderProgram, "aNormal");
 		texCoordLocation = gl.glGetAttribLocation(shaderProgram, "aTexCoord");
 		binormalLocation = gl.glGetAttribLocation(shaderProgram, "aBiTangent");
@@ -183,6 +187,12 @@ public class Shader {
 	public int getAttribPosition()
 	{return positionLocation;}
 	
+	public int getAttribBlendWeight()
+	{return positionLocation;}
+	
+	public int getAttribBlendIndex()
+	{return positionLocation;}
+	
 	public int getAttribColor()
 	{return colorLocation;}
 
@@ -197,6 +207,8 @@ public class Shader {
 
 	public void enableAttribs(GL3 gl) {
 		gl.glEnableVertexAttribArray(positionLocation);
+		gl.glEnableVertexAttribArray(blendWeightLocation);
+		gl.glEnableVertexAttribArray(blendIndexLocation);
     	gl.glEnableVertexAttribArray(normalLocation);
     	gl.glEnableVertexAttribArray(texCoordLocation);
     	gl.glEnableVertexAttribArray(binormalLocation);
@@ -205,6 +217,8 @@ public class Shader {
 
 	public void disableAttribs(GL3 gl) {
 		gl.glDisableVertexAttribArray(positionLocation);
+		gl.glDisableVertexAttribArray(blendWeightLocation);
+		gl.glDisableVertexAttribArray(blendIndexLocation);
     	gl.glDisableVertexAttribArray(normalLocation);
     	gl.glDisableVertexAttribArray(texCoordLocation);
     	gl.glDisableVertexAttribArray(binormalLocation);

@@ -8,23 +8,26 @@ import com.jogamp.common.nio.Buffers;
 import com.jogamp.graph.geom.Vertex;
 
 public class Mesh{
-	
+		
 	public ByteBuffer vertBuffer;
 	public ByteBuffer indexBuffer;
 	
-	public int vertOffset, indexOffset;		
-	public int numVerts, numIndex;
+	final public int vertOffset, indexOffset;		
+	final public int numVerts, numIndex;
 	
-	public int vertexSize, auxVertexSize, unknownSize, indexSize;
+	final public int vertexSize, auxVertexSize, unknownSize, indexSize;
 	
-	public int materialNumber;
+	final public int materialNumber;
+	
+	final public int vertElementIndex;
 	
 	public Mesh(int vertCount, int indexCount, int meshNum, int vertexBufferOffset,
-			int indexBufferOffset, int sizeinfo) {
+			int indexBufferOffset, int sizeinfo, int vertElementIndex) {
 		this.numVerts = vertCount;
 		this.numIndex = indexCount;
 		this.vertOffset = vertexBufferOffset;
 		this.indexOffset = indexBufferOffset;		
+		this.vertElementIndex = vertElementIndex;
 		
 		this.materialNumber = meshNum;
 		
@@ -51,5 +54,9 @@ public class Mesh{
     	bbTemp.limit (bbTemp.position() + (indexSize * numIndex));
     	indexBuffer.put (bbTemp);
 	
+	}
+
+	public int getVertexElementIndex() {
+		return vertElementIndex;
 	}
 }
