@@ -10,6 +10,7 @@ import javax.media.opengl.GL3;
 import ca.fraggergames.ffxivextract.helpers.Utils;
 import ca.fraggergames.ffxivextract.models.SqPack_IndexFile.SqPack_File;
 import ca.fraggergames.ffxivextract.models.SqPack_IndexFile.SqPack_Folder;
+import ca.fraggergames.ffxivextract.shaders.BGShader;
 import ca.fraggergames.ffxivextract.shaders.CharacterShader;
 import ca.fraggergames.ffxivextract.shaders.DefaultShader;
 import ca.fraggergames.ffxivextract.shaders.HairShader;
@@ -148,6 +149,8 @@ public class Material {
 				shader = new IrisShader(gl);
 			else if (stringArray[stringArray.length-1].equals("skin.shpk"))		
 				shader = new SkinShader(gl);
+			else if (stringArray[stringArray.length-1].equals("bg.shpk"))		
+				shader = new BGShader(gl);
 			else 		
 				shader = new DefaultShader(gl);
 		} catch (IOException e) {				

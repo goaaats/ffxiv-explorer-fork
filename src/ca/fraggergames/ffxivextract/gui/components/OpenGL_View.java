@@ -174,15 +174,18 @@ public class OpenGL_View extends JPanel {
 		          currentLoD = Integer.parseInt((String)e.getItem());
 		          String vertList = "Vertices: ";
 		          String indicesList = "Indices: ";
-		          for (Mesh m : model.getMeshes(currentLoD))
-		          {
-		        	  vertList+= "("+m.numVerts+") ";
-		        	  indicesList+= "("+m.numIndex+") ";
-		          }		        		          
+		          
+		          if (model.getMeshes(currentLoD) != null){
+			          for (Mesh m : model.getMeshes(currentLoD))
+			          {
+			        	  vertList+= "("+m.numVerts+") ";
+			        	  indicesList+= "("+m.numIndex+") ";
+			          }		        		          
+		          }
 		          
 		          lblVertices.setText("Vertices: " + vertList);
 		          lblIndices.setText("Indices: " + indicesList);
-		          lblMeshes.setText("Num Meshes: " + model.getMeshes(currentLoD).length);
+		          lblMeshes.setText("Num Meshes: " + (model.getMeshes(currentLoD) == null ? "NONE" : model.getMeshes(currentLoD).length));
 		          renderer.setLoD(currentLoD);	
 			    }
 			}
@@ -231,20 +234,27 @@ public class OpenGL_View extends JPanel {
         lblIndices = new JLabel("Indices:");
         panel_2.add(lblIndices);
         
-        lblMeshes = new JLabel("Num Meshes: " + model.getMeshes(currentLoD).length);
+        lblMeshes = new JLabel("Num Meshes: " + (model.getMeshes(currentLoD) == null ? "NONE" : model.getMeshes(currentLoD).length));
         panel_2.add(lblMeshes);
         
         String vertList = "Vertices: ";
         String indicesList = "Indices: ";
-        for (Mesh m : model.getMeshes(currentLoD))
-        {
-      	  vertList+= "("+m.numVerts+") ";
-      	  indicesList+= "("+m.numIndex+") ";
-        }		        		          
         
+        if (model.getMeshes(currentLoD) != null){
+	        for (Mesh m : model.getMeshes(currentLoD))
+	        {
+	      	  vertList+= "("+m.numVerts+") ";
+	      	  indicesList+= "("+m.numIndex+") ";
+	        }		        		          
+        }
+        else
+        {
+        	vertList += "NONE";
+        	indicesList += "NONE";
+        }
         lblVertices.setText("Vertices: " + vertList);
         lblIndices.setText("Indices: " + indicesList);
-        lblMeshes.setText("Num Meshes: " + model.getMeshes(currentLoD).length);
+        lblMeshes.setText("Num Meshes: " + (model.getMeshes(currentLoD) == null ? "NONE" : model.getMeshes(currentLoD).length));
         
         add( glcanvas, BorderLayout.CENTER);
 	}

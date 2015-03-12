@@ -50,6 +50,9 @@ public class LoDSubModel {
 	}
 
 	public void loadMeshes(ByteBuffer bb)  throws BufferOverflowException, BufferUnderflowException{
+		if (meshList == null)
+			return;
+		
 		for (Mesh m : meshList)
 			m.loadMeshes(bb, vertTableOffset, indexTableOffset);
 	}

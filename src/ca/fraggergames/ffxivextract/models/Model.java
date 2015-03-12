@@ -222,14 +222,16 @@ public class Model {
 	
 	public void loadMaterials(int variant)
 	{		
-		if (modelPath == null || modelPath.contains("null") || !modelPath.contains("chara"))
+		if (modelPath == null || modelPath.contains("null") || (!modelPath.contains("chara") && !modelPath.contains("bg")))
 			return;
 		
 		String split[] = modelPath.split("/");		
 		
 		String materialFolderPath = null;
 		
-		if ((modelPath.contains("face") || modelPath.contains("hsair"))){
+		if (!stringArray[numAtrStrings+numBoneStrings].startsWith("/"))
+			materialFolderPath = stringArray[numAtrStrings+numBoneStrings].substring(0, stringArray[numAtrStrings+numBoneStrings].lastIndexOf("/"));
+		else if ((modelPath.contains("face") || modelPath.contains("hsair"))){
 			if (variant == 1)
 				materialFolderPath = String.format("%smaterial", modelPath.substring(0, modelPath.indexOf("model")));
 			else
@@ -380,43 +382,37 @@ public class Model {
 	    	mesh.indexBuffer.position(0);
 	    	
 	    	//Position
-	    	if (mesh.vertexSize == 0x10 || mesh.vertexSize == 0x8)
-	    		gl.glVertexAttribPointer(shader.getAttribPosition(), 4, GL3.GL_HALF_FLOAT, false, 0, mesh.vertBuffer);
-		    else if (mesh.vertexSize == 0x14)
-		    	gl.glVertexAttribPointer(shader.getAttribPosition(), 3, GL3.GL_FLOAT, false, 0, mesh.vertBuffer);
+	    	//if (mesh.vertexSize == 0x10 || mesh.vertexSize == 0x8)
+	    	//	gl.glVertexAttribPointer(shader.getAttribPosition(), 4, GL3.GL_HALF_FLOAT, false, mesh.vertexSize, mesh.vertBuffer);
+		    //else if (mesh.vertexSize == 0x14)
+		    	gl.glVertexAttribPointer(shader.getAttribPosition(), 3, GL3.GL_HALF_FLOAT, false, mesh.vertexSize, mesh.vertBuffer);
 	    	
 	    	//Normal
 	    	ByteBuffer normalData = mesh.vertBuffer.duplicate();			    
-		    if (mesh.vertexSize == 0x10 || mesh.vertexSize == 0x8)
-		    	normalData.position(mesh.numVerts*8);
-		    else
-		    	normalData.position(mesh.numVerts*12);		    	
-	    	gl.glVertexAttribPointer(shader.getAttribNormal(), 4, GL3.GL_HALF_FLOAT, false, 24, normalData);
+		    normalData.position(mesh.numVerts*mesh.vertexSize + 0);		    	
+	    	gl.glVertexAttribPointer(shader.getAttribNormal(), 4, GL3.GL_HALF_FLOAT, false, mesh.auxVertexSize, normalData);
 	    	
 	    	//Tex Coord
-	    	ByteBuffer texData = mesh.vertBuffer.duplicate();			    
-		    if (mesh.vertexSize == 0x10 || mesh.vertexSize == 0x8)
-		    	texData.position((mesh.numVerts*8) + 16);
-		    else
-		    	texData.position((mesh.numVerts*12)+ 16);		
-	    	gl.glVertexAttribPointer(shader.getAttribTexCoord(), 4, GL3.GL_HALF_FLOAT, false, 24, texData);
-	    	
+	    	ByteBuffer texData = mesh.vertBuffer.duplicate();			    		    
+		    texData.position((mesh.numVerts*mesh.vertexSize)+ 0xc);		
+	    	gl.glVertexAttribPointer(shader.getAttribTexCoord(), 2, GL3.GL_HALF_FLOAT, false, mesh.auxVertexSize, texData);
+	    	/*
 	    	//BiNormal
 	    	ByteBuffer binormalData = mesh.vertBuffer.duplicate();			    
 		    if (mesh.vertexSize == 0x10 || mesh.vertexSize == 0x8)
-		    	binormalData.position(mesh.numVerts*8+8);
+		    	binormalData.position(mesh.numVerts*mesh.vertexSize+8);
 		    else
-		    	binormalData.position(mesh.numVerts*12+8);		    	
+		    	binormalData.position(mesh.numVerts*mesh.vertexSize+8);		    	
 	    	gl.glVertexAttribPointer(shader.getAttribBiTangent(), 4, GL3.GL_UNSIGNED_BYTE, false, 24, binormalData);
 	    	
 	    	//Color
 	    	ByteBuffer colorData = mesh.vertBuffer.duplicate();			    
 		    if (mesh.vertexSize == 0x10 || mesh.vertexSize == 0x8)
-		    	colorData.position((mesh.numVerts*8) + 12);
+		    	colorData.position((mesh.numVerts*mesh.vertexSize) + 12);
 		    else
-		    	colorData.position((mesh.numVerts*12)+ 12);	
+		    	colorData.position((mesh.numVerts*mesh.vertexSize)+ 12);	
 	    	gl.glVertexAttribPointer(shader.getAttribColor(), 4, GL3.GL_UNSIGNED_BYTE, false, 24, colorData);
-	    	
+	    	*/
 	    	shader.setTextures(gl, material);
 	    	shader.setMatrix(gl, modelMatrix, viewMatrix, projMatrix);
 		    	

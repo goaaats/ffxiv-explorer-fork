@@ -19,9 +19,6 @@ public class Mesh{
 	
 	public int materialNumber;
 	
-	public int[] boneWeight;
-	public int[] boneIndex;
-	
 	public Mesh(int vertCount, int indexCount, int meshNum, int vertexBufferOffset,
 			int indexBufferOffset, int sizeinfo) {
 		this.numVerts = vertCount;
@@ -41,71 +38,18 @@ public class Mesh{
 	}
 
 	public void loadMeshes(ByteBuffer bb, int lodVertexOffset, int lodIndexOffset) throws BufferOverflowException, BufferUnderflowException{
-		
-    	boneWeight = new int[numVerts];
-    	boneIndex = new int[numVerts];
-    	    	
+		    	    	
+    	//Vert Table
     	bb.position(lodVertexOffset +vertOffset);
-    	
-    	byte buffer[] = new byte[8];
-    	
-		for (int i = 0; i < numVerts; i++)
-		{			
-			
-			if (vertexSize == 0x10)
-			{
-				bb.get(buffer);
-				vertBuffer.put(buffer);
-			}			
-			else if (vertexSize == 0x14)
-			{
-				bb.get(buffer);
-				vertBuffer.put(buffer);
-				int x = bb.getInt();
-				vertBuffer.putInt(x);
-			}
-			else if (vertexSize == 0x8)
-			{
-				bb.get(buffer);
-				vertBuffer.put(buffer);
-			}
-			
-			boneWeight[i] = bb.getInt();
-			boneIndex[i] = bb.getInt();
-			
-		}								
-		
-		//Normals, Binormals, Colors, and Tex Coords
-		for (int i = 0; i < numVerts; i++)
-		{
-			//Normal			
-			vertBuffer.putShort(bb.getShort());
-			vertBuffer.putShort(bb.getShort());
-			vertBuffer.putShort(bb.getShort());
-			vertBuffer.putShort(bb.getShort());
-			
-			//Binormal
-			vertBuffer.put(bb.get());
-			vertBuffer.put(bb.get());
-			vertBuffer.put(bb.get());
-			vertBuffer.put(bb.get());
-			
-			//Color
-			vertBuffer.put(bb.get());
-			vertBuffer.put(bb.get());
-			vertBuffer.put(bb.get());
-			vertBuffer.put(bb.get());
-			
-			//Tex Coords
-			vertBuffer.putShort(bb.getShort());
-			vertBuffer.putShort(bb.getShort());
-			vertBuffer.putShort(bb.getShort());
-			vertBuffer.putShort(bb.getShort());
-		}		
-		
+    	ByteBuffer bbTemp = bb.duplicate ();    	
+    	bbTemp.limit (bbTemp.position() + ((auxVertexSize + vertexSize) * numVerts));
+    	vertBuffer.put (bbTemp);
+    
 		//Index Table
-		bb.position(lodIndexOffset + (indexOffset * 2));
-		for (int i = 0; i < numIndex; i++)
-			indexBuffer.putShort(bb.getShort());
+		bb.position(lodIndexOffset + (indexOffset * 2));		
+		bbTemp = bb.duplicate ();    	
+    	bbTemp.limit (bbTemp.position() + (indexSize * numIndex));
+    	indexBuffer.put (bbTemp);
+	
 	}
 }
