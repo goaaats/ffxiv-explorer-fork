@@ -252,7 +252,7 @@ public class Model {
 	
 	public void loadMaterials(int variant)
 	{		
-		if (modelPath == null || modelPath.contains("null") || (!modelPath.contains("chara") && !modelPath.contains("bg")))
+		if (modelPath == null || modelPath.contains("null") || (!modelPath.contains("chara") && !modelPath.contains("bg") && !modelPath.contains("bgcommon")))
 			return;
 		
 		String split[] = modelPath.split("/");		

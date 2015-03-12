@@ -112,11 +112,11 @@ public class Material {
 											if (extracted == null)
 												continue;
 											
-											if (fileString.endsWith("_d.tex") || fileString.contains("catchlight"))
+											if ((fileString.endsWith("_d.tex") || fileString.contains("catchlight")) && diffuse == null)
 												diffuse = new Texture_File(extracted);
-											else if (fileString.endsWith("_n.tex"))
+											else if (fileString.endsWith("_n.tex") && normal == null)
 												normal = new Texture_File(extracted);
-											else if (fileString.endsWith("_s.tex"))
+											else if (fileString.endsWith("_s.tex") && specular == null)
 												specular = new Texture_File(extracted);
 											else if (fileString.endsWith("_m.tex"))
 												mask = new Texture_File(extracted);
