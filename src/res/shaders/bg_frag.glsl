@@ -30,8 +30,7 @@ void main() {
 	vec4 specularColor;
   
   	//Texture Maps
-	/*if (uHasNormal) 
-        mapNormal = texture2D(uNormalTex, vTexCoord.st);
+	/*if 
 	if (uHasDiffuse)
     	mapDiffuse = texture2D(uDiffuseTex, vTexCoord.st);
     if (uHasSpecular)
@@ -39,7 +38,9 @@ void main() {
   */
    if (uHasDiffuse)
   	mapDiffuse = texture2D(uDiffuseTex, vTexCoord.st);  
-  
+   if (uHasNormal) 
+        mapNormal = texture2D(uNormalTex, vTexCoord.st);
+     
 	vec3 L = normalize(vLightDir);
     vec3 E = normalize(vEyeVec);
     //vec4 R = reflect(-L, vNormal);	
@@ -51,7 +52,7 @@ void main() {
 	//Specular
 	//float specular = pow( max(dot(R, E), 0.0), 1.0);
 
-    gl_FragColor = vec4(mapDiffuse.xyz,1.0);
+    gl_FragColor = mapDiffuse;
 }
 
 
