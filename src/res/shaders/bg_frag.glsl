@@ -30,15 +30,9 @@ void main() {
 	vec4 specularColor;
   
   	//Texture Maps
-	/*if 
-	if (uHasDiffuse)
-    	mapDiffuse = texture2D(uDiffuseTex, vTexCoord.st);
-    if (uHasSpecular)
-    	mapSpecular = texture2D(uSpecularTex, vTexCoord.st);
-  */
-   if (uHasDiffuse)
-  	mapDiffuse = texture2D(uDiffuseTex, vTexCoord.st);  
-   if (uHasNormal) 
+     if (uHasDiffuse)
+     	mapDiffuse = texture2D(uDiffuseTex, vTexCoord.st);  
+     if (uHasNormal) 
         mapNormal = texture2D(uNormalTex, vTexCoord.st);
      
 	vec3 L = normalize(vLightDir);
