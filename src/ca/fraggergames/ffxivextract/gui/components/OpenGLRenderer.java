@@ -167,7 +167,7 @@ class ModelRenderer implements GLEventListener{
 	      initFrameBuffer(gl, 1, width, height);
 	      
 	      Matrix.setIdentityM(projMatrix, 0);
-	      Matrix.perspectiveM(projMatrix, 0, 45.0f, aspect, 0.1f, 500.0f);		     
+	      Matrix.perspectiveM(projMatrix, 0, 45.0f, aspect, 0.1f, 5000.0f);		     
 	      Matrix.setIdentityM(modelMatrix, 0);
 	      Matrix.setIdentityM(viewMatrix, 0);
 	}

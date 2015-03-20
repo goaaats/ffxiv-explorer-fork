@@ -139,6 +139,17 @@ public class Material {
 	
 	public void loadShader(GL3 gl)
 	{
+		//Weird case
+		if (stringArray[stringArray.length-1] == null)
+		{
+			int x = stringArray.length-1;
+			do
+			{
+				x--;
+				stringArray[stringArray.length-1] = stringArray[x];				
+			}while (stringArray[x] == null && x >= 0);
+		}
+		
 		//Load Shader
 		try {
 			if (stringArray[stringArray.length-1].equals("character.shpk"))		

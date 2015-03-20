@@ -34,7 +34,8 @@ public class Mesh{
 		this.vertexSize = (sizeinfo >> 8*0) & 0xFF;
 		this.auxVertexSize = (sizeinfo >> 8*1) & 0xFF;
 		this.unknownSize = (sizeinfo >> 8*2) & 0xFF;
-		this.indexSize = (sizeinfo >> 8*3) & 0xFF;		
+		//this.indexSize = (sizeinfo >> 8*3) & 0xFF;	
+		indexSize = 2;
 		
 		this.vertBuffer = Buffers.newDirectByteBuffer(numVerts * (vertexSize+auxVertexSize));
 		this.indexBuffer = Buffers.newDirectByteBuffer(numIndex * indexSize);
