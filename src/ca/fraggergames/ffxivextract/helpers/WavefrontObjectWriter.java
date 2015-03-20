@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
+import ca.fraggergames.ffxivextract.Constants;
 import ca.fraggergames.ffxivextract.models.DX9VertexElement;
 import ca.fraggergames.ffxivextract.models.Mesh;
 import ca.fraggergames.ffxivextract.models.Model;
@@ -23,14 +24,14 @@ public class WavefrontObjectWriter {
 		{
 			BufferedWriter out = new BufferedWriter(new FileWriter(path.replace(".obj", "_"+i+".obj")));
 		
-			out.write("#FFXIV Model\r\n#Exported using FFXIV Explorer by Ioncannon\r\n\r\n");
+			out.write("#FFXIV Model\r\n#Exported using FFXIV Explorer by Ioncannon\r\n#Visit: "+Constants.URL_WEBSITE+"\r\n\r\n");
 				
 			//out.write("mtllib " + path.replace(".obj", ".mtl").substring(path.lastIndexOf("\\")+1) + "\r\n");
 			
 			//out.write("usemtl mesh"+i+"\r\n");
 			
 			DX9VertexElement[] elements = model.getDX9Struct(0, i);
-			DX9VertexElement vertElement, texCoordElement, normalElement;
+			DX9VertexElement vertElement = null, texCoordElement = null, normalElement = null;
 			
 			for (DX9VertexElement e : elements)
 			{
@@ -38,12 +39,12 @@ public class WavefrontObjectWriter {
 				{
 				case 0:
 					vertElement = e;
-					break;
-				case 1:
-					texCoordElement = e;
-					break;
-				case 2:
+					break;				
+				case 3:
 					normalElement = e;
+					break;
+				case 4:
+					texCoordElement = e;
 					break;
 				}
 			}
@@ -91,17 +92,15 @@ public class WavefrontObjectWriter {
 		
 		ByteBuffer vertBuffer = mesh.vertBuffer;
 		vertBuffer.order(ByteOrder.LITTLE_ENDIAN);
-		vertBuffer.position(0);		
 		
 		for (int i = 0; i < mesh.numVerts; i++)
 		{			
-			vertBuffer.position(i*mesh.vertexSize);
+			vertBuffer.position((i*mesh.vertexSize) + vertElement.offset);
 		
-			if (vertElement.datatype == )
+			if (vertElement.datatype == 13 || vertElement.datatype == 14)
 				out.write(String.format("v %f %f %f \r\n", Utils.convertHalfToFloat(vertBuffer.getShort()), Utils.convertHalfToFloat(vertBuffer.getShort()), Utils.convertHalfToFloat(vertBuffer.getShort())));			
-			else if (mesh.vertexSize == 0x14)			
-				out.write(String.format("v %f %f %f \r\n", vertBuffer.getFloat(), vertBuffer.getFloat(), vertBuffer.getFloat()));
-			
+			else if (vertElement.datatype == 2)			
+				out.write(String.format("v %f %f %f \r\n", vertBuffer.getFloat(), vertBuffer.getFloat(), vertBuffer.getFloat()));			
 		}
 		
 		out.write("\r\n");
@@ -115,7 +114,7 @@ public class WavefrontObjectWriter {
 		
 		for (int i = 0; i < mesh.numVerts; i++)
 		{
-		    vertBuffer.position((mesh.numVerts*mesh.vertexSize) + (i*mesh.auxVertexSize));				
+			vertBuffer.position((mesh.numVerts*mesh.vertexSize) + (i*mesh.auxVertexSize) + normalElement.offset);		    		
 			out.write(String.format("vn %f %f %f \r\n", Utils.convertHalfToFloat(vertBuffer.getShort()), Utils.convertHalfToFloat(vertBuffer.getShort()), Utils.convertHalfToFloat(vertBuffer.getShort())));
 		}		
 		
@@ -127,9 +126,10 @@ public class WavefrontObjectWriter {
 		
 		ByteBuffer vertBuffer = mesh.vertBuffer;
 		vertBuffer.order(ByteOrder.LITTLE_ENDIAN);
+		
 		for (int i = 0; i < mesh.numVerts; i++)
 		{
-	    	vertBuffer.position((mesh.numVerts*mesh.vertexSize) + (i*mesh.auxVertexSize) + 16);				
+			vertBuffer.position((mesh.numVerts*mesh.vertexSize) + (i*mesh.auxVertexSize) + texCoordElement.offset);
 			out.write(String.format("vt %f %f \r\n", Utils.convertHalfToFloat(vertBuffer.getShort()), Utils.convertHalfToFloat(vertBuffer.getShort())*-1));
 		}		
 		
@@ -142,6 +142,7 @@ public class WavefrontObjectWriter {
 		ByteBuffer indexBuffer = mesh.indexBuffer;
 		indexBuffer.position(0);
 		indexBuffer.order(ByteOrder.LITTLE_ENDIAN);
+		
 		for (int i = 0; i < mesh.numIndex; i+=3)
 		{
 			int ind1 = indexBuffer.getShort()+1;

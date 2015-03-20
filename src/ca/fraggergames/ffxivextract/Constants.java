@@ -7,8 +7,8 @@ import javax.swing.UIManager;
 
 public class Constants {
 
-	public static final String APPNAME = "FFXIV 2.0 Data Explorer";
-	public static final String VERSION = "v1.2";
+	public static final String APPNAME = "FFXIV Data Explorer";
+	public static final String VERSION = "v1.3";
 	public static final int APP_VERSION_CODE = 4;
 	public static final String COMMIT = "ff66243a210280b6dae6f6cec51c82d3cfce7f98";
 	public static boolean DEBUG = false;
@@ -26,12 +26,9 @@ public class Constants {
 	public static final String PREF_LASTOPENED = "pref_lastopened";
 	public static final String PREF_DO_DB_UPDATE = "pref_dbupdate";
 	
-//	///DEFAULT COLORS//////
-	//public static float defaultHairColor[] = {1.0f,1.0f,1.0f,1.0f};
+	/////DEFAULT COLORS//////
 	public static float defaultHairColor[] = {0.2941176f,0.2117647f,0.105882f,1.0f};
-	////public static float defaultHairColor[] = {1.0f,1.0f,1.0f,1.0f};
-	public static float defaultHighlightColor[] = {0.650f,0.502f,0.392f,1.0f};		
-	//public static float defaultHighlightColor[] = {0.8f,0.0f,0.8f,1.0f};
+	public static float defaultHighlightColor[] = {0.650f,0.502f,0.392f,1.0f};
 	public static float defaultEyeColor[] = {0.0f,0.302f,0.0f,1.0f};
 	/////DEFAULT COLORS//////
 	

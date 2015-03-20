@@ -233,4 +233,19 @@ public class MinifiedShaders {
 			+ "float a=.028,c=pow(max(0.,1.-dot(F,e)),5.),N=c+a*(1.-c);"
 			+ "g*=N;" + "}" + "float s=smoothstep(.6,1.,1.-max(dot(e,y),0.));"
 			+ "gl_FragColor=vec4(u+b*v.xyz+s*v.xyz+g*x,1.);" + "}";
+
+	protected static String bg_frag_glsl = "#version 150\n"
+			+ "precision highp float;\n"
+			+ "varying vec4 vPosition,vNormal,vTexCoord,vColor,vBiTangent;"
+			+ "varying mat4 vTBNMatrix;"
+			+ "varying vec3 vLightDir,vEyeVec;"
+			+ "uniform sampler2D uDiffuseTex,uNormalTex,uSpecularTex,uColorSetTex;"
+			+ "uniform bool uHasDiffuse,uHasNormal,uHasSpecular,uHasColorSet;"
+			+ "void main()" + "{" + "vec4 v=vec4(1.,1.,1.,1.),u,x,t;"
+			+ "if(uHasDiffuse)" + "v=texture2D(uDiffuseTex,vTexCoord.xy);"
+			+ "if(uHasNormal)" + "u=texture2D(uNormalTex,vTexCoord.xy);"
+			+ "vec3 r=normalize(vLightDir),z=normalize(vEyeVec);"
+			+ "v.xyz=v.xyz*max(dot(vNormal.xyz,r),0.);" + "v=clamp(v,0.,1.);"
+			+ "gl_FragColor=v;" + "}";
+
 }
