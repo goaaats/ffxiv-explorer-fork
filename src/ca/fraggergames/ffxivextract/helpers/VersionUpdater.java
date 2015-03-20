@@ -34,5 +34,6 @@ public class VersionUpdater {
 		public Integer currentDbVer;
 		public String appUpdateDate;
 		public String dbUpdateDate;
+		public String patchDesc;
 	}
 }

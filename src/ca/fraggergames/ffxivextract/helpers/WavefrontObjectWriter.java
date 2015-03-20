@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
+import ca.fraggergames.ffxivextract.models.DX9VertexElement;
 import ca.fraggergames.ffxivextract.models.Mesh;
 import ca.fraggergames.ffxivextract.models.Model;
 
@@ -28,9 +29,28 @@ public class WavefrontObjectWriter {
 			
 			//out.write("usemtl mesh"+i+"\r\n");
 			
-			writeVerts(model.getMeshes(0)[i], out);
-			writeTexCoords(model.getMeshes(0)[i], out);
-			writeNormals(model.getMeshes(0)[i], out);
+			DX9VertexElement[] elements = model.getDX9Struct(0, i);
+			DX9VertexElement vertElement, texCoordElement, normalElement;
+			
+			for (DX9VertexElement e : elements)
+			{
+				switch (e.usage)
+				{
+				case 0:
+					vertElement = e;
+					break;
+				case 1:
+					texCoordElement = e;
+					break;
+				case 2:
+					normalElement = e;
+					break;
+				}
+			}
+			
+			writeVerts(vertElement, model.getMeshes(0)[i], out);
+			writeTexCoords(texCoordElement, model.getMeshes(0)[i], out);
+			writeNormals(normalElement, model.getMeshes(0)[i], out);
 			writeIndices(model.getMeshes(0)[i], out);
 			
 			out.close();
@@ -66,20 +86,18 @@ public class WavefrontObjectWriter {
 		out.close();
 	}
 	
-	private static void writeVerts(Mesh mesh, BufferedWriter out) throws IOException {
+	private static void writeVerts(DX9VertexElement vertElement, Mesh mesh, BufferedWriter out) throws IOException {
 		out.write("#Verts\r\n");
 		
 		ByteBuffer vertBuffer = mesh.vertBuffer;
 		vertBuffer.order(ByteOrder.LITTLE_ENDIAN);
-		vertBuffer.position(0);
+		vertBuffer.position(0);		
+		
 		for (int i = 0; i < mesh.numVerts; i++)
-		{
-			if (mesh.vertexSize == 0x10 || mesh.vertexSize == 0x8)
-				vertBuffer.position(i*8);
-			else
-				vertBuffer.position(i*12);
-			
-			if (mesh.vertexSize == 0x10 || mesh.vertexSize == 0x8)			
+		{			
+			vertBuffer.position(i*mesh.vertexSize);
+		
+			if (vertElement.datatype == )
 				out.write(String.format("v %f %f %f \r\n", Utils.convertHalfToFloat(vertBuffer.getShort()), Utils.convertHalfToFloat(vertBuffer.getShort()), Utils.convertHalfToFloat(vertBuffer.getShort())));			
 			else if (mesh.vertexSize == 0x14)			
 				out.write(String.format("v %f %f %f \r\n", vertBuffer.getFloat(), vertBuffer.getFloat(), vertBuffer.getFloat()));
@@ -89,40 +107,29 @@ public class WavefrontObjectWriter {
 		out.write("\r\n");
 	}
 
-	private static void writeNormals(Mesh mesh, BufferedWriter out) throws IOException {
+	private static void writeNormals(DX9VertexElement normalElement, Mesh mesh, BufferedWriter out) throws IOException {
 		out.write("#Normals\r\n");
 		
 		ByteBuffer vertBuffer = mesh.vertBuffer;
 		vertBuffer.order(ByteOrder.LITTLE_ENDIAN);
-		if (mesh.vertexSize == 0x10 || mesh.vertexSize == 0x8)
-			vertBuffer.position(mesh.numVerts*8);
-	    else
-	    	vertBuffer.position(mesh.numVerts*12);
+		
 		for (int i = 0; i < mesh.numVerts; i++)
 		{
-			if (mesh.vertexSize == 0x10 || mesh.vertexSize == 0x8)
-				vertBuffer.position((mesh.numVerts*8) + (i*24));
-		    else
-		    	vertBuffer.position((mesh.numVerts*12) + (i*24));
-				
+		    vertBuffer.position((mesh.numVerts*mesh.vertexSize) + (i*mesh.auxVertexSize));				
 			out.write(String.format("vn %f %f %f \r\n", Utils.convertHalfToFloat(vertBuffer.getShort()), Utils.convertHalfToFloat(vertBuffer.getShort()), Utils.convertHalfToFloat(vertBuffer.getShort())));
 		}		
 		
 		out.write("\r\n");
 	}
 
-	private static void writeTexCoords(Mesh mesh, BufferedWriter out) throws IOException {
+	private static void writeTexCoords(DX9VertexElement texCoordElement, Mesh mesh, BufferedWriter out) throws IOException {
 		out.write("#Tex Coords\r\n");
 		
 		ByteBuffer vertBuffer = mesh.vertBuffer;
 		vertBuffer.order(ByteOrder.LITTLE_ENDIAN);
 		for (int i = 0; i < mesh.numVerts; i++)
 		{
-			if (mesh.vertexSize == 0x10 || mesh.vertexSize == 0x8)
-				vertBuffer.position((mesh.numVerts*8) + (i*24) + 16);
-		    else
-		    	vertBuffer.position((mesh.numVerts*12) + (i*24) + 16);
-				
+	    	vertBuffer.position((mesh.numVerts*mesh.vertexSize) + (i*mesh.auxVertexSize) + 16);				
 			out.write(String.format("vt %f %f \r\n", Utils.convertHalfToFloat(vertBuffer.getShort()), Utils.convertHalfToFloat(vertBuffer.getShort())*-1));
 		}		
 		

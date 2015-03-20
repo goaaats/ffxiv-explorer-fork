@@ -12,6 +12,7 @@ import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 
 import ca.fraggergames.ffxivextract.gui.FileManagerWindow;
+import ca.fraggergames.ffxivextract.gui.components.Update_Dialog;
 import ca.fraggergames.ffxivextract.helpers.EXD_Searcher;
 import ca.fraggergames.ffxivextract.helpers.PathSearcher;
 import ca.fraggergames.ffxivextract.helpers.VersionUpdater;
@@ -293,10 +294,9 @@ public class Main {
 			
 			if (HashDatabase.getHashDBVersion() < checkObj.currentDbVer || Constants.APP_VERSION_CODE < checkObj.currentAppVer )
 			{
-				JOptionPane.showMessageDialog(null,
-						(HashDatabase.getHashDBVersion() < checkObj.currentDbVer ? "-A new Hash DB was found, it was updated on " + checkObj.dbUpdateDate + ".\n" : "") + (Constants.APP_VERSION_CODE < checkObj.currentAppVer ? "-A new app version was found, it was updated on " + checkObj.appUpdateDate + "." : "") + "\nDownload at: " + Constants.URL_WEBSITE,
-					    "New Update Found",
-					    JOptionPane.INFORMATION_MESSAGE);
+				Update_Dialog updateDialog = new Update_Dialog(checkObj);
+				updateDialog.setLocationRelativeTo(fileMan);
+				updateDialog.setVisible(true);
 			}
 		}
 		

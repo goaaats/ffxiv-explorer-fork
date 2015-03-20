@@ -581,5 +581,9 @@ public class Model {
 			}					
 		}
 	}
+
+	public DX9VertexElement[] getDX9Struct(int lodLevel, int i) {
+		return vertexElements[lodModels[lodLevel].meshList[i].getVertexElementIndex()];
+	}
 	
 }

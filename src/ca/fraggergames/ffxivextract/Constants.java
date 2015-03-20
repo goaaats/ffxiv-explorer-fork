@@ -9,16 +9,16 @@ public class Constants {
 
 	public static final String APPNAME = "FFXIV 2.0 Data Explorer";
 	public static final String VERSION = "v1.2";
-	public static final int APP_VERSION_CODE = 3;
+	public static final int APP_VERSION_CODE = 4;
 	public static final String COMMIT = "ff66243a210280b6dae6f6cec51c82d3cfce7f98";
 	public static boolean DEBUG = false;
 	public static boolean EASTER_EGG = false;
 
 	public static Connection GLOBAL_CONN;
 	
-	public static final String URL_WEBSITE = "http://ffxivexplorer.fragmenterworks.com/";
-	public static final String URL_VERSION_CHECK = URL_WEBSITE + "version_check.json";
-	public static final String URL_HASHLIST_FILE = URL_WEBSITE + "downloads/hashlist.db";
+	public static final String URL_WEBSITE = "http://ffxivexplorer.fragmenterworks.com";
+	public static final String URL_VERSION_CHECK = URL_WEBSITE + "/version_check.json";
+	public static final String URL_HASHLIST_FILE = URL_WEBSITE + "/downloads/hashlist.db";
 	
 	public static final String DBFILE_NAME = "hashlist.db";
 	
