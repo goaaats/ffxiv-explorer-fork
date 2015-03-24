@@ -59,7 +59,6 @@ import ca.fraggergames.ffxivextract.gui.components.Path_to_Hash_Window;
 import ca.fraggergames.ffxivextract.gui.components.Sound_View;
 import ca.fraggergames.ffxivextract.helpers.LERandomAccessFile;
 import ca.fraggergames.ffxivextract.helpers.LuaDec;
-import ca.fraggergames.ffxivextract.helpers.OggVorbisPlayer;
 import ca.fraggergames.ffxivextract.helpers.WavefrontObjectWriter;
 import ca.fraggergames.ffxivextract.models.EXDF_File;
 import ca.fraggergames.ffxivextract.models.EXHF_File;
@@ -106,8 +105,6 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 	JMenuItem search_search;
 	JMenuItem search_searchAgain;	
 	JCheckBoxMenuItem options_enableUpdate;
-	
-	OggVorbisPlayer player;
 	
 	public FileManagerWindow(String title)
 	{	

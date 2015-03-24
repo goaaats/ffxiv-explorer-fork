@@ -3,15 +3,11 @@ package ca.fraggergames.ffxivextract.gui.components;
 import java.awt.BorderLayout;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
-import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
 import javax.sound.sampled.AudioFormat;
-import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.Clip;
 import javax.sound.sampled.DataLine;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
@@ -26,7 +22,6 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.table.AbstractTableModel;
 
 import ca.fraggergames.ffxivextract.helpers.MSADPCM_Decode;
-import ca.fraggergames.ffxivextract.helpers.OggVorbisPlayer;
 import ca.fraggergames.ffxivextract.models.SCD_File;
 import ca.fraggergames.ffxivextract.models.SCD_File.SCD_Sound_Info;
 
