@@ -494,7 +494,7 @@ public class EXDF_View extends JScrollPane implements ItemListener{
 					return ((int)entry.getShort(dataset.offset) & 0xFFFF);
 				case 0x03: // BYTE
 				case 0x02:  
-					return entry.getByte(dataset.offset);	
+					return (((int)entry.getByte(dataset.offset)) & 0xFF);	
 				case 0x01: // BOOL
 					return entry.getBoolean(dataset.offset);
 				case 0x00: // STRING; Points to offset from end of dataset part. Read until 0x0.
