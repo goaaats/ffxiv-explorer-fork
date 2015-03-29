@@ -49,6 +49,7 @@ public class Macro_File {
 		
 		byte[] buffer = new byte[MAX_LENGTH * 2];		
 		String title, icon;
+		int iconInt;
 		String[] lines = new String[MAX_LINES];		
 		
 		if (bb.get() != 'T') //something wrong
@@ -68,8 +69,17 @@ public class Macro_File {
 		int iconSize = bb.getShort();
 		bb.get(buffer, 0, iconSize);
 		icon = new String(buffer, 0, iconSize , "UTF-8");
+		iconInt = Integer.parseInt(icon.trim(), 16);
 		
-		System.out.println(icon);
+		
+		System.out.println(iconInt);
+		
+		//K?
+		if (bb.get() != 'K') //something wrong
+			throw new IOException("Didn't find K marker where it should be");
+		
+		int kSize = bb.getShort();
+		bb.get(buffer, 0, kSize);
 		
 		//LINES
 		for (int i = 0; i < MAX_LINES; i++){
@@ -81,7 +91,7 @@ public class Macro_File {
 			bb.get(buffer, 0, lineSize);
 			lines[i] = new String(buffer, 0, lineSize-1 , "UTF-8");
 			
-			if (!lines[i].equals("\0"))
+			if (!lines[i].equals("\0") && !lines[i].isEmpty())
 				System.out.println(lines[i]);
 		}		
 		

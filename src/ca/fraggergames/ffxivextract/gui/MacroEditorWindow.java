@@ -1,6 +1,9 @@
 package ca.fraggergames.ffxivextract.gui;
 
+import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -15,6 +18,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URL;
 
 import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -25,57 +29,90 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.TitledBorder;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultStyledDocument;
 import javax.swing.text.DocumentFilter;
+import javax.swing.text.AbstractDocument.DefaultDocumentEvent;
 
 import ca.fraggergames.ffxivextract.models.Macro_File;
 
-@SuppressWarnings("serial")
 public class MacroEditorWindow extends JFrame {
 
 	// FILE IO
-	File lastOpenedFile = null;
-	Macro_File currentMacro_File;
+	private File lastOpenedFile = null;
+	private Macro_File currentMacro_File;
 	
-	// UI
-	JPanel pnlMainDatFile, pnlMacroEditor;
-	JLabel txtDatLabel;
-	JTextField txtDatPath;
-	JButton btnBrowse;	
-	
-	JLabel txtMacroChooserLabel = new JLabel("Macro: ");
-	JLabel txtIconChooserLabel = new JLabel("Icon: ");
-	JLabel txtMacroNameLabel = new JLabel("Name: ");
-	
-	JButton btnImport = new JButton("Import");
-	JButton btnExport = new JButton("Export");
-	JButton btnSave = new JButton("Save");
-	
-	JComboBox drpMacroChooser;
-	JComboBox drpIconChooser;
-	JTextField txtMacroName;
-	JTextArea txtMacroBody;
+	private JPanel contentPane;	
 
+	// GUI
+	private JTextField txtDatPath;
+	private JComboBox drpMacroChooser;
+	private JComboBox drpIconChooser;
+	private JTextField txtMacroName;
+	private JTextArea txtMacroBody;
+	private JLabel txtLineCounter;
+	
+	private JLabel lblMacroChooserLabel;
+	private JLabel lblIconChooserLabel;
+	private JLabel lblMacroNameLabel;
+	
+	private JButton btnSave, btnBrowse;
+	
+	/**
+	 * Create the frame.
+	 */
 	public MacroEditorWindow() {
+		
 		this.setTitle("Macro Editor (EXPERIMENTAL)");
 		URL imageURL = getClass().getResource("/res/frameicon.png");
 		ImageIcon image = new ImageIcon(imageURL);
 		this.setIconImage(image.getImage());
-
-		// PATH SETUP
-		pnlMainDatFile = new JPanel();
-		pnlMainDatFile.setBorder(BorderFactory
-				.createTitledBorder("Macro File"));
-		txtDatLabel = new JLabel("Path to macro file: ");
+				
+		setBounds(100, 100, 600, 600);
+		contentPane = new JPanel();
+		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+		contentPane.setLayout(new BorderLayout(0, 0));
+		setContentPane(contentPane);
+		
+		JPanel panel_4 = new JPanel();
+		contentPane.add(panel_4, BorderLayout.NORTH);
+		panel_4.setLayout(new BoxLayout(panel_4, BoxLayout.Y_AXIS));
+		
+		JPanel pnlFileSelect = new JPanel();
+		panel_4.add(pnlFileSelect);
+		pnlFileSelect.setBorder(BorderFactory
+						.createTitledBorder("Macro File"));
+		GridBagLayout gbl_pnlFileSelect = new GridBagLayout();
+		gbl_pnlFileSelect.columnWidths = new int[]{91, 200, 67, 0};
+		gbl_pnlFileSelect.rowHeights = new int[]{23, 0};
+		gbl_pnlFileSelect.columnWeights = new double[]{0.0, 0.0, 0.0, Double.MIN_VALUE};
+		gbl_pnlFileSelect.rowWeights = new double[]{0.0, Double.MIN_VALUE};
+		pnlFileSelect.setLayout(gbl_pnlFileSelect);
+		
+		JLabel label = new JLabel("Path to macro file: ");
+		GridBagConstraints gbc_label = new GridBagConstraints();
+		gbc_label.anchor = GridBagConstraints.WEST;
+		gbc_label.insets = new Insets(0, 0, 0, 5);
+		gbc_label.gridx = 0;
+		gbc_label.gridy = 0;
+		pnlFileSelect.add(label, gbc_label);
+		
 		txtDatPath = new JTextField();
-		txtDatPath.setEditable(false);
 		txtDatPath.setText("Point to your MACRO.DAT file");
-		txtDatPath.setPreferredSize(new Dimension(200, txtDatPath
-				.getPreferredSize().height));
-
+		txtDatPath.setPreferredSize(new Dimension(200, 20));
+		txtDatPath.setEditable(false);
+		GridBagConstraints gbc_textField = new GridBagConstraints();
+		gbc_textField.weightx = 1.0;
+		gbc_textField.insets = new Insets(0, 0, 0, 5);
+		gbc_textField.gridx = 1;
+		gbc_textField.gridy = 0;
+		gbc_textField.fill = GridBagConstraints.HORIZONTAL;
+		pnlFileSelect.add(txtDatPath, gbc_textField);
+		
 		btnBrowse = new JButton("Browse");
 		btnBrowse.addActionListener(new ActionListener() {
 
@@ -84,92 +121,101 @@ public class MacroEditorWindow extends JFrame {
 				setPath();
 			}
 		});
-
-		pnlMainDatFile.add(txtDatLabel);
-		pnlMainDatFile.add(txtDatPath);
-		pnlMainDatFile.add(btnBrowse);		
-
-		// EDITOR
-		pnlMacroEditor = new JPanel(new GridBagLayout());
-		GridBagConstraints gbc = new GridBagConstraints();
-		pnlMacroEditor.setBorder(BorderFactory
-				.createTitledBorder("Macro Editor"));	
+		
+		GridBagConstraints gbc_button = new GridBagConstraints();
+		gbc_button.anchor = GridBagConstraints.NORTHWEST;
+		gbc_button.gridx = 2;
+		gbc_button.gridy = 0;
+		pnlFileSelect.add(btnBrowse, gbc_button);
+		
+		JPanel panel_5 = new JPanel();
+		panel_5.setBorder(new TitledBorder(null, "Macro Editor", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+		contentPane.add(panel_5, BorderLayout.CENTER);
+		panel_5.setLayout(new BorderLayout(0, 0));
+		
+		JPanel panel_3 = new JPanel();
+		panel_5.add(panel_3, BorderLayout.NORTH);
+		FlowLayout flowLayout = (FlowLayout) panel_3.getLayout();
+		flowLayout.setAlignment(FlowLayout.LEFT);
+		
+		JPanel panel = new JPanel();
+		panel_3.add(panel);
+		panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+		
+		JPanel panel_1 = new JPanel();
+		panel.add(panel_1);
+		panel_1.setLayout(new BoxLayout(panel_1, BoxLayout.X_AXIS));
+		
+		lblMacroChooserLabel = new JLabel("Macro: ");
+		panel_1.add(lblMacroChooserLabel);
+		lblMacroChooserLabel.setEnabled(false);
 		
 		drpMacroChooser = new JComboBox();
+		panel_1.add(drpMacroChooser);
+		drpMacroChooser.setEnabled(false);
+		
+		JPanel panel_2 = new JPanel();
+		panel.add(panel_2);
+		panel_2.setLayout(new BoxLayout(panel_2, BoxLayout.X_AXIS));
+		
+		lblIconChooserLabel = new JLabel("Icon:    ");
+		panel_2.add(lblIconChooserLabel);
+		lblIconChooserLabel.setEnabled(false);
+		
 		drpIconChooser = new JComboBox();
-		txtMacroName = new JTextField();
-		txtMacroBody = new JTextArea(Macro_File.MAX_LINES, Macro_File.MAX_LENGTH);
-		JScrollPane scroll = new JScrollPane(txtMacroBody);
-		scroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-		scroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		panel_2.add(drpIconChooser);
+		drpIconChooser.setEnabled(false);
+		
+		JPanel panel_6 = new JPanel();
+		panel_5.add(panel_6, BorderLayout.CENTER);
+		panel_6.setLayout(new BorderLayout(0, 0));
+		
+		JPanel panel_7 = new JPanel();
+		panel_6.add(panel_7, BorderLayout.NORTH);
+		panel_7.setLayout(new BoxLayout(panel_7, BoxLayout.Y_AXIS));
+		
+		lblMacroNameLabel = new JLabel("Macro Name:");
+		panel_7.add(lblMacroNameLabel);
+		
+		txtMacroName = new JTextField();		
+		txtMacroName.setAlignmentX(Component.LEFT_ALIGNMENT);
+		panel_7.add(txtMacroName);
+		
+		JPanel panel_8 = new JPanel();
+		panel_6.add(panel_8, BorderLayout.CENTER);
+		panel_8.setLayout(new BoxLayout(panel_8, BoxLayout.Y_AXIS));
+		
+		JLabel lblNewLabel = new JLabel("Macro Body:");
+		panel_8.add(lblNewLabel);
+		
+		JScrollPane scrollPane = new JScrollPane();
+		scrollPane.setAlignmentX(Component.LEFT_ALIGNMENT);
+		panel_8.add(scrollPane);
+		
+		txtMacroBody = new JTextArea();
+		scrollPane.setViewportView(txtMacroBody);
+		txtMacroBody.setRows(15);
+		txtMacroBody.setAlignmentX(Component.LEFT_ALIGNMENT);
+		
+		JPanel panel_9 = new JPanel();
+		panel_9.setBorder(new EmptyBorder(0, 0, 0, 2));
+		FlowLayout flowLayout_1 = (FlowLayout) panel_9.getLayout();
+		flowLayout_1.setAlignment(FlowLayout.RIGHT);
+		contentPane.add(panel_9, BorderLayout.SOUTH);
+		
+		btnSave = new JButton("Save");
+		panel_9.add(btnSave);
 		
 		DefaultStyledDocument doc = new DefaultStyledDocument();
 		doc.setDocumentFilter(new DocumentSizeFilter(txtMacroBody, Macro_File.MAX_LINES, Macro_File.MAX_LENGTH));
 		txtMacroBody.setDocument(doc);
 		
+		JPanel panel_10 = new JPanel();
+		panel_6.add(panel_10, BorderLayout.SOUTH);
+		panel_10.setLayout(new BorderLayout(0, 0));
 		
-		JPanel pnlDrp1 = new JPanel();
-		pnlDrp1.add(txtMacroChooserLabel);
-		pnlDrp1.add(drpMacroChooser);
-		JPanel pnlDrp2 = new JPanel();
-		pnlDrp2.add(txtIconChooserLabel);
-		pnlDrp2.add(drpIconChooser);
-		
-		gbc.gridx = 0;
-		gbc.gridy = 0;
-		gbc.weightx = 1;
-		gbc.weighty = 0;
-		gbc.anchor = GridBagConstraints.NORTHWEST;
-		pnlMacroEditor.add(pnlDrp1,gbc);
-		gbc.gridx = 0;		
-		gbc.gridy = 1;
-		pnlMacroEditor.add(pnlDrp2, gbc);
-		gbc.gridx = 0;
-		gbc.gridy = 2;
-		gbc.fill = GridBagConstraints.NONE;
-		gbc.insets = new Insets(0, 0, 5, 0);
-				
-		gbc.gridy = 3;
-		gbc.fill = GridBagConstraints.HORIZONTAL;
-		gbc.gridwidth = 2;		
-		pnlMacroEditor.add(txtMacroName,gbc);
-		gbc.gridy = 4;
-		gbc.fill = GridBagConstraints.BOTH;
-		gbc.gridwidth = 2;
-		gbc.weighty =1;
-		pnlMacroEditor.add(scroll,gbc);
-		
-		// BUTTONS
-		JPanel pnlButtons = new JPanel();
-		pnlButtons.add(btnSave);
-		pnlButtons.add(btnImport);
-		pnlButtons.add(btnExport);
-		
-		// ROOT
-		gbc = new GridBagConstraints();
-		JPanel pnlRoot = new JPanel(new GridBagLayout());	
-		pnlRoot.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-		gbc.gridx = 0;
-		gbc.gridy = 0;
-		gbc.fill = GridBagConstraints.HORIZONTAL;
-		gbc.anchor = GridBagConstraints.NORTH;
-		gbc.weightx = 1;
-		gbc.weighty = 0;
-		pnlRoot.add(pnlMainDatFile,gbc);
-		gbc.gridy = 1;
-		gbc.fill = GridBagConstraints.BOTH;
-		gbc.weighty = 1;
-		pnlRoot.add(pnlMacroEditor,gbc);
-		gbc.gridy = 2;
-		gbc.weighty = 0;
-		gbc.fill = GridBagConstraints.HORIZONTAL;
-		gbc.anchor = GridBagConstraints.SOUTH;
-		pnlRoot.add(pnlButtons,gbc);
-	
-		getContentPane().add(pnlRoot);
-		setSize(500, 600);
-		
-		setEditorEnabled(false);
+		txtLineCounter = new JLabel("-/15");
+		panel_10.add(txtLineCounter, BorderLayout.EAST);
 	}
 
 	public void setPath() {
@@ -252,12 +298,10 @@ public class MacroEditorWindow extends JFrame {
 	}
 
 	private void setEditorEnabled(boolean isEnabled) {
-		txtMacroChooserLabel.setEnabled(isEnabled);
-		txtIconChooserLabel.setEnabled(isEnabled);
-		txtMacroNameLabel.setEnabled(isEnabled);
+		lblMacroChooserLabel.setEnabled(isEnabled);
+		lblIconChooserLabel.setEnabled(isEnabled);
+		lblMacroNameLabel.setEnabled(isEnabled);
 		
-		btnImport.setEnabled(isEnabled);
-		btnExport.setEnabled(isEnabled);
 		btnSave.setEnabled(isEnabled);
 		
 		drpMacroChooser.setEnabled(isEnabled);
@@ -280,51 +324,58 @@ public class MacroEditorWindow extends JFrame {
 	    }
 	 
 	    public void insertString(FilterBypass fb, int offs,
-	                             String str, AttributeSet a)
+	                             String text, AttributeSet a)
 	        throws BadLocationException {
+	    
 	    	int actRow = area.getLineOfOffset(offs);
 	    	int rowBeginn = area.getLineStartOffset(actRow);
-	    	int rowEnd = area.getLineEndOffset(actRow);
-	      	int referenceValue = 0;
-	      	
-	    	if (str.length() > 1) {
-	    		referenceValue = (rowEnd + str.length()) - rowBeginn;
-	    	} else {
-	    		referenceValue = rowEnd - rowBeginn;
-	    	}
+	    	int rowEnd = area.getLineEndOffset(actRow);	      	
 	    	
-	    	//if (referenceValue < maxLines) {
-	    		super.insertString(fb, offs, str, a);	
-	    //	}    	
+	    	//Count newlines
+	    	int newlineCount = text.length() - text.replace("\n", "").length();
 	    	
+	    	if (text.contains("\n") && newlineCount + area.getLineCount() > maxLines)
+	    		return;
+	    	
+	    	super.insertString(fb, offs, text, a);	
+   	
+	    	txtLineCounter.setText(area.getLineCount() + "/" + maxLines);
 	    }    
-	 @Override
-	public void replace(FilterBypass fb, int offset, int length,
-			String text, AttributeSet attrs) throws BadLocationException {
-		 int actRow = area.getLineOfOffset(offset);
-	    	int rowBeginn = area.getLineStartOffset(actRow);
-	    	int rowEnd = area.getLineEndOffset(actRow);
-	      	int referenceValue = 0;
-	    	if (text.length() > 1) {
-	    		referenceValue = (rowEnd + text.length()) - rowBeginn;
-	    	} else {
-	    		referenceValue = rowEnd - rowBeginn;
-	    	}	 
-	    	
-	    	if (area.getLineCount() < maxLines && text.equals("\n"))
-	    	{
-	    		super.replace(fb, offset, length, text, attrs);		    		
-	    	}	    	
-	    	
-	    	try {
-				if (area.getText(rowBeginn, rowEnd).getBytes("UTF-8").length <= 0xB5 && !text.equals("\n")) {
-					super.replace(fb, offset, length, text, attrs);	
-				}
-			} catch (UnsupportedEncodingException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}	    	
-		
+		 @Override
+		public void replace(FilterBypass fb, int offset, int length,
+				String text, AttributeSet attrs) throws BadLocationException {		
+			 	int actRow = area.getLineOfOffset(offset);
+		    	int rowBegin = area.getLineStartOffset(actRow);
+		    	int rowEnd = area.getLineEndOffset(actRow);
+		      	
+		    	//Count newlines
+		    	int newlineCount = text.length() - text.replace("\n", "").length();
+		    	
+		    	if (text.contains("\n") && newlineCount + area.getLineCount() > maxLines)
+		    		return;
+		    	
+		    	if (area.getLineCount() < maxLines && text.equals("\n"))
+		    	{
+		    		super.replace(fb, offset, length, text, attrs);		    		
+		    	}	    	
+		    	
+		    	try {
+					if ((area.getText(rowBegin, rowEnd-rowBegin)+ text).getBytes("UTF-8").length <= 0xB5 && !text.equals("\n")) {
+						super.replace(fb, offset, length, text, attrs);	
+					}
+				} catch (UnsupportedEncodingException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}	    	
+		    	txtLineCounter.setText(area.getLineCount() + "/" + maxLines);
+		}
+		 
+		 @Override
+		public void remove(FilterBypass fb, int offset, int length)
+				throws BadLocationException {			
+			super.remove(fb, offset, length);
+			txtLineCounter.setText(area.getLineCount() + "/" + maxLines);
+		}
 	}
-	}
+	
 }

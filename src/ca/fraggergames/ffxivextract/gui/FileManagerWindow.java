@@ -418,7 +418,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 		tools_logViewer.addActionListener(menuHandler);
 
 		//tools_musicswapper.setEnabled(false);
-		tools_macroEditor.setEnabled(false);
+		//tools_macroEditor.setEnabled(false);
 		tools_logViewer.setEnabled(false);
 		
 		Preferences prefs = Preferences.userNodeForPackage(ca.fraggergames.ffxivextract.Main.class);
