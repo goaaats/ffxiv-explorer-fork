@@ -10,9 +10,10 @@ import ca.fraggergames.ffxivextract.helpers.LERandomAccessFile;
 public class Macro_File {
 
 	public final static int MAX_MACROS = 100;
-	public final static int MAX_LINES = 15;
-	public final static int MAX_LENGTH = 20;
+	public final static int MAX_LINES = 15;	
 	public final static int XOR_BYTE = 0x73;
+	public static final int MAX_NAME_LENGTH = 20;
+	public final static int MAX_BODY_LENGTH = 0xB5;
 	
 	public final Macro_Entry[] entries = new Macro_Entry[MAX_MACROS]; 
 	
@@ -47,7 +48,7 @@ public class Macro_File {
 	
 	private Macro_Entry readMacroEntry(ByteBuffer bb) throws IOException{		
 		
-		byte[] buffer = new byte[MAX_LENGTH * 2];		
+		byte[] buffer = new byte[MAX_BODY_LENGTH];
 		String title, icon;
 		int iconInt;
 		String[] lines = new String[MAX_LINES];		

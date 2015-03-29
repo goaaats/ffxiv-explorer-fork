@@ -29,15 +29,19 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultStyledDocument;
 import javax.swing.text.DocumentFilter;
-import javax.swing.text.AbstractDocument.DefaultDocumentEvent;
+import javax.swing.text.PlainDocument;
 
+import ca.fraggergames.ffxivextract.Constants;
 import ca.fraggergames.ffxivextract.models.Macro_File;
 
 public class MacroEditorWindow extends JFrame {
@@ -54,11 +58,13 @@ public class MacroEditorWindow extends JFrame {
 	private JComboBox drpIconChooser;
 	private JTextField txtMacroName;
 	private JTextArea txtMacroBody;
+	private JLabel txtNameCounter;
 	private JLabel txtLineCounter;
 	
 	private JLabel lblMacroChooserLabel;
 	private JLabel lblIconChooserLabel;
 	private JLabel lblMacroNameLabel;
+	private JLabel lblMacroBodyLabel;
 	
 	private JButton btnSave, btnBrowse;
 	
@@ -140,9 +146,10 @@ public class MacroEditorWindow extends JFrame {
 		
 		JPanel panel = new JPanel();
 		panel_3.add(panel);
-		panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+		panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
 		
 		JPanel panel_1 = new JPanel();
+		panel_1.setBorder(new EmptyBorder(0, 0, 0, 10));
 		panel.add(panel_1);
 		panel_1.setLayout(new BoxLayout(panel_1, BoxLayout.X_AXIS));
 		
@@ -158,7 +165,7 @@ public class MacroEditorWindow extends JFrame {
 		panel.add(panel_2);
 		panel_2.setLayout(new BoxLayout(panel_2, BoxLayout.X_AXIS));
 		
-		lblIconChooserLabel = new JLabel("Icon:    ");
+		lblIconChooserLabel = new JLabel("Icon: ");
 		panel_2.add(lblIconChooserLabel);
 		lblIconChooserLabel.setEnabled(false);
 		
@@ -175,24 +182,53 @@ public class MacroEditorWindow extends JFrame {
 		panel_7.setLayout(new BoxLayout(panel_7, BoxLayout.Y_AXIS));
 		
 		lblMacroNameLabel = new JLabel("Macro Name:");
+		lblMacroNameLabel.setEnabled(false);
 		panel_7.add(lblMacroNameLabel);
 		
-		txtMacroName = new JTextField();		
+		txtMacroName = new JTextField(Macro_File.MAX_NAME_LENGTH);		
+		txtMacroName.setDocument(new JTextFieldLimit(Macro_File.MAX_NAME_LENGTH));
+		txtMacroName.getDocument().addDocumentListener(new DocumentListener() {
+
+		    public void removeUpdate(DocumentEvent e) {		    	
+		        txtNameCounter.setText(txtMacroName.getText().length() + "/"+Macro_File.MAX_NAME_LENGTH);
+		    }
+
+		    public void insertUpdate(DocumentEvent e) {
+		    	txtNameCounter.setText(txtMacroName.getText().length() + "/"+Macro_File.MAX_NAME_LENGTH);
+		    }
+
+		    public void changedUpdate(DocumentEvent e) {
+		    	txtNameCounter.setText(txtMacroName.getText().length() + "/"+Macro_File.MAX_NAME_LENGTH);
+		    }
+		});
+		txtMacroName.setEnabled(false);
 		txtMacroName.setAlignmentX(Component.LEFT_ALIGNMENT);
 		panel_7.add(txtMacroName);
+		
+		JPanel panel_11 = new JPanel();
+		panel_11.setAlignmentX(Component.LEFT_ALIGNMENT);
+		panel_7.add(panel_11);
+		panel_11.setLayout(new BorderLayout(0, 0));
+		
+		txtNameCounter = new JLabel("-/20");
+		txtNameCounter.setEnabled(false);
+		txtNameCounter.setHorizontalAlignment(SwingConstants.RIGHT);
+		panel_11.add(txtNameCounter);
 		
 		JPanel panel_8 = new JPanel();
 		panel_6.add(panel_8, BorderLayout.CENTER);
 		panel_8.setLayout(new BoxLayout(panel_8, BoxLayout.Y_AXIS));
 		
-		JLabel lblNewLabel = new JLabel("Macro Body:");
-		panel_8.add(lblNewLabel);
+		lblMacroBodyLabel = new JLabel("Macro Body:");
+		lblMacroBodyLabel.setEnabled(false);
+		panel_8.add(lblMacroBodyLabel);
 		
 		JScrollPane scrollPane = new JScrollPane();
 		scrollPane.setAlignmentX(Component.LEFT_ALIGNMENT);
 		panel_8.add(scrollPane);
 		
 		txtMacroBody = new JTextArea();
+		txtMacroBody.setEnabled(false);
 		scrollPane.setViewportView(txtMacroBody);
 		txtMacroBody.setRows(15);
 		txtMacroBody.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -204,10 +240,11 @@ public class MacroEditorWindow extends JFrame {
 		contentPane.add(panel_9, BorderLayout.SOUTH);
 		
 		btnSave = new JButton("Save");
+		btnSave.setEnabled(false);
 		panel_9.add(btnSave);
 		
 		DefaultStyledDocument doc = new DefaultStyledDocument();
-		doc.setDocumentFilter(new DocumentSizeFilter(txtMacroBody, Macro_File.MAX_LINES, Macro_File.MAX_LENGTH));
+		doc.setDocumentFilter(new DocumentSizeFilter(txtMacroBody, Macro_File.MAX_LINES, Macro_File.MAX_BODY_LENGTH));
 		txtMacroBody.setDocument(doc);
 		
 		JPanel panel_10 = new JPanel();
@@ -215,6 +252,7 @@ public class MacroEditorWindow extends JFrame {
 		panel_10.setLayout(new BorderLayout(0, 0));
 		
 		txtLineCounter = new JLabel("-/15");
+		txtLineCounter.setEnabled(false);
 		panel_10.add(txtLineCounter, BorderLayout.EAST);
 	}
 
@@ -267,6 +305,9 @@ public class MacroEditorWindow extends JFrame {
 		for (int i = 0; i < Macro_File.MAX_MACROS; i++)
 			drpMacroChooser.addItem(""+i);
 		
+		for (int i = 0; i < Constants.macroIconList.length; i++)
+			drpIconChooser.addItem(""+ Constants.macroIconList[i]);
+		
 		drpMacroChooser.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent itemEvent) {
 				int state = itemEvent.getStateChange();
@@ -301,6 +342,7 @@ public class MacroEditorWindow extends JFrame {
 		lblMacroChooserLabel.setEnabled(isEnabled);
 		lblIconChooserLabel.setEnabled(isEnabled);
 		lblMacroNameLabel.setEnabled(isEnabled);
+		lblMacroBodyLabel.setEnabled(isEnabled);
 		
 		btnSave.setEnabled(isEnabled);
 		
@@ -308,6 +350,9 @@ public class MacroEditorWindow extends JFrame {
 		drpIconChooser.setEnabled(isEnabled);
 		txtMacroName.setEnabled(isEnabled);
 		txtMacroBody.setEnabled(isEnabled);
+		
+		txtNameCounter.setEnabled(isEnabled);
+		txtLineCounter.setEnabled(isEnabled);
 	}
 
 	public class DocumentSizeFilter extends DocumentFilter {
@@ -360,7 +405,7 @@ public class MacroEditorWindow extends JFrame {
 		    	}	    	
 		    	
 		    	try {
-					if ((area.getText(rowBegin, rowEnd-rowBegin)+ text).getBytes("UTF-8").length <= 0xB5 && !text.equals("\n")) {
+					if ((area.getText(rowBegin, rowEnd-rowBegin)+ text).getBytes("UTF-8").length <= maxLength && !text.equals("\n")) {
 						super.replace(fb, offset, length, text, attrs);	
 					}
 				} catch (UnsupportedEncodingException e) {
@@ -377,5 +422,27 @@ public class MacroEditorWindow extends JFrame {
 			txtLineCounter.setText(area.getLineCount() + "/" + maxLines);
 		}
 	}
+	
+	class JTextFieldLimit extends PlainDocument {
+		  private int limit;
+		  JTextFieldLimit(int limit) {
+		    super();
+		    this.limit = limit;
+		  }
+
+		  JTextFieldLimit(int limit, boolean upper) {
+		    super();
+		    this.limit = limit;
+		  }
+
+		  public void insertString(int offset, String str, AttributeSet attr) throws BadLocationException {
+		    if (str == null)
+		      return;
+
+		    if ((getLength() + str.length()) <= limit) {
+		      super.insertString(offset, str, attr);
+		    }
+		  }
+		}
 	
 }
