@@ -36,7 +36,7 @@ public class Constants {
 	public static float defaultEyeColor[] = { 0.0f, 0.302f, 0.0f, 1.0f };
 	// ///DEFAULT COLORS//////
 
-	public static final int[] macroIconList = { 66001, 66101, 66102, 66103, 66121,
+	public static final int[] macroIconList = {0, 66001, 66101, 66102, 66103, 66121,
 			66122, 66123, 66141, 66142, 66143, 66021, 66022, 66023, 66041,
 			66042, 66043, 66061, 66062, 66063, 2013, 2113, 2213, 2312, 2413,
 			2512, 2613, 2712, 66081, 66082, 66083, 66161, 66162, 66163, 66164,

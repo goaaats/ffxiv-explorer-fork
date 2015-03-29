@@ -11,11 +11,16 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.channels.FileChannel;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -73,7 +78,7 @@ public class MacroEditorWindow extends JFrame {
 	 */
 	public MacroEditorWindow() {
 		
-		this.setTitle("Macro Editor (EXPERIMENTAL)");
+		this.setTitle("Macro Editor");
 		URL imageURL = getClass().getResource("/res/frameicon.png");
 		ImageIcon image = new ImageIcon(imageURL);
 		this.setIconImage(image.getImage());
@@ -173,6 +178,9 @@ public class MacroEditorWindow extends JFrame {
 		panel_2.add(drpIconChooser);
 		drpIconChooser.setEnabled(false);
 		
+		JLabel label_1 = new JLabel("<--- Look in archive 060000 for these icon ids.");
+		panel_3.add(label_1);
+		
 		JPanel panel_6 = new JPanel();
 		panel_5.add(panel_6, BorderLayout.CENTER);
 		panel_6.setLayout(new BorderLayout(0, 0));
@@ -242,7 +250,18 @@ public class MacroEditorWindow extends JFrame {
 		btnSave = new JButton("Save");
 		btnSave.setEnabled(false);
 		panel_9.add(btnSave);
-		
+		btnSave.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				try {
+					doSave();
+				} catch (UnsupportedEncodingException e) {					
+					e.printStackTrace();
+				}
+			}
+		});
+				
 		DefaultStyledDocument doc = new DefaultStyledDocument();
 		doc.setDocumentFilter(new DocumentSizeFilter(txtMacroBody, Macro_File.MAX_LINES, Macro_File.MAX_BODY_LENGTH));
 		txtMacroBody.setDocument(doc);
@@ -329,6 +348,16 @@ public class MacroEditorWindow extends JFrame {
 						txtMacroBody.append(currentMacro_File.entries[drpMacroChooser.getSelectedIndex()].lines[i] + (i+1 >= currentMacro_File.entries[drpMacroChooser.getSelectedIndex()].lines.length ? "" : "\n"));
 						System.out.println(currentMacro_File.entries[drpMacroChooser.getSelectedIndex()].lines[i]);
 					}
+					
+					//Select Correct Icon
+					for (int i = 0; i < Constants.macroIconList.length; i++)
+					{
+						if (currentMacro_File.entries[drpMacroChooser.getSelectedIndex()].icon == Constants.macroIconList[i])
+						{
+							drpIconChooser.setSelectedIndex(i);
+							break;
+						}
+					}
 				}				
 			}
 		});
@@ -336,6 +365,16 @@ public class MacroEditorWindow extends JFrame {
 		txtMacroBody.setText("");
 		for (int i = 0; i <currentMacro_File.entries[drpMacroChooser.getSelectedIndex()].lines.length; i++)
 			txtMacroBody.append(currentMacro_File.entries[drpMacroChooser.getSelectedIndex()].lines[i] + (i+1 >= currentMacro_File.entries[drpMacroChooser.getSelectedIndex()].lines.length ? "" : "\n"));
+		
+		//Select Correct Icon
+		for (int i = 0; i < Constants.macroIconList.length; i++)
+		{
+			if (currentMacro_File.entries[drpMacroChooser.getSelectedIndex()].icon == Constants.macroIconList[i])
+			{
+				drpIconChooser.setSelectedIndex(i);
+				break;
+			}
+		}
 	}
 
 	private void setEditorEnabled(boolean isEnabled) {
@@ -355,6 +394,92 @@ public class MacroEditorWindow extends JFrame {
 		txtLineCounter.setEnabled(isEnabled);
 	}
 
+	private void doSave() throws UnsupportedEncodingException
+	{
+		byte header[] = new byte[0x10];
+		
+		ByteBuffer headerOut = ByteBuffer.wrap(header);
+		headerOut.order(ByteOrder.LITTLE_ENDIAN);
+		headerOut.putShort((short) 0x1);
+		headerOut.putShort((short) 0x2);
+		headerOut.putInt(0x46000);
+		
+		//Do a count of bytes needed
+		int total = 0;
+		for (int i = 0; i < Macro_File.MAX_MACROS; i++)
+		{
+			//Title
+			total += 3;
+			total += currentMacro_File.entries[i].title.getBytes("UTF-8").length;
+			
+			//Icon
+			total += 11;
+			
+			//K
+			total += 7;
+			
+			//Lines
+			for (int l = 0; l < Macro_File.MAX_LINES; l++)
+			{
+				total += 4;
+				total += currentMacro_File.entries[i].lines[l].getBytes("UTF-8").length;
+			}
+		}
+		
+		total++;
+		
+		headerOut.putInt(total);		
+		
+		byte body[] = new byte[0x46010];
+		
+		ByteBuffer bodyOut = ByteBuffer.wrap(body);
+		bodyOut.order(ByteOrder.LITTLE_ENDIAN);
+		
+		bodyOut.put((byte) 0xFF);
+		for (int i = 0; i < Macro_File.MAX_MACROS; i++)
+		{
+			//Title
+			bodyOut.put((byte) 'T');
+			bodyOut.putShort((short) (currentMacro_File.entries[i].title.getBytes("UTF-8").length));
+			bodyOut.put(currentMacro_File.entries[i].title.getBytes("UTF-8"));			
+			
+			//Icon
+			bodyOut.put((byte) 'I');
+			bodyOut.putShort((short)8);			
+			bodyOut.put(String.format("%07X\0", currentMacro_File.entries[i].icon).getBytes());
+			
+			//K
+			bodyOut.put((byte) 'K');
+			bodyOut.putShort((short)4);			
+			bodyOut.put("001\0".getBytes());
+						
+			//Lines
+			for (int l = 0; l < Macro_File.MAX_LINES; l++)
+			{
+				bodyOut.put((byte) 'L');
+				bodyOut.putShort((short) (currentMacro_File.entries[i].lines[l].getBytes("UTF-8").length + 1));
+				bodyOut.put(currentMacro_File.entries[i].lines[l].getBytes("UTF-8"));
+				bodyOut.put((byte) 0);
+			}
+		}
+		
+		//XOR ALL THE THINGS! (except header)
+		for (int i = 1; i <= total-1; i++)
+			body[i] = (byte) (body[i] ^ 0x73);
+		
+		//Save File
+		try {
+			FileOutputStream fio = new FileOutputStream(txtDatPath.getText() + ".test");
+			fio.write(header);			
+			fio.write(body);
+			fio.close();			
+		} catch (FileNotFoundException e) {			
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
 	public class DocumentSizeFilter extends DocumentFilter {
 	    
 	    JTextArea area;
