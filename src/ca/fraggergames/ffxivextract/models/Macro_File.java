@@ -59,7 +59,7 @@ public class Macro_File {
 		//TITLE
 		int titleSize = bb.getShort();
 		bb.get(buffer, 0, titleSize);
-		title = new String(buffer, 0, titleSize , "UTF-8");
+		title = new String(buffer, 0, titleSize-1 , "UTF-8");
 		
 		//System.out.println(title);
 		
