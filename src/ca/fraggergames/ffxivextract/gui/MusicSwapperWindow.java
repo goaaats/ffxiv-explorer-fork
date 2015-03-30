@@ -592,6 +592,10 @@ public class MusicSwapperWindow extends JFrame {
 			
 			originalFiles = originalMusicFile.getPackFolders()[0].getFiles();
 			editedFiles = editMusicFile.getPackFolders()[0].getFiles();
+			
+			for (int i = 0; i < originalFiles.length; i ++)
+				originalPositionTable.put(originalFiles[i].id, i);
+			
 			lblBackup.setText("Backup was auto generated. Remember to restore before patching.");
 			btnBackup.setEnabled(false);
 			btnRestore.setEnabled(true);			
