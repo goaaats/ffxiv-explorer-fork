@@ -28,6 +28,8 @@ public class FFXIV_String {
 	final static int TYPE_ICON2 = 0x1E;
 	final static int TYPE_DASH = 0x1F;
 
+	final static int TYPE_PLAYERLINK = 0x27;
+	
 	final static int TYPE_UNKNOWN2 = 0x2b;
 
 	final static int TYPE_UNKNOWN = 0x07;
@@ -318,11 +320,13 @@ public class FFXIV_String {
 			buffOut.put("-".getBytes("UTF-8"));
 			break;
 		case TYPE_SERVER_VALUE0:
-		case TYPE_SERVER_VALUE2:
+		case TYPE_SERVER_VALUE2:		
 		//case TYPE_SERVER_VALUE3:
 		case TYPE_SERVER_VALUE3:
 		//case TYPE_SERVER_VALUE5:
 			buffOut.put("<value>".getBytes("UTF-8"));
+			break;
+		case TYPE_PLAYERLINK:
 			break;
 		default:
 			String unknownMsg = String.format("<?0x%x>", type);

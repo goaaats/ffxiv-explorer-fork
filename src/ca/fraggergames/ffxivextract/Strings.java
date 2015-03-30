@@ -61,7 +61,7 @@ public class Strings {
 	public static final String MENUITEM_MUSICSWAPPER = "Music Swapper";
 	public static final String MENUITEM_HASHCALC = "Path -> Hash Calculator";
 	public static final String MENUITEM_MACROEDITOR = "Macro Editor";
-	public static final String MENUITEM_LOGVIEWER = "Log Viewer (NOT DONE)";
+	public static final String MENUITEM_LOGVIEWER = "Log Viewer";
 	public static final String MENUITEM_ENABLEUPDATE = "Check for Updates";
 	public static final String MENUITEM_QUIT = "Quit";
 	public static final String MENUITEM_ABOUT = "About";

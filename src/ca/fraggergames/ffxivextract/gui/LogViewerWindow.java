@@ -9,17 +9,17 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 
 import javax.swing.BoxLayout;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -45,22 +45,15 @@ public class LogViewerWindow extends JFrame {
 
 	public LogViewerWindow() {
 		setTitle("Log Viewer");		
-		setBounds(100, 100, 450, 300);
+		URL imageURL = getClass().getResource("/res/frameicon.png");
+		ImageIcon image = new ImageIcon(imageURL);
+		this.setIconImage(image.getImage());
+				
+		setBounds(100, 100, 900, 600);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
 		contentPane.setLayout(new BorderLayout(0, 2));
-
-		JPanel panel = new JPanel();
-		panel.setBorder(new EmptyBorder(5, 0, 0, 0));
-		contentPane.add(panel, BorderLayout.NORTH);
-		panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
-
-		JLabel lblNewLabel = new JLabel("Filter: ");
-		panel.add(lblNewLabel);
-
-		JComboBox comboBox = new JComboBox();
-		panel.add(comboBox);
 
 		JPanel panel_1 = new JPanel();
 		panel_1.setBorder(new EmptyBorder(10, 0, 10, 0));
@@ -155,7 +148,7 @@ public class LogViewerWindow extends JFrame {
 		{
 			if (!fileChooser.getSelectedFile().getName().equals("log"))
 			{
-				JOptionPane.showMessageDialog(this, "This is not a valid log folder.", "Error opening logs",
+				JOptionPane.showMessageDialog(this, "This is not a valid log folder. Please point the path to the log folder in your \".\\documents\\my games\\FINAL FANTASY XIV - A Realm Reborn\\\" folder.", "Error opening logs",
 					    JOptionPane.ERROR_MESSAGE);
 				dispose();
 				return;
@@ -235,16 +228,16 @@ public class LogViewerWindow extends JFrame {
 			Iterator<Log_Entry> it = logList.iterator();
 
 			if (SAVETYPE_CSV == type)
-				bw.write("Time,Sender,Message\r\n");
+				bw.write("Time,Channel,Sender,Message\r\n");
 			
 			while (it.hasNext()) {
 				Log_Entry entry = it.next();
 				if (SAVETYPE_PLAIN == type)
-					bw.write("[" + entry.formattedTime + "] " + entry.sender
-							+ ": " + entry.message + "\r\n");
+					bw.write("[" + entry.formattedTime + "] " + " " + Log_File.getChannelName(entry.channel) + " : " + entry.sender
+							+ " : " + entry.message + "\r\n");
 				else if (SAVETYPE_CSV == type)
-					bw.write(entry.formattedTime + "," + entry.sender + ","
-							+ entry.message + "\r\n");
+					bw.write("\""+entry.formattedTime + "\",\"" + Log_File.getChannelName(entry.channel) + "\",\"" + entry.sender + "\",\""
+							+ entry.message + "\"\r\n");
 			}
 			bw.close();
 		} catch (IOException e) {
@@ -256,7 +249,7 @@ public class LogViewerWindow extends JFrame {
 	class LogTableModel extends AbstractTableModel {
 
 		ArrayList<Log_Entry> entries;
-		String[] columns = { "Time", "Channel", "Message" };
+		String[] columns = { "Time", "Channel", "Sender", "Message" };
 
 		public LogTableModel(ArrayList<Log_Entry> list) {
 			entries = list;
@@ -282,9 +275,11 @@ public class LogViewerWindow extends JFrame {
 			if (columnIndex == 0)
 				return entries.get(rowIndex).formattedTime;
 			else if (columnIndex == 1)
-				return entries.get(rowIndex).filter;
+				return Log_File.getChannelName(entries.get(rowIndex).channel);
 			else if (columnIndex == 2)
-				return entries.get(rowIndex).message.toString();
+				return "<html>"+entries.get(rowIndex).sender.toString().replace("<", "&lt;").replace(">", "&gt;").replace("&lt;color #", "<font color=#").replace("&lt;/color&gt;", "</font>")+"</html>";
+			else if (columnIndex == 3)
+				return "<html>"+entries.get(rowIndex).message.toString().replace("<", "&lt;").replace(">", "&gt;").replace("&lt;color #", "<font color=#").replace("&lt;/color&gt;", "</font>")+"</html>";
 			else
 				return "";
 		}
