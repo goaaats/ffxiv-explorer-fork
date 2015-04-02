@@ -484,17 +484,20 @@ public class EXDF_View extends JScrollPane implements ItemListener{
 					int quad[] = entry.getQuad(dataset.offset);
 					return quad[3] + ", " + quad[2] + ", " + quad[1] + ", " + quad[0];
 				case 0x09: // FLOAT
-				case 0x08:
+				//case 0x08:
 					return entry.getFloat(dataset.offset);
-				case 0x07: // INT
-				case 0x06:  
+				case 0x07: // UINT
+					return (long)entry.getInt(dataset.offset);
+				case 0x06: // INT 
 					return entry.getInt(dataset.offset);
-				case 0x05: // SHORT
-				case 0x04:
+				case 0x05: // USHORT
 					return ((int)entry.getShort(dataset.offset) & 0xFFFF);
-				case 0x03: // BYTE
-				case 0x02:  
-					return (((int)entry.getByte(dataset.offset)) & 0xFF);	
+				case 0x04: // SHORT
+					return entry.getShort(dataset.offset);
+				case 0x03: // UBYTE
+					return (((int)entry.getByte(dataset.offset)) & 0xFF);
+				case 0x02: // BYTE
+					return entry.getByte(dataset.offset);	
 				case 0x01: // BOOL
 					return entry.getBoolean(dataset.offset);
 				case 0x00: // STRING; Points to offset from end of dataset part. Read until 0x0.

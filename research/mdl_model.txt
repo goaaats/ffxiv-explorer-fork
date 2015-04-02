@@ -1,9 +1,11 @@
 #### MODEL FILE RESEARCH ####
 
+0x000: UNKNOWN    	   0x40 Bytes; Dunno, but the offsets assume 0x40 extra bytes.				 
+
 --CHUNK 1--
 
 Variable amount of D3DVERTEXELEMENT9 structs, all 0x88 in size. Max 17 of them it seems.
-Used to initialize the buffers if using DirectX.
+Used to initialize the buffers if using DirectX, and also defines what the buffers consist of.
 
 --Chunk 2--
 
@@ -14,30 +16,31 @@ Used to initialize the buffers if using DirectX.
 --Post String block
 
 0x000: Unknown				  Int; 
-0x004: Unknown				  Int;
+0x004: Unknown				Short;
+0x006: Atr Count			Short;
 0x008: Unknown				Short;
 0x00a: Material Count		Short;
-0x00c: Animation Count		Short;
-0x010: Unknown				  Int;
-0x014: NULL					  Int;
-0x015: Unknown			     Byte;
-0x016: Unknown			     Byte;
-0x018: Num Structs?			Short;
+0x00c: Bone Count			Short;
+0x00e: Shp Count			Short;
+0x010: Unknown				Short;
+0x012: Unknown			    Short;
+0x016: Num Structs			Short;
 
---0x20 bytes of header
 
---Structs here 0x18 in size * num structs
+0x034: Structs					 ;Structs here are 0x20 in size * num structs
 
-0x   : Num meshes LOD1      Short; 
+--LOD HEADERS START [Repeat three times]--
+--LOD 1 HEADER
+0x000: Num meshes LOD1      Short; 
+--Skipping 0x28 bytes-- 
+0x02c: Vertex Buffer Size     Int;
+0x030: Index Buffer Size      Int;
+0x034: Vertex Buffer Offset   Int;
+0x038: Index  Buffer Offset   Int;
+--LOD 2 HEADER; Same as LOD1 Header
+--LOD 3 HEADER; Same as LOD1 Header
 
---Skip 0x28
-
-	 : Vertex Buffer Size     Int;
-	 : Index Buffer Size      Int;
-	 : Vertex Buffer Offset   Int;
-	 : Index  Buffer Offset   Int;
-
---LOD 1 MESH TABLE-- (Size of Num LOD1 Meshes)
+--LOD MESH TABLE-- (Size of Num LOD1 Meshes)
 0x000: Vertex Count			  Int;
 0x004: Index Count			  Int;
 0x008: Material Number		Short;
@@ -47,47 +50,18 @@ Used to initialize the buffers if using DirectX.
 0x014: Vertex Buffer Offset   Int;
 0x018: Unknown   			  Int;
 0x01c: Unknown   			  Int;
-0c020: Vertex Size		     Byte;
-0c021: Unknown				 Byte;
-0c021: Unknown              Short;
---LOD 2 MESH TABLE-- (Size of Num LOD2 Meshes); Same as LOD1
---LOD 3 MESH TABLE-- (Size of Num LOD3 Meshes); Same as LOD1
+0x020: Buffer Sizes (Vert, AuxVert, ?, ?)    Byte;
+--LOD 2 MESH TABLE-- (Size of Num LOD2 Meshes); Same as LOD1 Mesh Table
+--LOD 3 MESH TABLE-- (Size of Num LOD3 Meshes); Same as LOD1 Mesh Table
 
 
 --CHUNK 3,4,5-- (Three for each LoD)
 
 Will appear * num meshes
 
---Vertex Table-- (Size of Num Verts)
-0x000: X					Short; Half Float.
-0x002: Y					Short; Half Float.
-0x004: Z					Short; Half Float.
-0x006: W					Short; Half Float.
-0x008: Bone Weight			  Int;
-0x00c: Bone Index			  Int;
+--Vertex Table--
+--Aux Geo Data Table--
+--Indice Table Buffer--
 
---Aux Geo Data Table-- (Size of Num Verts)
-0x000: Normal X				Short; Half Float.
-0x002: Normal Y				Short; Half Float.
-0x004: Normal Z				Short; Half Float.
-0x006: Normal W				Short; Half Float.
-0x008: Binormal X	   		 Byte;
-0x009: Binormal Y	 		 Byte;
-0x00a: Binormal Z	 		 Byte;
-0x00b: Binormal W	 		 Byte;
-0x00c: Color R				 Byte;
-0x00d: Color G				 Byte;
-0x00e: Color B				 Byte;
-0x00f: Color A				 Byte;
-0x010: Tex Coord U1			Short; Half Float.
-0x012: Tex Coord V1			Short; Half Float.
-0x014: Tex Coord U2			Short; Half Float.
-0x016: Tex Coord V2			Short; Half Float.
-
---CHUNK 9,10,11-- (Three for each LoD)
-
-Will appear * num meshes.
-
---Indice Table-- (Size of Num Indices)
-0x000: Index			    Short; 
+--CHUNK 9,10,11-- (For each LoD)
 
