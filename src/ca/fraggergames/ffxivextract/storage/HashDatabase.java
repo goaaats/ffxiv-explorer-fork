@@ -239,20 +239,7 @@ public class HashDatabase {
 			// create a database connection
 			connection = DriverManager
 					.getConnection("jdbc:sqlite:./hashlist.db");
-			Statement statement = connection.createStatement();
-			statement.setQueryTimeout(30); // set timeout to 30 sec.
-			statement
-					.executeUpdate("create table if not exists folders (hash integer NOT NULL, path string, PRIMARY KEY (hash))");
-			statement
-					.executeUpdate("create table if not exists filenames (hash integer NOT NULL, path string, PRIMARY KEY (hash))");
-			statement
-					.executeUpdate("create table if not exists dbinfo (type string NOT NULL, value string NOT NULL)");
-			
-			if (getHashDBVersion() == -1)
-				statement
-						.executeUpdate("insert into dbinfo  values ('version', '-1')");
-			
-			statement.close();			
+	
 		} catch (SQLException e) {
 			// if the error message is "out of memory",
 			// it probably means no database file is found
@@ -300,7 +287,7 @@ public class HashDatabase {
 		return Integer.parseInt(version);
 	}
 	
-	public static boolean addFolderToDB(String folderName)
+	public static boolean addFolderToDB(String folderName, String archive)
 	{
 		if (folderName.endsWith("/"))
 			folderName = folderName.substring(0, folderName.length()-1);
@@ -317,7 +304,7 @@ public class HashDatabase {
 					.getConnection("jdbc:sqlite:./hashlist.db");
 			Statement statement = connection.createStatement();
 			statement.setQueryTimeout(30); // set timeout to 30 sec.
-			statement.executeUpdate("insert or ignore into folders values(" + folderHash + ", '" + folderName + "', '0')");			
+			statement.executeUpdate(String.format("insert or ignore into folders values(%d, '%s', '0', '%s', %d)", folderHash, folderName, archive, Constants.DB_VERSION_CODE));			
 			statement.close();
 		} catch (SQLException e) {
 			System.err.println(e.getMessage());
@@ -334,7 +321,7 @@ public class HashDatabase {
 	}
 	
 	// Used to add a string to the db. Automatically hashes and splits it.
-	public static boolean addPathToDB(String fullPath) {
+	public static boolean addPathToDB(String fullPath, String archive) {
 
 		String folder = fullPath.substring(0, fullPath.lastIndexOf('/'))
 				.toLowerCase();
@@ -355,8 +342,8 @@ public class HashDatabase {
 					.getConnection("jdbc:sqlite:./hashlist.db");
 			Statement statement = connection.createStatement();
 			statement.setQueryTimeout(30); // set timeout to 30 sec.
-			statement.executeUpdate("insert or ignore into folders values(" + folderHash + ", '" + folder + "', '0')");
-			statement.executeUpdate("insert or ignore into filenames values(" + fileHash + ", '" + filename + "', '0')");
+			statement.executeUpdate(String.format("insert or ignore into folders values(%d, '%s', 0, '%s', '%s')", folderHash, folder, archive, Constants.DB_VERSION_CODE));
+			statement.executeUpdate(String.format("insert or ignore into filenames values(%d, '%s', 0, '%s', '%s')", fileHash, filename, archive, Constants.DB_VERSION_CODE));
 			statement.close();
 		} catch (SQLException e) {
 			System.err.println(e.getMessage());
@@ -372,7 +359,7 @@ public class HashDatabase {
 		return true;
 	}
 	
-	public static boolean addPathToDB(String fullPath, Connection conn) {
+	public static boolean addPathToDB(String fullPath, String archive, Connection conn) {
 		
 		String folder = fullPath.substring(0, fullPath.lastIndexOf('/'))
 				.toLowerCase();
@@ -390,8 +377,8 @@ public class HashDatabase {
 		try{		
 			Statement statement = conn.createStatement();
 			statement.setQueryTimeout(30); // set timeout to 30 sec.
-			statement.executeUpdate("insert or ignore into folders values(" + folderHash + ", '" + folder + "', 0)");
-			statement.executeUpdate("insert or ignore into filenames values(" + fileHash + ", '" + filename + "', 0)");
+			statement.executeUpdate(String.format("insert or ignore into folders values(%d, '%s', 0, '%s', '%s')", folderHash, folder, archive, Constants.DB_VERSION_CODE));
+			statement.executeUpdate(String.format("insert or ignore into filenames values(%d, '%s', 0, '%s', '%s')", fileHash, filename, archive, Constants.DB_VERSION_CODE));
 			statement.close();
 		} catch (SQLException e) {
 			System.err.println(e.getMessage());
@@ -624,7 +611,7 @@ public class HashDatabase {
 			ResultSet rs = statement
 					.executeQuery("select * from filenames where hash = " + hash);						
 			while (rs.next())
-				path = rs.getString("path");
+				path = rs.getString("name");
 			statement.close();
 			rs.close();
 			
@@ -658,8 +645,9 @@ public class HashDatabase {
 						crc_table_0f085d0[(dwCRC >>> 24) & 0x000000FF];
 			}
 
-			for (int i = 0; i < cbEndUnalignedBytes; ++i) {
+			for (int i = 0; i < cbEndUnalignedBytes; ++i) {				
 				dwCRC = crc_table_0f085d0[(dwCRC ^ pbBuffer.get()) & 0x000000FF] ^ (dwCRC >>> 8);
+				System.out.println(String.format("%d\n",dwCRC));
 			}
 
 			return dwCRC;

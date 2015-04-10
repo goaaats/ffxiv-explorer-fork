@@ -135,7 +135,7 @@ public class PathSearcher extends JFrame {
 											System.out.println("NEW->"+fullpath);
 											numNewFound++;
 											numNewFoundFolder++;
-											HashDatabase.addPathToDB(fullpath);										
+											HashDatabase.addPathToDB(fullpath, currentIndexFile.getIndexName());										
 										//}
 										//else
 										//{

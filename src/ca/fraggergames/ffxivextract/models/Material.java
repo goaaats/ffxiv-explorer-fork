@@ -105,7 +105,7 @@ public class Material {
 									if (file.id == hash2)
 									{
 										System.out.println("Adding Entry: " + s);
-										HashDatabase.addPathToDB(s);																			
+										HashDatabase.addPathToDB(s, currentIndex.getIndexName());																			
 										
 										try {
 											byte extracted[] = currentIndex.extractFile(file.dataoffset, null);
