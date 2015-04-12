@@ -361,6 +361,11 @@ public class SqPack_IndexFile {
 		return data;
 	}
 
+	public String getIndexName() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 
 	
 }

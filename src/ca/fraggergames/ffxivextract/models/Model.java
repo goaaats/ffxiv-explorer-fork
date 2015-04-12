@@ -228,7 +228,7 @@ public class Model {
 							if (file.id == hash2)
 							{
 								System.out.println("Adding Entry: " + incFolderPath+"/"+fileString);
-								HashDatabase.addPathToDB(incFolderPath+"/"+fileString);
+								HashDatabase.addPathToDB(incFolderPath+"/"+fileString, currentIndex.getIndexName());
 								
 								try {
 									byte[] data = currentIndex.extractFile(file.getOffset(), null);
@@ -314,7 +314,7 @@ public class Model {
 								if (file.id == hash2)
 								{
 									try {
-										HashDatabase.addPathToDB(materialFolderPath+"/"+fileString);
+										HashDatabase.addPathToDB(materialFolderPath+"/"+fileString, currentIndex.getIndexName());
 										materials[i] = new Material(materialFolderPath, currentIndex, currentIndex.extractFile(file.dataoffset, null));
 									} catch (FileNotFoundException e) {
 										e.printStackTrace();
@@ -350,7 +350,7 @@ public class Model {
 							if (file.id == hash2)
 							{
 								try {
-									HashDatabase.addPathToDB(materialFolderPath+"/"+s);
+									HashDatabase.addPathToDB(materialFolderPath+"/"+s, currentIndex.getIndexName());
 									materials[bodyMaterialSpot] = new Material(materialFolderPath, currentIndex, currentIndex.extractFile(file.dataoffset, null));
 								} catch (FileNotFoundException e) {
 									e.printStackTrace();
