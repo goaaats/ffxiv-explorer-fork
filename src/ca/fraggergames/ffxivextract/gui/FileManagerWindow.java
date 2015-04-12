@@ -519,7 +519,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 			 //If it's a placeholder, don't bother			 
 			 if (contentType == 0x01)
 			 {
-				 JLabel lblFNFError = new JLabel("This is currently a placeholder, there is no data to here.");
+				 JLabel lblFNFError = new JLabel("This is currently a placeholder, there is no data here.");
 				 tabs.addTab("No Data", lblFNFError);
 				 hexView.setBytes(null);							
 				 splitPane.setRightComponent(tabs);
@@ -797,8 +797,11 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 					
 					loadingDialog.nextFile(i, folderName + "/" + fileName);
 					
+					if (currentIndexFile.getContentType(files.get(i).getOffset()) == 1)
+						continue;
+					
 					byte[] data = currentIndexFile.extractFile(files.get(i).getOffset(), loadingDialog);
-					byte[] dataToSave = null;
+					byte[] dataToSave = null;										
 					
 					String extension = getExtension(currentIndexFile.getContentType(files.get(i).getOffset()), data);
 					
