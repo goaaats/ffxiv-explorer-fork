@@ -1,0 +1,14 @@
+#### PAP FILE RESEARCH #### By Ioncannon
+
+Last Updated: 4/13/2015
+
+Special Thanks to Yukimono for looking into these files
+
+===PAP HEADER===
+0x000: Signature			4 Bytes; Signature ("PAP ", "BLKS", "PLKS", "DIE ", etc)
+0x004: Unknown				  Int32;
+0x008: Animation Count 		  Int32;
+0x00c: Unknown				  Int32;
+0x010: Unknown				  Short;
+~~~~~~~Padding~~~~~~~
+
