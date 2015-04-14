@@ -44,7 +44,7 @@ public class Main {
 		} catch (ClassNotFoundException e1) {
 			e1.printStackTrace();
 		}
-		
+		/*
 		String archive = "0a0000";
 		HashDatabase.beginConnection();try{
 		
@@ -80,7 +80,7 @@ public class Main {
 		{e.printStackTrace();}
 		HashDatabase.closeConnection();		
 		
-		System.exit(1);
+		System.exit(1);*/
 		// EXD_Searcher.findStains();
 
 		// EXD_Searcher.openEveryModel();
