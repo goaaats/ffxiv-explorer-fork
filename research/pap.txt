@@ -6,9 +6,19 @@ Special Thanks to Yukimono for looking into these files
 
 ===PAP HEADER===
 0x000: Signature			4 Bytes; Signature ("PAP ", "BLKS", "PLKS", "DIE ", etc)
-0x004: Unknown				  Int32;
-0x008: Animation Count 		  Int32;
-0x00c: Unknown				  Int32;
-0x010: Unknown				  Short;
+0x004: Unknown				  Short; Always 1?
+0x006: Unknown				  Short; Always 2?
+0x008: Animation Count 		  Short;
+0x00a: Unknown				  Int32; Chanes
+0x00e: Unknown				  Int32; Always 0x1A. Header Size?
+0x012: HKX File Start		  Int32;
+0x016: Footer Position		  Int32;
 ~~~~~~~Padding~~~~~~~
 
+--Animation Names--
+0x000: ASCII name		   22 Bytes;
+0x023: Index?				  Int32;
+
+--Havok Animations File--
+
+--Footer--
