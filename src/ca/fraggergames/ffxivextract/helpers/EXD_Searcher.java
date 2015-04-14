@@ -197,45 +197,45 @@ public class EXD_Searcher {
 					modelPath = String.format("%s%04d/obj/body/b%04d/model/m%04db%04d.mdl", typePath,id,model,id,model);
 					System.out.println(imcPath);
 					System.out.println(modelPath);								
-					HashDatabase.addPathToDB(imcPath);
-					HashDatabase.addPathToDB(modelPath);
+					HashDatabase.addPathToDB(imcPath, "040000");
+					HashDatabase.addPathToDB(modelPath, "040000");
 					
 					skelPath = String.format("%s%04d/skeleton/base/b%04d/eid_m%04db%04d.eid", typePath,id,model,id,model);
 					System.out.println(skelPath);
-					HashDatabase.addPathToDB(skelPath);
+					HashDatabase.addPathToDB(skelPath, "040000");
 					skelPath = String.format("%s%04d/skeleton/base/b%04d/skl_m%04db%04d.sklp", typePath,id,model,id,model);
 					System.out.println(skelPath);
-					HashDatabase.addPathToDB(skelPath);
+					HashDatabase.addPathToDB(skelPath, "040000");
 					skelPath = String.format("%s%04d/skeleton/base/b%04d/skl_m%04db%04d.sklb", typePath,id,model,id,model);
 					System.out.println(skelPath);
 					skelPath = String.format("%s%04d/animation/a%04d/bt_common/resident/monster.pap", typePath,id,0);
 					System.out.println(skelPath);
-					HashDatabase.addPathToDB(skelPath);
+					HashDatabase.addPathToDB(skelPath, "040000");
 					skelPath = String.format("%s%04d/animation/a%04d/bt_common/event/event_wandering_action.pap", typePath,id,0);
 					System.out.println(skelPath);
-					HashDatabase.addPathToDB(skelPath);
+					HashDatabase.addPathToDB(skelPath, "040000");
 					skelPath = String.format("%s%04d/animation/a%04d/bt_common/mon_sp/m%04d/mon_sp001.pap", typePath,id,0,id);
 					System.out.println(skelPath);
-					HashDatabase.addPathToDB(skelPath);
+					HashDatabase.addPathToDB(skelPath, "040000");
 					break;
 				case 4:
 					typePath = "chara/demihuman/d";
 					imcPath = String.format("%s%04d/obj/equipment/e%04d/e%04d.imc", typePath,id,model,model);
 					System.out.println(imcPath);
-					HashDatabase.addPathToDB(imcPath);
+					HashDatabase.addPathToDB(imcPath, "040000");
 					
 					modelPath = String.format("%s%04d/obj/equipment/e%04d/model/d%04de%04d_met.mdl", typePath,id,model,id,model);					
 					System.out.println(modelPath);												
-					HashDatabase.addPathToDB(modelPath);
+					HashDatabase.addPathToDB(modelPath, "040000");
 					modelPath = String.format("%s%04d/obj/equipment/e%04d/model/d%04de%04d_top.mdl", typePath,id,model,id,model);					
 					System.out.println(modelPath);												
-					HashDatabase.addPathToDB(modelPath);
+					HashDatabase.addPathToDB(modelPath, "040000");
 					modelPath = String.format("%s%04d/obj/equipment/e%04d/model/d%04de%04d_dwn.mdl", typePath,id,model,id,model);					
 					System.out.println(modelPath);												
-					HashDatabase.addPathToDB(modelPath);
+					HashDatabase.addPathToDB(modelPath, "040000");
 					modelPath = String.format("%s%04d/obj/equipment/e%04d/model/d%04de%04d_sho.mdl", typePath,id,model,id,model);					
 					System.out.println(modelPath);												
-					HashDatabase.addPathToDB(modelPath);
+					HashDatabase.addPathToDB(modelPath, "040000");
 					break;
 				}
 				
@@ -411,17 +411,17 @@ public class EXD_Searcher {
 								
 									if (file.getName().contains(".tex")){
 										for (int x = 1; x <= 85; x++)
-											HashDatabase.addPathToDB(newfolder + "/" + file.getName().replace(".tex", String.format("_s%04d.tex", x)));
+											HashDatabase.addPathToDB(newfolder + "/" + file.getName().replace(".tex", String.format("_s%04d.tex", x)), "040000");
 										
 										for (int x = 101; x <= 120; x++)
-											HashDatabase.addPathToDB(newfolder + "/" + file.getName().replace(".tex", String.format("_s%04d.tex", x)));
+											HashDatabase.addPathToDB(newfolder + "/" + file.getName().replace(".tex", String.format("_s%04d.tex", x)), "040000");
 									}
 									else if (file.getName().contains(".mtrl")){
 										for (int x = 1; x <= 85; x++)
-											HashDatabase.addPathToDB(newfolder + "/" + file.getName().replace(".mtrl", String.format("_s%04d.mtrl", x)));
+											HashDatabase.addPathToDB(newfolder + "/" + file.getName().replace(".mtrl", String.format("_s%04d.mtrl", x)), "040000");
 										
 										for (int x = 101; x <= 120; x++)
-											HashDatabase.addPathToDB(newfolder + "/" + file.getName().replace(".mtrl", String.format("_s%04d.mtrl", x)));
+											HashDatabase.addPathToDB(newfolder + "/" + file.getName().replace(".mtrl", String.format("_s%04d.mtrl", x)), "040000");
 									}
 								}
 								

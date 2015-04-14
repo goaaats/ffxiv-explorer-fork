@@ -2,10 +2,8 @@ package ca.fraggergames.ffxivextract;
 
 import java.io.File;
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.util.Hashtable;
+import java.sql.ResultSet;
+import java.sql.Statement;
 import java.util.prefs.Preferences;
 
 import javax.swing.JOptionPane;
@@ -13,12 +11,10 @@ import javax.swing.UIManager;
 
 import ca.fraggergames.ffxivextract.gui.FileManagerWindow;
 import ca.fraggergames.ffxivextract.gui.components.Update_Dialog;
-import ca.fraggergames.ffxivextract.helpers.EXD_Searcher;
+import ca.fraggergames.ffxivextract.helpers.LERandomAccessFile;
 import ca.fraggergames.ffxivextract.helpers.PathSearcher;
 import ca.fraggergames.ffxivextract.helpers.VersionUpdater;
 import ca.fraggergames.ffxivextract.helpers.VersionUpdater.VersionCheckObject;
-import ca.fraggergames.ffxivextract.models.Model;
-import ca.fraggergames.ffxivextract.models.SqPack_IndexFile;
 import ca.fraggergames.ffxivextract.models.SqPack_IndexFile.SqPack_Folder;
 import ca.fraggergames.ffxivextract.storage.HashDatabase;
 
@@ -49,6 +45,42 @@ public class Main {
 			e1.printStackTrace();
 		}
 		
+		String archive = "0a0000";
+		HashDatabase.beginConnection();try{
+		
+			LERandomAccessFile ref = new LERandomAccessFile("E:\\Program Files (x86)\\SquareEnix\\FINAL FANTASY XIV - A Realm Reborn\\game\\sqpack\\ffxiv\\"+archive+".win32.index", "r");
+	
+			ref.seek(0x400+0x4+0x4+(0x48*0));
+			int offset = ref.readInt();
+			int size = ref.readInt();			
+		
+			System.out.println("Size= " + size);
+			
+			for (int i = 0; i < size/16; i++){				
+				ref.seek(offset + (i * 16));
+				int hash = ref.readInt();
+				System.out.println(String.format("%d",hash));
+				Statement statement = HashDatabase.globalConnection.createStatement();
+				int query = statement
+						.executeUpdate("update filenames set archive=\""+archive+"\" where hash=" + hash +";");
+				
+				if (query == 0)
+				{
+					Statement stm = HashDatabase.globalConnection.createStatement();
+					stm.executeUpdate(String.format("insert or ignore into filenames (hash, used, archive, version) values(%d, 1, '%s', '%s')", hash, archive, Constants.DB_VERSION_CODE));
+					stm.close();
+				}
+				
+				statement.close();
+			}
+			
+			ref.close();
+		}
+		catch (Exception e)
+		{e.printStackTrace();}
+		HashDatabase.closeConnection();		
+		
+		System.exit(1);
 		// EXD_Searcher.findStains();
 
 		// EXD_Searcher.openEveryModel();
