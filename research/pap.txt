@@ -4,21 +4,20 @@ Last Updated: 4/13/2015
 
 Special Thanks to Yukimono for looking into these files
 
-===PAP HEADER===
+===PAP HEADER=== (Always 0x1A in size?)
 0x000: Signature			4 Bytes; Signature ("PAP ", "BLKS", "PLKS", "DIE ", etc)
 0x004: Unknown				  Short; Always 1?
 0x006: Unknown				  Short; Always 2?
 0x008: Animation Count 		  Short;
-0x00a: Unknown				  Int32; Chanes
-0x00e: Unknown				  Int32; Always 0x1A. Header Size?
+0x00a: Unknown				  Int32; Changes between models.
+0x00e: Unknown				  Int32; Always 0x1A. Header Size? Actually, probably Animation Name Table start.
 0x012: HKX File Start		  Int32;
 0x016: Footer Position		  Int32;
-~~~~~~~Padding~~~~~~~
 
---Animation Names--
-0x000: ASCII name		   22 Bytes;
-0x023: Index?				  Int32;
+===ANIMATION NAME TABLE=== (0x28 bytes * Animation Count)
+0x000: ASCII Name		   22 Bytes;
+0x023: Index?				  Short;
 
---Havok Animations File--
+===HAVOK SERIALIZED FILE===
 
---Footer--
+===FOOTER===

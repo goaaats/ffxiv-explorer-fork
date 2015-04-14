@@ -63,6 +63,7 @@ import ca.fraggergames.ffxivextract.helpers.WavefrontObjectWriter;
 import ca.fraggergames.ffxivextract.models.EXDF_File;
 import ca.fraggergames.ffxivextract.models.EXHF_File;
 import ca.fraggergames.ffxivextract.models.Model;
+import ca.fraggergames.ffxivextract.models.PAP_File;
 import ca.fraggergames.ffxivextract.models.SCD_File;
 import ca.fraggergames.ffxivextract.models.SCD_File.SCD_Sound_Info;
 import ca.fraggergames.ffxivextract.models.SqPack_IndexFile;
@@ -675,7 +676,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 			
 			@Override
 			public boolean accept(File f) {
-				return f.getName().endsWith(".csv") || f.getName().endsWith(".ogg") || f.getName().endsWith(".wav") ||f.getName().endsWith(".png") ||f.getName().endsWith(".obj") || f.isDirectory();
+				return f.getName().endsWith(".csv") || f.getName().endsWith(".ogg") || f.getName().endsWith(".wav") ||f.getName().endsWith(".png") || f.getName().endsWith(".hkx") || f.getName().endsWith(".obj") || f.isDirectory();
 			}				
 		};
 		fileChooser.addChoosableFileFilter(filter);
@@ -709,6 +710,10 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 			return ".luab";
 		else if (data.length >= 4 && data[0] == 'S' && data[1] == 'E' && data[2] == 'D' && data[3] == 'B' )
 			return ".scd";
+		else if (data.length >= 4 && data[0] == 'p' && data[1] == 'a' && data[2] == 'p' && data[3] == ' ' )		
+			return ".hkx";
+		else if (data.length >= 4 && data[0] == 'b' && data[1] == 'l' && data[2] == 'k' && data[3] == 's' )		
+			return ".hkx";		
 		else if (contentType == 3)
 		{
 			return ".obj";
@@ -893,6 +898,20 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 						WavefrontObjectWriter.writeObj(path, model);
 						
 						continue;
+					}
+					else if (extension.equals(".hkx") && doConvert)
+					{
+						if (data.length >= 4 && data[0] == 'p' && data[1] == 'a' && data[2] == 'p' && data[3] == ' ' )		
+						{
+							PAP_File pap = new PAP_File(data);
+							dataToSave = pap.getHavokData();
+						}
+						else if (data.length >= 4 && data[0] == 'b' && data[1] == 'l' && data[2] == 'k' && data[3] == 's' )
+						{
+							
+						}
+						
+						extension = ".hkx";
 					}
 					else if (extension.equals(".png") && doConvert)
 					{
