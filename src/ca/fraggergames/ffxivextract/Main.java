@@ -49,7 +49,7 @@ public class Main {
 			e1.printStackTrace();
 		}
 		
-		
+		/*
 		HavokNative.initHavokNativ();
 		HavokNative.startHavok();
 		System.out.println(HavokNative.loadSkeleton("C:\\Users\\Filip\\Dropbox\\Public\\havok\\skel2.hkx"));
@@ -66,7 +66,7 @@ public class Main {
 		FloatBuffer fbuff = buffer.asFloatBuffer();
 		fbuff.position(0);
 		
-		for (int i = 0; i < HavokNative.getNumBones()*16; i+=16)
+		for (int i = 16*3; i < 16*4; i+=16)
 			System.out.println(String.format("%f,%f,%f,%f\r\n%f,%f,%f,%f\r\n%f,%f,%f,%f\r\n%f,%f,%f,%f\r\n\r\n", fbuff.get(i),fbuff.get(i+1),fbuff.get(i+2),fbuff.get(i+3),fbuff.get(i+4),fbuff.get(i+5),fbuff.get(i+6),fbuff.get(i+7),fbuff.get(i+8),fbuff.get(i+9),fbuff.get(i+10),fbuff.get(i+11),fbuff.get(i+12),fbuff.get(i+13),fbuff.get(i+14),fbuff.get(i+15)));
 		
 		int i = 0;
@@ -78,7 +78,7 @@ public class Main {
 		HavokNative.endHavok();
 		
 		System.exit(1);
-		
+		*/
 		/*
 		String archive = "0a0000";
 		HashDatabase.beginConnection();try{

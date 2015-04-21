@@ -9,12 +9,14 @@ import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
+import javax.media.opengl.GL;
 import javax.media.opengl.GL3;
 import javax.media.opengl.GL3bc;
 
 import ca.fraggergames.ffxivextract.Constants;
 import ca.fraggergames.ffxivextract.helpers.ImageDecoding.ImageDecodingException;
 import ca.fraggergames.ffxivextract.helpers.GLHelper;
+import ca.fraggergames.ffxivextract.helpers.HavokNative;
 import ca.fraggergames.ffxivextract.helpers.Utils;
 import ca.fraggergames.ffxivextract.models.SqPack_IndexFile.SqPack_File;
 import ca.fraggergames.ffxivextract.models.SqPack_IndexFile.SqPack_Folder;
@@ -202,9 +204,22 @@ public class Model {
         for (int i = 0; i < lodModels.length; i++) {
         	lodModels[i].loadMeshes(bb);
         }
-        	       
+        	   
+        HavokNative.initHavokNativ();
+		HavokNative.startHavok();
+		System.out.println(HavokNative.loadSkeleton("C:\\Users\\Filip\\Dropbox\\Public\\havok\\skel2.hkx"));
+		System.out.println(HavokNative.loadAnimation("C:\\Users\\Filip\\Dropbox\\Public\\havok\\anim2.hkx"));
+
+		
+		HavokNative.setAnimation(1);
+		
+		buffer = ByteBuffer.allocateDirect(4 * 16 * HavokNative.getNumBones());
+		buffer.order(ByteOrder.nativeOrder());
+		
+		System.out.println(HavokNative.getNumBones());
+        
 	}
-	
+	ByteBuffer buffer;
 	private short loadNumberOfVariants()
 	{
 		if (modelPath == null || modelPath.contains("null") || !modelPath.contains("chara"))
@@ -399,7 +414,7 @@ public class Model {
 	}
 
 	public void render(DefaultShader defaultShader, float[] viewMatrix, float[] modelMatrix,
-			float[] projMatrix, GL3bc gl, int currentLoD) {
+			float[] projMatrix, GL3bc gl, int currentLoD) {/*
 		for (int i = 0; i < getNumMesh(currentLoD); i++){
 	    	
 	    	Mesh mesh = getMeshes(currentLoD)[i];
@@ -473,7 +488,22 @@ public class Model {
 		    gl.glDrawElements(GL3.GL_TRIANGLES, mesh.numIndex, GL3.GL_UNSIGNED_SHORT, mesh.indexBuffer);			    
 		    shader.disableAttribs(gl);			  
 		    
-		}
+		}*/
+				
+		buffer.position(4 * 8);		
+		HavokNative.getBones(buffer);
+		
+		HavokNative.stepAnimation(0.0001f);
+		
+		gl.glPointSize(2);
+		gl.glUseProgram(defaultShader.getShaderProgramID());
+		gl.glVertexAttribPointer(defaultShader.getAttribPosition(), 3, GL3.GL_FLOAT, false, 4*9, buffer);
+		defaultShader.setMatrix(gl, modelMatrix, viewMatrix, projMatrix);
+		//Draw	    	
+		defaultShader.enableAttribs(gl);
+	    gl.glDrawArrays(GL.GL_POINTS, 0, HavokNative.getNumBones());  
+	    defaultShader.disableAttribs(gl);		
+		
 	}
 
 	public void loadToVRAM(GL3bc gl) {
