@@ -188,10 +188,10 @@ public class Shader {
 	{return positionLocation;}
 	
 	public int getAttribBlendWeight()
-	{return positionLocation;}
+	{return blendWeightLocation;}
 	
 	public int getAttribBlendIndex()
-	{return positionLocation;}
+	{return blendIndexLocation;}
 	
 	public int getAttribColor()
 	{return colorLocation;}
@@ -207,8 +207,8 @@ public class Shader {
 
 	public void enableAttribs(GL3 gl) {
 		gl.glEnableVertexAttribArray(positionLocation);
-		//gl.glEnableVertexAttribArray(blendWeightLocation);
-		//gl.glEnableVertexAttribArray(blendIndexLocation);
+		gl.glEnableVertexAttribArray(blendWeightLocation);
+		gl.glEnableVertexAttribArray(blendIndexLocation);
     	gl.glEnableVertexAttribArray(normalLocation);
     	gl.glEnableVertexAttribArray(texCoordLocation);
     	gl.glEnableVertexAttribArray(binormalLocation);
@@ -217,8 +217,8 @@ public class Shader {
 
 	public void disableAttribs(GL3 gl) {
 		gl.glDisableVertexAttribArray(positionLocation);
-		//gl.glDisableVertexAttribArray(blendWeightLocation);
-		//gl.glDisableVertexAttribArray(blendIndexLocation);
+		gl.glDisableVertexAttribArray(blendWeightLocation);
+		gl.glDisableVertexAttribArray(blendIndexLocation);
     	gl.glDisableVertexAttribArray(normalLocation);
     	gl.glDisableVertexAttribArray(texCoordLocation);
     	gl.glDisableVertexAttribArray(binormalLocation);

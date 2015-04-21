@@ -11,6 +11,9 @@ attribute vec4 aTexCoord;
 attribute vec4 aColor;
 attribute vec4 aBiTangent;
 
+attribute vec4 aBlendWeight;
+attribute vec4 aBlendIndex;
+
 varying vec4 vPosition;
 varying vec4 vNormal;
 varying vec4 vTexCoord;
