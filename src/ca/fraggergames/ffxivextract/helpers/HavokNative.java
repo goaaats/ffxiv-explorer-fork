@@ -1,5 +1,7 @@
 package ca.fraggergames.ffxivextract.helpers;
 
+import java.nio.ByteBuffer;
+
 public class HavokNative {
 
 	static public native void startHavok();
@@ -8,7 +10,9 @@ public class HavokNative {
 	static public native boolean loadAnimation(String path);
 	static public native int setAnimation(int i);
 	static public native void stepAnimation(float deltaTime);
-	static public native void getBones();
+	static public native int getNumBones();
+	static public native void getBones(ByteBuffer buffer);
+	static public native void debugRenderBones();
 	
 	public static void initHavokNativ()
 	{
@@ -19,5 +23,6 @@ public class HavokNative {
 			e.printStackTrace();
 		}
 	}
+	
 	
 }
