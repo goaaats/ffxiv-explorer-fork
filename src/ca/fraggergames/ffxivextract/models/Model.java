@@ -439,10 +439,10 @@ public class Model {
 	    			gl.glVertexAttribPointer(shader.getAttribPosition(), components, datatype, false, size, origin);
 	    			break;
 	    		case 1://Blend Weights	    
-	    			//gl.glVertexAttribPointer(shader.getAttribBlendWeight(), components, datatype, false, size, origin);
+	    			gl.glVertexAttribPointer(shader.getAttribBlendWeight(), components, datatype, false, size, origin);
 	    			break;
 	    		case 2://Blend Indices
-	    			//gl.glVertexAttribPointer(shader.getAttribBlendIndex(), components, datatype, false, size, origin);
+	    			gl.glVertexAttribPointer(shader.getAttribBlendIndex(), components, datatype, false, size, origin);
 	    			break;
 	    		case 3://Normal
 	    			gl.glVertexAttribPointer(shader.getAttribNormal(), components, datatype, false, size, origin);

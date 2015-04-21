@@ -647,7 +647,7 @@ public class HashDatabase {
 
 			for (int i = 0; i < cbEndUnalignedBytes; ++i) {				
 				dwCRC = crc_table_0f085d0[(dwCRC ^ pbBuffer.get()) & 0x000000FF] ^ (dwCRC >>> 8);
-				System.out.println(String.format("%d\n",dwCRC));
+				//System.out.println(String.format("%d\n",dwCRC));
 			}
 
 			return dwCRC;
