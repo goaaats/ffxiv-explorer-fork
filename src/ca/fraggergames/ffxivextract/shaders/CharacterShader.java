@@ -18,6 +18,6 @@ public class CharacterShader extends Shader {
 
 	public void setBoneMatrix(GL3 gl, float[][] boneMatrix)
 	{
-		gl.glUniform4fv(boneMatrixLocation, 1, hairColor, 0);		
+		//gl.glUniformMatrix4fv(boneMatrixLocation, 1, boneMatrix, 0);		
 	}
 }

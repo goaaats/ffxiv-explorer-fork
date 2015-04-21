@@ -2,6 +2,9 @@ package ca.fraggergames.ffxivextract;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.FloatBuffer;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.prefs.Preferences;
@@ -46,17 +49,30 @@ public class Main {
 			e1.printStackTrace();
 		}
 		
+		
 		HavokNative.initHavokNativ();
 		HavokNative.startHavok();
-		System.out.println(HavokNative.loadSkeleton("C:\\Users\\Filip\\Dropbox\\Public\\havok\\skel.hkx"));
-		System.out.println(HavokNative.loadAnimation("C:\\Users\\Filip\\Dropbox\\Public\\havok\\anim.hkx"));
+		System.out.println(HavokNative.loadSkeleton("C:\\Users\\Filip\\Dropbox\\Public\\havok\\skel2.hkx"));
+		System.out.println(HavokNative.loadAnimation("C:\\Users\\Filip\\Dropbox\\Public\\havok\\anim2.hkx"));
 
-		HavokNative.setAnimation(9);
+		
+		HavokNative.setAnimation(1);
+		
+		ByteBuffer buffer = ByteBuffer.allocateDirect(4 * 16 * HavokNative.getNumBones());
+		buffer.order(ByteOrder.nativeOrder());
+		
+		System.out.println(HavokNative.getNumBones());
+		HavokNative.getBones(buffer);
+		FloatBuffer fbuff = buffer.asFloatBuffer();
+		fbuff.position(0);
+		
+		for (int i = 0; i < HavokNative.getNumBones()*16; i+=16)
+			System.out.println(String.format("%f,%f,%f,%f\r\n%f,%f,%f,%f\r\n%f,%f,%f,%f\r\n%f,%f,%f,%f\r\n\r\n", fbuff.get(i),fbuff.get(i+1),fbuff.get(i+2),fbuff.get(i+3),fbuff.get(i+4),fbuff.get(i+5),fbuff.get(i+6),fbuff.get(i+7),fbuff.get(i+8),fbuff.get(i+9),fbuff.get(i+10),fbuff.get(i+11),fbuff.get(i+12),fbuff.get(i+13),fbuff.get(i+14),fbuff.get(i+15)));
 		
 		int i = 0;
-		while (i == 0){
-			HavokNative.getBones();		
-			HavokNative.stepAnimation(1f/60f);
+		while (i == 0){				
+			HavokNative.stepAnimation(1f/120f);
+			HavokNative.debugRenderBones();
 		}
 		
 		HavokNative.endHavok();
