@@ -11,6 +11,7 @@ import javax.swing.UIManager;
 
 import ca.fraggergames.ffxivextract.gui.FileManagerWindow;
 import ca.fraggergames.ffxivextract.gui.components.Update_Dialog;
+import ca.fraggergames.ffxivextract.helpers.HavokNative;
 import ca.fraggergames.ffxivextract.helpers.LERandomAccessFile;
 import ca.fraggergames.ffxivextract.helpers.PathSearcher;
 import ca.fraggergames.ffxivextract.helpers.VersionUpdater;
@@ -44,6 +45,24 @@ public class Main {
 		} catch (ClassNotFoundException e1) {
 			e1.printStackTrace();
 		}
+		
+		HavokNative.initHavokNativ();
+		HavokNative.startHavok();
+		System.out.println(HavokNative.loadSkeleton("C:\\Users\\Filip\\Dropbox\\Public\\havok\\skel.hkx"));
+		System.out.println(HavokNative.loadAnimation("C:\\Users\\Filip\\Dropbox\\Public\\havok\\anim.hkx"));
+
+		HavokNative.setAnimation(9);
+		
+		int i = 0;
+		while (i == 0){
+			HavokNative.getBones();		
+			HavokNative.stepAnimation(1f/60f);
+		}
+		
+		HavokNative.endHavok();
+		
+		System.exit(1);
+		
 		/*
 		String archive = "0a0000";
 		HashDatabase.beginConnection();try{

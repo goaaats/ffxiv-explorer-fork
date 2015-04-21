@@ -57,6 +57,7 @@ import ca.fraggergames.ffxivextract.gui.components.Lua_View;
 import ca.fraggergames.ffxivextract.gui.components.OpenGL_View;
 import ca.fraggergames.ffxivextract.gui.components.Path_to_Hash_Window;
 import ca.fraggergames.ffxivextract.gui.components.Sound_View;
+import ca.fraggergames.ffxivextract.helpers.HavokNative;
 import ca.fraggergames.ffxivextract.helpers.LERandomAccessFile;
 import ca.fraggergames.ffxivextract.helpers.LuaDec;
 import ca.fraggergames.ffxivextract.helpers.WavefrontObjectWriter;
@@ -233,7 +234,8 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 			lastOpenedIndexFile = new File(prefs.get(Constants.PREF_LASTOPENED, null));
 		
 		//Init Luadec
-		luadec = LuaDec.initLuaDec();		
+		luadec = LuaDec.initLuaDec();
+		HavokNative.initHavokNativ();
 	}	
 
 	protected void openFile(File selectedFile) {
