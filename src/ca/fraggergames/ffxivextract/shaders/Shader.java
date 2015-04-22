@@ -2,6 +2,7 @@ package ca.fraggergames.ffxivextract.shaders;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.ByteBuffer;
 import java.util.Hashtable;
 import java.util.Scanner;
 
@@ -184,6 +185,12 @@ public class Shader {
     	gl.glUniformMatrix4fv(projLocation, 1, false, projMatrix, 0);	
 	}
 	
+	public void setBoneMatrix(GL3 gl, int numBones, ByteBuffer boneMatrixBuffer) {
+		int boneArrayLocation = gl.glGetUniformLocation(shaderProgram, "uBones");
+		boneMatrixBuffer.position(0);
+		gl.glUniformMatrix4fv(boneArrayLocation, numBones, false, boneMatrixBuffer.asFloatBuffer());
+	}
+	
 	public int getAttribPosition()
 	{return positionLocation;}
 	
@@ -228,6 +235,6 @@ public class Shader {
 	public int getNextSamplerId()
 	{
 		return numSampler+1;
-	}
+	}	
 	
 }

@@ -9,7 +9,6 @@ import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
-import javax.media.opengl.GL;
 import javax.media.opengl.GL3;
 import javax.media.opengl.GL3bc;
 
@@ -44,6 +43,9 @@ public class Model {
 	private Material materials[];
 	private LoDSubModel lodModels[] = new LoDSubModel[3];
 		
+	private ByteBuffer boneMatrixBuffer;
+	private int numBones;
+	
 	public Model(byte[] data)
 	{
 		this(null, null, data);
@@ -204,22 +206,20 @@ public class Model {
         for (int i = 0; i < lodModels.length; i++) {
         	lodModels[i].loadMeshes(bb);
         }
-        	   
-        HavokNative.initHavokNativ();
-		HavokNative.startHavok();
-		System.out.println(HavokNative.loadSkeleton("C:\\Users\\Filip\\Dropbox\\Public\\havok\\skel2.hkx"));
-		System.out.println(HavokNative.loadAnimation("C:\\Users\\Filip\\Dropbox\\Public\\havok\\anim2.hkx"));
+        	       
+        HavokNative.endHavok();
+        HavokNative.startHavok();
 
-		
-		HavokNative.setAnimation(1);
-		
-		buffer = ByteBuffer.allocateDirect(4 * 16 * HavokNative.getNumBones());
-		buffer.order(ByteOrder.nativeOrder());
-		
-		System.out.println(HavokNative.getNumBones());
-        
+		if (HavokNative.loadSkeleton("C:\\Users\\Filip\\Dropbox\\Public\\havok\\skel.hkx") && (HavokNative.loadAnimation("C:\\Users\\Filip\\Dropbox\\Public\\havok\\anim.hkx")))
+		{
+			HavokNative.setAnimation(9);
+			numBones = HavokNative.getNumBones();		
+			boneMatrixBuffer = ByteBuffer.allocateDirect(4 * 16 * numBones);			
+		}
+		else
+			numBones = -1;
 	}
-	ByteBuffer buffer;
+	
 	private short loadNumberOfVariants()
 	{
 		if (modelPath == null || modelPath.contains("null") || !modelPath.contains("chara"))
@@ -414,7 +414,7 @@ public class Model {
 	}
 
 	public void render(DefaultShader defaultShader, float[] viewMatrix, float[] modelMatrix,
-			float[] projMatrix, GL3bc gl, int currentLoD) {/*
+			float[] projMatrix, GL3bc gl, int currentLoD) {
 		for (int i = 0; i < getNumMesh(currentLoD); i++){
 	    	
 	    	Mesh mesh = getMeshes(currentLoD)[i];
@@ -482,28 +482,20 @@ public class Model {
 	    		((HairShader)shader).setHairColor(gl, Constants.defaultHairColor, Constants.defaultHighlightColor);
 	    	else if (shader instanceof IrisShader)
 	    		((IrisShader)shader).setEyeColor(gl, Constants.defaultEyeColor);		    	
+	    		    	
+	    	//Upload Bone Matrix
+	    	if (numBones != -1)
+	    		shader.setBoneMatrix(gl, numBones, boneMatrixBuffer);
 	    	
 	    	//Draw	    	
 	    	shader.enableAttribs(gl);
 		    gl.glDrawElements(GL3.GL_TRIANGLES, mesh.numIndex, GL3.GL_UNSIGNED_SHORT, mesh.indexBuffer);			    
 		    shader.disableAttribs(gl);			  
 		    
-		}*/
-				
-		buffer.position(4 * 8);		
-		HavokNative.getBones(buffer);
-		
-		HavokNative.stepAnimation(0.0001f);
-		
-		gl.glPointSize(2);
-		gl.glUseProgram(defaultShader.getShaderProgramID());
-		gl.glVertexAttribPointer(defaultShader.getAttribPosition(), 3, GL3.GL_FLOAT, false, 4*9, buffer);
-		defaultShader.setMatrix(gl, modelMatrix, viewMatrix, projMatrix);
-		//Draw	    	
-		defaultShader.enableAttribs(gl);
-	    gl.glDrawArrays(GL.GL_POINTS, 0, HavokNative.getNumBones());  
-	    defaultShader.disableAttribs(gl);		
-		
+		    //Advance Animation		
+		    if (numBones != -1)
+		    	HavokNative.stepAnimation(1f/60f);	
+		}
 	}
 
 	public void loadToVRAM(GL3bc gl) {
