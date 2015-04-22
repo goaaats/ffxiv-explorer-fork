@@ -214,7 +214,8 @@ public class Model {
 		{
 			HavokNative.setAnimation(9);
 			numBones = HavokNative.getNumBones();		
-			boneMatrixBuffer = ByteBuffer.allocateDirect(4 * 16 * numBones);			
+			boneMatrixBuffer = ByteBuffer.allocateDirect(4 * 16 * numBones);
+			boneMatrixBuffer.order(ByteOrder.nativeOrder());			
 		}
 		else
 			numBones = -1;
@@ -483,9 +484,13 @@ public class Model {
 	    	else if (shader instanceof IrisShader)
 	    		((IrisShader)shader).setEyeColor(gl, Constants.defaultEyeColor);		    	
 	    		    	
-	    	//Upload Bone Matrix
+	    	//Upload Bone Matrix	    	
 	    	if (numBones != -1)
+	    	{
+		    	boneMatrixBuffer.position(0);
+		    	HavokNative.getBones(boneMatrixBuffer);
 	    		shader.setBoneMatrix(gl, numBones, boneMatrixBuffer);
+	    	}
 	    	
 	    	//Draw	    	
 	    	shader.enableAttribs(gl);

@@ -5,6 +5,9 @@ uniform mat4 uModelMatrix;
 uniform mat4 uViewMatrix;
 uniform mat4 uProjMatrix;
 
+uniform float uNumBones;
+uniform mat4 uBones[256];
+
 attribute vec4 aPosition;
 attribute vec4 aNormal;
 attribute vec4 aTexCoord;
@@ -19,11 +22,39 @@ varying vec4 vNormal;
 varying vec4 vTexCoord;
 varying vec4 vColor;
 
-varying mat4 vTBNMatrix;
+varying mat4 vTBNMatrix;	
 varying vec3 vLightDir;
 varying vec3 vEyeVec;
 
 void main(void) {		
+
+	vec4 transformedPosition = vec4(0.0);
+    vec3 transformedNormal = vec3(0.0);
+
+	vec4 curIndex = index;
+    vec4 curWeight = aBlendWeight;
+
+    for (int i = 0; i < int(uNumBones); i++)
+    {
+        mat4 m44 = uBones[int(curIndex.x)];
+        
+        // transform the offset by bone i
+        transformedPosition += m44 * aPosition * curWeight.x;
+
+        mat3 m33 = mat3(m44[0].xyz,
+                        m44[1].xyz,
+                        m44[2].xyz);
+
+        // transform normal by bone i
+        transformedNormal += m33 * aNormal * curWeight.x;
+
+        // shift over the index/weight variables, this moves the index and 
+        // weight for the current bone into the .x component of the index 
+        // and weight variables
+        curIndex = curIndex.yzwx;
+        curWeight = curWeight.yzwx;
+    }
+
 	vPosition = vec4((uViewMatrix*uModelMatrix) * aPosition);
 	vTexCoord = aTexCoord;	
 		
@@ -43,5 +74,12 @@ void main(void) {
 	vEyeVec = vec3((inverse(uViewMatrix * uModelMatrix) * vec4(0.0,0.0,5.0,1.0)).xyz);
 	vColor = aColor;	
 
-    gl_Position = uProjMatrix * uViewMatrix * uModelMatrix * aPosition;
+	mat4 indent = mat4(
+	1.0, 0.0, 0.0 ,0.0,
+	0.0, 1.0, 0.0 ,0.0,
+	0.0, 0.0, 1.0 ,0.0,
+	0.0, 0.0, 0.0 ,1.0
+	);
+
+    gl_Position = uProjMatrix * uViewMatrix * uModelMatrix * transformedPosition;
 }

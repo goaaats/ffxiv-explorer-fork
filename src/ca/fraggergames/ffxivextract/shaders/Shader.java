@@ -3,6 +3,7 @@ package ca.fraggergames.ffxivextract.shaders;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
+import java.nio.FloatBuffer;
 import java.util.Hashtable;
 import java.util.Scanner;
 
@@ -22,6 +23,8 @@ public class Shader {
 	private int modelLocation;
 	private int viewLocation;
 	private int projLocation;
+	private int numBonesLocation;
+	private int boneArrayLocation;
 	
 	private int positionLocation;
 	private int blendWeightLocation;
@@ -86,7 +89,9 @@ public class Shader {
 		modelLocation = gl.glGetUniformLocation(shaderProgram, "uModelMatrix");
 		viewLocation = gl.glGetUniformLocation(shaderProgram, "uViewMatrix");
 		projLocation = gl.glGetUniformLocation(shaderProgram, "uProjMatrix");
-
+		numBonesLocation = gl.glGetUniformLocation(shaderProgram, "uNumBones");
+		boneArrayLocation = gl.glGetUniformLocation(shaderProgram, "uBones");
+		
 		//Set Uniform Tex Locations
 		diffuseTexLocation = gl.glGetUniformLocation(shaderProgram, "uDiffuseTex");
 		maskTexLocation = gl.glGetUniformLocation(shaderProgram, "uMaskTex");
@@ -186,8 +191,8 @@ public class Shader {
 	}
 	
 	public void setBoneMatrix(GL3 gl, int numBones, ByteBuffer boneMatrixBuffer) {
-		int boneArrayLocation = gl.glGetUniformLocation(shaderProgram, "uBones");
 		boneMatrixBuffer.position(0);
+		gl.glUniform1i(numBonesLocation, numBones);
 		gl.glUniformMatrix4fv(boneArrayLocation, numBones, false, boneMatrixBuffer.asFloatBuffer());
 	}
 	
