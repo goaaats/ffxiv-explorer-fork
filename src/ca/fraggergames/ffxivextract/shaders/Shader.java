@@ -75,16 +75,7 @@ public class Shader {
 		gl.glAttachShader(shaderProgram, fragShader);
 		gl.glLinkProgram(shaderProgram);
 		
-		int[] linked = new int[1];
-		gl.glGetProgramiv(shaderProgram, GL3.GL_LINK_STATUS, linked, 0);
-        if (linked[0] == 0) {
-           byte[] infoLog = new byte[1024];
-           gl.glGetProgramInfoLog(shaderProgram, 1024, null, 0, infoLog, 0);
-           System.out.println(new String(infoLog));
-           gl.glDeleteShader(shaderProgram);
-           shaderProgram = 0;
-           return;
-        }
+		
 		
 		gl.glValidateProgram(shaderProgram);
 		

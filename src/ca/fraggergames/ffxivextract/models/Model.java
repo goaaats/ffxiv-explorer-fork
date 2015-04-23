@@ -46,13 +46,15 @@ public class Model {
 	private ByteBuffer boneMatrixBuffer;
 	private int numBones;
 	
+	private String[] boneStrings;
+	
 	public Model(byte[] data)
 	{
 		this(null, null, data);
 	}
 	
 	public Model(String modelPath, SqPack_IndexFile index, byte[] data) throws BufferOverflowException, BufferUnderflowException
-	{		
+	{						
 		this.modelPath = modelPath;
 		this.currentIndex = index; 
 		
@@ -128,6 +130,9 @@ public class Model {
 		bb.getShort();
 		bb.getShort();
 
+		boneStrings = new String[numBoneStrings];
+		System.arraycopy(stringArray, numAtrStrings, boneStrings, 0, numBoneStrings);
+		
 		materials = new Material[numMaterialStrings];
 		
 		if (Constants.DEBUG){
@@ -209,16 +214,23 @@ public class Model {
         	       
         HavokNative.endHavok();
         HavokNative.startHavok();
-
-		if (HavokNative.loadSkeleton("C:\\Users\\Filip\\Dropbox\\Public\\havok\\skel3.hkx") && (HavokNative.loadAnimation("C:\\Users\\Filip\\Dropbox\\Public\\havok\\anim3.hkx")))
+        
+        if (HavokNative.loadSkeleton("C:\\Users\\Filip\\Dropbox\\Public\\havok\\skel_8034.hkx") && (HavokNative.loadAnimation("C:\\Users\\Filip\\Dropbox\\Public\\havok\\anim_8034.hkx")))
 		{
-			HavokNative.setAnimation(2);
-			numBones = HavokNative.getNumBones();		
+			if (HavokNative.setAnimation(0) == -1)
+			{
+				HavokNative.setAnimation(1);
+				System.out.println("Invalid Animation");
+			}
+			numBones = boneStrings.length;		
+			System.out.println("There are:" + numBones + " bones.");
 			boneMatrixBuffer = ByteBuffer.allocateDirect(4 * 16 * numBones);
 			boneMatrixBuffer.order(ByteOrder.nativeOrder());			
 		}
-		else
+		else{
 			numBones = -1;
+			HavokNative.endHavok();
+		}
 	}
 	
 	private short loadNumberOfVariants()
@@ -488,7 +500,7 @@ public class Model {
 	    	if (numBones != -1)
 	    	{
 		    	boneMatrixBuffer.position(0);
-		    	HavokNative.getBones(boneMatrixBuffer);
+		    	HavokNative.getBones(boneMatrixBuffer, boneStrings);
 	    		shader.setBoneMatrix(gl, numBones, boneMatrixBuffer);
 	    	}
 	    	

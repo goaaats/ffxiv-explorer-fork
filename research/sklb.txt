@@ -1,0 +1,19 @@
+#### SKLB FILE RESEARCH #### By Ioncannon
+
+Last Updated: 4/23/2015
+
+===SKLB HEADER=== (Always 0x1A in size?)
+0x000: Signature			4 Bytes; Signature "PLKS"
+0x004: Version?				  Int32; Seen 0031 and 0021
+0x008: Offset				  Short; Starts with "hpla". Alph?
+0x00a: Offset to HKX 		  Short;
+0x00c: Unknown				  Int32; Changes between models.
+0x00e: Unknown				  Int32; Always 0x1A. Header Size? Actually, probably Animation Name Table start.
+0x012: HKX File Start		  Int32;
+0x016: Footer Position		  Int32;
+
+===ANIMATION NAME TABLE=== (0x28 bytes * Animation Count)
+0x000: ASCII Name		   22 Bytes;
+0x023: Index?				  Short;
+
+===HAVOK SERIALIZED FILE===
