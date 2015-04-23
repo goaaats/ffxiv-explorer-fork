@@ -210,9 +210,9 @@ public class Model {
         HavokNative.endHavok();
         HavokNative.startHavok();
 
-		if (HavokNative.loadSkeleton("C:\\Users\\Filip\\Dropbox\\Public\\havok\\skel.hkx") && (HavokNative.loadAnimation("C:\\Users\\Filip\\Dropbox\\Public\\havok\\anim.hkx")))
+		if (HavokNative.loadSkeleton("C:\\Users\\Filip\\Dropbox\\Public\\havok\\skel3.hkx") && (HavokNative.loadAnimation("C:\\Users\\Filip\\Dropbox\\Public\\havok\\anim3.hkx")))
 		{
-			HavokNative.setAnimation(9);
+			HavokNative.setAnimation(2);
 			numBones = HavokNative.getNumBones();		
 			boneMatrixBuffer = ByteBuffer.allocateDirect(4 * 16 * numBones);
 			boneMatrixBuffer.order(ByteOrder.nativeOrder());			
@@ -499,7 +499,10 @@ public class Model {
 		    
 		    //Advance Animation		
 		    if (numBones != -1)
-		    	HavokNative.stepAnimation(1f/60f);	
+		    {
+		    	HavokNative.stepAnimation(1f/60f);
+		    	HavokNative.debugRenderBones();
+		    }
 		}
 	}
 

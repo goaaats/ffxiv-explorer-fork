@@ -5,7 +5,7 @@ uniform mat4 uModelMatrix;
 uniform mat4 uViewMatrix;
 uniform mat4 uProjMatrix;
 
-uniform float uNumBones;
+uniform int uNumBones;
 uniform mat4 uBones[256];
 
 attribute vec4 aPosition;
@@ -31,12 +31,12 @@ void main(void) {
 	vec4 transformedPosition = vec4(0.0);
     vec3 transformedNormal = vec3(0.0);
 
-	vec4 curIndex = index;
+	vec4 curIndex = aBlendIndex;
     vec4 curWeight = aBlendWeight;
 
-    for (int i = 0; i < int(uNumBones); i++)
+    for (int i = 0; i < uNumBones; i++)
     {
-        mat4 m44 = uBones[int(curIndex.x)];
+        mat4 m44 = uBones[int(curIndex.x)+1];
         
         // transform the offset by bone i
         transformedPosition += m44 * aPosition * curWeight.x;
@@ -46,7 +46,7 @@ void main(void) {
                         m44[2].xyz);
 
         // transform normal by bone i
-        transformedNormal += m33 * aNormal * curWeight.x;
+        transformedNormal += m33 * aNormal.xyz * curWeight.x;
 
         // shift over the index/weight variables, this moves the index and 
         // weight for the current bone into the .x component of the index 
