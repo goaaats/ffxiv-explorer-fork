@@ -35,6 +35,15 @@ public class GLHelper {
 		}
 	}
 
-	
+	public static boolean isNormalized(int datatype)
+	{
+		switch (datatype)
+		{
+		case 8:
+			return true;
+		default:
+			return false;
+		}
+	}
 	
 }

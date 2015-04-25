@@ -23,6 +23,7 @@ import ca.fraggergames.ffxivextract.shaders.DefaultShader;
 import ca.fraggergames.ffxivextract.shaders.HairShader;
 import ca.fraggergames.ffxivextract.shaders.IrisShader;
 import ca.fraggergames.ffxivextract.shaders.Shader;
+import ca.fraggergames.ffxivextract.shaders.SimpleShader;
 import ca.fraggergames.ffxivextract.storage.HashDatabase;
 
 import com.jogamp.common.nio.Buffers;
@@ -43,10 +44,12 @@ public class Model {
 	private Material materials[];
 	private LoDSubModel lodModels[] = new LoDSubModel[3];
 		
-	private ByteBuffer boneMatrixBuffer;
+	private ByteBuffer boneMatrixBuffer, boneMatrixBuffer2;
 	private int numBones;
 	
 	private String[] boneStrings;
+	
+	SimpleShader simpleShader;
 	
 	public Model(byte[] data)
 	{
@@ -215,9 +218,9 @@ public class Model {
         HavokNative.endHavok();
         HavokNative.startHavok();
         
-        if (HavokNative.loadSkeleton("C:\\Users\\Filip\\Dropbox\\Public\\havok\\skel_8034.hkx") && (HavokNative.loadAnimation("C:\\Users\\Filip\\Dropbox\\Public\\havok\\anim_8034.hkx")))
+        if (HavokNative.loadSkeleton("C:\\Users\\Filip\\Dropbox\\Public\\havok\\skel_8070.hkx") && (HavokNative.loadAnimation("C:\\Users\\Filip\\Dropbox\\Public\\havok\\anim_8070.hkx")))
 		{
-			if (HavokNative.setAnimation(0) == -1)
+			if (HavokNative.setAnimation(1) == -1)
 			{
 				HavokNative.setAnimation(1);
 				System.out.println("Invalid Animation");
@@ -226,6 +229,8 @@ public class Model {
 			System.out.println("There are:" + numBones + " bones.");
 			boneMatrixBuffer = ByteBuffer.allocateDirect(4 * 16 * numBones);
 			boneMatrixBuffer.order(ByteOrder.nativeOrder());			
+			boneMatrixBuffer2 = ByteBuffer.allocateDirect(4 * 16 * HavokNative.getNumBones());
+			boneMatrixBuffer2.order(ByteOrder.nativeOrder());
 		}
 		else{
 			numBones = -1;
@@ -428,6 +433,15 @@ public class Model {
 
 	public void render(DefaultShader defaultShader, float[] viewMatrix, float[] modelMatrix,
 			float[] projMatrix, GL3bc gl, int currentLoD) {
+		
+		if (simpleShader == null)
+			try {
+				simpleShader = new SimpleShader(gl);
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+		
 		for (int i = 0; i < getNumMesh(currentLoD); i++){
 	    	
 	    	Mesh mesh = getMeshes(currentLoD)[i];
@@ -500,19 +514,35 @@ public class Model {
 	    	if (numBones != -1)
 	    	{
 		    	boneMatrixBuffer.position(0);
-		    	HavokNative.getBones(boneMatrixBuffer, boneStrings);
+		    	HavokNative.getBones(boneMatrixBuffer2);
+		    	HavokNative.getBonesWithNames(boneMatrixBuffer, boneStrings);
 	    		shader.setBoneMatrix(gl, numBones, boneMatrixBuffer);
 	    	}
 	    	
 	    	//Draw	    	
 	    	shader.enableAttribs(gl);
-		    gl.glDrawElements(GL3.GL_TRIANGLES, mesh.numIndex, GL3.GL_UNSIGNED_SHORT, mesh.indexBuffer);			    
-		    shader.disableAttribs(gl);			  
+		    gl.glDrawElements(GL3.GL_TRIANGLES, mesh.numIndex, GL3.GL_UNSIGNED_SHORT, mesh.indexBuffer);		 		    
+		    shader.disableAttribs(gl);			  		    		   
+
+		    //Draw Skeleton
+		    gl.glDisable(GL3.GL_DEPTH_TEST);
+		    if (simpleShader != null){
+			    gl.glPointSize(5f);
+		    	simpleShader.enableAttribs(gl);
+			    boneMatrixBuffer2.position(4*12);
+			    gl.glUseProgram(simpleShader.getShaderProgramID());
+			    simpleShader.setMatrix(gl, modelMatrix, viewMatrix, projMatrix);
+			    gl.glVertexAttribPointer(simpleShader.getAttribPosition(), 3, GL3.GL_FLOAT, false, 16 * 4, boneMatrixBuffer2);
+			    gl.glDrawArrays(GL3.GL_POINTS, 0, HavokNative.getNumBones());
+			    simpleShader.disableAttribs(gl);	
+		    }
+		    gl.glEnable(GL3.GL_DEPTH_TEST);
+		    
 		    
 		    //Advance Animation		
 		    if (numBones != -1)
 		    {
-		    	HavokNative.stepAnimation(1f/60f);
+		    	HavokNative.stepAnimation(1f/40f);
 		    	HavokNative.debugRenderBones();
 		    }
 		}

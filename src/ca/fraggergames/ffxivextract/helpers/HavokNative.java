@@ -11,7 +11,8 @@ public class HavokNative {
 	static public native int setAnimation(int i);
 	static public native void stepAnimation(float deltaTime);
 	static public native int getNumBones();
-	static public native void getBones(ByteBuffer buffer, String[] boneNames);
+	static public native void getBones(ByteBuffer buffer);
+	static public native boolean getBonesWithNames(ByteBuffer buffer, String[] boneNames);
 	static public native void debugRenderBones();
 	
 	public static void initHavokNativ()
