@@ -89,52 +89,38 @@ public class Material {
 					continue;
 				}
 				
-				String folderName = s.substring(0, s.lastIndexOf("/"));				
-				
-				int hash1 = HashDatabase.computeCRC(folderName.getBytes(), 0, folderName.getBytes().length);			
-				
-				for (SqPack_Folder f : currentIndex.getPackFolders())
-				{			
-					if (f.getId() == hash1)
-					{
+				String folderName = s.substring(0, s.lastIndexOf("/"));										
+				String fileString = s.substring(s.lastIndexOf("/")+1, s.length());
+				long offset = Utils.getOffset(folderName, fileString, currentIndex);
+
+				if (offset != -1){
+					System.out.println("Adding Entry: " + s);
+					HashDatabase.addPathToDB(s, currentIndex.getIndexName());																			
+					
+					try {
+						byte extracted[] = currentIndex.extractFile(offset, null);
+						if (extracted == null)
+							continue;
 						
-								String fileString = s.substring(s.lastIndexOf("/")+1, s.length());
-								int hash2 = HashDatabase.computeCRC(fileString.getBytes(), 0, fileString.getBytes().length);
-								for (SqPack_File file : f.getFiles())
-								{
-									if (file.id == hash2)
-									{
-										System.out.println("Adding Entry: " + s);
-										HashDatabase.addPathToDB(s, currentIndex.getIndexName());																			
-										
-										try {
-											byte extracted[] = currentIndex.extractFile(file.dataoffset, null);
-											if (extracted == null)
-												continue;
-											
-											if ((fileString.endsWith("_d.tex") || fileString.contains("catchlight")) && diffuse == null)
-												diffuse = new Texture_File(extracted);
-											else if (fileString.endsWith("_n.tex") && normal == null)
-												normal = new Texture_File(extracted);
-											else if (fileString.endsWith("_s.tex") && specular == null)
-												specular = new Texture_File(extracted);
-											else if (fileString.endsWith("_m.tex"))
-												mask = new Texture_File(extracted);
-											else
-												colorSet = new Texture_File(extracted);
-											
-										} catch (FileNotFoundException e) {
-											e.printStackTrace();
-										} catch (IOException e) {
-											e.printStackTrace();
-										}
-										break;
-									}
-								}
-							}
+						if ((fileString.endsWith("_d.tex") || fileString.contains("catchlight")) && diffuse == null)
+							diffuse = new Texture_File(extracted);
+						else if (fileString.endsWith("_n.tex") && normal == null)
+							normal = new Texture_File(extracted);
+						else if (fileString.endsWith("_s.tex") && specular == null)
+							specular = new Texture_File(extracted);
+						else if (fileString.endsWith("_m.tex"))
+							mask = new Texture_File(extracted);
+						else
+							colorSet = new Texture_File(extracted);
+						
+					} catch (FileNotFoundException e) {
+						e.printStackTrace();
+					} catch (IOException e) {
+						e.printStackTrace();
 					}
 				}
-			}				
+			}
+		}				
 	}
 	
 	public void loadShader(GL3 gl)

@@ -397,8 +397,7 @@ public class SqPack_IndexFile {
 	}
 
 	public String getIndexName() {
-		// TODO Auto-generated method stub
-		return null;
+		return path;
 	}
 
 	public Calendar getDatTimestmap(int datNum) throws IOException

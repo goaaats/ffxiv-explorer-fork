@@ -1,5 +1,14 @@
 package ca.fraggergames.ffxivextract.helpers;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+
+import ca.fraggergames.ffxivextract.models.Material;
+import ca.fraggergames.ffxivextract.models.SqPack_IndexFile;
+import ca.fraggergames.ffxivextract.models.SqPack_IndexFile.SqPack_File;
+import ca.fraggergames.ffxivextract.models.SqPack_IndexFile.SqPack_Folder;
+import ca.fraggergames.ffxivextract.storage.HashDatabase;
+
 public class Utils {
 
 	/**
@@ -79,4 +88,42 @@ public class Utils {
 
         return "^" + toReturn + "$";
     }
+    
+    public static long getOffset(String foldername, String filename, SqPack_IndexFile indexFile)
+    {
+    	if (indexFile.getIndexName().contains("index2"))
+    	{
+    		String fullPath = foldername + "/" + filename;
+    		int hash = HashDatabase.computeCRC(fullPath.getBytes(), 0, fullPath.getBytes().length);
+    		for (SqPack_File f : indexFile.getPackFolders()[0].getFiles())
+    		{
+    			if (f.getId() == hash)
+    				return f.getOffset();
+    		}
+    	}
+    	else
+    	{
+	    	int hash1 = HashDatabase.computeCRC(foldername.getBytes(), 0, foldername.getBytes().length);
+			
+			for (SqPack_Folder f : indexFile.getPackFolders())
+			{			
+				if (f.getId() == hash1)
+				{
+								
+					int hash2 = HashDatabase.computeCRC(filename.getBytes(), 0, filename.getBytes().length);
+					for (SqPack_File file : f.getFiles())
+					{
+						if (file.id == hash2)
+						{
+							return file.dataoffset;
+						}
+					}
+				
+					break;
+				}
+			}	
+    	}
+		return -1;
+    }
+    
 }
