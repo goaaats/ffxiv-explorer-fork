@@ -42,7 +42,8 @@ public class Strings {
 	public static final String SEARCH_SEARCH = "Search: ";
 	
 	//File Types
-	public static final String FILETYPE_FFXIV_INDEX = "FFXIV Index File (.index, .index2)";
+	public static final String FILETYPE_FFXIV_INDEX = "FFXIV Index File (.index)";
+	public static final String FILETYPE_FFXIV_INDEX2 = "FFXIV Index2 File (.index2)";
 	public static final String FILETYPE_FFXIV_MUSICINDEX = "FFXIV Music Archive Index (0c0000.win32.index)";
 	
 	//Menu and Menu Items
