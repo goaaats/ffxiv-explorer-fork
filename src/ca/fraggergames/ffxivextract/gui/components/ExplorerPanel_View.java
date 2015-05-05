@@ -50,13 +50,9 @@ public class ExplorerPanel_View extends JScrollPane {
 		if (index.hasNoFolders())
 		{
 			SqPack_Folder fakefolder = index.getPackFolders()[0];
-			
-			for (int j = 0; j < fakefolder.getFiles().length; j++)
-			{
-				Arrays.sort(fakefolder.getFiles(), fileComparator);
+			Arrays.sort(fakefolder.getFiles(), fileComparator);
+			for (int j = 0; j < fakefolder.getFiles().length; j++)			
 				root.add(new DefaultMutableTreeNode(fakefolder.getFiles()[j]));	
-			}
-			
 		}
 		else
 		{
