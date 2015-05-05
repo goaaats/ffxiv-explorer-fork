@@ -65,9 +65,16 @@ public class SqPack_IndexFile {
 			}
 		} else {
 			noFolder = true;
+			
+			if (prgLoadingBar != null)
+				prgLoadingBar.setMaximum((pathToIndex.contains("index2") ? 2 : 1 ) * segments[0].getSize()/0x10);
+
+			if (lblLoadingBarString != null)
+				lblLoadingBarString.setText("0%");
+			
 			packFolders = new SqPack_Folder[1];
 			packFolders[0] = new SqPack_Folder(0, (pathToIndex.contains("index2") ? 2 : 1 ) * segments[0].getSize()/0x10, segments[0].getOffset());
-			packFolders[0].readFiles(ref, pathToIndex.contains("index2"));
+			packFolders[0].readFiles(ref, prgLoadingBar, lblLoadingBarString, pathToIndex.contains("index2"));
 		}
 
 		ref.close();
