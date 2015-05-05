@@ -246,43 +246,35 @@ public class Model {
 		if (modelPath == null || modelPath.contains("null") || !modelPath.contains("chara"))
 			return -1;
 		
-		String incFolderPath = String.format("%s", modelPath.substring(0, modelPath.indexOf("model")-1));			
+		String incFolderPath = String.format("%s", modelPath.substring(0, modelPath.indexOf("model")-1));							
 		
-		int hash1 = HashDatabase.computeCRC(incFolderPath.getBytes(), 0, incFolderPath.getBytes().length);			
-		
-		for (SqPack_Folder f : currentIndex.getPackFolders())
-		{			
-			if (f.getId() == hash1)
-			{
-					for (int i = 0; i < numMaterialStrings; i++)
-					{
-						String fileString = incFolderPath.substring(incFolderPath.lastIndexOf("/")+1) + ".imc";										
-							
-						int hash2 = HashDatabase.computeCRC(fileString.getBytes(), 0, fileString.getBytes().length);
-						for (SqPack_File file : f.getFiles())
-						{
-							if (file.id == hash2)
-							{
-								System.out.println("Adding Entry: " + incFolderPath+"/"+fileString);
-								HashDatabase.addPathToDB(incFolderPath+"/"+fileString, currentIndex.getIndexName());
-								
-								try {
-									byte[] data = currentIndex.extractFile(file.getOffset(), null);
-									ByteBuffer bb = ByteBuffer.wrap(data);
-									bb.order(ByteOrder.LITTLE_ENDIAN);
-									return bb.getShort();
-								} catch (FileNotFoundException e) {
-									// TODO Auto-generated catch block
-									e.printStackTrace();
-								} catch (IOException e) {
-									// TODO Auto-generated catch block
-									e.printStackTrace();
-								}															
-							}
-						}
-					}
-			}
+		for (int i = 0; i < numMaterialStrings; i++)
+		{
+			String fileString = incFolderPath.substring(incFolderPath.lastIndexOf("/")+1) + ".imc";										
+				
+			long offset = Utils.getOffset(incFolderPath, fileString, currentIndex);
+			
+			if (offset == -1)
+				continue;
+			
+			System.out.println("Adding Entry: " + incFolderPath+"/"+fileString);
+			HashDatabase.addPathToDB(incFolderPath+"/"+fileString, currentIndex.getIndexName());
+					
+			try {
+				byte[] data = currentIndex.extractFile(offset, null);
+				ByteBuffer bb = ByteBuffer.wrap(data);
+				bb.order(ByteOrder.LITTLE_ENDIAN);
+				return bb.getShort();
+			} catch (FileNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}															
+					
 		}
+		
 		return -1;
 	}
 	
@@ -306,8 +298,6 @@ public class Model {
 		else
 			materialFolderPath = String.format("%smaterial/v%04d", modelPath.substring(0, modelPath.indexOf("model")), variant);
 		
-		int hash1 = HashDatabase.computeCRC(materialFolderPath.getBytes(), 0, materialFolderPath.getBytes().length);			
-		
 		//HACK HERE
 		int bodyMaterialSpot = -1;
 		
@@ -317,53 +307,39 @@ public class Model {
 		}
 		else
 		{
-			for (SqPack_Folder f : currentIndex.getPackFolders())
-			{			
-				if (f.getId() == hash1)
+			for (int i = 0; i < numMaterialStrings; i++)
+			{
+				String fileString = null;
+				
+				try{
+				if (stringArray[numAtrStrings+numBoneStrings+i].startsWith("/"))
+					fileString = stringArray[numAtrStrings+numBoneStrings+i].substring(1);
+				else
+					fileString = stringArray[numAtrStrings+numBoneStrings+i].substring(stringArray[numAtrStrings+numBoneStrings+i].lastIndexOf("/")+1);
+				}
+				catch (ArrayIndexOutOfBoundsException e)
 				{
-						for (int i = 0; i < numMaterialStrings; i++)
-						{
-							String fileString = null;
-							
-							try{
-							if (stringArray[numAtrStrings+numBoneStrings+i].startsWith("/"))
-								fileString = stringArray[numAtrStrings+numBoneStrings+i].substring(1);
-							else
-								fileString = stringArray[numAtrStrings+numBoneStrings+i].substring(stringArray[numAtrStrings+numBoneStrings+i].lastIndexOf("/")+1);
-							}
-							catch (ArrayIndexOutOfBoundsException e)
-							{
-								System.out.println("Num Materials was a LIE!");
-								break;
-							}
-							
-							//HACK HERE
-							if (fileString.matches(Utils.getRegexpFromFormatString("mt_c%04db%04d_%s.mtrl")))
-							{
-								bodyMaterialSpot = i;
-								continue;
-							}
-							
-							int hash2 = HashDatabase.computeCRC(fileString.getBytes(), 0, fileString.getBytes().length);
-							for (SqPack_File file : f.getFiles())
-							{
-								if (file.id == hash2)
-								{
-									try {
-										HashDatabase.addPathToDB(materialFolderPath+"/"+fileString, currentIndex.getIndexName());
-										materials[i] = new Material(materialFolderPath, currentIndex, currentIndex.extractFile(file.dataoffset, null));
-									} catch (FileNotFoundException e) {
-										e.printStackTrace();
-									} catch (IOException e) {
-										e.printStackTrace();
-									}
-									break;
-								}
-							}
-						}
+					System.out.println("Num Materials was a LIE!");
 					break;
 				}
-			}	
+				
+				//HACK HERE
+				if (fileString.matches(Utils.getRegexpFromFormatString("mt_c%04db%04d_%s.mtrl")))
+				{
+					bodyMaterialSpot = i;
+					continue;
+				}
+				
+				try {
+					materials[i] = new Material(materialFolderPath, currentIndex, currentIndex.extractFile(Utils.getOffset(materialFolderPath, fileString, currentIndex), null));
+				} catch (FileNotFoundException e) {
+					e.printStackTrace();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				
+			}
+		
 		}
 		
 		//If there was a body material, grab it HACK HERE
@@ -374,31 +350,15 @@ public class Model {
 			int chara = Integer.parseInt(s1.substring(0, 4));
 			int body = Integer.parseInt(s1.substring(5, 9));
 			materialFolderPath = String.format("chara/human/c%04d/obj/body/b%04d/material",chara,body);
-			hash1 = HashDatabase.computeCRC(materialFolderPath.getBytes(), 0, materialFolderPath.getBytes().length);
 			
-			for (SqPack_Folder f : currentIndex.getPackFolders())
-			{			
-				if (f.getId() == hash1)
-				{
-						int hash2 = HashDatabase.computeCRC(s.getBytes(), 0, s.getBytes().length);
-						for (SqPack_File file : f.getFiles())
-						{
-							if (file.id == hash2)
-							{
-								try {
-									HashDatabase.addPathToDB(materialFolderPath+"/"+s, currentIndex.getIndexName());
-									materials[bodyMaterialSpot] = new Material(materialFolderPath, currentIndex, currentIndex.extractFile(file.dataoffset, null));
-								} catch (FileNotFoundException e) {
-									e.printStackTrace();
-								} catch (IOException e) {
-									e.printStackTrace();
-								}
-								break;
-							}
-						}
-					
-				}
-			}	 
+			try {
+				materials[bodyMaterialSpot] = new Material(materialFolderPath, currentIndex, currentIndex.extractFile(Utils.getOffset(materialFolderPath, s, currentIndex), null));
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			
 		}
 	}
 	

@@ -12,6 +12,7 @@ import javax.swing.JTable;
 
 import ca.fraggergames.ffxivextract.helpers.FFXIV_String;
 import ca.fraggergames.ffxivextract.helpers.LERandomAccessFile;
+import ca.fraggergames.ffxivextract.helpers.Utils;
 import ca.fraggergames.ffxivextract.models.EXDF_File;
 import ca.fraggergames.ffxivextract.models.EXDF_File.EXDF_Entry;
 import ca.fraggergames.ffxivextract.models.EXHF_File.EXDF_Dataset;
@@ -19,19 +20,29 @@ import ca.fraggergames.ffxivextract.models.EXHF_File;
 import ca.fraggergames.ffxivextract.models.SqPack_DatFile;
 import ca.fraggergames.ffxivextract.models.SqPack_IndexFile;
 import ca.fraggergames.ffxivextract.storage.HashDatabase;
+
 import javax.swing.JPanel;
+
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
+
 import javax.swing.border.TitledBorder;
+
 import java.awt.BorderLayout;
+
 import javax.swing.BoxLayout;
 import javax.swing.JLabel;
+
 import java.awt.Component;
+
 import javax.swing.border.CompoundBorder;
 import javax.swing.UIManager;
+
 import java.awt.Color;
+
 import javax.swing.border.EmptyBorder;
+
 import java.awt.FlowLayout;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
@@ -55,7 +66,6 @@ public class EXDF_View extends JScrollPane implements ItemListener{
 	String exhName;
 	
 	//To speed things up
-	private int folderIndex = 0;	
 	private int numPages = -1;
 	private int numLanguages = -1;
 	
@@ -98,38 +108,17 @@ public class EXDF_View extends JScrollPane implements ItemListener{
 		String folderName = exhName.substring(0, fullPath.lastIndexOf("/"));
 		exhName = exhName.substring(fullPath.lastIndexOf("/")+1, exhName.length()) +".exh";
 		
-		//Find this thing
+		exhFolder = folderName;
 		
-		int folderHash = HashDatabase.computeCRC(folderName.getBytes(), 0, folderName.getBytes().length);
-		int fullPathHash = HashDatabase.computeCRC(exhName.getBytes(), 0, exhName.getBytes().length);
-		
-		if (currentIndex.getPackFolders().length == 1)	
-			folderIndex = 0;
-		else
-		{
-			for (int i = 0; i < currentIndex.getPackFolders().length; i++)
-			{
-				if (currentIndex.getPackFolders()[i].getId() == folderHash)
-				{
-					folderIndex = i;
-					break;
-				}
-			}
-		}
-		
-		for (int j = 0; j < currentIndex.getPackFolders()[folderIndex].getFiles().length; j++)
-		{
-			//Found it
-			if (currentIndex.getPackFolders()[folderIndex].getFiles()[j].getId() == fullPathHash)
-			{
-				try {
-					byte[] data = currentIndex.extractFile(currentIndex.getPackFolders()[folderIndex].getFiles()[j].getOffset(),  null);
-					exhFile = new EXHF_File(data);
-					break;
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+		//Find this thing		
+		long offset = Utils.getOffset(folderName, exhName, currentIndex);
+		if (offset != -1){
+			try {
+				byte[] data = currentIndex.extractFile(offset,  null);
+				exhFile = new EXHF_File(data);				
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
 		}
 		
@@ -178,28 +167,12 @@ public class EXDF_View extends JScrollPane implements ItemListener{
 		numLanguages = exhFile.getNumLanguages();
 		
 		this.exhName = fullPath.substring(fullPath.lastIndexOf("/")+1, fullPath.length());
+		exhFolder = fullPath.substring(0, fullPath.lastIndexOf("/"));
 		
 		//Create the path to EXD
 		String exdName = fullPath;
 		exdName = fullPath.replace(".exh", "");
-		exdName += "_%s%s.exd"; // name_0_en.exd		
-		
-		String folderName = fullPath.substring(0, fullPath.lastIndexOf("/"));
-		int folderHash = HashDatabase.computeCRC(folderName.getBytes(), 0, folderName.getBytes().length);
-		
-		if (currentIndex.getPackFolders().length == 1)	
-			folderIndex = 0;
-		else
-		{
-			for (int i = 0; i < currentIndex.getPackFolders().length; i++)
-			{
-				if (currentIndex.getPackFolders()[i].getId() == folderHash)
-				{
-					folderIndex = i;
-					break;
-				}
-			}
-		}
+		exdName += "_%s%s.exd"; // name_0_en.exd				
 		
 		getEXDFiles(exhFile, exdName, numPages, numLanguages);
 		
@@ -324,32 +297,26 @@ public class EXDF_View extends JScrollPane implements ItemListener{
 				
 				formattedExdName = formattedExdName.substring(formattedExdName.lastIndexOf("/")+1);
 				
-				int fileHash = HashDatabase.computeCRC(formattedExdName.getBytes(), 0, formattedExdName.getBytes().length);
+				long offset = Utils.getOffset(exhFolder, formattedExdName, currentIndex);
 				
-				//Find File		
-				for (int j2 = 0; j2 < currentIndex.getPackFolders()[folderIndex].getFiles().length; j2++)
-				{
-					//Found it
-					if (currentIndex.getPackFolders()[folderIndex].getFiles()[j2].getId() == fileHash)
-					{
-						try {
-							
-							//Hey we accidently found something
-							if (HashDatabase.getFileName(fileHash) == null){
-								System.out.println("Adding: " + formattedExdName);
-								if (numLanguages > 1)					
-									HashDatabase.addPathToDB(String.format(exdName, exhFile.getPageTable()[i].pageNum, "_"+langs[j]), currentIndex.getIndexName());
-								else
-									HashDatabase.addPathToDB(String.format(exdName, exhFile.getPageTable()[i].pageNum, ""), currentIndex.getIndexName());
-							}
-							byte[] data = currentIndex.extractFile(currentIndex.getPackFolders()[folderIndex].getFiles()[j2].getOffset(), null);
-							exdFile[(i*(numLanguages == 1 ? 1 : 4))+j] = new EXDF_File(data);
-						} catch (IOException e) {
-							e.printStackTrace();
+				if (offset != -1){
+					
+					try {						
+						//Hey we accidently found something
+						if (HashDatabase.getFileName(HashDatabase.computeCRC(formattedExdName.getBytes(), 0, formattedExdName.getBytes().length)) == null){
+							System.out.println("Adding: " + formattedExdName);
+							if (numLanguages > 1)					
+								HashDatabase.addPathToDB(String.format(exdName, exhFile.getPageTable()[i].pageNum, "_"+langs[j]), currentIndex.getIndexName());
+							else
+								HashDatabase.addPathToDB(String.format(exdName, exhFile.getPageTable()[i].pageNum, ""), currentIndex.getIndexName());
 						}
+						byte[] data = currentIndex.extractFile(offset, null);
+						exdFile[(i*(numLanguages == 1 ? 1 : 4))+j] = new EXDF_File(data);
+					} catch (IOException e) {
+						e.printStackTrace();
 					}
+										
 				}
-				
 			}
 		}
 		
