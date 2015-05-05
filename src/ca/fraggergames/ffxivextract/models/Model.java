@@ -45,7 +45,7 @@ public class Model {
 	private LoDSubModel lodModels[] = new LoDSubModel[3];
 		
 	private ByteBuffer boneMatrixBuffer, boneMatrixBuffer2;
-	private int numBones;
+	private int numBones = -1;
 	
 	private String[] boneStrings;
 	
@@ -214,7 +214,9 @@ public class Model {
         for (int i = 0; i < lodModels.length; i++) {
         	lodModels[i].loadMeshes(bb);
         }
-        	       
+        
+        //HAVOK TEST CODE
+        /*
         HavokNative.endHavok();
         HavokNative.startHavok();
         
@@ -236,6 +238,7 @@ public class Model {
 			numBones = -1;
 			HavokNative.endHavok();
 		}
+		*/
 	}
 	
 	private short loadNumberOfVariants()
@@ -526,7 +529,7 @@ public class Model {
 
 		    //Draw Skeleton
 		    gl.glDisable(GL3.GL_DEPTH_TEST);
-		    if (simpleShader != null){
+		    if (simpleShader != null && numBones != -1){
 			    gl.glPointSize(5f);
 		    	simpleShader.enableAttribs(gl);
 			    boneMatrixBuffer2.position(4*12);

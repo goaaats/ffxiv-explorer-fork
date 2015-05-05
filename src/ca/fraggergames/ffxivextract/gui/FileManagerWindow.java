@@ -283,7 +283,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 					
 					@Override
 					public boolean accept(File f) {
-						return f.getName().endsWith(".index") || f.isDirectory();
+						return f.getName().contains(".index") || f.isDirectory();
 					}				
 				};
 				fileChooser.addChoosableFileFilter(filter);

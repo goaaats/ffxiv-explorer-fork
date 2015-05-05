@@ -57,15 +57,15 @@ WAVEFORMATEX           See: http://msdn.microsoft.com/en-us/library/windows/desk
 ADPCMCOEFSET           Int32; * 7
 
 ===IF OGG SEEK TABLE HEADER=== (32 bytes)
-0x00  					   Short;
-0x02 Encode Byte            Byte; If not 0x00, XOR the header with this byte
+0x00 Encode Type		   Short; Seems to tell what encoding is being used. 02,20 is XOR. 03,20 is Heavensward one.
+0x02 Encode Byte            Byte; If encoding is 02,20, XOR the header with this byte
 0x04 
 0x08 
 0x0c 
 0x10 Size of Seek Table    Int32; How many seek table entries there are.	
 0x14 Vorbis Header Size    Int32; Size of the Ogg Vorbis header (for decoding purpose).
 0x18 
-~~~~~~~~~Padding~~~~~~~~       Padded to fill 32bytes 
+~~~~~~~~~Padding~~~~~~~~       Padded to fill 32bytes 	
 
 ===SEEK TABLE=== (Size is 4 * [Num Seek Table])
 0x00 Seek Entry        Int32; An offset from the Vorbis header to some Ogg page. 
@@ -81,6 +81,28 @@ Ogg Vorbis data is here
 --------------Duplicate Header-----------------------------
 It seems that the first header is 3 chunks in size, each 0x120 bytes long. It's the Vorbis
 Indentification, Comment, and Setup headers. This is repeated after. 
+
+-------------Heavensward Encoding--------------------------
+Square Enix had encrypted the Heavensward music using a strange algorithm. Before decoding, you need the XOR table which can be found in the .exe if you search for:
+
+3A 32 32 32 03 7E 12 F7 B2 E2 A2 67 32 32 22 32
+
+The XOR table is 0xFF byte long.
+
+Example code to decode (note dataLength is [Music File Length] in the entry header):
+
+private void xorDecodeFromTable(byte[] dataFile, int dataLength) {
+	int byte1 = dataLength & 0xFF & 0x7F;
+	int byte2 = byte1 & 0x3F;
+	for (int i = 0; i < dataFile.length; i++)
+	{			
+		int xorByte = XORTABLE[(byte2 + i) & 0xFF];
+		xorByte &= 0xFF;
+		xorByte ^= (dataFile[i]&0xFF);
+		xorByte ^= byte1;
+		dataFile[i] = (byte) xorByte;
+	}
+} 
 
 --------------To Inject OGG-------------------------------
 

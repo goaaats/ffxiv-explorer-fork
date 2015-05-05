@@ -7,7 +7,8 @@ Current research on SqPack Index files
 0x00c: Header Length    Int32;  
 0x010: ~~Unknown~~             Int32; Unknown but repeated in other header
 0x014: SqPack Type      Int32; Type 0: SQDB, Type 1: Data, Type 2: Index
-0x018: ~~Unknown~~             A lot of 0s, but 0xFFFF at 0x20
+0x018: Timestamp1       Int32; Timestamp - Date (Thanks Cassiope)
+0x01c: Timestamp2       Int32; Timestamp - Time
 0x3c0: SHA-1 of Header    20B; SHA-1 of bytes 0x000-0x3BF, starts 64bytes before end of header
 ~~~~~~~~Padding~~~~~~~~~       Padding of 0's till [Header Length]
 

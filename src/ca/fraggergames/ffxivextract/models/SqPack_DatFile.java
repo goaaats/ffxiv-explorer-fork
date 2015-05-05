@@ -4,6 +4,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.Calendar;
 
 import ca.fraggergames.ffxivextract.Constants;
 import ca.fraggergames.ffxivextract.gui.components.Loading_Dialog;
@@ -445,6 +446,30 @@ public class SqPack_DatFile {
 		currentFilePointer.seek(offset);
 		currentFilePointer.readInt(); //Header Length
 		return currentFilePointer.readInt();
+	}
+	
+	protected Calendar getTimeStamp() throws IOException
+	{
+		// Timestamp
+		currentFilePointer.seek(0x18);
+		int date = currentFilePointer.readInt();
+		int time = currentFilePointer.readInt();
+		if (date != 0)
+		{
+			//Copied code from Cassiope example, too lazy to write my own lol.
+			int yyyy = (int) (date   /   10000) % 10000;
+            int mm   = (int) (date   /     100) %   100;
+            int dd   = (int) (date            ) %   100;
+            int hh24 = (int) (time / 1000000) %   100;
+            int mi   = (int) (time /   10000) %   100;
+            int ss   = (int) (time /     100) %   100;
+            int ms   = (int) (time          ) %   100;
+            
+            Calendar timestamp = Calendar.getInstance();
+            timestamp.set(yyyy, mm, dd, hh24, mi, ss);
+            return timestamp;
+		}		
+		return null;
 	}
 }
 
