@@ -216,11 +216,11 @@ public class Model {
         }
         
         //HAVOK TEST CODE
-        /*
+        
         HavokNative.endHavok();
         HavokNative.startHavok();
         
-        if (HavokNative.loadSkeleton("C:\\Users\\Filip\\Dropbox\\Public\\havok\\skel_8070.hkx") && (HavokNative.loadAnimation("C:\\Users\\Filip\\Dropbox\\Public\\havok\\anim_8070.hkx")))
+        if (HavokNative.loadSkeleton("C:\\Users\\Filip\\Dropbox\\Public\\havok\\skel_8034.hkx") && (HavokNative.loadAnimation("C:\\Users\\Filip\\Dropbox\\Public\\havok\\anim_8034.hkx")))
 		{
 			if (HavokNative.setAnimation(1) == -1)
 			{
@@ -238,7 +238,7 @@ public class Model {
 			numBones = -1;
 			HavokNative.endHavok();
 		}
-		*/
+		
 	}
 	
 	private short loadNumberOfVariants()
@@ -444,10 +444,10 @@ public class Model {
 	    			gl.glVertexAttribPointer(shader.getAttribPosition(), components, datatype, false, size, origin);
 	    			break;
 	    		case 1://Blend Weights	    
-	    			gl.glVertexAttribPointer(shader.getAttribBlendWeight(), components, datatype, false, size, origin);
+	    			gl.glVertexAttribIPointer(shader.getAttribBlendWeight(), components, datatype, size, origin);
 	    			break;
 	    		case 2://Blend Indices
-	    			gl.glVertexAttribPointer(shader.getAttribBlendIndex(), components, datatype, false, size, origin);
+	    			gl.glVertexAttribIPointer(shader.getAttribBlendIndex(), components, datatype, size, origin);
 	    			break;
 	    		case 3://Normal
 	    			gl.glVertexAttribPointer(shader.getAttribNormal(), components, datatype, false, size, origin);
@@ -480,6 +480,7 @@ public class Model {
 		    	HavokNative.getBones(boneMatrixBuffer2);
 		    	HavokNative.getBonesWithNames(boneMatrixBuffer, boneStrings);
 	    		shader.setBoneMatrix(gl, numBones, boneMatrixBuffer);
+	    		
 	    	}
 	    	
 	    	//Draw	    	
