@@ -35,13 +35,13 @@ void main(void) {
     ivec4 curWeight = aBlendWeight;
 	vec4 pos = aPosition;
 
-    for (int i = 0; i < 1; i++)
+    for (int i = 0; i < 4; i++)
     {
     	
         mat4 m44 = uBones[curIndex.x];
         
         // transform the offset by bone i
-        transformedPosition += m44 * pos;
+        transformedPosition += m44 * pos * (curWeight.x/255.0);
 
         mat3 m33 = mat3(m44[0].xyz,
                         m44[1].xyz,

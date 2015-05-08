@@ -220,9 +220,9 @@ public class Model {
         HavokNative.endHavok();
         HavokNative.startHavok();
         
-        if (HavokNative.loadSkeleton("C:\\Users\\Filip\\Dropbox\\Public\\havok\\skel_8034.hkx") && (HavokNative.loadAnimation("C:\\Users\\Filip\\Dropbox\\Public\\havok\\anim_8034.hkx")))
+        if (HavokNative.loadSkeleton("C:\\Users\\Filip\\Dropbox\\Public\\havok\\skel_0097.hkx") && (HavokNative.loadAnimation("C:\\Users\\Filip\\Dropbox\\Public\\havok\\anim_0097.hkx")))
 		{
-			if (HavokNative.setAnimation(1) == -1)
+			if (HavokNative.setAnimation(3) == -1)
 			{
 				HavokNative.setAnimation(1);
 				System.out.println("Invalid Animation");
@@ -489,6 +489,7 @@ public class Model {
 		    shader.disableAttribs(gl);			  		    		   
 
 		    //Draw Skeleton
+		    /*
 		    gl.glDisable(GL3.GL_DEPTH_TEST);
 		    if (simpleShader != null && numBones != -1){
 			    gl.glPointSize(5f);
@@ -501,12 +502,12 @@ public class Model {
 			    simpleShader.disableAttribs(gl);	
 		    }
 		    gl.glEnable(GL3.GL_DEPTH_TEST);
-		    
+		    */
 		    
 		    //Advance Animation		
 		    if (numBones != -1)
 		    {
-		    	HavokNative.stepAnimation(1f/40f);
+		    	HavokNative.stepAnimation(1f/80f);
 		    	HavokNative.debugRenderBones();
 		    }
 		}
