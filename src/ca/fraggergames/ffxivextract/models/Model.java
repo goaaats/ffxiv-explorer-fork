@@ -44,7 +44,7 @@ public class Model {
 	private Material materials[];
 	private LoDSubModel lodModels[] = new LoDSubModel[3];
 		
-	private ByteBuffer boneMatrixBuffer, boneMatrixBuffer2;
+	private ByteBuffer boneMatrixBuffer;
 	private int numBones = -1;
 	
 	private String[] boneStrings;
@@ -216,7 +216,7 @@ public class Model {
         }
         
         //HAVOK TEST CODE
-        /*
+        
         HavokNative.endHavok();
         HavokNative.startHavok();
         
@@ -230,15 +230,13 @@ public class Model {
 			numBones = boneStrings.length;		
 			System.out.println("There are:" + numBones + " bones.");
 			boneMatrixBuffer = ByteBuffer.allocateDirect(4 * 16 * numBones);
-			boneMatrixBuffer.order(ByteOrder.nativeOrder());			
-			boneMatrixBuffer2 = ByteBuffer.allocateDirect(4 * 16 * HavokNative.getNumBones());
-			boneMatrixBuffer2.order(ByteOrder.nativeOrder());
+			boneMatrixBuffer.order(ByteOrder.nativeOrder());						
 		}
 		else{
 			numBones = -1;
 			HavokNative.endHavok();
 		}
-		*/
+		
 	}
 	
 	private short loadNumberOfVariants()
@@ -477,7 +475,6 @@ public class Model {
 	    	if (numBones != -1)
 	    	{
 		    	boneMatrixBuffer.position(0);
-		    	HavokNative.getBones(boneMatrixBuffer2);
 		    	HavokNative.getBonesWithNames(boneMatrixBuffer, boneStrings);
 	    		shader.setBoneMatrix(gl, numBones, boneMatrixBuffer);
 	    	}
@@ -492,11 +489,11 @@ public class Model {
 		    if (simpleShader != null && numBones != -1){
 			    gl.glPointSize(5f);
 		    	simpleShader.enableAttribs(gl);
-			    boneMatrixBuffer2.position(4*12);
+		    	boneMatrixBuffer.position(4*12);
 			    gl.glUseProgram(simpleShader.getShaderProgramID());
 			    simpleShader.setMatrix(gl, modelMatrix, viewMatrix, projMatrix);
-			    gl.glVertexAttribPointer(simpleShader.getAttribPosition(), 3, GL3.GL_FLOAT, false, 16 * 4, boneMatrixBuffer2);
-			    gl.glDrawArrays(GL3.GL_POINTS, 0, HavokNative.getNumBones());
+			    gl.glVertexAttribPointer(simpleShader.getAttribPosition(), 3, GL3.GL_FLOAT, false, 16 * 4, boneMatrixBuffer);
+			    gl.glDrawArrays(GL3.GL_POINTS, 0, HavokNative.getNumBones()-1);
 			    simpleShader.disableAttribs(gl);	
 		    }
 		    gl.glEnable(GL3.GL_DEPTH_TEST);
