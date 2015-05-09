@@ -28,35 +28,44 @@ varying vec3 vEyeVec;
 
 void main(void) {		
 
+	
 	vec4 transformedPosition = vec4(0.0);
     vec3 transformedNormal = vec3(0.0);
 
-	ivec4 curIndex = aBlendIndex;
-    ivec4 curWeight = aBlendWeight;
-	vec4 pos = aPosition;
-
-    for (int i = 0; i < 4; i++)
-    {
-    	
-        mat4 m44 = uBones[curIndex.x];
-        
-        // transform the offset by bone i
-        transformedPosition += m44 * pos * (curWeight.x/255.0);
-
-        mat3 m33 = mat3(m44[0].xyz,
-                        m44[1].xyz,
-                        m44[2].xyz);
-                                
-        // transform normal by bone i
-        transformedNormal += m33 * aNormal.xyz * (curWeight.x/255.0);
-
-        // shift over the index/weight variables, this moves the index and 
-        // weight for the current bone into the .x component of the index 
-        // and weight variables
-        curIndex = curIndex.yzwx;
-        curWeight = curWeight.yzwx;
-    }
-
+	//Skinning
+	if (uNumBones > 0){
+		ivec4 curIndex = aBlendIndex;
+	    ivec4 curWeight = aBlendWeight;
+		vec4 pos = aPosition;
+	
+	    for (int i = 0; i < 4; i++)
+	    {
+	    	
+	        mat4 m44 = uBones[curIndex.x];
+	        
+	        // transform the offset by bone i
+	        transformedPosition += m44 * pos * (curWeight.x/255.0);
+	
+	        mat3 m33 = mat3(m44[0].xyz,
+	                        m44[1].xyz,
+	                        m44[2].xyz);
+	                                
+	        // transform normal by bone i
+	        transformedNormal += m33 * aNormal.xyz * (curWeight.x/255.0);
+	
+	        // shift over the index/weight variables, this moves the index and 
+	        // weight for the current bone into the .x component of the index 
+	        // and weight variables
+	        curIndex = curIndex.yzwx;
+	        curWeight = curWeight.yzwx;
+	    }
+	}
+	else
+	{
+		transformedPosition = aPosition;
+		transformedNormal = aNormal.xyz;
+	}
+	
 	vPosition = vec4((uViewMatrix*uModelMatrix) * aPosition);
 	vTexCoord = aTexCoord;	
 		
