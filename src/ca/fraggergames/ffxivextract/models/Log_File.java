@@ -73,9 +73,7 @@ public class Log_File {
 				continue;
 			}
 			
-			String data = new String(buffer, 0, offsets[i] - (i == 0 ? 0 : offsets[i-1]));
-			
-			System.out.println(data);
+			String data = new String(buffer, 0, offsets[i] - (i == 0 ? 0 : offsets[i-1]));			
 			
 			String[] splitData = data.split(":");										
 			

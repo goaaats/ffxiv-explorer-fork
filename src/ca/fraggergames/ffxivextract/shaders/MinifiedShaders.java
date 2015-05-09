@@ -248,4 +248,11 @@ public class MinifiedShaders {
 			+ "v.xyz=v.xyz*max(dot(vNormal.xyz,r),0.);" + "v=clamp(v,0.,1.);"
 			+ "gl_FragColor=v;" + "}";
 
+	protected static String simple_vert_glsl = "#version 150\n"
+			+ "precision highp float;\n" +
+			"uniform mat4 uModelMatrix,uViewMatrix,uProjMatrix;attribute vec4 aPosition;void main(){gl_Position=uProjMatrix*uViewMatrix*uModelMatrix*aPosition;}";
+	
+	protected static String simple_frag_glsl = "#version 150\n"
+			+ "precision highp float;\n" +
+			"void main(){gl_FragColor=vec4(1.,0.,0.,1.);}";
 }
