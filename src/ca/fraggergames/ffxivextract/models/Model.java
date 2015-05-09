@@ -220,9 +220,9 @@ public class Model {
         HavokNative.endHavok();
         HavokNative.startHavok();
         
-        if (HavokNative.loadSkeleton("C:\\Users\\Filip\\Dropbox\\Public\\havok\\skel_8070.hkx") && (HavokNative.loadAnimation("C:\\Users\\Filip\\Dropbox\\Public\\havok\\anim_8070.hkx")))
+        if (HavokNative.loadSkeleton("C:\\Users\\Filip\\Dropbox\\Public\\havok\\skel_0097.hkx") && (HavokNative.loadAnimation("C:\\Users\\Filip\\Dropbox\\Public\\havok\\anim_0097.hkx")))
 		{
-			if (HavokNative.setAnimation(1) == -1)
+			if (HavokNative.setAnimation(3) == -1)
 			{
 				HavokNative.setAnimation(1);
 				System.out.println("Invalid Animation");
@@ -442,10 +442,10 @@ public class Model {
 	    			gl.glVertexAttribPointer(shader.getAttribPosition(), components, datatype, false, size, origin);
 	    			break;
 	    		case 1://Blend Weights	    
-	    			gl.glVertexAttribPointer(shader.getAttribBlendWeight(), components, datatype, false, size, origin);
+	    			gl.glVertexAttribIPointer(shader.getAttribBlendWeight(), components, datatype, size, origin);
 	    			break;
 	    		case 2://Blend Indices
-	    			gl.glVertexAttribPointer(shader.getAttribBlendIndex(), components, datatype, false, size, origin);
+	    			gl.glVertexAttribIPointer(shader.getAttribBlendIndex(), components, datatype, size, origin);
 	    			break;
 	    		case 3://Normal
 	    			gl.glVertexAttribPointer(shader.getAttribNormal(), components, datatype, false, size, origin);
@@ -477,6 +477,7 @@ public class Model {
 		    	boneMatrixBuffer.position(0);
 		    	HavokNative.getBonesWithNames(boneMatrixBuffer, boneStrings);
 	    		shader.setBoneMatrix(gl, numBones, boneMatrixBuffer);
+	    		
 	    	}
 	    	
 	    	//Draw	    	
@@ -485,6 +486,7 @@ public class Model {
 		    shader.disableAttribs(gl);			  		    		   
 
 		    //Draw Skeleton
+		    /*
 		    gl.glDisable(GL3.GL_DEPTH_TEST);
 		    if (simpleShader != null && numBones != -1){
 			    gl.glPointSize(5f);
@@ -497,12 +499,12 @@ public class Model {
 			    simpleShader.disableAttribs(gl);	
 		    }
 		    gl.glEnable(GL3.GL_DEPTH_TEST);
-		    
+		    */
 		    
 		    //Advance Animation		
 		    if (numBones != -1)
 		    {
-		    	HavokNative.stepAnimation(1f/40f);
+		    	HavokNative.stepAnimation(1f/80f);
 		    	HavokNative.debugRenderBones();
 		    }
 		}
