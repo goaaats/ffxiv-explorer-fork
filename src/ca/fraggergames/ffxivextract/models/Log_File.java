@@ -63,15 +63,33 @@ public class Log_File {
 		//Read in log entries
 		byte buffer[] = new byte[maxBufferSize];
 		for (int i = 0; i < offsets.length; i++)
-		{			
+		{									
 			file.read(buffer, 0, offsets[i] - (i == 0 ? 0 : offsets[i-1]));
+			
+			//Corrupted?
+			if (buffer[0] == 0 && buffer[1] == 0 && buffer[2] == 0 && buffer[3] == 0 && buffer[4] == 0 && buffer[5] == 0 && buffer[6] == 0 && buffer[7] == 0)
+			{
+				entries[i] = new Log_Entry(0, -1, -1, "", "Missing Log Entry");
+				continue;
+			}
+			
 			String data = new String(buffer, 0, offsets[i] - (i == 0 ? 0 : offsets[i-1]));
 			
-			String[] splitData = data.split(":");							
+			System.out.println(data);
+			
+			String[] splitData = data.split(":");										
 			
 			String info = splitData[0];
-			String sender = splitData.length >= 2 ? FFXIV_String.parseFFXIVString(splitData[1].getBytes()) : "";			
-			String message = splitData.length == 3 ? FFXIV_String.parseFFXIVString(splitData[2].getBytes()) : "";
+			String sender = splitData.length >= 2 ? FFXIV_String.parseFFXIVString(splitData[1].getBytes()) : "";
+			
+			//This is for fuckups where a : may be in the message string
+			if (splitData.length > 3)
+			{
+				for (int s = 3; s < splitData.length; s++)
+					splitData[2] += splitData[s];
+			}
+			
+			String message = splitData.length >= 3 ? FFXIV_String.parseFFXIVString(splitData[2].getBytes()) : "";
 			
 			long time = Long.parseLong(info.substring(0, 8), 16);			
 			int filter = Integer.parseInt(info.substring(8, 10), 16);

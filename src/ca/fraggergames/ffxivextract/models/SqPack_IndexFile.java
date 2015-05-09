@@ -340,6 +340,7 @@ public class SqPack_IndexFile {
 			//if (id2 == -1)			
 				//this.name = HashDatabase.getFullpath(id);			
 			//else
+			if (id2 != -1)
 				this.name = HashDatabase.getFileName(id);
 			if (this.name == null)
 				this.name = String.format("~%x", id);

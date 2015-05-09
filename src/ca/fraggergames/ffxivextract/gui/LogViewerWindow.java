@@ -30,6 +30,7 @@ import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 
+import ca.fraggergames.ffxivextract.Strings;
 import ca.fraggergames.ffxivextract.models.Log_File;
 import ca.fraggergames.ffxivextract.models.Log_File.Log_Entry;
 
@@ -139,14 +140,31 @@ public class LogViewerWindow extends JFrame {
 	private void loadLog() {
 		
 		JFileChooser fileChooser = new JFileChooser();
-		fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+		fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+		
+		FileFilter filter = new FileFilter() {
+			
+			@Override
+			public String getDescription() {
+				return Strings.FILETYPE_FFXIV_LOG;
+			}
+			
+			@Override
+			public boolean accept(File f) {
+				return f.getName().endsWith(".log") || f.isDirectory();
+			}				
+		};
+		fileChooser.addChoosableFileFilter(filter);
+		fileChooser.setFileFilter(filter);
+		fileChooser.setAcceptAllFileFilterUsed(false);
+		
 		int retVal = fileChooser.showOpenDialog(this);
 		
 		Log_File logs[];
 		
 		if (retVal == JFileChooser.APPROVE_OPTION)
 		{
-			if (!fileChooser.getSelectedFile().getName().equals("log"))
+			if (!fileChooser.getSelectedFile().getParentFile().getName().equals("log"))
 			{
 				JOptionPane.showMessageDialog(this, "This is not a valid log folder. Please point the path to the log folder in your \".\\documents\\my games\\FINAL FANTASY XIV - A Realm Reborn\\\" folder.", "Error opening logs",
 					    JOptionPane.ERROR_MESSAGE);
@@ -154,7 +172,7 @@ public class LogViewerWindow extends JFrame {
 				return;
 			}
 			
-			File directory = fileChooser.getSelectedFile();
+			File directory = fileChooser.getSelectedFile().getParentFile();
 			File list[] = directory.listFiles();
 			logs = new Log_File[list.length];
 			

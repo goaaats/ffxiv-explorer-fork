@@ -24,6 +24,7 @@ import javax.imageio.ImageIO;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -131,6 +132,12 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 		this.setIconImage(image.getImage());
 		
 		JPanel pnlContent = new JPanel();
+		
+		pnlContent.registerKeyboardAction(menuHandler, "search", KeyStroke.getKeyStroke(KeyEvent.VK_F, ActionEvent.CTRL_MASK), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+		pnlContent.registerKeyboardAction(menuHandler, "extractc", KeyStroke.getKeyStroke(KeyEvent.VK_E, KeyEvent.CTRL_MASK), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+		pnlContent.registerKeyboardAction(menuHandler, "extractr", KeyStroke.getKeyStroke(KeyEvent.VK_E, KeyEvent.SHIFT_MASK|KeyEvent.CTRL_MASK), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+		pnlContent.registerKeyboardAction(menuHandler, "searchagain", KeyStroke.getKeyStroke(KeyEvent.VK_F3,0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+		
 		getContentPane().add(pnlContent, BorderLayout.CENTER);
 		pnlContent.setLayout(new BoxLayout(pnlContent, BoxLayout.X_AXIS));
 		
@@ -317,21 +324,21 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 			{
 				closeFile();				
 			}
-			else if (event.getActionCommand().equals("extractc"))
+			else if (event.getActionCommand().equals("extractc")&& file_Extract.isEnabled())
 			{
 				extract(true);
 			}
-			else if (event.getActionCommand().equals("extractr"))
+			else if (event.getActionCommand().equals("extractr") && file_ExtractRaw.isEnabled())
 			{
 				extract(false);
 			}
-			else if (event.getActionCommand().equals("search"))
+			else if (event.getActionCommand().equals("search") && search_search.isEnabled())
 			{				
 				searchWindow.setLocationRelativeTo(FileManagerWindow.this);
 				searchWindow.setVisible(true);
 				searchWindow.reset();
 			}
-			else if (event.getActionCommand().equals("searchagain"))
+			else if (event.getActionCommand().equals("searchagain") && search_searchAgain.isEnabled())
 			{
 				searchWindow.searchAgain();
 			}
@@ -408,15 +415,15 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 		
 		search_search = new JMenuItem(Strings.MENUITEM_SEARCH);
 		search_search.setEnabled(false);
-		search_search.setActionCommand("search");
-		search_search.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F, KeyEvent.CTRL_MASK));
+		search_search.setActionCommand("search");		
 		search_search.addActionListener(menuHandler);
-
+		search_search.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F, ActionEvent.CTRL_MASK));		
+		
 		search_searchAgain = new JMenuItem(Strings.MENUITEM_SEARCHAGAIN);
 		search_searchAgain.setEnabled(false);
-		search_searchAgain.setActionCommand("searchagain");
+		search_searchAgain.setActionCommand("searchagain");		
+		search_searchAgain.addActionListener(menuHandler);	
 		search_searchAgain.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F3,0));
-		search_searchAgain.addActionListener(menuHandler);		
 		
 		JMenuItem tools_musicswapper = new JMenuItem(Strings.MENUITEM_MUSICSWAPPER);
 		tools_musicswapper.setActionCommand("musicswapper");

@@ -45,6 +45,7 @@ public class Strings {
 	public static final String FILETYPE_FFXIV_INDEX = "FFXIV Index File (.index)";
 	public static final String FILETYPE_FFXIV_INDEX2 = "FFXIV Index2 File (.index2)";
 	public static final String FILETYPE_FFXIV_MUSICINDEX = "FFXIV Music Archive Index (0c0000.win32.index)";
+	public static final String FILETYPE_FFXIV_LOG = "FFXIV Log File (.log)";
 	
 	//Menu and Menu Items
 	public static final String MENU_FILE = "File";
