@@ -67,6 +67,7 @@ import ca.fraggergames.ffxivextract.models.Model;
 import ca.fraggergames.ffxivextract.models.PAP_File;
 import ca.fraggergames.ffxivextract.models.SCD_File;
 import ca.fraggergames.ffxivextract.models.SCD_File.SCD_Sound_Info;
+import ca.fraggergames.ffxivextract.models.SKLB_File;
 import ca.fraggergames.ffxivextract.models.SqPack_IndexFile;
 import ca.fraggergames.ffxivextract.models.SqPack_IndexFile.SqPack_File;
 import ca.fraggergames.ffxivextract.models.Texture_File;
@@ -910,7 +911,8 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 						}
 						else if (data.length >= 4 && data[0] == 'b' && data[1] == 'l' && data[2] == 'k' && data[3] == 's' )
 						{
-							
+							SKLB_File pap = new SKLB_File(data);
+							dataToSave = pap.getHavokData();
 						}
 						
 						extension = ".hkx";

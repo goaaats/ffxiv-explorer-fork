@@ -220,7 +220,35 @@ public class Model {
         HavokNative.endHavok();
         HavokNative.startHavok();
         
-        if (HavokNative.loadSkeleton("C:\\Users\\Filip\\Dropbox\\Public\\havok\\skel_0097.hkx") && (HavokNative.loadAnimation("C:\\Users\\Filip\\Dropbox\\Public\\havok\\anim_0097.hkx")))
+        byte skel[] = null;
+		try {
+			skel = currentIndex.extractFile(0x1FBF642, null);
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+        byte anim[] = null;
+		try {
+			anim = currentIndex.extractFile(0xC550310, null);
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+        
+        ByteBuffer skelBuffer = ByteBuffer.allocateDirect(skel.length);
+        skelBuffer.order(ByteOrder.nativeOrder());
+        skelBuffer.put(skel);        
+        ByteBuffer animBuffer = ByteBuffer.allocateDirect(anim.length);
+        skelBuffer.order(ByteOrder.nativeOrder());
+        animBuffer.put(anim);
+        
+        if (HavokNative.loadSkeleton(skelBuffer, skel.length) && (HavokNative.loadAnimation(animBuffer, anim.length)))
 		{
 			if (HavokNative.setAnimation(3) == -1)
 			{
