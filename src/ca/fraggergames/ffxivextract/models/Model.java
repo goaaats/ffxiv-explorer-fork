@@ -215,19 +215,14 @@ public class Model {
         	lodModels[i].loadMeshes(bb);
         }
         
-        //HAVOK TEST CODE
-        
-        HavokNative.endHavok();
-        
+        //Skeletons and Animations
         SKLB_File skelFile = null;
 		try {
 			byte sklbData[] = currentIndex.extractFile(0x1FBF642, null);
 			skelFile = new SKLB_File(sklbData);
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
         PAP_File animFile = null;
@@ -235,10 +230,8 @@ public class Model {
 			byte animData[] = currentIndex.extractFile(0xC550310, null); 
 			animFile = new PAP_File(animData);
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}		
 		
@@ -515,6 +508,7 @@ public class Model {
 	    	{
 		    	boneMatrixBuffer.position(0);
 		    	HavokNative.getBonesWithNames(boneMatrixBuffer, boneStrings);
+		    	boneMatrixBuffer.position(0);
 	    		shader.setBoneMatrix(gl, numBones, boneMatrixBuffer);
 	    		
 	    	}
