@@ -49,6 +49,11 @@ public class Model {
 	
 	private String[] boneStrings;
 	
+	//Skeleton/Animation
+	SKLB_File skelFile;
+	PAP_File animFile;
+	float animSpeed = 1f/60f;
+	
 	SimpleShader simpleShader;
 	
 	public Model(byte[] data)
@@ -216,59 +221,80 @@ public class Model {
         }
         
         //Skeletons and Animations
-        SKLB_File skelFile = null;
-		try {
-			byte sklbData[] = currentIndex.extractFile(0x1FBF642, null);
-			skelFile = new SKLB_File(sklbData);
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-        PAP_File animFile = null;
-		try {
-			byte animData[] = currentIndex.extractFile(0xC550310, null); 
-			animFile = new PAP_File(animData);
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}		
-		
-		if (animFile != null && skelFile != null){
-	        ByteBuffer skelBuffer = ByteBuffer.allocateDirect(skelFile.getHavokData().length);
-	        skelBuffer.order(ByteOrder.nativeOrder());
-	        skelBuffer.put(skelFile.getHavokData());        
-	        ByteBuffer animBuffer = ByteBuffer.allocateDirect(animFile.getHavokData().length);
-	        skelBuffer.order(ByteOrder.nativeOrder());
-	        animBuffer.put(animFile.getHavokData());
-	        skelBuffer.position(0);
-	        animBuffer.position(0);
-		
-	        HavokNative.startHavok();
-		
-		    if (HavokNative.loadSkeleton(skelBuffer, skelFile.getHavokData().length) && (HavokNative.loadAnimation(animBuffer, animFile.getHavokData().length)))
-			{
-				if (HavokNative.setAnimation(1) == -1)
-				{
-					HavokNative.setAnimation(1);
-					System.out.println("Invalid Animation");
-				}
-				numBones = boneStrings.length;		
-				System.out.println("There are:" + numBones + " bones.");
-				boneMatrixBuffer = ByteBuffer.allocateDirect(4 * 16 * numBones);
-				boneMatrixBuffer.order(ByteOrder.nativeOrder());						
+        if (modelPath != null)
+        {
+        	String modelPathSplit[] = modelPath.split("/");
+        	String skeletonPath = null, animationPath = null;        	        	        	
+        	
+        	if (modelPathSplit[1].equals("monster"))
+        	{
+        		skeletonPath = String.format("chara/monster/%s/skeleton/base/b0001/skl_%sb0001.sklb", modelPathSplit[2], modelPathSplit[2]);
+        		animationPath = String.format("chara/monster/%s/animation/a0001/bt_common/resident/monster.pap", modelPathSplit[2]);
+        	}        	       
+        	        		       
+        	if (skeletonPath == null || animationPath == null)
+        	{
+        		skeletonPath = "!/!";
+        		animationPath = "!/!";
+        	}
+        	
+        	long skelPathOffset = Utils.getOffset(skeletonPath, currentIndex);
+        	long animPathOffset = Utils.getOffset(animationPath, currentIndex);
+        	
+	        skelFile = null;
+			try {
+				byte sklbData[] = currentIndex.extractFile(skelPathOffset, null);
+				skelFile = new SKLB_File(sklbData);
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
 			}
-			else{
+	        animFile = null;
+			try {
+				byte animData[] = currentIndex.extractFile(animPathOffset, null); 
+				animFile = new PAP_File(animData);
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}		
+			
+			if (animFile != null && skelFile != null){
+		        ByteBuffer skelBuffer = ByteBuffer.allocateDirect(skelFile.getHavokData().length);
+		        skelBuffer.order(ByteOrder.nativeOrder());
+		        skelBuffer.put(skelFile.getHavokData());        
+		        ByteBuffer animBuffer = ByteBuffer.allocateDirect(animFile.getHavokData().length);
+		        skelBuffer.order(ByteOrder.nativeOrder());
+		        animBuffer.put(animFile.getHavokData());
+		        skelBuffer.position(0);
+		        animBuffer.position(0);
+			
+		        HavokNative.startHavok();
+			
+			    if (HavokNative.loadSkeleton(skelBuffer, skelFile.getHavokData().length) && (HavokNative.loadAnimation(animBuffer, animFile.getHavokData().length)))
+				{
+					if (HavokNative.setAnimation(0) == -1)
+					{
+						HavokNative.setAnimation(0);
+						System.out.println("Invalid Animation");
+					}
+					numBones = boneStrings.length;		
+					System.out.println("There are:" + numBones + " bones.");
+					boneMatrixBuffer = ByteBuffer.allocateDirect(4 * 16 * numBones);
+					boneMatrixBuffer.order(ByteOrder.nativeOrder());						
+				}
+				else{
+					numBones = -1;
+					HavokNative.endHavok();
+				}
+			}
+			else
+			{
 				numBones = -1;
 				HavokNative.endHavok();
 			}
-		}
-		else
-		{
-			numBones = -1;
-			HavokNative.endHavok();
-		}
+        }
 	}
 	
 	private short loadNumberOfVariants()
@@ -537,7 +563,7 @@ public class Model {
 		    //Advance Animation		
 		    if (numBones != -1)
 		    {
-		    	HavokNative.stepAnimation(1f/80f);
+		    	HavokNative.stepAnimation(animSpeed);
 		    	HavokNative.debugRenderBones();
 		    }
 		}
@@ -651,6 +677,34 @@ public class Model {
 
 	public DX9VertexElement[] getDX9Struct(int lodLevel, int i) {
 		return vertexElements[lodModels[lodLevel].meshList[i].getVertexElementIndex()];
+	}
+	
+	public int getNumAnimations()
+	{
+		if (animFile == null)
+			return 0;
+		else
+			return animFile.getNumAnimations();
+	}
+	
+	public String getAnimationName(int index)
+	{
+		if (animFile == null)
+			return null;
+		else
+			return animFile.getAnimationName(index);
+	}
+
+	public void setCurrentAnimation(int selectedIndex) {
+		if (HavokNative.setAnimation(selectedIndex) == -1)
+		{
+			HavokNative.setAnimation(0);
+			System.out.println("Invalid Animation");
+		}
+	}
+
+	public void setAnimationSpeed(int speed) {
+		animSpeed = 1/(float)speed;
 	}
 	
 }

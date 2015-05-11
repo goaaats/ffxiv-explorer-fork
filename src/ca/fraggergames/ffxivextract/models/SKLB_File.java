@@ -31,13 +31,28 @@ public class SKLB_File {
 		if (bb.getInt() != 0x736b6c62)
 			throw new IOException("Not a SKLB");
 		
-		bb.getInt();
-		int offsetToSkelSection = bb.getInt();
-		int offsetToHavokFile = bb.getInt();
-		bb.getShort();
-		bb.getShort();		
-		bb.getInt();
-		bb.getInt();
+		int version = bb.getInt();
+		
+		int offsetToSkelSection = -1;
+		int offsetToHavokFile = -1;
+		
+		//Different depending if 0031 or 0021	
+		if (version == 0x31333030)
+		{		
+			offsetToSkelSection = bb.getInt();
+			offsetToHavokFile = bb.getInt();
+			bb.getShort();
+			bb.getShort();		
+			bb.getInt();
+			bb.getInt();
+		}
+		else if (version == 0x31323030)
+		{
+			offsetToSkelSection = bb.getShort();
+			offsetToHavokFile = bb.getShort();
+			bb.getShort();
+			bb.getShort();
+		}
 		
 		//SKEL INFO SECTION		
 		

@@ -24,7 +24,10 @@ import javax.swing.BoxLayout;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JSlider;
 import javax.swing.border.TitledBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import ca.fraggergames.ffxivextract.helpers.Matrix;
 import ca.fraggergames.ffxivextract.models.Mesh;
@@ -40,7 +43,8 @@ public class OpenGL_View extends JPanel {
 
 	//UI
 	JLabel lblVertices, lblIndices, lblMeshes;
-	JComboBox cmbLodChooser, cmbVariantChooser;
+	JComboBox cmbLodChooser, cmbVariantChooser, cmbAnimation;
+	JSlider sldSpeed;
 	
 	FPSAnimator animator;
 	ModelRenderer renderer;
@@ -236,6 +240,59 @@ public class OpenGL_View extends JPanel {
         
         lblMeshes = new JLabel("Num Meshes: " + (model.getMeshes(currentLoD) == null ? "NONE" : model.getMeshes(currentLoD).length));
         panel_2.add(lblMeshes);
+        
+        JPanel panel_6 = new JPanel();
+        panel_6.setBorder(null);
+        add(panel_6, BorderLayout.SOUTH);
+        panel_6.setLayout(new FlowLayout(FlowLayout.LEFT, 5, 5));
+        
+        JLabel lblAnimation = new JLabel("Animation: ");
+        panel_6.add(lblAnimation);
+        
+        cmbAnimation = new JComboBox();
+        cmbAnimation.setLightWeightPopupEnabled(false);
+        panel_6.add(cmbAnimation);
+        
+        for (int i = 0; i < model.getNumAnimations(); i++)
+        	cmbAnimation.addItem(model.getAnimationName(i));
+        
+        if (model.getNumAnimations() == 0)
+        	cmbAnimation.addItem("No Animations Detected");
+        
+        cmbAnimation.addItemListener(new ItemListener() {
+			
+			@Override
+			public void itemStateChanged(ItemEvent e) {
+				if (e.getStateChange() == ItemEvent.SELECTED) {
+			          if (!((String)e.getItem()).equals("No Animations Detected"))
+			          {
+			        	  if (model != null)
+			        		  model.setCurrentAnimation(cmbAnimation.getSelectedIndex());
+			          }
+			    }
+			}
+		});
+        
+        JLabel lblAnimationSpeed = new JLabel("Animation Speed: ");
+        panel_6.add(lblAnimationSpeed);
+        
+        sldSpeed = new JSlider();
+        sldSpeed.setMinimum(1);
+        sldSpeed.setValue(60);
+        panel_6.add(sldSpeed);
+        
+        sldSpeed.addChangeListener(new ChangeListener() {
+			
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				if (!sldSpeed.getValueIsAdjusting()) {
+		            int speed = (int)sldSpeed.getValue();
+		            
+		            if (model != null)
+		            	model.setAnimationSpeed(speed);
+		        }  
+			}
+		});
         
         String vertList = "Vertices: ";
         String indicesList = "Indices: ";

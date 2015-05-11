@@ -89,6 +89,14 @@ public class Utils {
         return "^" + toReturn + "$";
     }
     
+    public static long getOffset(String path, SqPack_IndexFile indexFile)
+    {
+    	String folder = path.substring(0, path.lastIndexOf("/"));
+    	String file = path.substring(path.lastIndexOf("/")+1);
+    	
+    	return getOffset(folder, file, indexFile);
+    }
+    
     public static long getOffset(String foldername, String filename, SqPack_IndexFile indexFile)
     {
     	if (indexFile.getIndexName().contains("index2"))
