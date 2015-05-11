@@ -32,8 +32,8 @@ public class SKLB_File {
 			throw new IOException("Not a SKLB");
 		
 		bb.getInt();
-		int offsetToSkelSection = bb.getShort();
-		int offsetToHavokFile = bb.getShort();
+		int offsetToSkelSection = bb.getInt();
+		int offsetToHavokFile = bb.getInt();
 		bb.getShort();
 		bb.getShort();		
 		bb.getInt();
