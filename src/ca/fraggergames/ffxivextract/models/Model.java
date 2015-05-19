@@ -230,7 +230,12 @@ public class Model {
         	{
         		skeletonPath = String.format("chara/monster/%s/skeleton/base/b0001/skl_%sb0001.sklb", modelPathSplit[2], modelPathSplit[2]);
         		animationPath = String.format("chara/monster/%s/animation/a0001/bt_common/resident/monster.pap", modelPathSplit[2]);
-        	}        	       
+        	} 
+        	else if (modelPathSplit[1].equals("human"))
+        	{
+        		skeletonPath = String.format("chara/human/%s/skeleton/%s/%s/skl_%s%s.sklb", modelPathSplit[2], modelPathSplit[4], modelPathSplit[5], modelPathSplit[2], modelPathSplit[5]);
+        		animationPath = String.format("chara/human/%s/animation/%s/resident/face.pap", modelPathSplit[2], modelPathSplit[5]);
+        	}  
         	        		       
         	if (skeletonPath == null || animationPath == null)
         	{
@@ -246,18 +251,18 @@ public class Model {
 				byte sklbData[] = currentIndex.extractFile(skelPathOffset, null);
 				skelFile = new SKLB_File(sklbData);
 			} catch (FileNotFoundException e) {
-				e.printStackTrace();
+				System.out.println("Skel Not Found");
 			} catch (IOException e) {
-				e.printStackTrace();
+				System.out.println("Skel Not Found");
 			}
 	        animFile = null;
 			try {
 				byte animData[] = currentIndex.extractFile(animPathOffset, null); 
 				animFile = new PAP_File(animData);
 			} catch (FileNotFoundException e) {
-				e.printStackTrace();
+				System.out.println("Anim Not Found");
 			} catch (IOException e) {
-				e.printStackTrace();
+				System.out.println("Anim Not Found");
 			}		
 			
 			if (animFile != null && skelFile != null){
@@ -327,7 +332,7 @@ public class Model {
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-			}															
+			}										
 					
 		}
 		

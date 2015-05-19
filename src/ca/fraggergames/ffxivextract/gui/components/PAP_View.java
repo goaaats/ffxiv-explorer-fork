@@ -1,16 +1,14 @@
 package ca.fraggergames.ffxivextract.gui.components;
 
+import java.awt.BorderLayout;
+
+import javax.swing.AbstractListModel;
+import javax.swing.JList;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.border.TitledBorder;
 
 import ca.fraggergames.ffxivextract.models.PAP_File;
-import javax.swing.JList;
-import java.awt.BorderLayout;
-import javax.swing.AbstractListModel;
-import javax.swing.border.BevelBorder;
-import javax.swing.border.EmptyBorder;
-import javax.swing.JScrollPane;
-import javax.swing.JLabel;
-import javax.swing.border.TitledBorder;
 
 public class PAP_View extends JPanel {
 

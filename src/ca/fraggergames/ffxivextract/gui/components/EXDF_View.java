@@ -703,4 +703,9 @@ public class EXDF_View extends JScrollPane implements ItemListener{
 	public int getNumLangs() {
 		return exhFile.getNumLanguages();
 	}	
+	
+	public JTable getTable()
+	{
+		return table;
+	}
 }
