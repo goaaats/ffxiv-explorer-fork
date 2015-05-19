@@ -56,6 +56,7 @@ import ca.fraggergames.ffxivextract.gui.components.Image_View;
 import ca.fraggergames.ffxivextract.gui.components.Loading_Dialog;
 import ca.fraggergames.ffxivextract.gui.components.Lua_View;
 import ca.fraggergames.ffxivextract.gui.components.OpenGL_View;
+import ca.fraggergames.ffxivextract.gui.components.PAP_View;
 import ca.fraggergames.ffxivextract.gui.components.Path_to_Hash_Window;
 import ca.fraggergames.ffxivextract.gui.components.Sound_View;
 import ca.fraggergames.ffxivextract.helpers.HavokNative;
@@ -676,6 +677,15 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 				splitPane.setRightComponent(tabs);				
 			}
 		}	
+		else if (data.length >= 4 && data[0] == 'p' && data[1] == 'a' && data[2] == 'p' && data[3] == ' ')
+		{
+			try {
+				PAP_View papView = new PAP_View(new PAP_File(data));
+				tabs.addTab("Animation File", papView);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
 		
 		hexView.setBytes(data);	
 		//if (contentType != 3)
