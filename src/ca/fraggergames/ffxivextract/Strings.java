@@ -8,6 +8,7 @@ public class Strings {
 	//Dialog Titles
 	public static final String DIALOG_TITLE_ABOUT = "About";
 	public static final String DIALOG_TITLE_MUSICSWAPPER = "Music Swap Tool";
+	public static final String DIALOG_TITLE_MODELVIEWER = "Model Viewer";
 	public static final String DIALOG_TITLE_SEARCH = "Search";
 	public static final String DIALOG_TITLE_ERROR = "Error";
 	
@@ -64,6 +65,7 @@ public class Strings {
 	public static final String MENUITEM_HASHCALC = "Path -> Hash Calculator";
 	public static final String MENUITEM_MACROEDITOR = "Macro Editor";
 	public static final String MENUITEM_LOGVIEWER = "Log Viewer";
+	public static final String MENUITEM_MODELVIEWER = "Model Viewer";
 	public static final String MENUITEM_ENABLEUPDATE = "Check for Updates";
 	public static final String MENUITEM_QUIT = "Quit";
 	public static final String MENUITEM_ABOUT = "About";

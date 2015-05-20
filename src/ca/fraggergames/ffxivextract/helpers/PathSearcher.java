@@ -63,7 +63,7 @@ public class PathSearcher extends JFrame {
 
 		System.out.println("Opening " + path + "....");
 		
-		SqPack_IndexFile currentIndexFile = new SqPack_IndexFile(path);
+		SqPack_IndexFile currentIndexFile = new SqPack_IndexFile(path, true);
 		
 		int numFound = 0;
 		int numFoundFolder = 0;

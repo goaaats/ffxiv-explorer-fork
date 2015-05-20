@@ -110,17 +110,16 @@ public class EXDF_View extends JScrollPane implements ItemListener{
 		
 		exhFolder = folderName;
 		
-		//Find this thing		
-		long offset = Utils.getOffset(folderName, exhName, currentIndex);
-		if (offset != -1){
-			try {
-				byte[] data = currentIndex.extractFile(offset,  null);
-				exhFile = new EXHF_File(data);				
+		//Find this thing				
+		try {
+				byte[] data = currentIndex.extractFile(folderName, exhName);
+				
+				if (data != null)
+					exhFile = new EXHF_File(data);				
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
-			}
 		}
+		
 		
 		//No EXH file found...
 		if (exhFile == null)
@@ -297,26 +296,25 @@ public class EXDF_View extends JScrollPane implements ItemListener{
 				
 				formattedExdName = formattedExdName.substring(formattedExdName.lastIndexOf("/")+1);
 				
-				long offset = Utils.getOffset(exhFolder, formattedExdName, currentIndex);
 				
-				if (offset != -1){
-					
-					try {						
-						//Hey we accidently found something
-						if (HashDatabase.getFileName(HashDatabase.computeCRC(formattedExdName.getBytes(), 0, formattedExdName.getBytes().length)) == null){
-							System.out.println("Adding: " + formattedExdName);
-							if (numLanguages > 1)					
-								HashDatabase.addPathToDB(String.format(exdName, exhFile.getPageTable()[i].pageNum, "_"+langs[j]), currentIndex.getIndexName());
-							else
-								HashDatabase.addPathToDB(String.format(exdName, exhFile.getPageTable()[i].pageNum, ""), currentIndex.getIndexName());
-						}
-						byte[] data = currentIndex.extractFile(offset, null);
-						exdFile[(i*(numLanguages == 1 ? 1 : 4))+j] = new EXDF_File(data);
-					} catch (IOException e) {
-						e.printStackTrace();
+				try {						
+					//Hey we accidently found something
+					if (HashDatabase.getFileName(HashDatabase.computeCRC(formattedExdName.getBytes(), 0, formattedExdName.getBytes().length)) == null){
+						System.out.println("Adding: " + formattedExdName);
+						if (numLanguages > 1)					
+							HashDatabase.addPathToDB(String.format(exdName, exhFile.getPageTable()[i].pageNum, "_"+langs[j]), currentIndex.getIndexName());
+						else
+							HashDatabase.addPathToDB(String.format(exdName, exhFile.getPageTable()[i].pageNum, ""), currentIndex.getIndexName());
 					}
-										
+					byte[] data = currentIndex.extractFile(exhFolder, formattedExdName);
+					
+					if (exdFile != null)
+						exdFile[(i*(numLanguages == 1 ? 1 : 4))+j] = new EXDF_File(data);
+				} catch (IOException e) {
+					e.printStackTrace();
 				}
+									
+				
 			}
 		}
 		

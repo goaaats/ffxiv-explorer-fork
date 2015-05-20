@@ -59,6 +59,7 @@ import ca.fraggergames.ffxivextract.gui.components.OpenGL_View;
 import ca.fraggergames.ffxivextract.gui.components.PAP_View;
 import ca.fraggergames.ffxivextract.gui.components.Path_to_Hash_Window;
 import ca.fraggergames.ffxivextract.gui.components.Sound_View;
+import ca.fraggergames.ffxivextract.gui.modelviewer.ModelViewerWindow;
 import ca.fraggergames.ffxivextract.helpers.HavokNative;
 import ca.fraggergames.ffxivextract.helpers.LERandomAccessFile;
 import ca.fraggergames.ffxivextract.helpers.LuaDec;
@@ -350,6 +351,12 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 				hasher.setLocationRelativeTo(FileManagerWindow.this);
 				hasher.setVisible(true);
 			}
+			else if (event.getActionCommand().equals("modelviewer"))
+			{
+				ModelViewerWindow modelviewer = new ModelViewerWindow();
+				modelviewer.setLocationRelativeTo(FileManagerWindow.this);
+				modelviewer.setVisible(true);
+			}
 			else if (event.getActionCommand().equals("musicswapper"))
 			{
 				MusicSwapperWindow swapper = new MusicSwapperWindow();
@@ -427,6 +434,10 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 		search_searchAgain.addActionListener(menuHandler);	
 		search_searchAgain.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F3,0));
 		
+		JMenuItem tools_modelViewer = new JMenuItem(Strings.MENUITEM_MODELVIEWER);		
+		tools_modelViewer.setActionCommand("modelviewer");
+		tools_modelViewer.addActionListener(menuHandler);
+		
 		JMenuItem tools_musicswapper = new JMenuItem(Strings.MENUITEM_MUSICSWAPPER);
 		tools_musicswapper.setActionCommand("musicswapper");
 		tools_musicswapper.addActionListener(menuHandler);
@@ -441,7 +452,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 		
 		JMenuItem tools_logViewer = new JMenuItem(Strings.MENUITEM_LOGVIEWER);		
 		tools_logViewer.setActionCommand("logviewer");
-		tools_logViewer.addActionListener(menuHandler);
+		tools_logViewer.addActionListener(menuHandler);		
 
 		Preferences prefs = Preferences.userNodeForPackage(ca.fraggergames.ffxivextract.Main.class);
 		options_enableUpdate = new JCheckBoxMenuItem(Strings.MENUITEM_ENABLEUPDATE, prefs.getBoolean(Constants.PREF_DO_DB_UPDATE, false));
@@ -464,6 +475,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 		search.add(search_search);
 		search.add(search_searchAgain);
 		
+		tools.add(tools_modelViewer);
 		tools.add(tools_musicswapper);
 		tools.add(tools_macroEditor);
 		tools.add(tools_logViewer);

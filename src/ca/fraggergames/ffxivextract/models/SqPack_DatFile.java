@@ -18,6 +18,7 @@ public class SqPack_DatFile {
 	public final static int TYPE_TEXTURE = 4;
 	public final static int TYPE_MODEL = 3;
 	public final static int TYPE_BINARY = 2;
+	public final static int TYPE_PLACEHOLDER = 1;
 	
 	private LERandomAccessFile currentFilePointer;
 
