@@ -70,6 +70,11 @@ public class PAP_File {
 		return numAnimations;
 	}
 	
+	public String[] getAnimationNames()
+	{
+		return animationNames;
+	}
+	
 	public String getAnimationName(int index)
 	{
 		if (index >= numAnimations)

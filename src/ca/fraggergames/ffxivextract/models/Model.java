@@ -50,11 +50,13 @@ public class Model {
 	private String[] boneStrings;
 	
 	//Skeleton/Animation
-	SKLB_File skelFile;
-	PAP_File animFile;
-	float animSpeed = 1f/60f;
+	private SKLB_File skelFile;
+	private PAP_File animFile;
+	private float animSpeed = 1f/60f;
 	
-	SimpleShader simpleShader;
+	private SimpleShader simpleShader;
+	
+	private boolean isVRAMLoaded = false;
 	
 	public Model(byte[] data)
 	{
@@ -230,7 +232,12 @@ public class Model {
         	{
         		skeletonPath = String.format("chara/monster/%s/skeleton/base/b0001/skl_%sb0001.sklb", modelPathSplit[2], modelPathSplit[2]);
         		animationPath = String.format("chara/monster/%s/animation/a0001/bt_common/resident/monster.pap", modelPathSplit[2]);
-        	}        	       
+        	} 
+        	else if (modelPathSplit[1].equals("human"))
+        	{
+        		skeletonPath = String.format("chara/human/%s/skeleton/%s/%s/skl_%s%s.sklb", modelPathSplit[2], modelPathSplit[4], modelPathSplit[5], modelPathSplit[2], modelPathSplit[5]);
+        		animationPath = String.format("chara/human/%s/animation/%s/resident/face.pap", modelPathSplit[2], modelPathSplit[5]);
+        	}  
         	        		       
         	if (skeletonPath == null || animationPath == null)
         	{
@@ -238,26 +245,26 @@ public class Model {
         		animationPath = "!/!";
         	}
         	
-        	long skelPathOffset = Utils.getOffset(skeletonPath, currentIndex);
-        	long animPathOffset = Utils.getOffset(animationPath, currentIndex);
         	
 	        skelFile = null;
-			try {
-				byte sklbData[] = currentIndex.extractFile(skelPathOffset, null);
-				skelFile = new SKLB_File(sklbData);
+			try {				
+				byte sklbData[] = currentIndex.extractFile(skeletonPath);
+				if (skelFile != null)
+					skelFile = new SKLB_File(sklbData);
 			} catch (FileNotFoundException e) {
-				e.printStackTrace();
+				System.out.println("Skel Not Found");
 			} catch (IOException e) {
-				e.printStackTrace();
+				System.out.println("Skel Not Found");
 			}
 	        animFile = null;
 			try {
-				byte animData[] = currentIndex.extractFile(animPathOffset, null); 
-				animFile = new PAP_File(animData);
+				byte animData[] = currentIndex.extractFile(animationPath);
+				if (animData != null)
+					animFile = new PAP_File(animData);
 			} catch (FileNotFoundException e) {
-				e.printStackTrace();
+				System.out.println("Anim Not Found");
 			} catch (IOException e) {
-				e.printStackTrace();
+				System.out.println("Anim Not Found");
 			}		
 			
 			if (animFile != null && skelFile != null){
@@ -308,16 +315,15 @@ public class Model {
 		{
 			String fileString = incFolderPath.substring(incFolderPath.lastIndexOf("/")+1) + ".imc";										
 				
-			long offset = Utils.getOffset(incFolderPath, fileString, currentIndex);
-			
-			if (offset == -1)
-				continue;
-			
-			System.out.println("Adding Entry: " + incFolderPath+"/"+fileString);
-			HashDatabase.addPathToDB(incFolderPath+"/"+fileString, currentIndex.getIndexName());
-					
 			try {
-				byte[] data = currentIndex.extractFile(offset, null);
+				byte[] data = currentIndex.extractFile(incFolderPath);
+				
+				if (data == null)
+					continue;
+				
+				System.out.println("Adding Entry: " + incFolderPath+"/"+fileString);
+				HashDatabase.addPathToDB(incFolderPath+"/"+fileString, currentIndex.getIndexName());
+				
 				ByteBuffer bb = ByteBuffer.wrap(data);
 				bb.order(ByteOrder.LITTLE_ENDIAN);
 				return bb.getShort();
@@ -327,7 +333,7 @@ public class Model {
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-			}															
+			}										
 					
 		}
 		
@@ -387,7 +393,7 @@ public class Model {
 				}
 				
 				try {
-					materials[i] = new Material(materialFolderPath, currentIndex, currentIndex.extractFile(Utils.getOffset(materialFolderPath, fileString, currentIndex), null));
+					materials[i] = new Material(materialFolderPath, currentIndex, currentIndex.extractFile(materialFolderPath, fileString));
 				} catch (FileNotFoundException e) {
 					e.printStackTrace();
 				} catch (IOException e) {
@@ -408,7 +414,7 @@ public class Model {
 			materialFolderPath = String.format("chara/human/c%04d/obj/body/b%04d/material",chara,body);
 			
 			try {
-				materials[bodyMaterialSpot] = new Material(materialFolderPath, currentIndex, currentIndex.extractFile(Utils.getOffset(materialFolderPath, s, currentIndex), null));
+				materials[bodyMaterialSpot] = new Material(materialFolderPath, currentIndex, currentIndex.extractFile(materialFolderPath, s));
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
 			} catch (IOException e) {
@@ -676,6 +682,8 @@ public class Model {
 				m.loadShader(gl);
 			}					
 		}
+		
+		isVRAMLoaded = true;
 	}
 
 	public DX9VertexElement[] getDX9Struct(int lodLevel, int i) {
@@ -708,6 +716,15 @@ public class Model {
 
 	public void setAnimationSpeed(int speed) {
 		animSpeed = 1/(float)speed;
+	}
+	
+	public boolean isVRAMLoaded()
+	{
+		return isVRAMLoaded;
+	}
+
+	public void resetVRAM() {
+		isVRAMLoaded = false;
 	}
 	
 }

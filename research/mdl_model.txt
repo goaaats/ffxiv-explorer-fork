@@ -54,6 +54,15 @@ Used to initialize the buffers if using DirectX, and also defines what the buffe
 --LOD 2 MESH TABLE-- (Size of Num LOD2 Meshes); Same as LOD1 Mesh Table
 --LOD 3 MESH TABLE-- (Size of Num LOD3 Meshes); Same as LOD1 Mesh Table
 
+--
+--Two Shorts
+--[Data Size, Int32] + Data Size
+--Byte: Num padding
+--Padding
+--BOUNDING BOXES: 4 float vector * 2 points
+-0x40 bytes
+--BONE INFO: 4 float vector * 2 * numBones
+
 
 --CHUNK 3,4,5-- (Three for each LoD)
 

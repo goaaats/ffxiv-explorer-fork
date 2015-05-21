@@ -3,8 +3,6 @@ package ca.fraggergames.ffxivextract.models;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Calendar;
-import java.util.Date;
-import java.sql.SQLException;
 
 import javax.swing.JLabel;
 import javax.swing.JProgressBar;
@@ -19,11 +17,17 @@ public class SqPack_IndexFile {
 	
 	private SqPack_DataSegment segments[] = new SqPack_DataSegment[4];
 	private SqPack_Folder packFolders[];
-	private boolean noFolder = false;
-	
-	long offset;
-	int size;
+	private boolean noFolder = false;	
 
+	private boolean isFastloaded = false;
+	
+	/**
+	  * Constructor. Primarily used by the FileManagerWindow to handle gui stuff. Loads all file info + structure info and names.
+	  * 
+	  * @param pathToIndex Path to the SqPack index file you wish to open 	   
+	  * @param prgLoadingBar The progress bar to increment
+	  * @param lblLoadingBarString The progress bar text to increment
+	  */
 	public SqPack_IndexFile(String pathToIndex, JProgressBar prgLoadingBar, JLabel lblLoadingBarString) throws IOException {
 
 		path = pathToIndex;
@@ -81,7 +85,13 @@ public class SqPack_IndexFile {
 
 	}
 	
-	public SqPack_IndexFile(String pathToIndex) throws IOException {
+	 /**
+	  * Constructor.
+	  * 
+	  * @param pathToIndex Path to the SqPack index file you wish to open 	   
+	  * @param fastLoad Setting this to true will load only file info of the archive, and omit it's structure and file/folder names.
+	  */
+	public SqPack_IndexFile(String pathToIndex, boolean fastLoad) throws IOException {
 
 		path = pathToIndex;
 		
@@ -90,40 +100,74 @@ public class SqPack_IndexFile {
 		int sqpackHeaderLength = checkSqPackHeader(ref);	
 		getSegments(ref, sqpackHeaderLength);
 
-		// Check if we have a folder segment, if not... load files only
-		if (segments[3] != null) {			
-			int offset = segments[3].getOffset();
-			int size = segments[3].getSize();
-			int numFolders = size / 0x10;
-
-			packFolders = new SqPack_Folder[numFolders];
-
-			for (int i = 0; i < numFolders; i++) {
-				ref.seek(offset + (i * 16)); // Every folder offset header is 16
-												// bytes
-
-				int id = ref.readInt();
-				int fileIndexOffset = ref.readInt();
-				int folderSize = ref.readInt();
-				int numFiles = folderSize / 0x10;
-				ref.readInt(); // Skip
-
-				packFolders[i] = new SqPack_Folder(id, numFiles,
-						fileIndexOffset);
-
-				packFolders[i].readFiles(ref, false);
-			}
-		} else {
+		//Fast load will blindly load all files regardless of folder
+		if (fastLoad)
+		{
+			isFastloaded = true;
+			
 			noFolder = true;
 			packFolders = new SqPack_Folder[1];
 			packFolders[0] = new SqPack_Folder(0, (pathToIndex.contains("index2") ? 2 : 1 ) * segments[0].getSize()/0x10, segments[0].getOffset());
-			packFolders[0].readFiles(ref, pathToIndex.contains("index2"));
+			
+			ref.seek(segments[0].getOffset());
+			
+			for (int i = 0; i < packFolders[0].files.length; i++)
+			{			
+				if (!pathToIndex.contains("index2"))
+				{
+					int id = ref.readInt();
+					int id2 = ref.readInt();
+					long dataoffset = ref.readInt();
+					ref.readInt();
+				
+					packFolders[0].getFiles()[i] = new SqPack_File(id, id2, dataoffset, false);
+				}
+				else
+				{
+					int id = ref.readInt();
+					long dataoffset = ref.readInt();
+					packFolders[0].getFiles()[i] = new SqPack_File(id, -1, dataoffset, false);										
+				}					
+			}
+		}
+		else
+		{
+			// Check if we have a folder segment, if not... load files only
+			if (segments[3] != null) {			
+				int offset = segments[3].getOffset();
+				int size = segments[3].getSize();
+				int numFolders = size / 0x10;
+	
+				packFolders = new SqPack_Folder[numFolders];
+	
+				for (int i = 0; i < numFolders; i++) {
+					ref.seek(offset + (i * 16)); // Every folder offset header is 16
+													// bytes
+	
+					int id = ref.readInt();
+					int fileIndexOffset = ref.readInt();
+					int folderSize = ref.readInt();
+					int numFiles = folderSize / 0x10;
+					ref.readInt(); // Skip
+	
+					packFolders[i] = new SqPack_Folder(id, numFiles,
+							fileIndexOffset);
+	
+					packFolders[i].readFiles(ref, false);
+				}
+			} else {
+				noFolder = true;
+				packFolders = new SqPack_Folder[1];
+				packFolders[0] = new SqPack_Folder(0, (pathToIndex.contains("index2") ? 2 : 1 ) * segments[0].getSize()/0x10, segments[0].getOffset());
+				packFolders[0].readFiles(ref, pathToIndex.contains("index2"));
+			}
 		}
 
 		ref.close();
 
 	}
 	
+	/** Checks the sqpack header, will also advance the file pointer by it's size.  */
 	public static int checkSqPackHeader(LERandomAccessFile ref) throws IOException{
 		// Check SqPack Header
 		byte[] buffer = new byte[6];
@@ -171,15 +215,18 @@ public class SqPack_IndexFile {
 		return headerLength;
 	}
 
+	/** Returns the folders in this archive.  */
 	public SqPack_Folder[] getPackFolders() {
 		return packFolders;
 	}
 	
+	/** Returns if this archive has no folders (usually the case with index2 and will be for fastloads)  */
 	public boolean hasNoFolders()
 	{
 		return noFolder;
 	}
 	
+	/** Debug  */
 	public void displayIndexInfo() {
 		for (int i = 0; i < getPackFolders().length; i++) {
 			System.out.println("Folder: "
@@ -257,7 +304,7 @@ public class SqPack_IndexFile {
 					long dataoffset = ref.readInt();
 					ref.readInt();
 				
-					files[i] = new SqPack_File(id, id2, dataoffset);
+					files[i] = new SqPack_File(id, id2, dataoffset, true);
 				
 					if (prgLoadingBar != null)
 						prgLoadingBar.setValue(prgLoadingBar.getValue()+1);
@@ -269,7 +316,7 @@ public class SqPack_IndexFile {
 				{
 					int id = ref.readInt();
 					long dataoffset = ref.readInt();
-					files[i] = new SqPack_File(id, -1, dataoffset);
+					files[i] = new SqPack_File(id, -1, dataoffset, true);
 					
 					if (prgLoadingBar != null)
 						prgLoadingBar.setValue(prgLoadingBar.getValue()+1);
@@ -293,13 +340,13 @@ public class SqPack_IndexFile {
 					long dataoffset = ref.readInt();
 					ref.readInt();
 				
-					files[i] = new SqPack_File(id, id2, dataoffset);
+					files[i] = new SqPack_File(id, id2, dataoffset, true);
 				}
 				else
 				{
 					int id = ref.readInt();
 					long dataoffset = ref.readInt();
-					files[i] = new SqPack_File(id, -1, dataoffset);										
+					files[i] = new SqPack_File(id, -1, dataoffset, true);										
 				}					
 			}
 		}
@@ -330,7 +377,7 @@ public class SqPack_IndexFile {
 		public long dataoffset;
 		private String name;
 		
-		public SqPack_File(int id, int id2, long offset)
+		public SqPack_File(int id, int id2, long offset, boolean loadNames)
 		{
 			this.id = id;
 			this.id2 = id2;
@@ -340,10 +387,15 @@ public class SqPack_IndexFile {
 			//if (id2 == -1)			
 				//this.name = HashDatabase.getFullpath(id);			
 			//else
-			if (id2 != -1)
-				this.name = HashDatabase.getFileName(id);
-			if (this.name == null)
-				this.name = String.format("~%x", id);
+			
+			if (loadNames){
+			
+				if (id2 != -1)
+					this.name = HashDatabase.getFileName(id);
+				if (this.name == null)
+					this.name = String.format("~%x", id);
+				
+			}
 			//else
 				//HashDatabase.flagFileNameAsUsed(id);
 		}
@@ -372,6 +424,7 @@ public class SqPack_IndexFile {
 		}
 	}
 
+	/** Gets the content type of the file at the given offset.  */
 	public int getContentType(long dataoffset) throws IOException, FileNotFoundException {
 		String pathToOpen = path;
 		
@@ -386,7 +439,76 @@ public class SqPack_IndexFile {
 		datFile.close();
 		return contentType;
 	}
+	
+	/** Extracts the file at the specified path.  */
+	public byte[] extractFile(String path) throws IOException, FileNotFoundException 
+    {
+    	String folder = path.substring(0, path.lastIndexOf("/"));
+    	String file = path.substring(path.lastIndexOf("/")+1);
+    	
+    	return extractFile(folder, file);
+    }
+    
+	/** Extracts the file at the specified folder with the given filename.  */
+    public byte[] extractFile(String foldername, String filename) throws IOException, FileNotFoundException 
+    {
+    	if (getIndexName().contains("index2"))
+    	{
+    		String fullPath = foldername + "/" + filename;
+    		int hash = HashDatabase.computeCRC(fullPath.getBytes(), 0, fullPath.getBytes().length);
+    		for (SqPack_File f : getPackFolders()[0].getFiles())
+    		{
+    			if (f.getId() == hash)
+    				return extractFile(f.getOffset());
+    		}
+    	}
+    	else
+    	{
+	    	int hash1 = HashDatabase.computeCRC(foldername.getBytes(), 0, foldername.getBytes().length);
+			
+	    	if (!isFastloaded)
+	    	{
+				for (SqPack_Folder f : getPackFolders())
+				{			
+					if (f.getId() == hash1)
+					{
+									
+						int hash2 = HashDatabase.computeCRC(filename.getBytes(), 0, filename.getBytes().length);
+						for (SqPack_File file : f.getFiles())
+						{
+							if (file.id == hash2)
+							{
+								return extractFile(file.getOffset());
+							}
+						}
+					
+						break;
+					}
+				}	
+	    	}
+	    	else
+	    	{
+	    		for (int i = 0; i < packFolders[0].getFiles().length; i++)
+	    		{
+	    			SqPack_File file = packFolders[0].getFiles()[i];
+	    			if (file.getId2() == hash1)
+	    			{
+	    				int hash2 = HashDatabase.computeCRC(filename.getBytes(), 0, filename.getBytes().length);
+	    				if (file.getId() == hash2)
+	    					return extractFile(file.getOffset()); 
+	    			}
+	    		}
+	    	}
+    	}
+		return null;
+    }
 
+    /** Extracts the file at the specified offset.  */
+    public byte[] extractFile(long dataoffset) throws IOException, FileNotFoundException {
+    	return extractFile(dataoffset, null);
+    }
+    
+    /** Extracts the file at the specified offset... loading bar info also given.  */
 	public byte[] extractFile(long dataoffset, Loading_Dialog loadingDialog) throws IOException, FileNotFoundException {
 		
 		String pathToOpen = path;
@@ -404,6 +526,7 @@ public class SqPack_IndexFile {
 		return data;
 	}
 
+	/** Returns the index file's name.  */
 	public String getIndexName() {
 		return path;
 	}

@@ -359,7 +359,7 @@ public class EXD_Searcher {
 	public static void openEveryModel()
 	{
 		try {
-			SqPack_IndexFile currentIndex = new SqPack_IndexFile("c:\\Program Files (x86)\\SquareEnix\\FINAL FANTASY XIV - A Realm Reborn\\game\\sqpack\\ffxiv\\040000.win32.index");
+			SqPack_IndexFile currentIndex = new SqPack_IndexFile("c:\\Program Files (x86)\\SquareEnix\\FINAL FANTASY XIV - A Realm Reborn\\game\\sqpack\\ffxiv\\040000.win32.index", true);
 			
 			for (int i = 0; i < currentIndex.getPackFolders().length; i++)
 			{
@@ -385,7 +385,7 @@ public class EXD_Searcher {
 	public static void findStains()
 	{
 		try {
-			SqPack_IndexFile currentIndex = new SqPack_IndexFile("e:\\Program Files (x86)\\SquareEnix\\FINAL FANTASY XIV - A Realm Reborn\\game\\sqpack\\ffxiv\\040000.win32.index");
+			SqPack_IndexFile currentIndex = new SqPack_IndexFile("e:\\Program Files (x86)\\SquareEnix\\FINAL FANTASY XIV - A Realm Reborn\\game\\sqpack\\ffxiv\\040000.win32.index", true);
 			
 			for (int i = 0; i < currentIndex.getPackFolders().length; i++)
 			{

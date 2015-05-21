@@ -17,10 +17,9 @@ import ca.fraggergames.ffxivextract.shaders.FXAAShader;
 
 import com.jogamp.common.nio.Buffers;
 
-class ModelRenderer implements GLEventListener{
+public class ModelRenderer implements GLEventListener{
 
 	private Model model, model2;
-	private GLU glu;
 	private float zoom = -7;
 	private float panX = 0;
 	private float panY = 0;
@@ -31,9 +30,7 @@ class ModelRenderer implements GLEventListener{
 	FXAAShader fxaaShader;
 	BlurShader blurShader;
 	
-	static int currentLoD = 0;	
-	
-	private int[] textureIds;		
+	static int currentLoD = 0;		
 	
 	//Matrices
 	float[] modelMatrix = new float[16];
@@ -49,16 +46,40 @@ class ModelRenderer implements GLEventListener{
 	//Frame Buffer Quad
 	FloatBuffer drawQuad;
 	
+	public ModelRenderer()
+	{
+		this(null, null);
+	}
+	
+	public ModelRenderer(Model model)
+	{
+		this(model, null);
+	}
+	
 	public ModelRenderer(Model model, Model model2) {
 		this.model = model;
 		this.model2 = model2;
-		textureIds = new int[model.getNumMaterials() * 4];
 		
 		drawQuad = Buffers.newDirectFloatBuffer(new float[]{-1.0f, -1.0f, 1.0f, -1.0f, -1.0f, 1.0f, -1.0f, 1.0f, 1.0f, -1.0f, 1.0f, 1.0f});
 	}
 
+	public void setModel(Model model)
+	{
+		this.model = model;
+		model.resetVRAM();
+	}
+	
+	public void setModel2(Model model)
+	{
+		this.model2 = model;
+		model2.resetVRAM();
+	}
+	
 	public void resetMaterial() {
-		loaded = false;
+		if (model != null)
+			model.resetVRAM();
+		if (model2 != null)
+			model2.resetVRAM();
 	}
 
 	public void zoom(int notches) {
@@ -81,19 +102,15 @@ class ModelRenderer implements GLEventListener{
 	{
 		currentLoD = level;
 	}
-
-	boolean loaded = false;		
 	
 	@Override
 	public void display(GLAutoDrawable drawable) {
 		GL3bc gl = drawable.getGL().getGL3bc();
 		
-		if (!loaded)
-		{
+		if (model!=null && !model.isVRAMLoaded())
 			model.loadToVRAM(gl);
-		//	model2.loadToVRAM(gl);
-			loaded = true;
-		}
+		if (model2!=null && !model2.isVRAMLoaded())
+			model2.loadToVRAM(gl);
 		
 	    gl.glClear(GL3.GL_COLOR_BUFFER_BIT | GL3.GL_DEPTH_BUFFER_BIT); 		  
 	    
@@ -107,7 +124,8 @@ class ModelRenderer implements GLEventListener{
 	    gl.glViewport(0,0, canvasWidth, canvasHeight);		    
 	    gl.glClear(GL3.GL_COLOR_BUFFER_BIT | GL3.GL_DEPTH_BUFFER_BIT);
 	    			    
-	    model.render(defaultShader, viewMatrix, modelMatrix, projMatrix, gl, currentLoD);
+	    if (model != null)
+	    	model.render(defaultShader, viewMatrix, modelMatrix, projMatrix, gl, currentLoD);
 	    if (model2 != null)
 	    	model2.render(defaultShader, viewMatrix, modelMatrix, projMatrix, gl, currentLoD);		  		   		    		    
 	    		    		   
@@ -129,7 +147,6 @@ class ModelRenderer implements GLEventListener{
 	@Override
 	public void init(GLAutoDrawable drawable) {
 		GL3 gl = drawable.getGL().getGL3();      // get the OpenGL graphics context
-	      glu = new GLU();                         // get GL Utilities
 	      gl.glClearColor(0.3f, 0.3f, 0.3f, 0.3f); // set background (clear) color
 	      gl.glClearDepth(1.0f);      // set clear depth value to farthest
 	      gl.glEnable(GL3.GL_DEPTH_TEST); // enables depth testing
@@ -144,7 +161,6 @@ class ModelRenderer implements GLEventListener{
 			fxaaShader = new FXAAShader(gl);
 			blurShader = new BlurShader(gl);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}

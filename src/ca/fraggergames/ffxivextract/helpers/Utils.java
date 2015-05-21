@@ -89,49 +89,6 @@ public class Utils {
         return "^" + toReturn + "$";
     }
     
-    public static long getOffset(String path, SqPack_IndexFile indexFile)
-    {
-    	String folder = path.substring(0, path.lastIndexOf("/"));
-    	String file = path.substring(path.lastIndexOf("/")+1);
-    	
-    	return getOffset(folder, file, indexFile);
-    }
     
-    public static long getOffset(String foldername, String filename, SqPack_IndexFile indexFile)
-    {
-    	if (indexFile.getIndexName().contains("index2"))
-    	{
-    		String fullPath = foldername + "/" + filename;
-    		int hash = HashDatabase.computeCRC(fullPath.getBytes(), 0, fullPath.getBytes().length);
-    		for (SqPack_File f : indexFile.getPackFolders()[0].getFiles())
-    		{
-    			if (f.getId() == hash)
-    				return f.getOffset();
-    		}
-    	}
-    	else
-    	{
-	    	int hash1 = HashDatabase.computeCRC(foldername.getBytes(), 0, foldername.getBytes().length);
-			
-			for (SqPack_Folder f : indexFile.getPackFolders())
-			{			
-				if (f.getId() == hash1)
-				{
-								
-					int hash2 = HashDatabase.computeCRC(filename.getBytes(), 0, filename.getBytes().length);
-					for (SqPack_File file : f.getFiles())
-					{
-						if (file.id == hash2)
-						{
-							return file.dataoffset;
-						}
-					}
-				
-					break;
-				}
-			}	
-    	}
-		return -1;
-    }
     
 }
