@@ -1,6 +1,8 @@
 package ca.fraggergames.ffxivextract.gui.modelviewer;
 
 import java.awt.BorderLayout;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
@@ -18,6 +20,7 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.event.ListDataListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
@@ -26,16 +29,20 @@ import com.jogamp.opengl.util.FPSAnimator;
 import ca.fraggergames.ffxivextract.gui.components.EXDF_View;
 import ca.fraggergames.ffxivextract.gui.components.ModelRenderer;
 import ca.fraggergames.ffxivextract.gui.components.OpenGL_View;
+import ca.fraggergames.ffxivextract.helpers.SparseArray;
 import ca.fraggergames.ffxivextract.helpers.Utils;
 import ca.fraggergames.ffxivextract.models.EXHF_File;
 import ca.fraggergames.ffxivextract.models.Model;
 import ca.fraggergames.ffxivextract.models.SqPack_IndexFile;
+
 import javax.swing.BoxLayout;
 import javax.swing.JComboBox;
 import javax.swing.border.TitledBorder;
 import javax.swing.UIManager;
+
 import java.awt.Color;
 import java.awt.FlowLayout;
+
 import javax.swing.border.EmptyBorder;
 
 public class ModelViewerItems extends JPanel {
@@ -43,12 +50,18 @@ public class ModelViewerItems extends JPanel {
 	ModelViewerWindow parent;
 	
 	ArrayList<ModelItemEntry> entries[] = new ArrayList[22];
+	
+	SparseArray<String> slots = new SparseArray<String>();
+	
+	SparseArray<String> charIds = new SparseArray<String>();
 
-	int currentCategory = 3;
+	int currentBody = -1;
+	int currentCategory = -1;
 	
 	OpenGL_View view3D;
-	JList lstMonsters;	
-	
+	JList lstItems;	
+	JComboBox cmbBodyStyle;
+	JComboBox cmbCategory;
 	FPSAnimator animator;
 	
 	ModelRenderer renderer;
@@ -66,6 +79,46 @@ public class ModelViewerItems extends JPanel {
 		
 		this.parent = parent;
 		this.modelIndexFile = modelIndex;
+				
+		//Fill the Equipment Slots
+		slots.append(-1, "--Equipment Slot--");		
+		slots.append(1, "One-Handed Weapon");
+		slots.append(13, "Two-Handed Weapon");
+		slots.append(2, "Offhand");
+		slots.append(3, "Head");
+		slots.append(4, "Body");
+		slots.append(5, "Hands");
+		slots.append(7, "Legs");
+		slots.append(8, "Feet");
+		slots.append(9, "Earings");
+		slots.append(10, "Necklace");
+		slots.append(11, "Wrists");
+		slots.append(12, "Rings");
+		
+		slots.append(15, "Body + Head");
+		slots.append(16, "All - Head");
+		//slots.append(17, "Soulstone");
+		slots.append(18, "Legs + Feet");
+		slots.append(19, "All");
+		slots.append(20, "Body + Hands");
+		slots.append(21, "Body + Legs + Feet");
+		
+		slots.append(0, "Non-Equipment");
+		
+		//Fill the char ids
+		charIds.append(-1, "--Body Style--");		
+		charIds.append(1, "Midlander Male");
+		charIds.append(2, "Midlander  Female");
+		charIds.append(3, "Highlander Male");
+		charIds.append(4, "Highlander Female");
+		charIds.append(5, "Elezen Male");
+		charIds.append(6, "Elezen Female");
+		charIds.append(7, "Miqo'te Male");
+		charIds.append(8, "Miqo'te Female");
+		charIds.append(9, "Roegadyn Male");
+		charIds.append(10, "Roegadyn  Female");
+		charIds.append(11, "Lalafell Male");
+		charIds.append(12, "Lalafell Female");
 		
 		for (int i = 0; i < entries.length; i++)
 			entries[i] = new ArrayList<ModelItemEntry>();
@@ -100,7 +153,7 @@ public class ModelViewerItems extends JPanel {
 		panel_4.add(panel_5);
 		panel_5.setLayout(new BoxLayout(panel_5, BoxLayout.X_AXIS));
 		
-		JComboBox cmbBodyStyle = new JComboBox();
+		cmbBodyStyle = new JComboBox();
 		panel_5.add(cmbBodyStyle);
 		
 		JPanel panel_6 = new JPanel();
@@ -108,15 +161,15 @@ public class ModelViewerItems extends JPanel {
 		panel_4.add(panel_6);
 		panel_6.setLayout(new BoxLayout(panel_6, BoxLayout.X_AXIS));
 		
-		JComboBox cmbCategory = new JComboBox();
+		cmbCategory = new JComboBox();
 		panel_6.add(cmbCategory);
 		
 		JScrollPane scrollPane = new JScrollPane();
 		panel.add(scrollPane, BorderLayout.CENTER);
 		
-		lstMonsters = new JList();
+		lstItems = new JList();
 		
-		scrollPane.setViewportView(lstMonsters);
+		scrollPane.setViewportView(lstItems);
 
 		GLProfile glProfile = GLProfile.getDefault();
 		GLCapabilities glcapabilities = new GLCapabilities( glProfile );
@@ -211,81 +264,127 @@ public class ModelViewerItems extends JPanel {
 			e1.printStackTrace();
 		} catch (IOException e1) {
 			e1.printStackTrace();
-		}        
+		}    
         
-        lstMonsters.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+        for (int i = 0; i < charIds.size(); i++)
+        	cmbBodyStyle.addItem(charIds.valueAt(i));
+        
+        cmbBodyStyle.addItemListener(new ItemListener() {
+			
+			@Override
+			public void itemStateChanged(ItemEvent e) {
+				if (e.getStateChange() == ItemEvent.SELECTED) {
+		          int selected = cmbBodyStyle.getSelectedIndex();		          
+		          currentBody = charIds.keyAt(selected);
+		          
+		          if (currentCategory != -1 && lstItems.getSelectedIndex() != 0)
+		        	  loadModel(-1, lstItems.getSelectedIndex());
+				}
+			}
+        });
+        
+        for (int i = 0; i < slots.size(); i++)
+        	cmbCategory.addItem(slots.valueAt(i));
+        
+        cmbCategory.addItemListener(new ItemListener() {
+			
+			@Override
+			public void itemStateChanged(ItemEvent e) {
+				if (e.getStateChange() == ItemEvent.SELECTED) {
+		          int selected = cmbCategory.getSelectedIndex();
+		          
+		          currentCategory = slots.keyAt(selected);
+		          
+		          ((ItemsListModel)lstItems.getModel()).refresh();
+				}
+			}
+        });
+        
+        //Add all the slots        
+        lstItems.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
 			
 			@Override
 			public void valueChanged(ListSelectionEvent event) {				
 								
 				
-				if (event.getValueIsAdjusting() || lstMonsters.getModel().getSize() == 0)
+				if (event.getValueIsAdjusting() || lstItems.getModel().getSize() == 0 || currentCategory == -1)
 					return;				
 				
-				int selected = lstMonsters.getSelectedIndex();
+				int selected = lstItems.getSelectedIndex();
 				
-				String modelPath = null;
-				byte[] modelData = null;				
-				
-				ModelItemEntry currentItem = entries[currentCategory].get(selected);
-				
-				try {
-					
-					switch (currentCategory)
-					{
-					case 13:											
-					case 2:
-						modelPath = String.format("chara/weapon/w%04d/obj/body/b%04d/model/w%04b%04d.mdl", currentItem.id, currentItem.model, currentItem.id, currentItem.model);
-						break;
-					case 3:
-						modelPath = String.format("chara/equipment/e%04d/model/c%04de%04d_met.mdl", currentItem.id, currentItem.character, currentItem.id);	
-						break;
-					case 4:					
-						modelPath = String.format("chara/equipment/e%04d/model/c%04de%04d_top.mdl", currentItem.id, currentItem.character, currentItem.id);
-						break;
-					case 5:
-						modelPath = String.format("chara/equipment/e%04d/model/c%04de%04d_glv.mdl", currentItem.id, currentItem.character, currentItem.id);
-						break;
-					case 7:
-						modelPath = String.format("chara/equipment/e%04d/model/c%04de%04d_dwn.mdl", currentItem.id, currentItem.character, currentItem.id);
-						break;
-					case 8:
-						modelPath = String.format("chara/equipment/e%04d/model/c%04de%04d_met.mdl", currentItem.id, currentItem.character, currentItem.id);
-						break;	
-					case 9:
-						modelPath = String.format("chara/accessory/a%04d/model/c%04da%04d_ear.mdl", currentItem.id, currentItem.character, currentItem.id);
-						break;
-					case 10:
-						modelPath = String.format("chara/accessory/a%04d/model/c%04da%04d_nek.mdl", currentItem.id, currentItem.character, currentItem.id);
-						break;
-					case 11:
-						modelPath = String.format("chara/accessory/a%04d/model/c%04da%04d_wrs.mdl", currentItem.id, currentItem.character, currentItem.id);
-						break;
-					case 12:
-						modelPath = String.format("chara/accessory/a%04d/model/c%04da%04d_rir.mdl", currentItem.id, currentItem.character, currentItem.id);
-						break;					
-					}
-					
-					modelData = modelIndexFile.extractFile(modelPath);
-				} catch (FileNotFoundException e) {
-					e.printStackTrace();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-				
-				if (modelData != null)
-				{
-					Model model = new Model(modelPath,modelIndexFile,modelData);
-					model.loadMaterials(currentItem.varient == 0 ? 1 : currentItem.varient);
-					renderer.setModel(model);
-				}
+				loadModel(-1, selected);
 			}
 		});		
         
         panel_3.add( glcanvas, BorderLayout.CENTER);
                 
 	}
-
+	
+	private void loadModel(int charNumberOverride, int selected)
+	{
+		String modelPath = null;
+		byte[] modelData = null;
+		ModelItemEntry currentItem = entries[currentCategory].get(selected);
+		
+		int characterNumber = ((charNumberOverride == -1 ? currentBody : charNumberOverride) * 100) + 01; 
+		
+		try {
+			
+			switch (currentCategory)
+			{
+			case 13:		
+			case 1:
+			case 2:
+				modelPath = String.format("chara/weapon/w%04d/obj/body/b%04d/model/w%04b%04d.mdl", currentItem.id, currentItem.model, currentItem.id, currentItem.model);
+				break;
+			case 3:
+				modelPath = String.format("chara/equipment/e%04d/model/c%04de%04d_met.mdl", currentItem.id, characterNumber, currentItem.id);	
+				break;
+			case 4:					
+				modelPath = String.format("chara/equipment/e%04d/model/c%04de%04d_top.mdl", currentItem.id, characterNumber, currentItem.id);
+				break;
+			case 5:
+				modelPath = String.format("chara/equipment/e%04d/model/c%04de%04d_glv.mdl", currentItem.id, characterNumber, currentItem.id);
+				break;
+			case 7:
+				modelPath = String.format("chara/equipment/e%04d/model/c%04de%04d_dwn.mdl", currentItem.id, characterNumber, currentItem.id);
+				break;
+			case 8:
+				modelPath = String.format("chara/equipment/e%04d/model/c%04de%04d_sho.mdl", currentItem.id, characterNumber, currentItem.id);
+				break;	
+			case 9:
+				modelPath = String.format("chara/accessory/a%04d/model/c%04da%04d_ear.mdl", currentItem.id, characterNumber, currentItem.id);
+				break;
+			case 10:
+				modelPath = String.format("chara/accessory/a%04d/model/c%04da%04d_nek.mdl", currentItem.id, characterNumber, currentItem.id);
+				break;
+			case 11:
+				modelPath = String.format("chara/accessory/a%04d/model/c%04da%04d_wrs.mdl", currentItem.id, characterNumber, currentItem.id);
+				break;
+			case 12:
+				modelPath = String.format("chara/accessory/a%04d/model/c%04da%04d_rir.mdl", currentItem.id, characterNumber, currentItem.id);
+				break;					
+			}
+			
+			modelData = modelIndexFile.extractFile(modelPath);
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		if (modelData == null && characterNumber != 101)
+			loadModel(fallback(characterNumber), lstItems.getSelectedIndex());
+		
+		if (modelData != null)
+		{
+			Model model = new Model(modelPath,modelIndexFile,modelData);
+			model.loadMaterials(currentItem.varient == 0 ? 1 : currentItem.varient);
+			renderer.setModel(model);
+		}
+				
+	}
+	
 	private void loadItems() throws FileNotFoundException, IOException
 	{
 		SqPack_IndexFile indexFile = new SqPack_IndexFile(parent.getSqpackPath() + "0a0000.win32.index", true);
@@ -294,24 +393,64 @@ public class ModelViewerItems extends JPanel {
 		
 		for (int i = 0; i < view.getTable().getRowCount(); i++){
 			if (!((String)view.getTable().getValueAt(i, 11)).equals("0, 0, 0, 0"))
-			{
+			{				
 				String model1Split[] = ((String)view.getTable().getValueAt(i, 11)).split(",");
 				String model2Split[] = ((String)view.getTable().getValueAt(i, 12)).split(",");
 						
 				int slot = (Integer) view.getTable().getValueAt(i, 48);
-				entries[slot].add(new ModelItemEntry((String)view.getTable().getValueAt(i, 4), Integer.parseInt(model1Split[0].trim()), Integer.parseInt(model1Split[2].trim()), Integer.parseInt(model1Split[1].trim()), slot, 101));			
+				entries[slot].add(new ModelItemEntry((String)view.getTable().getValueAt(i, 4), Integer.parseInt(model1Split[0].trim()), Integer.parseInt(model1Split[2].trim()), Integer.parseInt(model1Split[1].trim()), slot));			
 			}
 		}		
 				
-		lstMonsters.setModel(new AbstractListModel() {			
+		lstItems.setModel(new ItemsListModel());
+				
+	}
+	
+	private int fallback(int characterCode)
+	{
+		switch (characterCode)
+		{
+			
+		}
+		
+		return 101;
+	}
+	
+	private void searchAndSelect(String input)
+	{
+		for (int i = 0; i < entries[currentCategory].size(); i++)
+		{
+			if (entries[currentCategory].get(i).name.equalsIgnoreCase(input))
+			{
+				lstItems.setSelectedIndex(i);
+			}
+		}
+	}
+	
+	class ItemsListModel extends AbstractListModel
+	{			
 			public int getSize() {
+				
+				if (currentCategory == -1)
+					return 0;
+				
 				return entries[currentCategory].size();
 			}
 			public String getElementAt(int index) {
+				
+				if (currentCategory == -1)
+					return "";
+				
 				return entries[currentCategory].get(index).name;
 			}
-		});
-				
+			
+			public void refresh()
+			{
+				if (currentCategory == -1)
+					fireContentsChanged(this, 0, 0);
+				else
+					fireContentsChanged(this, 0, entries[currentCategory].size());
+			}
 	}
 	
 }
