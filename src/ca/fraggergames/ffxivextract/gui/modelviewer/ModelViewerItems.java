@@ -282,7 +282,7 @@ public class ModelViewerItems extends JPanel {
 			}
 		});		
         
-        //panel_3.add( glcanvas, BorderLayout.CENTER);
+        panel_3.add( glcanvas, BorderLayout.CENTER);
                 
 	}
 
@@ -299,7 +299,7 @@ public class ModelViewerItems extends JPanel {
 				String model2Split[] = ((String)view.getTable().getValueAt(i, 12)).split(",");
 						
 				int slot = (Integer) view.getTable().getValueAt(i, 48);
-				entries[slot].add(new ModelItemEntry((String)view.getTable().getValueAt(i, 4), Integer.parseInt(model1Split[0].trim()), Integer.parseInt(model1Split[1].trim()), Integer.parseInt(model1Split[2].trim()), slot, 101));			
+				entries[slot].add(new ModelItemEntry((String)view.getTable().getValueAt(i, 4), Integer.parseInt(model1Split[0].trim()), Integer.parseInt(model1Split[2].trim()), Integer.parseInt(model1Split[1].trim()), slot, 101));			
 			}
 		}		
 				

@@ -393,7 +393,10 @@ public class Model {
 				}
 				
 				try {
-					materials[i] = new Material(materialFolderPath, currentIndex, currentIndex.extractFile(materialFolderPath, fileString));
+					byte materialData[] = currentIndex.extractFile(materialFolderPath, fileString);
+					
+					if (materialData != null)
+						materials[i] = new Material(materialFolderPath, currentIndex, materialData);
 				} catch (FileNotFoundException e) {
 					e.printStackTrace();
 				} catch (IOException e) {

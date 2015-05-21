@@ -14,7 +14,7 @@ import java.net.URL;
 
 public class ModelViewerWindow extends JFrame {
 	
-	SqPack_IndexFile modelIndexFile;
+	SqPack_IndexFile modelIndexFile, buildingIndexFile;
 	
 	public ModelViewerWindow() {
 		
@@ -29,6 +29,7 @@ public class ModelViewerWindow extends JFrame {
 		
         try {
 			modelIndexFile = new SqPack_IndexFile(getSqpackPath() + "040000.win32.index", true);
+			buildingIndexFile = new SqPack_IndexFile(getSqpackPath() + "010000.win32.index", true);
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -37,10 +38,11 @@ public class ModelViewerWindow extends JFrame {
 		//tabbedPane.add("Character Builder", new ModelViewerCharacter(this, modelIndexFile));
 		tabbedPane.add("Items", new ModelViewerItems(this, modelIndexFile));
 		tabbedPane.add("Monsters", new ModelViewerMonsters(this, modelIndexFile));
+		tabbedPane.add("Furniture", new ModelViewerFurniture(this, buildingIndexFile));
 	}
 
 	public String getSqpackPath() {
-		return "C:\\Program Files (x86)\\SquareEnix\\FINAL FANTASY XIV - A Realm Reborn\\game\\sqpack\\ffxiv\\";
+		return "E:\\Program Files (x86)\\SquareEnix\\FINAL FANTASY XIV - A Realm Reborn\\game\\sqpack\\ffxiv\\";
 	}
 
 }
