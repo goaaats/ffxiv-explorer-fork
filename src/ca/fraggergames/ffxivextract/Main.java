@@ -14,6 +14,7 @@ import javax.swing.UIManager;
 
 import ca.fraggergames.ffxivextract.gui.FileManagerWindow;
 import ca.fraggergames.ffxivextract.gui.components.Update_Dialog;
+import ca.fraggergames.ffxivextract.helpers.DatBuilder;
 import ca.fraggergames.ffxivextract.helpers.HavokNative;
 import ca.fraggergames.ffxivextract.helpers.LERandomAccessFile;
 import ca.fraggergames.ffxivextract.helpers.PathSearcher;
@@ -26,6 +27,7 @@ public class Main {
 
 	public static void main(String[] args) {
 
+		
 		// Set to windows UI
 		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
@@ -49,36 +51,7 @@ public class Main {
 			e1.printStackTrace();
 		}
 		
-		/*
-		HavokNative.initHavokNativ();
-		HavokNative.startHavok();
-		System.out.println(HavokNative.loadSkeleton("C:\\Users\\Filip\\Dropbox\\Public\\havok\\skel2.hkx"));
-		System.out.println(HavokNative.loadAnimation("C:\\Users\\Filip\\Dropbox\\Public\\havok\\anim2.hkx"));
-
 		
-		HavokNative.setAnimation(1);
-		
-		ByteBuffer buffer = ByteBuffer.allocateDirect(4 * 16 * HavokNative.getNumBones());
-		buffer.order(ByteOrder.nativeOrder());
-		
-		System.out.println(HavokNative.getNumBones());
-		HavokNative.getBones(buffer);
-		FloatBuffer fbuff = buffer.asFloatBuffer();
-		fbuff.position(0);
-		
-		for (int i = 16*3; i < 16*4; i+=16)
-			System.out.println(String.format("%f,%f,%f,%f\r\n%f,%f,%f,%f\r\n%f,%f,%f,%f\r\n%f,%f,%f,%f\r\n\r\n", fbuff.get(i),fbuff.get(i+1),fbuff.get(i+2),fbuff.get(i+3),fbuff.get(i+4),fbuff.get(i+5),fbuff.get(i+6),fbuff.get(i+7),fbuff.get(i+8),fbuff.get(i+9),fbuff.get(i+10),fbuff.get(i+11),fbuff.get(i+12),fbuff.get(i+13),fbuff.get(i+14),fbuff.get(i+15)));
-		
-		int i = 0;
-		while (i == 0){				
-			HavokNative.stepAnimation(1f/120f);
-			HavokNative.debugRenderBones();
-		}
-		
-		HavokNative.endHavok();
-		
-		System.exit(1);
-		*/
 		/*
 		String archive = "0a0000";
 		HashDatabase.beginConnection();try{

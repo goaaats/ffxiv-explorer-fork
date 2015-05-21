@@ -457,9 +457,15 @@ public class Model {
 			try {
 				simpleShader = new SimpleShader(gl);
 			} catch (IOException e1) {
-				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
+		
+
+		if (numBones != -1){
+	    	boneMatrixBuffer.position(0);
+	    	HavokNative.getBonesWithNames(boneMatrixBuffer, boneStrings);
+	    	boneMatrixBuffer.position(0);
+		}
 		
 		for (int i = 0; i < getNumMesh(currentLoD); i++){
 	    	
@@ -531,10 +537,7 @@ public class Model {
 	    		    	
 	    	//Upload Bone Matrix	    	
 	    	if (numBones != -1)
-	    	{
-		    	boneMatrixBuffer.position(0);
-		    	HavokNative.getBonesWithNames(boneMatrixBuffer, boneStrings);
-		    	boneMatrixBuffer.position(0);
+	    	{	
 	    		shader.setBoneMatrix(gl, numBones, boneMatrixBuffer);
 	    		
 	    	}
@@ -563,7 +566,7 @@ public class Model {
 		    //Advance Animation		
 		    if (numBones != -1)
 		    {
-		    	HavokNative.stepAnimation(animSpeed);
+		    	//HavokNative.stepAnimation(animSpeed);
 		    	HavokNative.debugRenderBones();
 		    }
 		}
