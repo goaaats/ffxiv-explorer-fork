@@ -1,13 +1,9 @@
 package ca.fraggergames.ffxivextract.helpers;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-
-import ca.fraggergames.ffxivextract.models.Material;
-import ca.fraggergames.ffxivextract.models.SqPack_IndexFile;
-import ca.fraggergames.ffxivextract.models.SqPack_IndexFile.SqPack_File;
-import ca.fraggergames.ffxivextract.models.SqPack_IndexFile.SqPack_Folder;
-import ca.fraggergames.ffxivextract.storage.HashDatabase;
 
 public class Utils {
 
@@ -89,6 +85,21 @@ public class Utils {
         return "^" + toReturn + "$";
     }
     
+    public static byte[] readContentIntoByteArray(File file) throws IOException
+    {
+       FileInputStream fileInputStream = null;
+       byte[] bFile = new byte[(int) file.length()];
     
+      //convert file into array of bytes
+      fileInputStream = new FileInputStream(file);
+      fileInputStream.read(bFile);
+      fileInputStream.close();
+      for (int i = 0; i < bFile.length; i++)
+      {
+         System.out.print((char) bFile[i]);
+      }
+       
+       return bFile;
+    }
     
 }

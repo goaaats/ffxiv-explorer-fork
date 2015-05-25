@@ -41,7 +41,7 @@ Structure (based on 0c0000.win32.index):
 0x04 Num Channels      Int32; 0x01: Mono, 0x02: Stereo, FFXIV is usually 0x02 channels
 0x08 Frequency         Int32; FFXIV is usually 44100HZ (AC440000)
 0x0C Data Type         Int32; 0x0C: MS-ADPCM, 0x06: OGG. FFXIV seems to use OGG for music, MS-ADPCM for sound.
-0x10 Loop Start        Int32; In file size (???)
+0x10 Loop Start        Int32; In Bytes. Calculation: (filesize/amount of samples)*sample
 0x14 Loop End          Int32; Ditto, if you wanted to loop a whole song, set this to the file's size.
 0x18 First Frame Pos   Int32; First OggS after (possibly, not always) encrypted header.
 0x1C Aux Chunk Count   Short; Number of Aux Chunks

@@ -8,6 +8,7 @@ public class Strings {
 	//Dialog Titles
 	public static final String DIALOG_TITLE_ABOUT = "About";
 	public static final String DIALOG_TITLE_MUSICSWAPPER = "Music Swap Tool";
+	public static final String DIALOG_TITLE_SCDCONVERTER = "OGG to SCD Converter";
 	public static final String DIALOG_TITLE_MODELVIEWER = "Model Viewer";
 	public static final String DIALOG_TITLE_SEARCH = "Search";
 	public static final String DIALOG_TITLE_ERROR = "Error";
