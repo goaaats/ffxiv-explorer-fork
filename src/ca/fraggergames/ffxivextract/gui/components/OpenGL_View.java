@@ -285,12 +285,12 @@ public class OpenGL_View extends JPanel {
 			
 			@Override
 			public void stateChanged(ChangeEvent e) {
-				if (!sldSpeed.getValueIsAdjusting()) {
-		            int speed = (int)sldSpeed.getValue();
-		            
-		            if (model != null)
-		            	model.setAnimationSpeed(speed);
-		        }  
+				
+	            int speed = (int)sldSpeed.getValue();
+	            
+	            if (model != null)
+	            	model.setAnimationSpeed(speed);
+	        
 			}
 		});
         

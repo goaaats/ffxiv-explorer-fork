@@ -326,7 +326,7 @@ public class ModelViewerItems extends JPanel {
 		byte[] modelData = null;
 		ModelItemEntry currentItem = entries[currentCategory].get(selected);
 		
-		int characterNumber = ((charNumberOverride == -1 ? currentBody : charNumberOverride) * 100) + 01; 
+		int characterNumber = ((charNumberOverride == -1 ? currentBody * 100+ 01: charNumberOverride)); 
 		
 		try {
 			
@@ -373,8 +373,18 @@ public class ModelViewerItems extends JPanel {
 			e.printStackTrace();
 		}
 		
-		if (modelData == null && characterNumber != 101)
-			loadModel(fallback(characterNumber), lstItems.getSelectedIndex());
+		if (modelData == null && (characterNumber != 101 && characterNumber != 201))
+		{
+			System.out.println(String.format("Model for charId %04d not detected, falling back to %s Hyur model.", characterNumber, currentBody % 2 == 0 ? "female" : "male"));
+			
+			if (currentBody % 2 == 0)
+				loadModel(201, selected);
+			else
+				loadModel(101, selected);
+			
+			
+			return;			
+		}
 		
 		if (modelData != null)
 		{

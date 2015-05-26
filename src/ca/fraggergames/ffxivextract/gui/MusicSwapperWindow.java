@@ -89,6 +89,7 @@ public class MusicSwapperWindow extends JFrame {
 	private JButton btnRemove;
 	private JLabel lblGenerateMessage;
 	private JPanel panel_7;
+	private JButton btnOgg2Scd;
 	
 	public MusicSwapperWindow() {
 		this.setTitle(Strings.DIALOG_TITLE_MUSICSWAPPER);
@@ -181,6 +182,18 @@ public class MusicSwapperWindow extends JFrame {
 		
 		btnGenerateDat = new JButton("Generate Dat");
 		panel_2.add(btnGenerateDat);
+		
+		btnOgg2Scd = new JButton("Ogg2Scd Converter");
+		panel_2.add(btnOgg2Scd);
+		
+		btnOgg2Scd.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				SCDConverterWindow converter = new SCDConverterWindow();
+				converter.setVisible(true);
+			}
+		});
 		
 		pnlSwapper = new JPanel();
 		pnlSwapper.setBorder(new TitledBorder(null, Strings.MUSICSWAPPER_FRAMETITLE_SWAPPING, TitledBorder.LEADING, TitledBorder.TOP, null, null));
@@ -527,8 +540,8 @@ public class MusicSwapperWindow extends JFrame {
 		if (backup.exists()) {
 			System.out.println("Backup found, checking file.");
 			// Should hash here, but for now just check file counts
-			originalMusicFile = new SqPack_IndexFile(backup.getCanonicalPath(), true);
-			editMusicFile = new SqPack_IndexFile(file.getCanonicalPath(), true);
+			originalMusicFile = new SqPack_IndexFile(backup.getCanonicalPath(), false);
+			editMusicFile = new SqPack_IndexFile(file.getCanonicalPath(), false);
 			
 			Arrays.sort(editMusicFile.getPackFolders()[0].getFiles(), new Comparator<SqPack_File>() {
 
@@ -560,7 +573,7 @@ public class MusicSwapperWindow extends JFrame {
 				backup.delete();
 				copyFile(file, backup);
 				originalMusicFile = new SqPack_IndexFile(
-						backup.getCanonicalPath(), true);
+						backup.getCanonicalPath(), false);
 				originalFiles = originalMusicFile.getPackFolders()[0]
 						.getFiles();
 			}
@@ -571,8 +584,8 @@ public class MusicSwapperWindow extends JFrame {
 		} else {
 			// Create backup
 			copyFile(file, backup);
-			editMusicFile = new SqPack_IndexFile(file.getCanonicalPath(), true);
-			originalMusicFile = new SqPack_IndexFile(backup.getCanonicalPath(), true);
+			editMusicFile = new SqPack_IndexFile(file.getCanonicalPath(), false);
+			originalMusicFile = new SqPack_IndexFile(backup.getCanonicalPath(), false);
 			
 			Arrays.sort(editMusicFile.getPackFolders()[0].getFiles(), new Comparator<SqPack_File>() {
 
@@ -645,8 +658,8 @@ public class MusicSwapperWindow extends JFrame {
 		// Create backup
 		System.out.println("Creating backup.");
 		copyFile(edittingIndexFile, backup);
-		editMusicFile = new SqPack_IndexFile(edittingIndexFile.getCanonicalPath(), true);
-		originalMusicFile = new SqPack_IndexFile(backup.getCanonicalPath(), true);
+		editMusicFile = new SqPack_IndexFile(edittingIndexFile.getCanonicalPath(), false);
+		originalMusicFile = new SqPack_IndexFile(backup.getCanonicalPath(), false);
 		SqPack_File originalFiles[] = originalMusicFile.getPackFolders()[0].getFiles();
 		editedFiles = editMusicFile.getPackFolders()[0].getFiles();
 		

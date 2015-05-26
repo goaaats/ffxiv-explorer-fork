@@ -249,7 +249,7 @@ public class Model {
 	        skelFile = null;
 			try {				
 				byte sklbData[] = currentIndex.extractFile(skeletonPath);
-				if (skelFile != null)
+				if (sklbData != null)
 					skelFile = new SKLB_File(sklbData);
 			} catch (FileNotFoundException e) {
 				System.out.println("Skel Not Found");
@@ -276,9 +276,17 @@ public class Model {
 		        animBuffer.put(animFile.getHavokData());
 		        skelBuffer.position(0);
 		        animBuffer.position(0);
-			
+					
+		        //Incase Havok doesn't work
+		        try{
 		        HavokNative.startHavok();
-			
+		        }
+		        catch (UnsatisfiedLinkError e)
+		        { 
+		        	numBones = -1;
+		        	return;
+		        }
+		        
 			    if (HavokNative.loadSkeleton(skelBuffer, skelFile.getHavokData().length) && (HavokNative.loadAnimation(animBuffer, animFile.getHavokData().length)))
 				{
 					if (HavokNative.setAnimation(0) == -1)
@@ -575,7 +583,7 @@ public class Model {
 		    //Advance Animation		
 		    if (numBones != -1)
 		    {
-		    	//HavokNative.stepAnimation(animSpeed);
+		    	HavokNative.stepAnimation(animSpeed);
 		    	HavokNative.debugRenderBones();
 		    }
 		}
@@ -710,11 +718,16 @@ public class Model {
 	}
 
 	public void setCurrentAnimation(int selectedIndex) {
+		
+		if (numBones == -1)
+			return;
+		
 		if (HavokNative.setAnimation(selectedIndex) == -1)
 		{
 			HavokNative.setAnimation(0);
 			System.out.println("Invalid Animation");
-		}
+		}		
+				
 	}
 
 	public void setAnimationSpeed(int speed) {
