@@ -6,8 +6,11 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
+import java.io.BufferedReader;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
 
 import javax.media.opengl.GLCapabilities;
 import javax.media.opengl.GLProfile;
@@ -25,6 +28,7 @@ import com.jogamp.opengl.util.FPSAnimator;
 import ca.fraggergames.ffxivextract.gui.components.EXDF_View;
 import ca.fraggergames.ffxivextract.gui.components.ModelRenderer;
 import ca.fraggergames.ffxivextract.gui.components.OpenGL_View;
+import ca.fraggergames.ffxivextract.helpers.SparseArray;
 import ca.fraggergames.ffxivextract.helpers.Utils;
 import ca.fraggergames.ffxivextract.models.EXHF_File;
 import ca.fraggergames.ffxivextract.models.Model;
@@ -46,11 +50,12 @@ public class ModelViewerMonsters extends JPanel {
 	private boolean leftMouseDown = false;
 	private boolean rightMouseDown = false;
 	
-	private int currentLoD = 0;
 	private int lastOriginX, lastOriginY;
 	private int lastX, lastY;	
 	
-	SqPack_IndexFile modelIndexFile;
+	SqPack_IndexFile modelIndexFile;	
+	
+	SparseArray<String> names = new SparseArray<String>();
 	
 	public ModelViewerMonsters(ModelViewerWindow parent, SqPack_IndexFile modelIndex) {
 		
@@ -225,6 +230,7 @@ public class ModelViewerMonsters extends JPanel {
         
         panel_3.add( glcanvas, BorderLayout.CENTER);
                 
+        loadAndParseNames("./monsters.lst");
 	}
 
 	private void loadMonsters() throws FileNotFoundException, IOException
@@ -243,11 +249,36 @@ public class ModelViewerMonsters extends JPanel {
 			public int getSize() {
 				return entries.length;
 			}
-			public String getElementAt(int index) {
-				return "Monster: " + index;
+			public String getElementAt(int index) {				
+				return names.get(index, "Monster " + index);
 			}
 		});
 				
+	}
+	
+	private void loadAndParseNames(String path)
+	{
+		try{
+			BufferedReader br = new BufferedReader(new FileReader(path));
+		    for(String line; (line = br.readLine()) != null; ) {
+		    	//Skip comments and whitespace
+		        if (line.startsWith("#") || line.isEmpty() || line.equals(""))
+		        	continue;		        
+		        if (line.contains(":"))
+		        {
+		        	String split[] = line.split(":", 2);
+		        	if (split.length != 2)
+		        		continue;
+		        	
+		        	if (split[1].isEmpty())
+		        		continue;
+		        	names.put(Integer.parseInt(split[0]), split[1]);
+		        }
+		    } 
+		}
+		catch (IOException e){
+			
+		}
 	}
 	
 }

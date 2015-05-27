@@ -15,7 +15,7 @@ import ca.fraggergames.ffxivextract.models.SqPack_IndexFile;
 
 public class ModelViewerWindow extends JFrame {
 	
-	String sqPackPath = "E:\\Program Files (x86)\\SquareEnix\\FINAL FANTASY XIV - A Realm Reborn\\game\\sqpack\\ffxiv\\";
+	String sqPackPath = "C:\\Program Files (x86)\\SquareEnix\\FINAL FANTASY XIV - A Realm Reborn\\game\\sqpack\\ffxiv\\";
 	SqPack_IndexFile modelIndexFile, buildingIndexFile;
 	
 	public ModelViewerWindow() {
@@ -32,7 +32,7 @@ public class ModelViewerWindow extends JFrame {
                 "Customized Dialog",
                 JOptionPane.PLAIN_MESSAGE);
 		
-		if (s != null)
+		if (s != null && !s.isEmpty())
 			sqPackPath = s;
 		
 		JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);

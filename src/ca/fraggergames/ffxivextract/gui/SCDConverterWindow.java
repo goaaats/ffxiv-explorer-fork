@@ -262,7 +262,7 @@ public class SCDConverterWindow extends JFrame {
 		int numChannels = 2;
 		int sampleRate = 44100;
 		int loopStart = 0;
-		int loopEnd = oggPath.length();
+		int loopEnd = ogg.length;
 				
 		//Create Header
 		byte[] header = createSCDHeader(ogg.length, volume, numChannels, sampleRate, loopStart, loopEnd);

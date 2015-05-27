@@ -1,0 +1,56 @@
+#Lines like this are ignored. Comments must be on their own line starting with a #.
+#Syntax is ID:NAME, if duplicates are found, first in list will be used. Empty or missing names will return index instead.
+
+#IDs 1-20 are equipable models 
+0:Human
+1:Chocobo
+2:
+3:
+4:
+5:
+6:
+7:
+8:
+9:
+10:
+11:
+12:
+13:
+14:
+15:
+16:
+17:
+18:
+19:
+
+#Monster ids
+20:Diremite
+21:Banemite (Grey)
+22:Banemite (Purple)
+23:Banemite (Wtf?)
+24:Rat
+25:Squirrel
+26:Squirrel
+27:Squirrel
+28:Toadstool (Red)
+29:Toadstool (Purple)
+31:Toadstool (Green)
+32:Opo-opo
+33:Opo-opo
+34:Opo-opo
+35:Ochu (Orange)
+36:Ochu (Red)
+37:Mosquto
+38:Mosquto
+39:Mosquto
+40:Carrion Bird
+41:Carrion Bird
+42:Carrion Bird
+43:Carrion Bird
+44:Warthog (Brown)
+45:Warthog (Grey)
+46:Warthog (White)
+47:Roseling
+48:
+49:
+50:
