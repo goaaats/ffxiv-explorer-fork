@@ -1,5 +1,5 @@
 #Lines like this are ignored. Comments must be on their own line starting with a #.
-#Syntax is ID:NAME, if duplicates are found, first in list will be used. Empty or missing names will return index instead.
+#Syntax is ID:NAME, if duplicate ids are found, last in list will be used. Empty or missing names will return index instead.
 
 #IDs 1-20 are equipable models 
 0:Human
@@ -50,7 +50,97 @@
 44:Warthog (Brown)
 45:Warthog (Grey)
 46:Warthog (White)
-47:Roseling
-48:
-49:
-50:
+47:Roseling (Red)
+48:Roseling (Blue)
+49:Roseling (Purple)
+50:Slug
+51:Slug
+52:Slug
+53:Gnat
+54:Gnat
+55:Magitek Bit
+56:Beetle (Yellow)
+57:Beetle (Ladybug)
+58:Swarm (White)
+59:Swarm (Yellow)
+60:Swarm ()
+61:Doe
+62:Antelope
+63:Imp (Grey)
+64:Imp (Purple)
+65:Courel (Yellow Spotted)
+66:Courel (White)
+67:Courel (Black)
+68:Courel (Yellow Spotted)
+69:Courel (Yellow)
+70:Courel (Yellow Spotted)
+71:Mindflayer 1
+72:Mindflayer 2
+73:Mindflayer 3
+74:Mindflayer 4
+75:Yarzon
+76:Yarzon (purple)
+
+#Missing stuff here, this is most likely particle only things... IE: Fireflies/Willo the Wisps
+77:
+78:
+79:
+80:
+
+81:Golem 1
+82:Golem 2 (White)
+83:Golem 3
+84:Golem 4
+85:Golem 5
+86:Golem 6
+87:Golem 7
+88:Golem 8 /w Spriggan
+
+89:Tonberry
+90:Tonberry 2 
+91:Tonberry King
+92:Tonberry Scholar
+93:Tonberry Black Mage
+
+94:Turtle 1
+95:Turtle 2
+96:Raptor 1
+97:Raptor 2
+98:Bat 1
+99:Bat 2
+100:Bomb 1
+101:Bomb 2
+102:Bomb 3
+103:Bomb 4
+104:Treant 1
+105:Treant 2
+106:Treant 3
+107:Spriggan 1 (Purple Stone)
+108:Spriggan 1 (Yellow Stone)
+109:Spriggan 1 (Silver Stone)
+110:Spriggan 1 (Red Stone)
+111:Spriggan 2 (Purple Stone)
+112:Spriggan 2 (Yellow Stone)
+113:Spriggan 2 (Silver Stone)
+114:Spriggan 2 (Red Stone)
+115:Spriggan (Egg 1)
+116:Spriggan (Egg 2)
+117:Spriggan (Egg 3)
+118:Spriggan (Egg 4)
+119:Spriggan (Egg 5)
+120:Spriggan (Egg 6)
+121:Dullahan 1
+122:Dullahan 2
+123:Dullahan 3
+124:Dullahan w/o Head 1
+125:Dullahan w/o Head 2
+126:Gigantoad 1
+127:Gigantoad 2
+128:Gigantoad 3 (Purple)
+129:Gigantoad 4 (Green)
+130:Puk 1
+131:Puk 2
+132:Puk 3
+133:Hippocerf 1
+134:Hippocerf 2
+135:
