@@ -231,6 +231,19 @@ public class ModelViewerMonsters extends JPanel {
         panel_3.add( glcanvas, BorderLayout.CENTER);
                 
         loadAndParseNames("./monsters.lst");
+        
+        try {
+			renderer.addModel(new Model("chara/demihuman/d0001/obj/equipment/e0001/model/d0001e0001_dwn.mdl", modelIndexFile, modelIndexFile.extractFile("chara/demihuman/d0001/obj/equipment/e0001/model/d0001e0001_dwn.mdl")));
+			renderer.addModel(new Model("chara/demihuman/d0001/obj/equipment/e0001/model/d0001e0001_met.mdl", modelIndexFile, modelIndexFile.extractFile("chara/demihuman/d0001/obj/equipment/e0001/model/d0001e0001_met.mdl")));
+			renderer.addModel(new Model("chara/demihuman/d0001/obj/equipment/e0001/model/d0001e0001_sho.mdl", modelIndexFile, modelIndexFile.extractFile("chara/demihuman/d0001/obj/equipment/e0001/model/d0001e0001_sho.mdl")));
+			renderer.addModel(new Model("chara/demihuman/d0001/obj/equipment/e0001/model/d0001e0001_top.mdl", modelIndexFile, modelIndexFile.extractFile("chara/demihuman/d0001/obj/equipment/e0001/model/d0001e0001_top.mdl")));
+		} catch (FileNotFoundException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 	}
 
 	private void loadMonsters() throws FileNotFoundException, IOException

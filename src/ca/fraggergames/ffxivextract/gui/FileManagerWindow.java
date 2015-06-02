@@ -588,24 +588,12 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 		if (contentType == 3)
 		{		
 			OpenGL_View view = null;
-			
-			Model model = null;
-			/*
-			try {
-				model = new Model("chara/human/c1101/obj/hair/h0002/model/c1101h0002_hir.mdl", currentIndexFile, currentIndexFile.extractFile(0x3543000, null));
-			} catch (FileNotFoundException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			*/
+					
 			try{
 				if (HashDatabase.getFolder(file.getId2()) == null)
-					view = new OpenGL_View(new Model(null, currentIndexFile, data), model);
+					view = new OpenGL_View(new Model(null, currentIndexFile, data));
 				else
-					view = new OpenGL_View(new Model(HashDatabase.getFolder(file.getId2()) + "/" + file.getName(), currentIndexFile, data), model);				
+					view = new OpenGL_View(new Model(HashDatabase.getFolder(file.getId2()) + "/" + file.getName(), currentIndexFile, data));				
 			}catch(Exception modelException)
 			{
 				modelException.printStackTrace();	
