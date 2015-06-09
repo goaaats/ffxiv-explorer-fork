@@ -199,6 +199,14 @@ public class ModelViewerMonsters extends JPanel {
 				byte[] modelData = null;
 				try {
 					
+					/*
+					 * 1: Human
+					 * 2: Demihuman
+					 * 3: Monster
+					 * 4: Object
+					 * 5: ?
+					 */
+					
 					switch (entries[selected].type)
 					{
 					case 2:
@@ -209,6 +217,9 @@ public class ModelViewerMonsters extends JPanel {
 						modelPath = String.format("chara/monster/m%04d/obj/body/b%04d/model/m%04db%04d.mdl", entries[selected].id, entries[selected].model, entries[selected].id, entries[selected].model);
 						modelData = modelIndexFile.extractFile(modelPath);
 						break;
+					case 5:
+						modelPath = String.format("chara/monster/m%04d/obj/body/b%04d/model/m%04db%04d.mdl", entries[selected].id, entries[selected].model, entries[selected].id, entries[selected].model);
+						modelData = modelIndexFile.extractFile(modelPath);
 					}
 						
 				} catch (FileNotFoundException e) {

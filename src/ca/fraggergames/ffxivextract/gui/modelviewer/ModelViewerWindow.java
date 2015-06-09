@@ -15,7 +15,7 @@ import ca.fraggergames.ffxivextract.models.SqPack_IndexFile;
 
 public class ModelViewerWindow extends JFrame {
 	
-	String sqPackPath = "C:\\Program Files (x86)\\SquareEnix\\FINAL FANTASY XIV - A Realm Reborn\\game\\sqpack\\ffxiv\\";
+	String sqPackPath = "E:\\Program Files (x86)\\SquareEnix\\FINAL FANTASY XIV - A Realm Reborn\\game\\sqpack\\ffxiv\\";
 	SqPack_IndexFile modelIndexFile, buildingIndexFile;
 	
 	public ModelViewerWindow() {

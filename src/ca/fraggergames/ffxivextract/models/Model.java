@@ -307,7 +307,13 @@ public class Model {
 			else
 			{
 				numBones = -1;
-				HavokNative.endHavok();
+				try{
+					HavokNative.endHavok();
+				}
+				 catch (UnsatisfiedLinkError e)
+			        { 
+					 
+			        }
 			}
         }
 	}

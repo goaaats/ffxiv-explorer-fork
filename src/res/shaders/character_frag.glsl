@@ -24,8 +24,8 @@ uniform bool uHasSpecular;
 uniform bool uHasColorSet;
 
 vec3 lightPos = vec3(1.0,1.0,1.0);
-vec3 ambientColor = vec3(0.0, 0.0, 0.0);
-vec3 diffuseColor = vec3(255.0/255.0, 255.0/255.0, 255.0/255.0);
+vec3 ambientColor = vec3(1.0,1.0,1.0);
+vec3 diffuseColor = vec3(1.0, 1.0, 1.0);
 vec3 specColor = vec3(1.0, 1.0, 1.0);
 
 void main() {
@@ -54,9 +54,7 @@ void main() {
     if (uHasMask)
     	mapMask = texture2D(uMaskTex, vTexCoord.st);
     if (uHasSpecular)
-    	mapSpecular = texture2D(uSpecularTex, vTexCoord.st);
-    	
-    
+    	mapSpecular = texture2D(uSpecularTex, vTexCoord.st);    	
     	
 	if (uHasNormal && uHasColorSet)
 	{
@@ -88,20 +86,18 @@ void main() {
     //Color
     vec3 color = table_color.xyz;       	
     if (uHasDiffuse && uHasColorSet){    
-   		color = table_color.xyz;
-   		color += table_unknown1.xyz; 
-    	//mapDiffuse = vec4(mapDiffuse.xyz * color,1.0);    
+    	mapDiffuse = vec4((table_color.xyz * mapDiffuse.xyz + table_unknown1.xyz),1.0);    
     } 
-	if (uHasMask && uHasNormal && uHasColorSet){		
-		color = mix(table_color.xyz, table_color.xyz+table_specular.xyz, mapMask.g);
-    	mapDiffuse = vec4(mapDiffuse.xyz * color * mapMask.x, 1.0);
+	if (uHasMask && uHasNormal && uHasColorSet){
+		color = mix(table_color.xyz, table_color.xyz + table_specular.xyz, mapMask.g);
+    	mapDiffuse = vec4(mapDiffuse.xyz * color * mapMask.r, 1.0);
     }
     
-    if (uHasDiffuse && uHasColorSet)
+  /*  if (uHasDiffuse && uHasColorSet)
     {
     	color = (table_color+table_specular).xyz;		
     	mapDiffuse = vec4(mapDiffuse.xyz * color, 1.0);
-    }
+    }*/
     
    // if (table_unknown1.a > 0.1)
     	//mapDiffuse.rgb = table_unknown1.rgb;
@@ -111,41 +107,46 @@ void main() {
     //mapDiffuse.b = 0.0;
     
     //Diffuse           	
-    float lambertian = max(dot(L,normal), 0.0);
-    float invertedLambertian = 1.0 -max(dot(L,normal), 0.0);
-    
-    if (uHasMask)
-    	invertedLambertian *= mapMask.b;
-    else
-    	invertedLambertian = 0.0;
+    float lambertian = max(dot(L,normal), 0.0);    
         
 	vec3 specular = vec3(0.0,0.0,0.0);
  
 	if(lambertian > 0.0 && uHasSpecular) {
-		// this is blinn phong
-		specColor = mapSpecular.rgb * table_specular.rgb;
+		// this is blinn phong		
 		float specAngle = max(dot(H, normal), 0.0);			
 		
-		if (uHasSpecular)
-		{
-			specular = vec3(pow(specAngle, mapSpecular.r*64.0),pow(specAngle, mapSpecular.g*74.0),pow(specAngle, mapSpecular.b*32.0));						
-		}
+		specular.x = pow(specAngle, 25.0) * table_specular.x;
+		specular.y = pow(specAngle, 25.0) * table_specular.y;
+		specular.z = pow(specAngle, 25.0) * table_specular.z;	
 		
-		//Fresnel approximation
-		float F0 = 0.028;
-		float exp = pow(max(0.0, 1.0-dot(H, E)), 5.0);
-	 	float fresnel = exp+F0*(1.0-exp);
-		//specular *= fresnel;				
-	}      
+		if (uHasSpecular)
+			specColor = mapSpecular.xyz;					
+	} 
+	else if (lambertian > 0.0 && uHasMask)
+	{
+		float specAngle = max(dot(H, normal), 0.0);					
+		specular = vec3(pow(specAngle, 8.0)*mapMask.b, pow(specAngle, 8.0)*mapMask.b, pow(specAngle, 8.0)*mapMask.b);		
+	}
 	
-	float rimShading = 0.0;
-	if (uHasMask)
-    	rimShading = mapMask.b * (1.0 - max(dot(E, normal), 0.0));    
+	//Fresnel approximation
+	float fZero = 0.5;
+	float base = max(0, 1-dot(E, L));
+	float exp = pow(base, 5);
+	float fresnel = fZero + (1-fZero)*exp;
+	
+	specular *= fresnel;			
+	
+	//specColor = mapSpecular.rgb * table_specular.rgb;      	
+	
+	float rimShading = (1.0 - max(dot(E, normal), 0.0));   		
+	vec3 finalRimShading = vec3(smoothstep(table_specular.a, 1.0, rimShading * vec3(1.0,1.0,1.0)));
+	
 
 	gl_FragColor = vec4(
-                      /*rimShading * vec3(1.0,1.0,1.0) +*/
-                      specColor * specular +                     
-                      diffuseColor * lambertian * mapDiffuse.xyz, 1.0);
+                     
+                      ambientColor * 0.1 +      
+                      //specular * specColor +               
+                      lambertian * mapDiffuse.xyz, 1.0);
 
 }
 
