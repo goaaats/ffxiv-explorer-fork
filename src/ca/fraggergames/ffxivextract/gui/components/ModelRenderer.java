@@ -72,6 +72,16 @@ public class ModelRenderer implements GLEventListener{
 		model.resetVRAM();
 	}
 	
+	public void setModels(ArrayList<Model> modelList)
+	{
+		for (Model m : modelList)
+			m.resetVRAM();
+		
+		models.clear();
+		models.addAll(modelList);
+		
+	}
+	
 	public void addModel(Model model)
 	{
 		models.add(model);

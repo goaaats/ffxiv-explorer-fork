@@ -202,15 +202,130 @@ public class ModelViewerMonsters extends JPanel {
 					switch (entries[selected].type)
 					{
 					case 2:
-						modelPath = String.format("chara/demihuman/d%04d/obj/body/b%04d/model/d%04db%04d.mdl", entries[selected].id, entries[selected].model, entries[selected].id, entries[selected].model);
-						modelData = modelIndexFile.extractFile(modelPath);
+						EquipableRender demihuman = new EquipableRender();
+						
+						switch(entries[selected].id)
+						{
+						case 1: //Chocobo													
+							demihuman.setModel(EquipableRender.DWN, modelIndexFile, "chara/demihuman/d0001/obj/equipment/e0001/model/d0001e0001_dwn.mdl", 0);
+							demihuman.setModel(EquipableRender.MET, modelIndexFile, "chara/demihuman/d0001/obj/equipment/e0001/model/d0001e0001_met.mdl", 0);
+							demihuman.setModel(EquipableRender.SHO, modelIndexFile, "chara/demihuman/d0001/obj/equipment/e0001/model/d0001e0001_sho.mdl", 0);
+							demihuman.setModel(EquipableRender.TOP, modelIndexFile, "chara/demihuman/d0001/obj/equipment/e0001/model/d0001e0001_top.mdl", 0);							
+							break;
+						case 2: //Magitek													
+							demihuman.setModel(EquipableRender.TOP, modelIndexFile, "chara/demihuman/d0002/obj/equipment/e0001/model/d0002e0001_top.mdl", 0);											
+							break;
+						case 1001: //Amalja													
+							demihuman.setModel(EquipableRender.DWN, modelIndexFile, "chara/demihuman/d1001/obj/equipment/e0001/model/d1001e0001_dwn.mdl", 0);
+							demihuman.setModel(EquipableRender.MET, modelIndexFile, "chara/demihuman/d1001/obj/equipment/e0001/model/d1001e0001_met.mdl", 0);
+							demihuman.setModel(EquipableRender.SHO, modelIndexFile, "chara/demihuman/d1001/obj/equipment/e0001/model/d1001e0001_sho.mdl", 0);
+							demihuman.setModel(EquipableRender.TOP, modelIndexFile, "chara/demihuman/d1001/obj/equipment/e0001/model/d1001e0001_top.mdl", 0);
+							demihuman.setModel(EquipableRender.GLV, modelIndexFile, "chara/demihuman/d1001/obj/equipment/e0001/model/d1001e0001_glv.mdl", 0);
+							break;
+						case 1002: //Ixali													
+							demihuman.setModel(EquipableRender.MET, modelIndexFile, "chara/demihuman/d1002/obj/equipment/e0001/model/d1002e0001_met.mdl", 0);
+							demihuman.setModel(EquipableRender.SHO, modelIndexFile, "chara/demihuman/d1002/obj/equipment/e0001/model/d1002e0001_sho.mdl", 0);
+							demihuman.setModel(EquipableRender.TOP, modelIndexFile, "chara/demihuman/d1002/obj/equipment/e0001/model/d1002e0001_top.mdl", 0);
+							demihuman.setModel(EquipableRender.GLV, modelIndexFile, "chara/demihuman/d1002/obj/equipment/e0001/model/d1002e0001_glv.mdl", 0);
+							break;
+						case 1003: //Kobold												
+							demihuman.setModel(EquipableRender.MET, modelIndexFile, "chara/demihuman/d1003/obj/equipment/e0001/model/d1003e0001_met.mdl", 0);
+							demihuman.setModel(EquipableRender.TOP, modelIndexFile, "chara/demihuman/d1003/obj/equipment/e0001/model/d1003e0001_top.mdl", 0);							
+							break;
+						case 1004: //Goblin													
+							demihuman.setModel(EquipableRender.MET, modelIndexFile, "chara/demihuman/d1004/obj/equipment/e0001/model/d1004e0001_met.mdl", 0);
+							demihuman.setModel(EquipableRender.TOP, modelIndexFile, "chara/demihuman/d1004/obj/equipment/e0001/model/d1004e0001_top.mdl", 0);							
+							break;
+						case 1005: //Sylph													
+							demihuman.setModel(EquipableRender.TOP, modelIndexFile, "chara/demihuman/d1005/obj/equipment/e0001/model/d1005e0001_top.mdl", 0);							
+							break;
+						case 1006: //Moogle													
+							demihuman.setModel(EquipableRender.TOP, modelIndexFile, "chara/demihuman/d1006/obj/equipment/e0001/model/d1006e0001_top.mdl", 0);							
+							break;
+						case 1007: //Sahagin													
+							demihuman.setModel(EquipableRender.TOP, modelIndexFile, "chara/demihuman/d1007/obj/equipment/e0001/model/d1007e0001_top.mdl", 0);							
+							break;
+						case 1008: //Mamoolja													
+							demihuman.setModel(EquipableRender.TOP, modelIndexFile, "chara/demihuman/d1008/obj/equipment/e0001/model/d1008e0001_top.mdl", 0);							
+							break;
+						case 1009: //Gigas 1													
+							demihuman.setModel(EquipableRender.DWN, modelIndexFile, "chara/demihuman/d1009/obj/equipment/e0001/model/d1009e0001_dwn.mdl", 0);
+							demihuman.setModel(EquipableRender.GLV, modelIndexFile, "chara/demihuman/d1009/obj/equipment/e0001/model/d1009e0001_glv.mdl", 0);
+							demihuman.setModel(EquipableRender.TOP, modelIndexFile, "chara/demihuman/d1009/obj/equipment/e0001/model/d1009e0001_top.mdl", 0);							
+							break;
+						case 1010: //Gigas 2													
+							demihuman.setModel(EquipableRender.MET, modelIndexFile, "chara/demihuman/d1010/obj/equipment/e0001/model/d1010e0001_met.mdl", 0);
+							demihuman.setModel(EquipableRender.TOP, modelIndexFile, "chara/demihuman/d1010/obj/equipment/e0001/model/d1010e0001_top.mdl", 0);							
+							break;
+						case 1011: //Gigas 3													
+							demihuman.setModel(EquipableRender.DWN, modelIndexFile, "chara/demihuman/d1011/obj/equipment/e0001/model/d1011e0001_dwn.mdl", 0);
+							demihuman.setModel(EquipableRender.MET, modelIndexFile, "chara/demihuman/d1011/obj/equipment/e0001/model/d1011e0001_met.mdl", 0);							
+							demihuman.setModel(EquipableRender.TOP, modelIndexFile, "chara/demihuman/d1011/obj/equipment/e0001/model/d1011e0001_top.mdl", 0);							
+							break;
+						case 1012: //Quijrn													
+							demihuman.setModel(EquipableRender.TOP, modelIndexFile, "chara/demihuman/d1012/obj/equipment/e0001/model/d1012e0001_top.mdl", 0);							
+							break;
+						case 1013: //Moogle Postman													
+							demihuman.setModel(EquipableRender.DWN, modelIndexFile, "chara/demihuman/d1013/obj/equipment/e0001/model/d1013e0001_dwn.mdl", 0);
+							demihuman.setModel(EquipableRender.MET, modelIndexFile, "chara/demihuman/d1013/obj/equipment/e0001/model/d1013e0001_met.mdl", 0);
+							demihuman.setModel(EquipableRender.TOP, modelIndexFile, "chara/demihuman/d1013/obj/equipment/e0001/model/d1013e0001_top.mdl", 0);							
+							break;
+						case 1014: //Lamia													
+							demihuman.setModel(EquipableRender.TOP, modelIndexFile, "chara/demihuman/d1014/obj/equipment/e0001/model/d1014e0001_top.mdl", 0);							
+							break;
+						case 1015: //Skel													
+							demihuman.setModel(EquipableRender.TOP, modelIndexFile, "chara/demihuman/d1015/obj/equipment/e0001/model/d1015e0001_top.mdl", 0);							
+							break;
+						case 1016: //Succubus													
+							demihuman.setModel(EquipableRender.TOP, modelIndexFile, "chara/demihuman/d1016/obj/equipment/e0001/model/d1016e0001_top.mdl", 0);							
+							break;
+						case 1017: //Demon
+							demihuman.setModel(EquipableRender.TOP, modelIndexFile, "chara/demihuman/d1017/obj/equipment/e0001/model/d1017e0001_top.mdl", 0);							
+							break;
+						case 1018: //Emperor													
+							demihuman.setModel(EquipableRender.MET, modelIndexFile, "chara/demihuman/d1018/obj/equipment/e0001/model/d1018e0001_met.mdl", 0);
+							demihuman.setModel(EquipableRender.TOP, modelIndexFile, "chara/demihuman/d1018/obj/equipment/e0001/model/d1018e0001_top.mdl", 0);							
+							break;
+						case 1019: //Archbishop											
+							demihuman.setModel(EquipableRender.MET, modelIndexFile, "chara/demihuman/d1019/obj/equipment/e0001/model/d1019e0001_met.mdl", 0);
+							demihuman.setModel(EquipableRender.TOP, modelIndexFile, "chara/demihuman/d1019/obj/equipment/e0001/model/d1019e0001_top.mdl", 0);							
+							break;
+						case 1020: //											
+							//demihuman.setModel(EquipableRender.MET, modelIndexFile, "chara/demihuman/d1020/obj/equipment/e0001/model/d1020e0001_met.mdl", 0);
+							demihuman.setModel(EquipableRender.DWN, modelIndexFile, "chara/demihuman/d1020/obj/equipment/e0001/model/d1020e0001_dwn.mdl", 0);							
+							break;
+						case 1021: //											
+							demihuman.setModel(EquipableRender.MET, modelIndexFile, "chara/demihuman/d1021/obj/equipment/e0001/model/d1021e0001_met.mdl", 0);
+							demihuman.setModel(EquipableRender.TOP, modelIndexFile, "chara/demihuman/d1022/obj/equipment/e0001/model/d1021e0001_top.mdl", 0);							
+							break;
+						case 1022: //											
+							demihuman.setModel(EquipableRender.MET, modelIndexFile, "chara/demihuman/d1022/obj/equipment/e0001/model/d1022e0001_met.mdl", 0);
+							demihuman.setModel(EquipableRender.TOP, modelIndexFile, "chara/demihuman/d1022/obj/equipment/e0001/model/d1022e0001_top.mdl", 0);							
+							break;
+						case 1101: //											
+							demihuman.setModel(EquipableRender.MET, modelIndexFile, "chara/demihuman/d1101/obj/equipment/e0001/model/d1101e0001_met.mdl", 0);
+							demihuman.setModel(EquipableRender.TOP, modelIndexFile, "chara/demihuman/d1101/obj/equipment/e0001/model/d1101e0001_top.mdl", 0);							
+							break;
+						case 1201: //											
+							demihuman.setModel(EquipableRender.MET, modelIndexFile, "chara/demihuman/d1201/obj/equipment/e0001/model/d1201e0001_met.mdl", 0);
+							demihuman.setModel(EquipableRender.TOP, modelIndexFile, "chara/demihuman/d1201/obj/equipment/e0001/model/d1201e0001_top.mdl", 0);							
+							break;
+						}		
+												
+						renderer.setModels(demihuman.getModels());
+						
 						break;
 					case 3:
 						modelPath = String.format("chara/monster/m%04d/obj/body/b%04d/model/m%04db%04d.mdl", entries[selected].id, entries[selected].model, entries[selected].id, entries[selected].model);
 						modelData = modelIndexFile.extractFile(modelPath);
+						if (modelData != null)
+						{
+							Model model = new Model(modelPath,modelIndexFile,modelData);
+							model.loadMaterials(entries[selected].varient);
+							renderer.setModel(model);
+						}
 						break;
-					}
-						
+					}						
 				} catch (FileNotFoundException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -219,12 +334,7 @@ public class ModelViewerMonsters extends JPanel {
 					e.printStackTrace();
 				}
 				
-				if (modelData != null)
-				{
-					Model model = new Model(modelPath,modelIndexFile,modelData);
-					model.loadMaterials(entries[selected].varient);
-					renderer.setModel(model);
-				}
+				
 			}
 		});		
         
@@ -232,18 +342,7 @@ public class ModelViewerMonsters extends JPanel {
                 
         loadAndParseNames("./monsters.lst");
         
-        try {
-			renderer.addModel(new Model("chara/demihuman/d0001/obj/equipment/e0001/model/d0001e0001_dwn.mdl", modelIndexFile, modelIndexFile.extractFile("chara/demihuman/d0001/obj/equipment/e0001/model/d0001e0001_dwn.mdl")));
-			renderer.addModel(new Model("chara/demihuman/d0001/obj/equipment/e0001/model/d0001e0001_met.mdl", modelIndexFile, modelIndexFile.extractFile("chara/demihuman/d0001/obj/equipment/e0001/model/d0001e0001_met.mdl")));
-			renderer.addModel(new Model("chara/demihuman/d0001/obj/equipment/e0001/model/d0001e0001_sho.mdl", modelIndexFile, modelIndexFile.extractFile("chara/demihuman/d0001/obj/equipment/e0001/model/d0001e0001_sho.mdl")));
-			renderer.addModel(new Model("chara/demihuman/d0001/obj/equipment/e0001/model/d0001e0001_top.mdl", modelIndexFile, modelIndexFile.extractFile("chara/demihuman/d0001/obj/equipment/e0001/model/d0001e0001_top.mdl")));
-		} catch (FileNotFoundException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		} catch (IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
+
 	}
 
 	private void loadMonsters() throws FileNotFoundException, IOException
