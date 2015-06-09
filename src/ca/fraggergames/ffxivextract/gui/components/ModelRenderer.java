@@ -2,6 +2,7 @@ package ca.fraggergames.ffxivextract.gui.components;
 
 import java.io.IOException;
 import java.nio.FloatBuffer;
+import java.util.ArrayList;
 
 import javax.media.opengl.GL3;
 import javax.media.opengl.GL3bc;
@@ -19,7 +20,7 @@ import com.jogamp.common.nio.Buffers;
 
 public class ModelRenderer implements GLEventListener{
 
-	private Model model, model2;
+	private ArrayList<Model> models;
 	private float zoom = -7;
 	private float panX = 0;
 	private float panY = 0;
@@ -48,38 +49,50 @@ public class ModelRenderer implements GLEventListener{
 	
 	public ModelRenderer()
 	{
-		this(null, null);
+		models = new ArrayList<Model>();
+		drawQuad = Buffers.newDirectFloatBuffer(new float[]{-1.0f, -1.0f, 1.0f, -1.0f, -1.0f, 1.0f, -1.0f, 1.0f, 1.0f, -1.0f, 1.0f, 1.0f});
 	}
 	
 	public ModelRenderer(Model model)
 	{
-		this(model, null);
+		models = new ArrayList<Model>();		
+		models.add(model);
+		drawQuad = Buffers.newDirectFloatBuffer(new float[]{-1.0f, -1.0f, 1.0f, -1.0f, -1.0f, 1.0f, -1.0f, 1.0f, 1.0f, -1.0f, 1.0f, 1.0f});
 	}
 	
-	public ModelRenderer(Model model, Model model2) {
-		this.model = model;
-		this.model2 = model2;
-		
+	public ModelRenderer(ArrayList<Model> models) {
+		this.models = models;		
 		drawQuad = Buffers.newDirectFloatBuffer(new float[]{-1.0f, -1.0f, 1.0f, -1.0f, -1.0f, 1.0f, -1.0f, 1.0f, 1.0f, -1.0f, 1.0f, 1.0f});
 	}
 
 	public void setModel(Model model)
 	{
-		this.model = model;
+		models.clear();
+		models.add(model);
 		model.resetVRAM();
 	}
 	
-	public void setModel2(Model model)
+	public void setModels(ArrayList<Model> modelList)
 	{
-		this.model2 = model;
-		model2.resetVRAM();
+		for (Model m : modelList)
+			m.resetVRAM();
+		
+		models.clear();
+		models.addAll(modelList);
+		
+	}
+	
+	public void addModel(Model model)
+	{
+		models.add(model);
+		model.resetVRAM();
 	}
 	
 	public void resetMaterial() {
-		if (model != null)
-			model.resetVRAM();
-		if (model2 != null)
-			model2.resetVRAM();
+		
+		for (Model m : models)
+			m.resetVRAM();
+		
 	}
 
 	public void zoom(int notches) {
@@ -107,10 +120,11 @@ public class ModelRenderer implements GLEventListener{
 	public void display(GLAutoDrawable drawable) {
 		GL3bc gl = drawable.getGL().getGL3bc();
 		
-		if (model!=null && !model.isVRAMLoaded())
-			model.loadToVRAM(gl);
-		if (model2!=null && !model2.isVRAMLoaded())
-			model2.loadToVRAM(gl);
+		for (Model model : models)
+		{
+			if (!model.isVRAMLoaded())
+				model.loadToVRAM(gl);
+		}
 		
 	    gl.glClear(GL3.GL_COLOR_BUFFER_BIT | GL3.GL_DEPTH_BUFFER_BIT); 		  
 	    
@@ -123,12 +137,10 @@ public class ModelRenderer implements GLEventListener{
 	    gl.glBindFramebuffer(GL3.GL_FRAMEBUFFER, fboId[1]);
 	    gl.glViewport(0,0, canvasWidth, canvasHeight);		    
 	    gl.glClear(GL3.GL_COLOR_BUFFER_BIT | GL3.GL_DEPTH_BUFFER_BIT);
-	    			    
-	    if (model != null)
+	    			
+	    for (Model model : models)
 	    	model.render(defaultShader, viewMatrix, modelMatrix, projMatrix, gl, currentLoD);
-	    if (model2 != null)
-	    	model2.render(defaultShader, viewMatrix, modelMatrix, projMatrix, gl, currentLoD);		  		   		    		    
-	    		    		   
+	        		   
 	    //FXAA
 	    gl.glBindFramebuffer(GL3.GL_FRAMEBUFFER, 0);
 	    gl.glViewport(0,0, canvasWidth, canvasHeight);

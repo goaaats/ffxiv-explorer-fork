@@ -1,6 +1,8 @@
 package ca.fraggergames.ffxivextract.gui.modelviewer;
 
 import java.awt.BorderLayout;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
@@ -8,6 +10,7 @@ import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
 
 import javax.media.opengl.GLCapabilities;
 import javax.media.opengl.GLProfile;
@@ -17,36 +20,77 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.event.ListDataListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 import com.jogamp.opengl.util.FPSAnimator;
 
+import ca.fraggergames.ffxivextract.Constants;
 import ca.fraggergames.ffxivextract.gui.components.EXDF_View;
 import ca.fraggergames.ffxivextract.gui.components.ModelRenderer;
 import ca.fraggergames.ffxivextract.gui.components.OpenGL_View;
+import ca.fraggergames.ffxivextract.helpers.SparseArray;
 import ca.fraggergames.ffxivextract.helpers.Utils;
 import ca.fraggergames.ffxivextract.models.EXHF_File;
 import ca.fraggergames.ffxivextract.models.Model;
 import ca.fraggergames.ffxivextract.models.SqPack_IndexFile;
 
+import javax.swing.BoxLayout;
+import javax.swing.JComboBox;
+import javax.swing.border.TitledBorder;
+import javax.swing.UIManager;
+
+import java.awt.Color;
+import java.awt.FlowLayout;
+
+import javax.swing.border.EmptyBorder;
+import javax.swing.JSpinner;
+import javax.swing.JButton;
+import java.awt.Component;
+
 public class ModelViewerCharacter extends JPanel {
 	
 	ModelViewerWindow parent;
+	
+	ArrayList<ModelItemEntry> entries[] = new ArrayList[22];
+	
+	SparseArray<String> slots = new SparseArray<String>();
+	
+	SparseArray<String> charIds = new SparseArray<String>();
 
-	ModelCharaEntry[] entries;
-	
+	//UI
 	OpenGL_View view3D;
-	JList lstMonsters;	
-	
 	FPSAnimator animator;
 	
-	ModelRenderer renderer;
+	//Builder	
+	private int currentBody = 0;
+	private int currentFace = 0;
+	private int currentFaceOptions = 0;
+	private int currentHair = 0;
+	private float[] currentHairColor = Constants.defaultHairColor;
+	private float[] currentHairHighlightsColor = Constants.defaultHairColor;
+	private float[] currentEyeColor = Constants.defaultEyeColor;
 	
+	private ModelItemEntry currentWeap1Item = null;
+	private ModelItemEntry currentWeap2Item = null;
+	private ModelItemEntry currentHeadItem = null;
+	private ModelItemEntry currentBodyItem = null;
+	private ModelItemEntry currentBeltItem = null;
+	private ModelItemEntry currentHandsItem = null;
+	private ModelItemEntry currentPantsItem = null;
+	private ModelItemEntry currentFeetItem = null;
+	private ModelItemEntry currentNeckItem = null;
+	private ModelItemEntry currentBracletItem = null;
+	private ModelItemEntry currentRing1Item = null;
+	private ModelItemEntry currentRing2Item = null;
+	
+	//Render Stuff
+	private ModelRenderer renderer;
+		
 	private boolean leftMouseDown = false;
 	private boolean rightMouseDown = false;
 	
-	private int currentLoD = 0;
 	private int lastOriginX, lastOriginY;
 	private int lastX, lastY;	
 	
@@ -56,6 +100,49 @@ public class ModelViewerCharacter extends JPanel {
 		
 		this.parent = parent;
 		this.modelIndexFile = modelIndex;
+				
+		//Fill the Equipment Slots
+		slots.append(-1, "--Equipment Slot--");		
+		slots.append(1, "One-Handed Weapon");
+		slots.append(13, "Two-Handed Weapon");
+		slots.append(2, "Offhand");
+		slots.append(3, "Head");
+		slots.append(4, "Body");
+		slots.append(5, "Hands");
+		slots.append(7, "Legs");
+		slots.append(8, "Feet");
+		slots.append(9, "Earings");
+		slots.append(10, "Necklace");
+		slots.append(11, "Wrists");
+		slots.append(12, "Rings");
+		
+		slots.append(15, "Body + Head");
+		slots.append(16, "All - Head");
+		//slots.append(17, "Soulstone");
+		slots.append(18, "Legs + Feet");
+		slots.append(19, "All");
+		slots.append(20, "Body + Hands");
+		slots.append(21, "Body + Legs + Feet");
+		
+		slots.append(0, "Non-Equipment");
+		
+		//Fill the char ids
+		charIds.append(-1, "--Body Style--");		
+		charIds.append(1, "Midlander Male");
+		charIds.append(2, "Midlander  Female");
+		charIds.append(3, "Highlander Male");
+		charIds.append(4, "Highlander Female");
+		charIds.append(5, "Elezen Male");
+		charIds.append(6, "Elezen Female");
+		charIds.append(7, "Miqo'te Male");
+		charIds.append(8, "Miqo'te Female");
+		charIds.append(9, "Roegadyn Male");
+		charIds.append(10, "Roegadyn  Female");
+		charIds.append(11, "Lalafell Male");
+		charIds.append(12, "Lalafell Female");
+		
+		for (int i = 0; i < entries.length; i++)
+			entries[i] = new ArrayList<ModelItemEntry>();
 		
 		setLayout(new BorderLayout(0, 0));
 		
@@ -73,16 +160,92 @@ public class ModelViewerCharacter extends JPanel {
 		panel_1.add(panel_3, BorderLayout.CENTER);
 		panel_3.setLayout(new BorderLayout(0, 0));
 		
-		JPanel panel = new JPanel();
-		add(panel, BorderLayout.WEST);
-		panel.setLayout(new BorderLayout(0, 0));
+		JPanel panel_9 = new JPanel();
+		add(panel_9, BorderLayout.WEST);
+		panel_9.setLayout(new BorderLayout(0, 0));
 		
 		JScrollPane scrollPane = new JScrollPane();
-		panel.add(scrollPane, BorderLayout.WEST);
+		panel_9.add(scrollPane);
 		
-		lstMonsters = new JList();
+		JPanel panel = new JPanel();
+		scrollPane.setViewportView(panel);
+		panel.setBorder(new EmptyBorder(0, 0, 0, 0));
+		panel.setLayout(new BorderLayout(0, 0));
 		
-		scrollPane.setViewportView(lstMonsters);
+		JPanel panel_5 = new JPanel();
+		panel.add(panel_5, BorderLayout.NORTH);
+		panel_5.setBorder(new TitledBorder(null, "Appearance", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+		panel_5.setLayout(new BoxLayout(panel_5, BoxLayout.Y_AXIS));
+		
+		JComboBox cmbRace = new JComboBox();
+		cmbRace.setAlignmentX(Component.LEFT_ALIGNMENT);
+		panel_5.add(cmbRace);
+		
+		JPanel panel_4 = new JPanel();
+		panel_4.setAlignmentX(Component.LEFT_ALIGNMENT);
+		FlowLayout flowLayout_1 = (FlowLayout) panel_4.getLayout();
+		flowLayout_1.setAlignment(FlowLayout.LEFT);
+		panel_5.add(panel_4);
+		
+		JLabel lblFace = new JLabel("Face");
+		panel_4.add(lblFace);
+		
+		JSpinner spnFace = new JSpinner();
+		panel_4.add(spnFace);
+		
+		JPanel panel_7 = new JPanel();
+		panel_7.setAlignmentX(Component.LEFT_ALIGNMENT);
+		FlowLayout flowLayout = (FlowLayout) panel_7.getLayout();
+		flowLayout.setAlignment(FlowLayout.LEFT);
+		panel_5.add(panel_7);
+		
+		JLabel lblHair = new JLabel("Hair ");
+		panel_7.add(lblHair);
+		
+		JSpinner spnHair = new JSpinner();
+		panel_7.add(spnHair);
+		
+		JPanel panel_8 = new JPanel();
+		panel_8.setAlignmentX(Component.LEFT_ALIGNMENT);
+		panel_5.add(panel_8);
+		panel_8.setLayout(new BoxLayout(panel_8, BoxLayout.Y_AXIS));
+		
+		JButton btnFaceOptions = new JButton("Face Options");
+		btnFaceOptions.setAlignmentX(Component.CENTER_ALIGNMENT);
+		panel_8.add(btnFaceOptions);
+		
+		JButton btnColorOptions = new JButton("Color Options");
+		btnColorOptions.setAlignmentX(Component.CENTER_ALIGNMENT);
+		panel_8.add(btnColorOptions);
+		
+		JPanel panel_6 = new JPanel();
+		panel.add(panel_6, BorderLayout.CENTER);
+		panel_6.setBorder(new TitledBorder(null, "Equipment", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+		panel_6.setLayout(new BoxLayout(panel_6, BoxLayout.Y_AXIS));
+		
+		JButton btnMainhand = new JButton("Main Hand");
+		panel_6.add(btnMainhand);
+		
+		JButton btnOffhand = new JButton("Off hand");
+		panel_6.add(btnOffhand);
+		
+		JButton btnHead = new JButton("Head");
+		panel_6.add(btnHead);
+		
+		JButton btnBody = new JButton("Body");
+		panel_6.add(btnBody);
+		
+		JButton btnBelt = new JButton("Belt");
+		panel_6.add(btnBelt);
+		
+		JButton btnHands = new JButton("Hands");
+		panel_6.add(btnHands);
+		
+		JButton btnLegs = new JButton("Legs");
+		panel_6.add(btnLegs);
+		
+		JButton btnFeet = new JButton("Feet");
+		panel_6.add(btnFeet);
 
 		GLProfile glProfile = GLProfile.getDefault();
 		GLCapabilities glcapabilities = new GLCapabilities( glProfile );
@@ -171,83 +334,10 @@ public class ModelViewerCharacter extends JPanel {
 			}
 		});
         
-        try {
-			loadMonsters();
-		} catch (FileNotFoundException e1) {
-			e1.printStackTrace();
-		} catch (IOException e1) {
-			e1.printStackTrace();
-		}
         
-        lstMonsters.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
-			
-			@Override
-			public void valueChanged(ListSelectionEvent event) {				
-								
-				
-				if (event.getValueIsAdjusting() || lstMonsters.getModel().getSize() == 0)
-					return;				
-				
-				int selected = lstMonsters.getSelectedIndex();
-				
-				String modelPath = null;
-				byte[] modelData = null;
-				try {
-					
-					switch (entries[selected].type)
-					{
-					case 2:
-						modelPath = String.format("chara/demihuman/d%04d/obj/body/b%04d/model/d%04db%04d.mdl", entries[selected].id, entries[selected].model, entries[selected].id, entries[selected].model);
-						modelData = modelIndexFile.extractFile(modelPath);
-						break;
-					case 3:
-						modelPath = String.format("chara/monster/m%04d/obj/body/b%04d/model/m%04db%04d.mdl", entries[selected].id, entries[selected].model, entries[selected].id, entries[selected].model);
-						modelData = modelIndexFile.extractFile(modelPath);
-						break;
-					}
-						
-				} catch (FileNotFoundException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				
-				if (modelData != null)
-				{
-					Model model = new Model(modelPath,modelIndexFile,modelData);
-					model.loadMaterials(entries[selected].varient);
-					renderer.setModel(model);
-				}
-			}
-		});		
-        
-        panel_3.add( glcanvas, BorderLayout.CENTER);
+       // panel_3.add( glcanvas, BorderLayout.CENTER);
                 
-	}
-
-	private void loadMonsters() throws FileNotFoundException, IOException
-	{
-		SqPack_IndexFile indexFile = new SqPack_IndexFile(parent.getSqpackPath() + "0a0000.win32.index", true);
-		EXHF_File exhfFile = new EXHF_File(indexFile.extractFile("exd/modelchara.exh"));
-		EXDF_View view = new EXDF_View(indexFile, "exd/modelchara.exh", exhfFile);
-		
-		entries = new ModelCharaEntry[view.getTable().getRowCount()];
-		
-		for (int i = 0; i < view.getTable().getRowCount(); i++){
-			entries[i] = new ModelCharaEntry((Integer)view.getTable().getValueAt(i, 1), (Integer)view.getTable().getValueAt(i, 4), (Integer)view.getTable().getValueAt(i, 5), (Integer)view.getTable().getValueAt(i, 3));
-		}
-				
-		lstMonsters.setModel(new AbstractListModel() {			
-			public int getSize() {
-				return entries.length;
-			}
-			public String getElementAt(int index) {
-				return "Monster: " + index;
-			}
-		});
-				
-	}
+	}	
+	
 	
 }

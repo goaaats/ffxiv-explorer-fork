@@ -57,11 +57,11 @@ public class OpenGL_View extends JPanel {
 	private int lastOriginX, lastOriginY;
 	private int lastX, lastY;		
 	
-	public OpenGL_View(final Model model, Model model2) {
+	public OpenGL_View(final Model model) {
 		GLProfile glProfile = GLProfile.getDefault();
 		GLCapabilities glcapabilities = new GLCapabilities( glProfile );
         final GLCanvas glcanvas = new GLCanvas( glcapabilities );
-        renderer = new ModelRenderer(model, model2);
+        renderer = new ModelRenderer(model);
         glcanvas.addGLEventListener(renderer);
         animator = new FPSAnimator(glcanvas, 30);
         animator.start();

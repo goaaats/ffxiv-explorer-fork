@@ -223,6 +223,12 @@ public class Model {
         }
         
         //Skeletons and Animations
+        if (!Constants.HAVOK_ENABLED)
+        { 
+        	numBones = -1;
+        	return;
+        }
+        
         if (modelPath != null)
         {
         	String modelPathSplit[] = modelPath.split("/");
@@ -275,11 +281,11 @@ public class Model {
 		        skelBuffer.order(ByteOrder.nativeOrder());
 		        animBuffer.put(animFile.getHavokData());
 		        skelBuffer.position(0);
-		        animBuffer.position(0);
-					
+		        animBuffer.position(0);							        
+		        
 		        //Incase Havok doesn't work
-		        try{
-		        HavokNative.startHavok();
+		        try{		        	
+		        	HavokNative.startHavok();
 		        }
 		        catch (UnsatisfiedLinkError e)
 		        { 

@@ -46,7 +46,7 @@ public class ModelViewerWindow extends JFrame {
 			e1.printStackTrace();
 		}
 		
-		//tabbedPane.add("Character Builder", new ModelViewerCharacter(this, modelIndexFile));
+        tabbedPane.add("Character Builder", new ModelViewerCharacter(this, modelIndexFile));
 		tabbedPane.add("Items", new ModelViewerItems(this, modelIndexFile));
 		tabbedPane.add("Monsters", new ModelViewerMonsters(this, modelIndexFile));
 		tabbedPane.add("Furniture", new ModelViewerFurniture(this, buildingIndexFile));
