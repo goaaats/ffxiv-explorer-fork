@@ -335,7 +335,7 @@ public class ModelViewerItems extends JPanel {
 			case 13:		
 			case 1:
 			case 2:
-				modelPath = String.format("chara/weapon/w%04d/obj/body/b%04d/model/w%04b%04d.mdl", currentItem.id, currentItem.model, currentItem.id, currentItem.model);
+				modelPath = String.format("chara/weapon/w%04d/obj/body/b%04d/model/w%04db%04d.mdl", currentItem.id, currentItem.model, currentItem.id, currentItem.model);
 				break;
 			case 3:
 				modelPath = String.format("chara/equipment/e%04d/model/c%04de%04d_met.mdl", currentItem.id, characterNumber, currentItem.id);	
@@ -408,7 +408,20 @@ public class ModelViewerItems extends JPanel {
 				String model2Split[] = ((String)view.getTable().getValueAt(i, 12)).split(",");
 						
 				int slot = (Integer) view.getTable().getValueAt(i, 48);
-				entries[slot].add(new ModelItemEntry((String)view.getTable().getValueAt(i, 4), Integer.parseInt(model1Split[0].trim()), Integer.parseInt(model1Split[2].trim()), Integer.parseInt(model1Split[1].trim()), slot));			
+				
+				String name = (String)view.getTable().getValueAt(i, 4);
+				int id = Integer.parseInt(model1Split[0].trim());
+					
+				boolean isWeap = false;
+				if (slot == 1 || slot == 2 || slot == 13)
+					isWeap = true;
+				
+				int model = !isWeap ? Integer.parseInt(model1Split[2].trim()) : Integer.parseInt(model1Split[1].trim());
+				int varient = !isWeap ? Integer.parseInt(model1Split[1].trim()) : Integer.parseInt(model1Split[2].trim());
+				
+				int type = slot;
+				
+				entries[slot].add(new ModelItemEntry(name, id, model, varient, type));			
 			}
 		}		
 				
