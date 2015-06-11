@@ -292,7 +292,7 @@ public class SCDConverterWindow extends JFrame {
 		bb.position(0x10);
 		bb.putInt(scdHeader.length + oggLength);
 		bb.position(0x1B0);
-		bb.putInt(oggLength);
+		bb.putInt(oggLength+0x10);
 		
 		bb.position(0xA8);
 		bb.putFloat(volume);

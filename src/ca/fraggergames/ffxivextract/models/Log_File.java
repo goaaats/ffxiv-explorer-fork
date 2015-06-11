@@ -30,8 +30,8 @@ public class Log_File {
 	public static final int CHANNEL_LS7 = 0x16;
 	public static final int CHANNEL_LS8 = 0x17;
 	public static final int CHANNEL_FC = 0x18;
-	public static final int CHANNEL_EMOTE_STANDARD = 0x1C;
-	public static final int CHANNEL_EMOTE_CUSTOM = 0x1D;
+	public static final int CHANNEL_EMOTE_CUSTOM = 0x1C;
+	public static final int CHANNEL_EMOTE_STANDARD = 0x1D;
 	public static final int CHANNEL_YELL = 0x1E;		
 	public static final int CHANNEL_SYSTEM = 0x39;
 	
