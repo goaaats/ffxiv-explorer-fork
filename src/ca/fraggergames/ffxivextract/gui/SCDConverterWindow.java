@@ -43,6 +43,7 @@ public class SCDConverterWindow extends JFrame {
 	private JTextField edtVolume;
 	private JTextField edtChannels;
 	private JTextField edtSampleRate;
+	private JTextField edtNumSamples;
 	private JTextField edtLoopStart;
 	private JTextField edtLoopEnd;
 	
@@ -176,6 +177,18 @@ public class SCDConverterWindow extends JFrame {
 		edtLoopEnd.setColumns(10);
 		panel_9.add(edtLoopEnd, BorderLayout.EAST);
 		
+		JPanel panel_10 = new JPanel();
+		panel_1.add(panel_10);
+		panel_10.setLayout(new BorderLayout(0, 0));
+		
+		JLabel lblNumSamples = new JLabel("Number of Samples: ");
+		panel_10.add(lblNumSamples, BorderLayout.WEST);
+		
+		edtNumSamples = new JTextField();
+		edtNumSamples.setEnabled(false);
+		edtNumSamples.setColumns(10);
+		panel_10.add(edtNumSamples, BorderLayout.EAST);
+		
 		JPanel panel_2 = new JPanel();
 		contentPane.add(panel_2, BorderLayout.SOUTH);
 		panel_2.setLayout(new BorderLayout(0, 0));
@@ -213,15 +226,19 @@ public class SCDConverterWindow extends JFrame {
 				{
 					edtLoopStart.setText("");
 					edtLoopEnd.setText("");
+					edtNumSamples.setText("");
 					edtLoopStart.setEnabled(false);
 					edtLoopEnd.setEnabled(false);
+					edtNumSamples.setEnabled(false);
 				}
 				else if (e.getActionCommand().equals("loopCustom"))
 				{
 					edtLoopStart.setText("0");
 					edtLoopEnd.setText("0");
+					edtNumSamples.setText("0");
 					edtLoopStart.setEnabled(true);
 					edtLoopEnd.setEnabled(true);
+					edtNumSamples.setEnabled(true);
 				}
 			}
 		};
@@ -264,6 +281,46 @@ public class SCDConverterWindow extends JFrame {
 		int loopStart = 0;
 		int loopEnd = ogg.length;
 				
+		
+		
+		//Handle custom loops
+		if (rdbtnCustom.isSelected())
+		{
+			
+				int positionStart;
+				int positionEnd;
+				int numSamples;
+				
+				try {
+					positionStart = Integer.parseInt(edtLoopStart.getText());
+				}
+				catch (Exception e)
+				{
+					e.printStackTrace();
+					return;
+				}		
+				try {
+					positionEnd = Integer.parseInt(edtLoopEnd.getText());
+				}
+				catch (Exception e)
+				{
+					e.printStackTrace();
+					return;
+				}		
+				try {
+					numSamples = Integer.parseInt(edtNumSamples.getText());
+				}
+				catch (Exception e)
+				{
+					e.printStackTrace();
+					return;
+				}		
+				
+				loopStart = getBytePosition(positionStart, numSamples,ogg.length);
+				loopEnd = getBytePosition(positionEnd, numSamples,ogg.length);			
+				
+		}
+		
 		//Create Header
 		byte[] header = createSCDHeader(ogg.length, volume, numChannels, sampleRate, loopStart, loopEnd);
 		
@@ -292,7 +349,7 @@ public class SCDConverterWindow extends JFrame {
 		bb.position(0x10);
 		bb.putInt(scdHeader.length + oggLength);
 		bb.position(0x1B0);
-		bb.putInt(oggLength+0x10);
+		bb.putInt(oggLength-0x10);
 		
 		bb.position(0xA8);
 		bb.putFloat(volume);
@@ -351,7 +408,7 @@ public class SCDConverterWindow extends JFrame {
 		edtVolume.setText("1.0");
 		edtSampleRate.setText("44100");
 		edtChannels.setText("2");
-		edtLoopStart.setText("");
+		edtLoopStart.setText("0");
 		edtLoopEnd.setText("");
 		
 		setEnabled(true);
@@ -369,9 +426,16 @@ public class SCDConverterWindow extends JFrame {
 		edtChannels.setEnabled(b);
 		edtLoopStart.setEnabled(false);
 		edtLoopEnd.setEnabled(false);
+		edtNumSamples.setEnabled(false);
 		rdbtnCustom.setEnabled(b);
 		rdbtnLoop.setEnabled(b);
 		pnlOpt.setEnabled(b);
 	}
+	
+	private int getBytePosition(int samplePosition, int numSamples, int filesize)
+	{
+		return (filesize/numSamples)*samplePosition;
+	}
+	
 }
 
