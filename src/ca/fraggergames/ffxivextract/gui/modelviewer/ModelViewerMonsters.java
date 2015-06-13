@@ -1,6 +1,7 @@
 package ca.fraggergames.ffxivextract.gui.modelviewer;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
@@ -20,6 +21,7 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
@@ -38,7 +40,7 @@ public class ModelViewerMonsters extends JPanel {
 	
 	ModelViewerWindow parent;
 
-	ModelCharaEntry[] entries;
+	ArrayList<ModelCharaEntry> entries = new ArrayList<ModelCharaEntry>();
 	
 	OpenGL_View view3D;
 	JList lstMonsters;	
@@ -64,8 +66,11 @@ public class ModelViewerMonsters extends JPanel {
 		
 		setLayout(new BorderLayout(0, 0));
 		
+		JSplitPane splitPane = new JSplitPane();
+		
+				
 		JPanel panel_1 = new JPanel();
-		add(panel_1, BorderLayout.CENTER);
+		add(splitPane, BorderLayout.CENTER);
 		panel_1.setLayout(new BorderLayout(0, 0));
 		
 		JPanel panel_2 = new JPanel();
@@ -79,12 +84,11 @@ public class ModelViewerMonsters extends JPanel {
 		panel_3.setLayout(new BorderLayout(0, 0));
 		
 		JPanel panel = new JPanel();
-		add(panel, BorderLayout.WEST);
+		//add(panel, BorderLayout.WEST);		
 		panel.setLayout(new BorderLayout(0, 0));
 		
 		JScrollPane scrollPane = new JScrollPane();
-		panel.add(scrollPane, BorderLayout.WEST);
-		
+		panel.add(scrollPane, BorderLayout.CENTER);
 		lstMonsters = new JList();
 		
 		scrollPane.setViewportView(lstMonsters);
@@ -174,15 +178,7 @@ public class ModelViewerMonsters extends JPanel {
 				int notches = e.getWheelRotation();		
 				renderer.zoom(-notches);				
 			}
-		});
-        
-        try {
-			loadMonsters();
-		} catch (FileNotFoundException e1) {
-			e1.printStackTrace();
-		} catch (IOException e1) {
-			e1.printStackTrace();
-		}
+		});      
         
         lstMonsters.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
 			
@@ -199,12 +195,12 @@ public class ModelViewerMonsters extends JPanel {
 				byte[] modelData = null;
 				try {
 					
-					switch (entries[selected].type)
+					switch (entries.get(selected).type)
 					{
 					case 2:
 						EquipableRender demihuman = new EquipableRender();
 						
-						switch(entries[selected].id)
+						switch(entries.get(selected).id)
 						{
 						case 1: //Chocobo													
 							demihuman.setModel(EquipableRender.DWN, modelIndexFile, "chara/demihuman/d0001/obj/equipment/e0001/model/d0001e0001_dwn.mdl", 0);
@@ -258,9 +254,9 @@ public class ModelViewerMonsters extends JPanel {
 							demihuman.setModel(EquipableRender.TOP, modelIndexFile, "chara/demihuman/d1010/obj/equipment/e0001/model/d1010e0001_top.mdl", 0);							
 							break;
 						case 1011: //Horse													
-							demihuman.setModel(EquipableRender.DWN, modelIndexFile, "chara/demihuman/d1011/obj/equipment/e0001/model/d1011e0001_dwn.mdl", entries[selected].varient);
-							demihuman.setModel(EquipableRender.MET, modelIndexFile, "chara/demihuman/d1011/obj/equipment/e0001/model/d1011e0001_met.mdl", entries[selected].varient);							
-							demihuman.setModel(EquipableRender.TOP, modelIndexFile, "chara/demihuman/d1011/obj/equipment/e0001/model/d1011e0001_top.mdl", entries[selected].varient);							
+							demihuman.setModel(EquipableRender.DWN, modelIndexFile, "chara/demihuman/d1011/obj/equipment/e0001/model/d1011e0001_dwn.mdl", entries.get(selected).varient);
+							demihuman.setModel(EquipableRender.MET, modelIndexFile, "chara/demihuman/d1011/obj/equipment/e0001/model/d1011e0001_met.mdl", entries.get(selected).varient);							
+							demihuman.setModel(EquipableRender.TOP, modelIndexFile, "chara/demihuman/d1011/obj/equipment/e0001/model/d1011e0001_top.mdl", entries.get(selected).varient);							
 							break;
 						case 1012: //Quijrn													
 							demihuman.setModel(EquipableRender.TOP, modelIndexFile, "chara/demihuman/d1012/obj/equipment/e0001/model/d1012e0001_top.mdl", 0);							
@@ -308,12 +304,12 @@ public class ModelViewerMonsters extends JPanel {
 						
 						break;
 					case 3:
-						modelPath = String.format("chara/monster/m%04d/obj/body/b%04d/model/m%04db%04d.mdl", entries[selected].id, entries[selected].model, entries[selected].id, entries[selected].model);
+						modelPath = String.format("chara/monster/m%04d/obj/body/b%04d/model/m%04db%04d.mdl", entries.get(selected).id, entries.get(selected).model, entries.get(selected).id, entries.get(selected).model);
 						modelData = modelIndexFile.extractFile(modelPath);
 						if (modelData != null)
 						{
 							Model model = new Model(modelPath,modelIndexFile,modelData);
-							model.loadMaterials(entries[selected].varient);
+							model.loadMaterials(entries.get(selected).varient);
 							renderer.setModel(model);
 						}
 						break;
@@ -332,29 +328,50 @@ public class ModelViewerMonsters extends JPanel {
         
         panel_3.add( glcanvas, BorderLayout.CENTER);
                 
-        loadAndParseNames("./monsters.lst");
+        
+        splitPane.setLeftComponent(panel);
+        splitPane.setRightComponent(panel_1);
         
 
+        loadAndParseNames("./monsters.lst");
+        
+        try {
+			loadMonsters();
+		} catch (FileNotFoundException e1) {
+			e1.printStackTrace();
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
+        
 	}
 
 	private void loadMonsters() throws FileNotFoundException, IOException
 	{
 		SqPack_IndexFile indexFile = new SqPack_IndexFile(parent.getSqpackPath() + "0a0000.win32.index", true);
 		EXHF_File exhfFile = new EXHF_File(indexFile.extractFile("exd/modelchara.exh"));
-		EXDF_View view = new EXDF_View(indexFile, "exd/modelchara.exh", exhfFile);
-		
-		entries = new ModelCharaEntry[view.getTable().getRowCount()];
+		EXDF_View view = new EXDF_View(indexFile, "exd/modelchara.exh", exhfFile);		
 		
 		for (int i = 0; i < view.getTable().getRowCount(); i++){
-			entries[i] = new ModelCharaEntry((Integer)view.getTable().getValueAt(i, 1), (Integer)view.getTable().getValueAt(i, 4), (Integer)view.getTable().getValueAt(i, 5), (Integer)view.getTable().getValueAt(i, 3));
+			
+			int index = (Integer)view.getTable().getValueAt(i, 0);
+			int v1 = (Integer)view.getTable().getValueAt(i, 1);
+			int v2 = (Integer)view.getTable().getValueAt(i, 4);
+			int v3 = (Integer)view.getTable().getValueAt(i, 5);
+			int v4 = (Integer)view.getTable().getValueAt(i, 3);
+			
+			if (v4 <= 1 || (names.get(index) != null && names.get(index).equals("BLANK")))
+				continue;
+			
+			entries.add(new ModelCharaEntry(index, v1, v2, v3, v4));
+			
 		}
 				
 		lstMonsters.setModel(new AbstractListModel() {			
 			public int getSize() {
-				return entries.length;
+				return entries.size();
 			}
 			public String getElementAt(int index) {				
-				return names.get(index, "Monster " + index);
+				return names.get(entries.get(index).index, "Monster " + entries.get(index).index);
 			}
 		});
 				

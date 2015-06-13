@@ -15,7 +15,7 @@ import ca.fraggergames.ffxivextract.models.SqPack_IndexFile;
 
 public class ModelViewerWindow extends JFrame {
 	
-	String sqPackPath = "E:\\Program Files (x86)\\SquareEnix\\FINAL FANTASY XIV - A Realm Reborn\\game\\sqpack\\ffxiv\\";
+	String sqPackPath = "C:\\Program Files (x86)\\SquareEnix\\FINAL FANTASY XIV - A Realm Reborn\\game\\sqpack\\ffxiv\\";
 	SqPack_IndexFile modelIndexFile, buildingIndexFile;
 	
 	public ModelViewerWindow() {
@@ -46,7 +46,7 @@ public class ModelViewerWindow extends JFrame {
 			e1.printStackTrace();
 		}
 		
-        tabbedPane.add("Character Builder", new ModelViewerCharacter(this, modelIndexFile));
+        //tabbedPane.add("Character Builder", new ModelViewerCharacter(this, modelIndexFile));
 		tabbedPane.add("Items", new ModelViewerItems(this, modelIndexFile));
 		tabbedPane.add("Monsters", new ModelViewerMonsters(this, modelIndexFile));
 		tabbedPane.add("Furniture", new ModelViewerFurniture(this, buildingIndexFile));

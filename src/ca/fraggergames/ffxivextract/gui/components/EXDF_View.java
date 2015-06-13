@@ -439,7 +439,7 @@ public class EXDF_View extends JScrollPane implements ItemListener{
 				
 				//Index
 				if (columnIndex == 0)
-					return ""+entry.getIndex();
+					return entry.getIndex();
 				
 				//Data
 				EXDF_Dataset dataset = exhFile.getDatasetTable()[columnIndex-1];									
