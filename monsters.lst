@@ -81,7 +81,7 @@
 75:Yarzon
 76:Yarzon (purple)
 
-#Missing stuff here, this is most likely particle only things... IE: Fireflies/Willo the Wisps
+#Missing stuff here, this is most likely particle only things... IE:Fireflies/Willo the Wisps
 77:Invisible
 78:Firefly (Green)
 79:Firefly (Red)
@@ -364,3 +364,405 @@
 416:Titan Egi
 417:Garuda Egi
 418:Ramuh Egi
+
+630:BLANK
+631:BLANK
+632:BLANK
+633:Clockwork Spider
+634:Princely Hatchling (Minion)
+635:Invisible
+636:Gilgamesh
+#MARK
+638: (Tam-Tara Hard)
+639:Poroggo (Green)
+640:Decaying Gourmand (Lost City of Amdapor)
+641:Gobmachine G-VI (Brayflox Longstop Hard)
+642:Leviathan Tail
+643:Fat Chocobo (Mount)
+644:Bomb Palanquin (Mount)
+645:Bug (Lost City of Amdapor)
+646:Bug (Lost City of Amdapor)
+647:Nael Deus Darnus (Second Coil - Turn 4)
+648:Mimic (Lost City of Amdapor)
+
+650:Key
+651:BLANK
+652:Enkidu (Chicken)
+653:Arioch (Lost City of Amdapor)
+654:Dragonfly (Hunt Mob)(Lost City of Amdapor)
+655:Rafflesia (Dark Matter)(Second Coil - Turn 1)
+656:Bulb (Dark Matter)(Second Coil - Turn 1)
+657:Bee (Dark Matter)(Second Coil - Turn 1)
+658:The Avatar (Second Coil - Turn 3)
+659:Scourge of Meracydia (First Coil - Turn 4)
+660:Dragon (Red)
+661:Golem
+662:Dragon (Yellow)
+663:Dragon (Green)
+664:Dragon (Red)
+665:Dragon (Decayed)(Labyrinth of the Ancients)
+666:Rock (Brayflox Longstop Hard)
+667:Rock (Brayflox Longstop Hard)
+668:Rock (Brayflox Longstop Hard)
+669:Invisible
+670:Explosive Bomb (Plain)(Brayflox Longstop Hard)
+671:Explosive Bomb (Branded)(Brayflox Longstop Hard)
+672:Explosive Bomb (Spiked)(Brayflox Longstop Hard)
+673:Magitek vangob G-III (Brayflox Longstop Hard)
+674:Cyclopse (Halatali Hard)
+675:Direwolf (Mount)
+677:BLANK
+678:Kolbold Furnace
+679:Sahagin Ballistae
+
+680:BLANK
+681:Invisible
+682:Zu Hatchling (Minon)
+683:Wind-up Odin (Minon)
+684:Wind-up Warrior of Light (Minion)
+685:Wind-up Bahamut (Minion)
+686:Baby Opo-opo (Minion)
+687:Magic Broom (Minion)
+688:Wind-up Moogle (Minion)
+689:Elbst (Beastman Quests)(Mount)
+690:Hecteyes (Lost City of Amdapor)
+691:Imp ()
+692:Gilgamesh (Battle at the Big Bridge)
+693:Bug (Lost City of Amdapor)
+694:Ranch Wamoura (Lost City of Amdapor)
+695:Roselet (Dark Matter)(Second Coil - Turn 1)
+696:Crate
+697:BLANK
+698:Slug (Dark Matter)(First Coil - Turn 3/Second Coil - Turn 1)
+699:Wind-up Kobold (Minion)
+700:Wind-up Sahagin (Minion)
+713:Unicorn (Ifrit)
+714:Unicorn (Garuda)
+715:Unicorn ()
+716:Unicorn ()
+717:Lamia
+718:BLANK
+719:Bear (Phecta)(Hunt Mob)
+720:BLANK
+721:Fenrir (Mount)
+722:Dark Helmet (Hunt Mob)
+723:Bear Trap (Hullbreaker)
+724:Aurelia (Dark Matter)(First Coil - Turn 3)
+725:Kraken Tentacle (Hullbreaker)
+726:Kraken Arm (Hullbreaker)
+727:Harpy (Hullbreaker)
+728:Nanka (Preggo)(Hullbreaker)
+729:Nanka (Not Preggo)(Hullbreaker)
+730:Giruveganaus (Stone Vigil Hard)
+731:Gorynich (Stone Vigil Hard)
+732:Cuca Fera (Stone Vigil Hard)
+733:Medusa Head (?)
+734:Avere Bravearm (Tam-Tara Deepcroft)
+735:Sasquatch (Hullbreaker)
+736:Invisible
+
+738:Poroggo (Red)
+739:Puk (Vigil Heir)(Stone Vigil Hard)
+740:Nanka Baby (Hullbreaker Isle)
+741:Angler 
+742:Onion Prince (Minion)
+743:Eggplant Knight (Minion)
+744:Garlic Jester (Minion)
+745:King Tomato (Minion)
+746:Mandragora Queen (Minion)
+747:Treasure Box (Minion)
+748:Wind-up Succubus (Minion)
+749:Wind-up Onion Knight (Minion)
+750:Wind-up Y'shtola (Minion)
+751:Wind-up Nanamo (Minion)
+752:Nana Bear (Minion)
+753:Minature Minecart (Minion)
+754:Tiny Tapir (Minion)
+755:Nutkin (Minion)
+756:Gilgamesh (Minion)
+757:Mandragora (Onion)
+758:Mandragora (Eggplant)
+759:Mandragora (Garlic)
+760:Mandragora (Tomato)
+761:Mandragora (Red Flower)
+762:BLANK
+763:Enkidu (Battle in the Big Keep)
+764:Icicle
+765:~~Unknown~~
+766:Allagan Node (Frontlines, Final Coil - Turn 2)
+77:Yeti (Snowcloak)
+768:Staff of Eld (Syrcus Tower)
+769:Slime Experiment (Syrcus Tower)
+
+770:Iron Giant (Grey)
+771:Iron Giant (Grey)
+#MARK
+772:Fish?
+773:Mamoolja (Demihuman)
+774:Lamia (Demihuman)
+#MARK
+775:Magitek Bit
+776:Medusa Head (Green)
+777:Elbst (Bluish Grey)
+778:Ogre
+779:Ice Block (Syrcus Tower)
+780:Glasya Labolas (Syrcus Tower)
+781:Vodoriga (Blue)
+782:Aevis (Downy)
+
+#From Hez
+791:BLANK
+792:Emperor Varis Zos Galvus
+793:Archbishop Thordan VII
+794:BLANK
+795:Kobold
+796:Wind-up Thancred (Minion)
+797:Wind-up Minfilia (Minion)
+798:Mummy's Little Mummy (Minion)
+799:Wind-up Ultros (Minion)
+800:Heavy Hatchling (Minion)
+801:Littlefoot (Minion)
+802:Fat Cat (Minion)
+803:Hoary the Snowman (Minion)
+804:BLANK
+805:Demon Box (Minion)
+806:BLANK
+807:Assassin Fry (Minion)
+808:Naughty Nanka (Minion)
+809:Delivery Moogle (Minion)
+810:Frog??? (Red)
+811:Warhorse (Limsa Lominsa)
+812:Warhorse (Gridania)
+813:Warhorse (Ul'dah)
+814:Delivery Moogle
+815:~~Unknown~~
+816:BLANK
+817:Unicorn (Titan?)
+818:Unicorn (Shiva)
+819:Sewer Syrup (Hunt Mob)
+820:Cavalry Elbst (Mount)
+821:Fireworks Launcher (Moonfire Faire 2014)
+822:Kaliya (Blue)(Final Coil - Turn 2)
+823:Karlabos (Brown)(Sastasha Hard)
+824:Karlabos (Red)(Sastasha Hard)
+825:Gigas
+826:Zanigoh (Hunt Mob)
+827:BLANK
+828:BLANK
+829:Gravity Node (Final Coil - Turn 2)
+830:Electric Node (Final Coil - Turn 2)
+831:BLANK
+832:???
+833:Imdugud (Final Coil - Turn 2)
+834:BLANK
+835:~~Unknown~~
+836:Water Imp (The Dragon's Neck)
+837:Manxome Molaa Ja Ja (Wanderer's Palace Hard)
+838:Frumious Koheel Ja's Mount (Wanderer's Palace Hard)
+839:BLANK
+840:~~Unknown~~
+841:BLANK
+842:???
+843:Vicegerent's Right Hand (Sunken Temple of Qarn Hard)
+844:Vicegerent's Left Hand (Sunken Temple of Qarn Hard)
+845:Captain Madison (Mutated) (Sastasha Hard)
+846:Daughter of Imdugud (Final Coil - Turn 1)
+847:Son of Imdugud (Final Coil - Turn 1)
+851:Bennu (Blue)(Final Coil - Turn 3)
+852:Bennu (Red)(Final Coil - Turn 3)
+853:Bennu (Red)(Final Coil - Turn 3)
+854:Phoenix (Final Coil - Turn 3)
+855:The Pain of Meracydia (Final Coil - Turn 4)
+856:The Blood of Meracydia (Final Coil - Turn 4)
+857:The Gust of Meracydia (Final Coil - Turn 4)
+858:The Shadow of Meracydia (Final Coil - Turn 4)
+859:The Sin of Meracydia (Final Coil - Turn 4)
+860:Vicegerent's Head (Sunken Temple of Qarn Hard)
+861:Pugil (Grey/Blue)
+862:Skeleton
+863:Antelope (Grey/Blue)
+864:Bomb (Minature)
+865:Spriggan (Ice)(Snowcloak)
+866:Sleipnir (Mount)
+867:Snowball (Snowcloak)
+868:Zombie Mummy (Lalafell)(Sunken Temple of Qarn Hard)
+869:Zombie Mummy (Roegadyn)(Sunken Temple of Qarn Hard)
+870:Bear (White)
+871:Ultros Tentacle (The Dragon's Neck)
+872:~~Unknown~~
+873:Sabotender Emperatriz (Sunken Temple of Qarn Hard)
+874:Sabotender Guardia (Sunken Temple of Quarn Hard)
+875:Sabotender Guardia (Sunken Temple of Qarn Hard)
+876:Vicegerent To The Warden (Sunken Temple of Qarn Hard)
+877:BLANK
+878:Wind-up Yda (Minion)
+879:Wind-up Papalymo (Minion)
+880:Wind-up Urianger (Minion)
+881:Wind-up Louisoix (Minion)
+882:Wind-up Gentleman (Minion, Hildibrand!)
+883:Midgardsormr (Minion)
+884:Alphinaud (Minion)
+885:Alisaie (Minion)
+886:Water Imp (Minion)
+887:Model Enterprise (Minion)
+888:Enkidu (Minion)
+889:BLANK
+890:BLANK
+891:BLANK
+892:BLANK
+893:BLANK
+894:BLANK
+895:BLANK
+896:BLANK
+897:BLANK
+898:BLANK
+899:BLANK
+900:BLANK
+901:Wind-up Violet (Minion)
+902:Wind-up Founder (Minion)
+903:Wind-up Dezul Qualan (Minion)
+904:BLANK
+905:BLANK
+907:Invisible
+908:4 Tonz Weight (The Dragon's Neck)
+909:Adjudicator (Sunken Temple of Qarn)
+911:Shiva
+912:Ferdiad (Amdapor Keep Hard)
+913:BLANK
+914:BLANK
+915:BLANK
+916:BLANK
+917:Midgardsormr Head
+918:Hecteyes (Darker Color)
+919:Oceanus (Syrcus Tower)
+920:Imp / Devilet
+921:Bat / Kalong
+922:Ahriman
+923:Ghost / Revenant
+924:Vodoriga (Black)
+925:BLANK
+926:BLANK
+927:Megalotragus (Amdapor Keep Hard)
+929:BLANK
+930:Magitek Gunship (White)(Keeper of the Lake)
+932:Ultros (/w bandaids on his head)
+933:Ultros (/w bandaids on his head)
+934:Ultros (/w bandaids on his head)
+935:Foreboding Statue (Amdapor Keep Hard)
+936:Totem 1 (Wanderer's Palace Hard)
+937:Totem 2 (Wanderer's Palace Hard)
+938:BLANK
+939:BLANK
+940:BLANK
+941:Unknown Trident (Ramuh's actual Weapon when you fight him maybe?)
+942:BLANK
+943:BLANK
+944:BLANK
+945:BLANK
+946:BLANK
+947:Unknown Pole Weapon
+948:Combat Wivre (Wanderer's Palace Hard)
+949:BLANK
+950:BLANK
+951:BLANK
+952:BLANK
+953:BLANK
+954:BLANK
+955:BLANK
+956:Anchag (Amdapor Keep Hard)
+957:BLANK
+958:Kirin (Mount)
+959:Kaliya (Final Coil - Turn 2)
+961:BLANK
+962:BLANK
+963:BLANK
+964:BLANK
+965:Parade Chocobo (Mount)
+966:Chocobo (Demihuman)
+967:Mamoolja (Demihuman)
+968:Garm (World of Darkness)
+969:Scylla's Clone (World of Darkness)
+970:Atomos (World of Darkness)
+971:Glasya Labolas's Clone (World of Darkness)
+972:Dragonfly
+973:Triple Triad Duel Table
+974:Einhander (/w gun)(Keeper of the Lake)
+975:BLANK
+976:BLANK
+977:BLANK
+978:Sahagin (Demihuman)
+979:BLANK
+980:BLANK
+981:Cloud of Darkness (World of Darkness)
+982:BLANK
+983:BLANK
+984:BLANK
+985:BLANK
+986:BLANK
+987:Adamantoise Mount
+988:BLANK
+989:BLANK
+990:BLANK
+991:BLANK
+992:BLANK
+994:Mirage Dragon (Orange)(Keeper of the Lake)
+995:Mirage Dragon (Blue)(Keeper of the Lake)
+996:Einhander (/w tank)(Keeper of the Lake)
+997:Main Ceruleum Tank (Keeper of the Lake)
+998:Auxiliary Ceruleum Tank (Keeper of the Lake)
+999:Field Generator (Keeper of the Lake)
+1000:Atomos Prime (World of Darkness)
+1001:Dragon Head Add (Battle in the Big Keep)
+1002:Snare (Steps of Faith
+1003:Barrels (Steps of Faith)
+1004:Xande's Clone (World of Darkness).
+1005:Five-headed Dragon (World of Darkness)
+1011:BLANK
+1012:BLANK
+1013:Flan (Giant Bavarois Wanderer's Palace)
+1014:Green ball. Possibly Slime King (B-rank hunt monster)
+1016:Model Magitek Bit (Minion)
+1017:Puff of Darkness (Minion)
+1018:Mandragora Queen (Monster)
+1019:Midgardsormr's Head (Keeper of the Lake)
+1020:Midgardsormr's Head (Keeper of the Lake)
+1021:Enormous Egg (2015 Easter FATE)
+1022:Spriggan (Red)(2015 Easter FATE)
+1023:Spriggan (Gold Egg)(2015 Easter FATE)
+1024:Midgardstromr (Keeper of the Lake))
+1026:Fenrir (Snowcloak)
+1027:BLANK
+1028:BLANK
+1029:Unknown Spiked Allagan Ball
+1030:Magitek Gunship (Blue)(Keeper of the Lake)
+1032:Hecteyes (A-rank Hunt Mob)
+1033:Landtrap (Milkroot Sapling)
+
+#Particle Cubes
+
+0649:Particle Cube
+0676:Particle Cube
+0737:Particle Cube
+0783:Particle Cube
+0784:Particle Cube
+0785:Particle Cube
+0786:Particle Cube
+0787:Particle Cube
+0788:Particle Cube
+0789:Particle Cube
+0790:Particle Cube
+0848:Particle Cube
+0849:Particle Cube
+0850:Particle Cube
+0906:Particle Cube
+0910:Particle Cube
+0928:Particle Cube
+0931:Particle Cube
+0960:Particle Cube
+1006:Particle Cube
+1007:Particle Cube
+1008:Particle Cube
+1009:Particle Cube
+1010:Particle Cylinder
+1015:Particle Cube
+1025:Particle Cube
