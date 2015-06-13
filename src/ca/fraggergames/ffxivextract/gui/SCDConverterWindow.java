@@ -282,7 +282,6 @@ public class SCDConverterWindow extends JFrame {
 		int loopEnd = ogg.length;
 				
 		
-		
 		//Handle custom loops
 		if (rdbtnCustom.isSelected())
 		{
@@ -320,7 +319,6 @@ public class SCDConverterWindow extends JFrame {
 				loopEnd = getBytePosition(positionEnd, numSamples,ogg.length);			
 				
 		}
-		
 		//Create Header
 		byte[] header = createSCDHeader(ogg.length, volume, numChannels, sampleRate, loopStart, loopEnd);
 		
@@ -432,9 +430,9 @@ public class SCDConverterWindow extends JFrame {
 		pnlOpt.setEnabled(b);
 	}
 	
-	private int getBytePosition(int samplePosition, int numSamples, int filesize)
-	{
-		return (filesize/numSamples)*samplePosition;
+	private int getBytePosition(float samplePosition, float numSamples, float filesize)
+	{		
+		return (int)((filesize/numSamples)*samplePosition);
 	}
 	
 }

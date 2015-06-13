@@ -418,11 +418,19 @@ public final class ImageDecoding {
 					fb = 1.0f;
 				if (fa > 1)
 					fa = 1.0f;
-				final int b = (int) (255f * fb);
-				final int g = (int) (255f * fg);
-				final int r = (int) (255f * fr);
-				final int a = (int) (255f * fa);
+				int b = (int) (255f * fb);
+				int g = (int) (255f * fg);
+				int r = (int) (255f * fr);
+				int a = (int) (255f * fa);
 				
+				if (r > 255)
+					r = 255;
+				if (g > 255)
+					g = 255;
+				if (b > 255)
+					b = 255;
+				if (a > 255)
+					a = 255;
 				p += 4;
 				img.setRGB(x, y, new Color(r, g, b, a).getRGB());
 			}
