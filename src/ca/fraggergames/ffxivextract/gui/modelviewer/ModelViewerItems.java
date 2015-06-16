@@ -397,16 +397,16 @@ public class ModelViewerItems extends JPanel {
 	
 	private void loadItems() throws FileNotFoundException, IOException
 	{
-		SqPack_IndexFile indexFile = new SqPack_IndexFile(parent.getSqpackPath() + "0a0000.win32.index", true);
+		SqPack_IndexFile indexFile = parent.getExdIndexFile();
 		EXHF_File exhfFile = new EXHF_File(indexFile.extractFile("exd/item.exh"));
 		EXDF_View view = new EXDF_View(indexFile, "exd/item.exh", exhfFile);
 		
 		for (int i = 0; i < view.getTable().getRowCount(); i++){
-			if (!((String)view.getTable().getValueAt(i, 11)).equals("0, 0, 0, 0"))
+			if (view.getTable().getValueAt(i, 0) instanceof Integer && !((String)view.getTable().getValueAt(i, 11)).equals("0, 0, 0, 0"))
 			{				
 				String model1Split[] = ((String)view.getTable().getValueAt(i, 11)).split(",");
-				String model2Split[] = ((String)view.getTable().getValueAt(i, 12)).split(",");
-						
+				String model2Split[] = ((String)view.getTable().getValueAt(i, 12)).split(",");										
+				
 				int slot = (Integer) view.getTable().getValueAt(i, 48);
 				
 				String name = (String)view.getTable().getValueAt(i, 4);

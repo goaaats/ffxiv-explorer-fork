@@ -9,7 +9,8 @@ import java.nio.ByteOrder;
 public class IMC_File {
 
 	private int numVariances;
-	private int partMask;
+	private int numParts = 0;
+	private int partMask;	
 	
 	VarianceInfo[] varianceInfoList;
 
@@ -36,18 +37,29 @@ public class IMC_File {
 		
 		varianceInfoList = new VarianceInfo[numVariances];
 		
-		//This is a weird variant sitting here
-		bb.getShort();
-		bb.getShort();
-		bb.getShort();
+		//This is weird variants sitting here. SaintCoinach reads it based on the part mask.
+		for (int i = 0; i < 8; i++)
+		{
+			int bit = (byte) (1 << i);
+			if ((partMask & bit) == bit)
+			{
+				bb.getShort();
+				bb.getShort();
+				bb.getShort();
+				numParts++;
+			}
+		}
 		
 		//Get the variances
-		for (int i = 0; i < numVariances; i++)
+		for (int p = 0; p < numParts; p++)
 		{
-			short materialNumber = bb.getShort();
-			short partMask = bb.getShort();
-			short effectNumber = bb.getShort();
-			varianceInfoList[i] = new VarianceInfo(materialNumber, partMask, effectNumber);
+			for (int i = 0; i < numVariances; i++)
+			{
+				short materialNumber = bb.getShort();
+				short partMask = bb.getShort();
+				short effectNumber = bb.getShort();
+				varianceInfoList[i] = new VarianceInfo(materialNumber, partMask, effectNumber);
+			}
 		}
 	}
 	

@@ -221,7 +221,7 @@ public class ModelViewerFurniture extends JPanel {
 
 	private void loadFurniture() throws FileNotFoundException, IOException
 	{
-		SqPack_IndexFile indexFile = new SqPack_IndexFile(parent.getSqpackPath() + "0a0000.win32.index", true);
+		SqPack_IndexFile indexFile = parent.getExdIndexFile();
 		EXHF_File exhfFileHousingFurniture = new EXHF_File(indexFile.extractFile("exd/housingfurniture.exh"));
 		EXHF_File exhfFileItem = new EXHF_File(indexFile.extractFile("exd/item.exh"));
 		EXHF_File exhfFileHousingCategory = new EXHF_File(indexFile.extractFile("exd/housingitemcategory.exh"));

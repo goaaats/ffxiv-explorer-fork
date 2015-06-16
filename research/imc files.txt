@@ -1,0 +1,13 @@
+#### IMC RESEARCH #### By Ioncannon
+
+These files define the variant information for the models. Which material to use and which effect to use.
+
+0x00 Num Variants 		Short;  
+0x02 Part Mask 			Short;
+0x04 Start of Parts			 ; Go through each bit of the lower byte of part mask. If 1, read, else don't.
+0x?? Start of Variance  	 ; Num Variants * Num Parts * Entry size
+
+===Variant Entry===
+0x00 Material Number	Short;
+0x02 Mask				Short;
+0x04 Effect Number		Short;

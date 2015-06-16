@@ -353,8 +353,18 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 				hasher.setVisible(true);
 			}
 			else if (event.getActionCommand().equals("modelviewer"))
-			{
-				ModelViewerWindow modelviewer = new ModelViewerWindow();
+			{				
+				if (Constants.datPath == null || Constants.datPath.isEmpty() || !new File(Constants.datPath).exists())
+				{
+					JOptionPane.showMessageDialog(
+			                FileManagerWindow.this,
+			                "You have not set a valid FFXIV path. Please set it first in Settings under the Options menu.",
+			                "FFXIV Path Not Set",
+			                JOptionPane.ERROR_MESSAGE);					
+					return;
+				}
+				
+				ModelViewerWindow modelviewer = new ModelViewerWindow(Constants.datPath);
 				modelviewer.setLocationRelativeTo(FileManagerWindow.this);
 				modelviewer.setVisible(true);
 			}
@@ -375,6 +385,12 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 				LogViewerWindow logViewer = new LogViewerWindow();
 				logViewer.setLocationRelativeTo(FileManagerWindow.this);
 				logViewer.setVisible(true);
+			}
+			else if  (event.getActionCommand().equals("settings"))
+			{
+				SettingsWindow settings = new SettingsWindow(FileManagerWindow.this);
+				settings.setLocationRelativeTo(FileManagerWindow.this);
+				settings.setVisible(true);
 			}
 			else if (event.getActionCommand().equals("options_update"))
 			{
@@ -399,6 +415,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 		//File Menu
 		JMenu file = new JMenu(Strings.MENU_FILE);
 		JMenu search = new JMenu(Strings.MENU_SEARCH);
+		JMenu dataviewers = new JMenu(Strings.MENU_DATAVIEWERS);
 		JMenu tools = new JMenu(Strings.MENU_TOOLS);
 		JMenu options = new JMenu(Strings.MENU_OPTIONS);
 		JMenu help = new JMenu(Strings.MENU_HELP);
@@ -435,9 +452,9 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 		search_searchAgain.addActionListener(menuHandler);	
 		search_searchAgain.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F3,0));
 		
-		JMenuItem tools_modelViewer = new JMenuItem(Strings.MENUITEM_MODELVIEWER);		
-		tools_modelViewer.setActionCommand("modelviewer");
-		tools_modelViewer.addActionListener(menuHandler);
+		JMenuItem dataviewer_modelViewer = new JMenuItem(Strings.MENUITEM_MODELVIEWER);		
+		dataviewer_modelViewer.setActionCommand("modelviewer");
+		dataviewer_modelViewer.addActionListener(menuHandler);
 		
 		JMenuItem tools_musicswapper = new JMenuItem(Strings.MENUITEM_MUSICSWAPPER);
 		tools_musicswapper.setActionCommand("musicswapper");
@@ -455,6 +472,10 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 		tools_logViewer.setActionCommand("logviewer");
 		tools_logViewer.addActionListener(menuHandler);		
 
+		JMenuItem options_settings =  new JMenuItem(Strings.MENUITEM_SETTINGS);		
+		options_settings.setActionCommand("settings");
+		options_settings.addActionListener(menuHandler);		
+		
 		Preferences prefs = Preferences.userNodeForPackage(ca.fraggergames.ffxivextract.Main.class);
 		options_enableUpdate = new JCheckBoxMenuItem(Strings.MENUITEM_ENABLEUPDATE, prefs.getBoolean(Constants.PREF_DO_DB_UPDATE, false));
 		options_enableUpdate.setActionCommand("options_update");
@@ -476,12 +497,14 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 		search.add(search_search);
 		search.add(search_searchAgain);
 		
-		tools.add(tools_modelViewer);
+		dataviewers.add(dataviewer_modelViewer);
+		
 		tools.add(tools_musicswapper);
 		tools.add(tools_macroEditor);
 		tools.add(tools_logViewer);
 		tools.add(tools_hashcalculator);
 		
+		options.add(options_settings);
 		options.add(options_enableUpdate);
 		
 		help.add(help_About);
@@ -489,6 +512,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 		//Super Menus
 		menu.add(file);
 		menu.add(search);
+		menu.add(dataviewers);
 		menu.add(tools);
 		menu.add(options);
 		menu.add(help);

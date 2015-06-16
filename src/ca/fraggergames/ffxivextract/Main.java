@@ -303,7 +303,8 @@ public class Main {
 		// Load Prefs
 		Preferences prefs = Preferences
 				.userNodeForPackage(ca.fraggergames.ffxivextract.Main.class);
-		boolean firstRun = prefs.getBoolean(Constants.PREF_FIRSTRUN, true);
+		boolean firstRun = prefs.getBoolean(Constants.PREF_FIRSTRUN, true);		
+		Constants.datPath = prefs.get(Constants.PREF_DAT_PATH, null);
 
 		// First Run
 		if (firstRun) {

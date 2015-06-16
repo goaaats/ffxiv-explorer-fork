@@ -195,6 +195,8 @@ public class ModelViewerMonsters extends JPanel {
 				byte[] modelData = null;
 				try {
 					
+					System.out.println("Loading Type: " + entries.get(selected).type + " with id: " + entries.get(selected).id);
+					
 					switch (entries.get(selected).type)
 					{
 					case 2:
@@ -298,6 +300,16 @@ public class ModelViewerMonsters extends JPanel {
 							demihuman.setModel(EquipableRender.MET, modelIndexFile, "chara/demihuman/d1022/obj/equipment/e0001/model/d1022e0001_met.mdl", 0);
 							demihuman.setModel(EquipableRender.TOP, modelIndexFile, "chara/demihuman/d1022/obj/equipment/e0001/model/d1022e0001_top.mdl", 0);							
 							break;
+						case 1023: //	
+							demihuman.setModel(EquipableRender.TOP, modelIndexFile, "chara/demihuman/d1023/obj/equipment/e0001/model/d1023e0001_dwn.mdl", 0);		
+							break;
+						case 1024: //	
+							demihuman.setModel(EquipableRender.TOP, modelIndexFile, "chara/demihuman/d1024/obj/equipment/e0001/model/d1024e0001_met.mdl", 0);		
+							break;
+						case 1025: //											
+							//demihuman.setModel(EquipableRender.MET, modelIndexFile, "chara/demihuman/d1024/obj/equipment/e0001/model/d1024e0001_met.mdl", 0);
+							demihuman.setModel(EquipableRender.TOP, modelIndexFile, "chara/demihuman/d1025/obj/equipment/e0001/model/d1025e0001_met.mdl", 0);							
+							break;
 						}		
 												
 						renderer.setModels(demihuman.getModels());
@@ -312,6 +324,8 @@ public class ModelViewerMonsters extends JPanel {
 							model.loadMaterials(entries.get(selected).varient);
 							renderer.setModel(model);
 						}
+						else
+							System.out.println("Model not found");
 						break;
 					}						
 				} catch (FileNotFoundException e) {
@@ -347,7 +361,7 @@ public class ModelViewerMonsters extends JPanel {
 
 	private void loadMonsters() throws FileNotFoundException, IOException
 	{
-		SqPack_IndexFile indexFile = new SqPack_IndexFile(parent.getSqpackPath() + "0a0000.win32.index", true);
+		SqPack_IndexFile indexFile = parent.getExdIndexFile();
 		EXHF_File exhfFile = new EXHF_File(indexFile.extractFile("exd/modelchara.exh"));
 		EXDF_View view = new EXDF_View(indexFile, "exd/modelchara.exh", exhfFile);		
 		

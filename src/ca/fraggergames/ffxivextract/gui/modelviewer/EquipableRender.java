@@ -35,6 +35,10 @@ public class EquipableRender {
 
 	public void setModel(int type, SqPack_IndexFile modelIndexFile, String modelPath, int varient) throws FileNotFoundException, IOException {
 		byte[] modelData = modelIndexFile.extractFile(modelPath);
+		
+		if (modelData == null)
+			return;
+		
 		Model model = new Model(modelPath,modelIndexFile,modelData);
 		model.loadMaterials(varient);
 		
