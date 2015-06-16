@@ -203,25 +203,27 @@ public class OpenGL_View extends JPanel {
         JLabel lblVariant = new JLabel("Variant:");
         panel_4.add(lblVariant);
         
-        cmbVariantChooser = new JComboBox();
-        cmbVariantChooser.setLightWeightPopupEnabled(false);
-        
-        int variantChooserModel[] = new int[model.getNumVariants() == -1 ? 0 : model.getNumVariants()];
-        for (int i = 0; i < variantChooserModel.length; i++)
-        	cmbVariantChooser.addItem("" + (i+1));
-        
-        cmbVariantChooser.addItemListener(new ItemListener() {
-			
-			@Override
-			public void itemStateChanged(ItemEvent e) {
-				if (e.getStateChange() == ItemEvent.SELECTED) {
-			          model.loadMaterials(Integer.parseInt((String)e.getItem()));
-			          renderer.resetMaterial();
-			    }
-			}
-		});
-        
-        panel_4.add(cmbVariantChooser);
+        if (model.getNumVariants() > -1){
+	        cmbVariantChooser = new JComboBox();
+	        cmbVariantChooser.setLightWeightPopupEnabled(false);
+	                
+	        int variantChooserModel[] = new int[model.getNumVariants()];
+	        for (int i = 0; i < variantChooserModel.length; i++)
+	        	cmbVariantChooser.addItem("" + (i+1));
+	        
+	        cmbVariantChooser.addItemListener(new ItemListener() {
+				
+				@Override
+				public void itemStateChanged(ItemEvent e) {
+					if (e.getStateChange() == ItemEvent.SELECTED) {
+				          model.loadMaterials(Integer.parseInt((String)e.getItem()));
+				          renderer.resetMaterial();
+				    }
+				}
+			});
+	        
+	        panel_4.add(cmbVariantChooser);
+        }
         
         JPanel panel_5 = new JPanel();
         panel.add(panel_5, BorderLayout.CENTER);

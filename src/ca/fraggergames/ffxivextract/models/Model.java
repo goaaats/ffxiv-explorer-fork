@@ -35,11 +35,10 @@ public class Model {
 	SqPack_IndexFile currentIndex;
 		
 	//Model Info
+	private IMC_File imcFile;
 	private DX9VertexElement vertexElements[][];
 	private String stringArray[];
-	private short numAtrStrings, numBoneStrings, numMaterialStrings, numShpStrings;	
-	
-	private int numVariants = -1;
+	private short numAtrStrings, numBoneStrings, numMaterialStrings, numShpStrings;		
 	
 	private Material materials[];
 	private LoDSubModel lodModels[] = new LoDSubModel[3];
@@ -151,7 +150,7 @@ public class Model {
 			System.out.println("Anim Things: " + numBoneStrings);
 		}
 		
-		numVariants = loadNumberOfVariants();		
+		imcFile = loadImcFile();		
 		loadMaterials(1);
 		
 		//Skip Stuff
@@ -324,43 +323,35 @@ public class Model {
         }
 	}
 	
-	private short loadNumberOfVariants()
+	private IMC_File loadImcFile()
 	{
 		if (modelPath == null || modelPath.contains("null") || !modelPath.contains("chara"))
-			return -1;
+			return null;
 		
-		String incFolderPath = String.format("%s", modelPath.substring(0, modelPath.indexOf("model")-1));							
-		
-		for (int i = 0; i < numMaterialStrings; i++)
-		{
-			String fileString = incFolderPath.substring(incFolderPath.lastIndexOf("/")+1) + ".imc";										
-				
-			try {
-				byte[] data = currentIndex.extractFile(incFolderPath);
-				
-				if (data == null)
-					continue;
-				
-				System.out.println("Adding Entry: " + incFolderPath+"/"+fileString);
-				HashDatabase.addPathToDB(incFolderPath+"/"+fileString, currentIndex.getIndexName());
-				
-				ByteBuffer bb = ByteBuffer.wrap(data);
-				bb.order(ByteOrder.LITTLE_ENDIAN);
-				return bb.getShort();
-			} catch (FileNotFoundException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}										
-					
+		String incFolderPath = String.format("%s", modelPath.substring(0, modelPath.indexOf("model")-1));								
+		String fileString = incFolderPath.substring(incFolderPath.lastIndexOf("/")+1) + ".imc";										
+		String imcPath = incFolderPath + "/" + fileString;
+		try {
+			byte[] data = currentIndex.extractFile(imcPath);
+			
+			if (data == null)
+				return null;
+			
+			System.out.println("Adding Entry: " + imcPath);
+			HashDatabase.addPathToDB(imcPath, currentIndex.getIndexName());			
+
+			return new IMC_File(data);
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 		
-		return -1;
+		return null;										
+					
 	}
 	
-	public void loadMaterials(int variant)
+	public void loadMaterials(int variantNumber)
 	{		
 		if (modelPath == null || modelPath.contains("null") || (!modelPath.contains("chara") && !modelPath.contains("bg") && !modelPath.contains("bgcommon")))
 			return;
@@ -372,13 +363,13 @@ public class Model {
 		if (!stringArray[numAtrStrings+numBoneStrings].startsWith("/") && !stringArray[numAtrStrings+numBoneStrings].contains("chara"))
 			materialFolderPath = stringArray[numAtrStrings+numBoneStrings].substring(0, stringArray[numAtrStrings+numBoneStrings].lastIndexOf("/"));
 		else if ((modelPath.contains("face") || modelPath.contains("hsair"))){
-			if (variant == 1)
+			if (variantNumber == -1 || imcFile == null)
 				materialFolderPath = String.format("%smaterial", modelPath.substring(0, modelPath.indexOf("model")));
 			else
-				materialFolderPath = String.format("%smaterial/v%04d", modelPath.substring(0, modelPath.indexOf("model")), variant-1);
+				materialFolderPath = String.format("%smaterial/v%04d", modelPath.substring(0, modelPath.indexOf("model")), imcFile.getVarianceInfo(variantNumber-1).materialNumber);
 		}		
 		else
-			materialFolderPath = String.format("%smaterial/v%04d", modelPath.substring(0, modelPath.indexOf("model")), variant);
+			materialFolderPath = String.format("%smaterial/v%04d", modelPath.substring(0, modelPath.indexOf("model")), imcFile.getVarianceInfo(variantNumber-1).materialNumber);
 		
 		//HACK HERE
 		int bodyMaterialSpot = -1;
@@ -476,7 +467,10 @@ public class Model {
 	
 	public int getNumVariants()
 	{
-		return numVariants;
+		if (imcFile == null)
+			return -1;
+		else
+			return imcFile.getNumVariances();
 	}
 
 	public void render(DefaultShader defaultShader, float[] viewMatrix, float[] modelMatrix,
