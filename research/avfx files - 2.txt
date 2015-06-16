@@ -1,0 +1,102 @@
+Ver    : Version? Doesn't seem to change between files (13,09,11,20) but doesn't care.
+bDFP   : ?  Boolean
+bFG    : ?  Boolean
+bTS    : ?  Boolean
+bASH   : ?  Boolean
+bCBC   : ?  Boolean
+bCul   : ?  Boolean
+CBPx   : ?  Float (0.0f)
+CBPy   : ?  Float (Changes: 100.0f)
+CBPz   : ?  Float (Changes: 0.0f, 0.2f)
+CBSx   : ?  Float (Changes: 0.0f, 0.5f, 50.0f, )
+CBSy   : ?  Float (Changes: 0.0f, 0.2f, 0.5f, 100.0f)
+CBSz   : ?  Float (Changes: 0.0f, 0.5f, 1.0, 50.0f)
+ZBMs   : ?  Float (1.0f)
+ZBMd   : ?  Float (0.0f)
+bCmS   : ?  Boolean
+bFEL   : ?  Boolean
+bOSt   : ?  Boolean
+SPFR   : ?  Float (1.0f, 0.5f, 0.35, 0.15f, 0.1f, 0.0f) (Seems to be a range between 0.0 and 1.0)
+SKO    : ?  Float (0.0, 0.01, 0.005 -0.2)
+DwLy   : ?  Int? (0x02, 0x01, 0x0a) (Max is 0x0a)
+DwOT   : ?  Int? (0x02)
+DLST   : ?  Int?  (0x00, 0x02)
+PL1S   : ?
+PL2S   : ?
+RvPx   : Sprite PositionX  Float (0.0)
+RvPy   : Sprite PositionY  Float (0.0)
+RvPz   : Sprite PositionZ  Float (0.0)
+RvRx   : Sprite RotationX  Float (0.0)
+RvRy   : Sprite RotationY  Float (0.0)
+RvRz   : Sprite RotationZ  Float (0.0)
+RvSx   : Sprite ScaleX  Float (0.0, 0.7, 1.3)
+RvSy   : Sprite ScaleY  Float (0.7, 1.3)
+RvSz   : Sprite ScaleZ  Float (0.7, 1.3)
+RvR    : Sprite Color Red  Float (1.0)
+RvG    : Sprite Color Green  Float (1.0)
+RvB    : Sprite Color Blue  Float (1.0)
+AFXe   : ?  Float
+AFXi   : ?  Float (PI? 3.141593)
+AFXo   : ?  Float
+AFYe   : ?  Float
+AFYi   : ?  Float PI? 3.141593)
+AFYo   : ?  Float
+AFZe   : ?  Float
+AFZi   : ?  Float PI? 3.141593)
+AFZo   : ?  Float
+bGFE   : ?  Boolean (Made center glow go away)
+GFIM   : ?  Float (1.0)
+ScCn   : Schedule Count Int
+TlCn   : Timeline Count Int
+EmCn   : Emitter Count Int
+PrCn   : Particle Count Int
+EfCn   : Effect Count Int
+BdCn   : Binding Count Int
+TxCn   : Texture Count Int
+MdCn   : Model Count Int
+Schd
+TmLn
+TmLn
+Emit
+Emit
+Emit
+Ptcl
+Ptcl
+Ptcl
+Ptcl
+Bind
+Bind
+Bind
+Tex
+Tex
+Tex
+Modl
+Modl
+
+Schedule Tags:
+
+ItCn   : Item Count Int
+TrCn   : ? Count Int
+Item   : Item?
+  -> bEna   : Enabled? Boolean
+  -> StTm   : Statement? Int?
+  -> TlNo   : Timeline Number? Int?
+Trgr   : Trigger
+  -> bEna   : Enabled? Boolean
+  -> StTm   : Statement? Int?
+  -> TlNo   : Timeline Number? Int?
+  
+TimeLine Tags:
+LpSt   :
+LpEd   :
+BnNo   :  Bind Number? Int?
+TICn   :  ? Count? Int
+CpCn   :  ? Count? Int
+Item   : 
+  -> bEna
+  -> StTm
+  -> EdTm
+  -> BdNo
+  -> EfNo
+  -> Plfm
+  

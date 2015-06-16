@@ -315,8 +315,8 @@ public class SCDConverterWindow extends JFrame {
 					return;
 				}		
 				
-				loopStart = getBytePosition(positionStart, numSamples,ogg.length);
-				loopEnd = getBytePosition(positionEnd, numSamples,ogg.length);			
+				loopStart = getBytePosition(positionStart, numSamples,ogg.length-0x10);
+				loopEnd = getBytePosition(positionEnd, numSamples,ogg.length-0x10);			
 				
 		}
 		//Create Header

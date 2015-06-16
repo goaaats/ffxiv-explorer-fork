@@ -12,7 +12,7 @@ public class AVFX_File {
 	public AVFX_File(byte[] data)
 	{
 		ByteBuffer bb = ByteBuffer.wrap(data);
-		bb.order(ByteOrder.LITTLE_ENDIAN);
+		bb.order(ByteOrder.LITTLE_ENDIAN);		
 		
 		bb.getInt(); //Signature
 		fileSize = bb.getInt(); //File Size
@@ -28,18 +28,41 @@ public class AVFX_File {
 		byte data[];
 		
 		public AVFX_Packet(ByteBuffer inBuff)
-		{
-			inBuff.get(tag);
-			dataSize = inBuff.getInt();
+		{			
+			inBuff.get(tag);		
+			
+			dataSize = inBuff.getInt();				
+			
+			//Datasizes for strings are all fucked up
+			if (tag[0] == 0x78 && tag[1] == 0x65 && tag[2] == 0x54)
+			{		
+				int increment = 0;
+				int curPos = inBuff.position();
+				inBuff.position(curPos + dataSize);
+				
+				while (inBuff.hasRemaining() && inBuff.get() == 0x0)
+					increment++;
+				
+				dataSize += increment;
+				
+				inBuff.position(curPos);				
+			}
+			//End this hack
+			
 			data = new byte[dataSize];
 			inBuff.get(data);
 			
-			printOut();
 		}
 		
 		@Override
 		public String toString() {			
-			return new StringBuffer(new String(tag)).reverse().toString().trim();
+			
+			String string = "";
+			
+			for (int i = 0; i < 4; i++)
+				string += String.format("%02x, ", data[i]);
+			
+			return new StringBuffer(new String(tag)).reverse().toString().trim() + " : " + (data.length == 4 ? string : "");
 		}		
 		
 	}

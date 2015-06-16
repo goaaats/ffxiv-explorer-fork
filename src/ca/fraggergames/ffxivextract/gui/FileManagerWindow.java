@@ -64,6 +64,7 @@ import ca.fraggergames.ffxivextract.helpers.HavokNative;
 import ca.fraggergames.ffxivextract.helpers.LERandomAccessFile;
 import ca.fraggergames.ffxivextract.helpers.LuaDec;
 import ca.fraggergames.ffxivextract.helpers.WavefrontObjectWriter;
+import ca.fraggergames.ffxivextract.models.AVFX_File;
 import ca.fraggergames.ffxivextract.models.EXDF_File;
 import ca.fraggergames.ffxivextract.models.EXHF_File;
 import ca.fraggergames.ffxivextract.models.Model;
@@ -650,11 +651,11 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 				e.printStackTrace();
 			}
 		}
-		/*else if (data.length >= 4 && data[0] == 'X' && data[1] == 'F' && data[2] == 'V' && data[3] == 'A')
+		else if (data.length >= 4 && data[0] == 'X' && data[1] == 'F' && data[2] == 'V' && data[3] == 'A')
 		{
 			AVFX_File avfxFile = new AVFX_File(data);
 			avfxFile.printOut();
-		}*/
+		}
 		else if (contentType == 4 || file.getName().endsWith("atex"))
 		{
 			Image_View imageComponent = new Image_View(new Texture_File(data));

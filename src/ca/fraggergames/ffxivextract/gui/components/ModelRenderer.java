@@ -1,5 +1,7 @@
 package ca.fraggergames.ffxivextract.gui.components;
 
+import java.awt.Component;
+import java.awt.Dimension;
 import java.io.IOException;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
@@ -181,6 +183,9 @@ public class ModelRenderer implements GLEventListener{
 	public void reshape(GLAutoDrawable drawable, int x, int y, int width, int height){
 			GL3bc gl = drawable.getGL().getGL3bc();  // get the OpenGL 2 graphics context
 		 
+
+			((Component)drawable).setMinimumSize(new Dimension(0,0));
+			
 	      if (height == 0) height = 1;   // prevent divide by zero
 	      float aspect = (float)width / height;
 	 

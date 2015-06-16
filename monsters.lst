@@ -360,10 +360,162 @@
 412:Carbuncle (Yellow)
 413:Carbuncle (White)
 414:Carbuncle (Black)
-415:Ifrit Egi
-416:Titan Egi
-417:Garuda Egi
-418:Ramuh Egi
+415:Ifrit-Egi
+416:Titan-Egi
+417:Garuda-Egi
+418:Ramuh-Egi
+
+######I AM HERE############
+
+470:Wind-up Airship (Minion)
+471:Wind-up Qiqirn (Minion)
+472:Wind-up Dalamud (Minion)
+473:BLANK
+474:Carriage
+475:BLANK
+478:Garuda Tornado
+479:Thing
+
+482:BLANK
+483:BLANK
+484:BLANK
+485:BLANK
+486:BLANK
+487:BLANK
+488:BLANK
+489:BLANK
+490:BLANK
+491:BLANK
+492:BLANK
+493:BLANK
+494:BLANK
+495:BLANK
+496:BLANK
+497:BLANK
+498:BLANK
+499:BLANK
+500:BLANK
+501:BLANK
+502:BLANK
+503:Cube Thing (Scenery)
+504:BLANK
+505:Black Chocobo Chick (Minion)
+506:Tonberry (Scholar, Glow)
+#MARK
+507:Thing from Dzemael
+508:Clockwork Spider
+509:Puk (Dark Matter)(First Coil - Turn 1)
+510:BLANK
+
+515:Invisible (Conflag)
+516:BLANK
+517:BLANK
+518:Bertha/Quad Cannon
+519:FFXIII Event?
+
+520:Lightning (FFXIII Event)
+521:Laser Shooter (Sunken Temple of Quarn)
+522:BLANK
+523:Invisible (Dreadknight Snare, T5)
+524:BLANK
+525:BLANK
+526:Invisible
+527:Shantotto (Minion)
+528:Box with maps
+529:Box
+
+530:Crate
+531:Standard with Torch
+532:Book Glow (Green)
+533:Bomb Decoration (Halloween 2013)
+534:Unicorn
+535:BLANK
+536:BLANK
+#MARK
+537:Purple Ifrit 
+538:Sword
+539:BLANK
+540:BLANK 
+541:Book Glow (Purple)
+
+550:Light Emitter
+551:Garuda Plume (Green)
+552:Garuda Plume (Purple)
+553:Garuda Plume
+554:Titan
+555:Dragon
+558:Serpent (Blue)(First Coil - Turn 1)
+559:Serpent (Blue)(First Coil - Turn 1)
+
+560:Serpent (First Coil - Turn 1)
+561:BLANK
+562:Rat
+563:Cow (Blue)
+564:Cow (Brown)
+565:Cow (Yellow)
+566:Cow (Red)
+567:Ash 1 (Haukke Manor Hard)
+568:Ash 2 (Haukke Manor Hard)
+569:Ash 3 (Haukke Manor Hard)
+
+570:Unktehi 1 (Hunt Mob)
+571:Ceremony Chocobo (Mount)
+572:Unktehi 2
+573:Unktehi 3
+574:Phecta (Hunt Mob)
+575:Tiny Brickman
+576:Brickman
+577:Wind-up Brickman
+578:Minute Mindflayer
+579:Tight-beaked Parrot (Minion)
+580:Wind-up Amalj'aa (Minion)
+581:Wind-up Ixali (Minion)
+582:Wind-up Kobold (Minion)
+583:Wind-up Sahagin (Minion)
+584:Wind-up Edvya
+585:Wind-up Sun
+586:Plush Cushion (Minion)
+587:Minion of Light (Warrior)(Minion)
+588:Behemoth (Mount)
+589:Blockman (Grey)
+
+590:Blockman (Gold)
+591:Imp (On Fire)
+592:Drake (/w Bling)
+593:Gobbue (Mount)
+594:Unicorn ()(Mount)
+595:Zu Hatchling 1
+596:Zu Hatchling 2
+597:Zu Egg 1
+598:Zu Egg 2
+599:Invisible
+
+600:Leech King (Hunt Mob)
+601:Bogey (Hunt Mob)
+602:Bogey
+603:Garlock (Hunt Mob)
+604:Zu
+605:Dullahan (Purple and Headless)
+606:Hound (Corrupted Crystal)
+607:Ahriman
+608:Pudding (Yellow)
+#Mark
+609:???
+610:Slime (Yellow)
+611:Garuda Plume
+615:Ifrit Beacon
+616:Giant Fungus
+617:Snowman
+618:Titan-Egi (Grey) 
+619:Glowing Lance
+620:Spinning Scythe
+623:Minion of Light (WhiteMage)(Minion)
+624:Minion of Light (BlackMage)(Minion)
+625:Wind-up Leader (Raubahn)(Minion)
+626:Wind-up Leader (Merlwyb)(Minion)
+627:Wind-up Leader (Kan-e-senna)(Minion)
+628:Trent (Christmas)
+629:Rock
 
 630:BLANK
 631:BLANK
@@ -374,7 +526,7 @@
 636:Gilgamesh
 #MARK
 638: (Tam-Tara Hard)
-639:Poroggo (Green)
+639:Frog (Green)
 640:Decaying Gourmand (Lost City of Amdapor)
 641:Gobmachine G-VI (Brayflox Longstop Hard)
 642:Leviathan Tail
@@ -461,7 +613,7 @@
 735:Sasquatch (Hullbreaker)
 736:Invisible
 
-738:Poroggo (Red)
+738:Frog (Red)
 739:Puk (Vigil Heir)(Stone Vigil Hard)
 740:Nanka Baby (Hullbreaker Isle)
 741:Angler 
@@ -492,7 +644,6 @@
 766:Allagan Node (Frontlines, Final Coil - Turn 2)
 77:Yeti (Snowcloak)
 768:Staff of Eld (Syrcus Tower)
-769:Slime Experiment (Syrcus Tower)
 
 770:Iron Giant (Grey)
 771:Iron Giant (Grey)
@@ -740,29 +891,42 @@
 
 #Particle Cubes
 
-0649:Particle Cube
-0676:Particle Cube
-0737:Particle Cube
-0783:Particle Cube
-0784:Particle Cube
-0785:Particle Cube
-0786:Particle Cube
-0787:Particle Cube
-0788:Particle Cube
-0789:Particle Cube
-0790:Particle Cube
-0848:Particle Cube
-0849:Particle Cube
-0850:Particle Cube
-0906:Particle Cube
-0910:Particle Cube
-0928:Particle Cube
-0931:Particle Cube
-0960:Particle Cube
-1006:Particle Cube
-1007:Particle Cube
-1008:Particle Cube
-1009:Particle Cube
-1010:Particle Cylinder
-1015:Particle Cube
-1025:Particle Cube
+0476:Particle Cube (Gaius X Attack)
+0477:Particle Cube (Gaius X Attack)
+0511:Particle Cube (Dark Orb)
+0512:Particle Cube (T5 Purple Orb)
+0513:Particle Cube (Green Tunder Orb)
+0514:Particle Cube (Music Orb)
+0556:Particle Cube (Conflag)
+0557:Particle Cube (Conflag)
+0612:Particle Cube (Corrupted Sprite)
+0613:Particle Cube (Corrupted Gas)
+0614:Particle Cube (Green Thunder)
+0622:Particle Cube (Darkness)
+0649:Particle Cube (Diabolos Nightmare)
+0676:Particle Cube (Splume)
+0737:Particle Cube (Bubble)
+0769:Particle Sphere (Starfall Marker)
+0783:Particle Cube (Fire Orb)(Syrcus Tower)
+0784:Particle Cube (Ice Orb)(Syrcus Tower)
+0785:Particle Cube (Thunder Orb)(Syrcus Tower)
+0786:Particle Cube (Purple Orb)
+0787:Particle Cube (White Orb)
+0788:Particle Cube (Thunder Orb)
+0789:Particle Cube (Dark Orb)
+0790:Particle Cube (Hunter's Moon)
+0848:Particle Cube (Blackfire)(Final Coil - Turn 3)
+0849:Particle Cube (Fountain)(Final Coil - Turn 3)
+0850:Particle Cube (Fire Orb)
+0906:Particle Cube (Typhon Wind)
+0910:Particle Cube (Sand Orb)
+0928:Particle Cube (Thunder Orb)
+0931:Particle Cube (Green Orb)
+0960:Particle Cube (Blue Orb)
+1006:Particle Cube (Weird Glyph)
+1007:Particle Cube (Light Orb)
+1008:Particle Cube (Thunder Orb)
+1009:Particle Cube (Dark Cloud)
+1010:Particle Cylinder (Chains)
+1015:Particle Cube (Thunder Orb)
+1025:Particle Cube (Dark Cloud)
