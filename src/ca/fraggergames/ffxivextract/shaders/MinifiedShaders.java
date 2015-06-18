@@ -61,7 +61,7 @@ public class MinifiedShaders {
 			+ "if(uHasMask&&uHasNormal&&uHasColorSet)"
 			+ "w=mix(d.xyz,d.xyz+r.xyz,n.y),v=vec4(v.xyz*w*n.x,1.);"
 			+ "if(uHasDiffuse&&uHasColorSet)"
-			+ "w=(d+r).xyz,v=vec4(v.xyz*w,1.);"
+			+ "w=(d+r+t).xyz,v=vec4(v.xyz*w,1.);"
 			+ "float s=max(dot(m,i),0.),b=1.-max(dot(m,i),0.);"
 			+ "if(uHasMask)" + "b*=n.z;" + "else" + " b=0.;"
 			+ "vec3 o=vec3(0.,0.,0.);" + "if(s>0.&&uHasSpecular)" + "{"
