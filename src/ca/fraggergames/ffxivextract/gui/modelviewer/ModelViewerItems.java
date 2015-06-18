@@ -58,8 +58,8 @@ public class ModelViewerItems extends JPanel {
 	
 	SparseArray<String> charIds = new SparseArray<String>();
 
-	int currentBody = -1;
-	int currentCategory = -1;
+	int currentBody = 0;
+	int currentCategory = 0;
 	
 	OpenGL_View view3D;
 	JList lstItems;	
@@ -90,7 +90,6 @@ public class ModelViewerItems extends JPanel {
 		this.modelIndexFile = modelIndex;
 				
 		//Fill the Equipment Slots
-		slots.append(-1, "--Equipment Slot--");		
 		slots.append(1, "One-Handed Weapon");
 		slots.append(13, "Two-Handed Weapon");
 		slots.append(2, "Offhand");
@@ -112,10 +111,9 @@ public class ModelViewerItems extends JPanel {
 		slots.append(20, "Body + Hands");
 		slots.append(21, "Body + Legs + Feet");
 		
-		slots.append(0, "Non-Equipment");
+		slots.append(0, "Food");
 		
-		//Fill the char ids
-		charIds.append(-1, "--Body Style--");		
+		//Fill the char ids		
 		charIds.append(1, "Midlander Male");
 		charIds.append(2, "Midlander  Female");
 		charIds.append(3, "Highlander Male");
@@ -373,6 +371,10 @@ public class ModelViewerItems extends JPanel {
         
         panel_3.add( glcanvas, BorderLayout.CENTER);
                 
+
+        ((ItemsListModel)lstItems.getModel()).refresh();
+        lstItems.clearSelection();
+        
 	}
 	
 	private void loadModel(int charNumberOverride, int selected)
@@ -495,7 +497,7 @@ public class ModelViewerItems extends JPanel {
 					int id = Integer.parseInt(model1Split[0].trim());
 						
 					boolean isWeap = false;
-					if (slot == 1 || slot == 2 || slot == 13)
+					if (slot == 0 || slot == 1 || slot == 2 || slot == 13)
 						isWeap = true;
 					
 					int model = !isWeap ? Integer.parseInt(model1Split[2].trim()) : Integer.parseInt(model1Split[1].trim());
