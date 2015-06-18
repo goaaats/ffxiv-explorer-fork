@@ -40,7 +40,7 @@ void main() {
 	//Color Sets
 	vec4 table_color;
 	vec4 table_specular;
-	vec4 table_unknown1;
+	vec4 table_glow;
 	vec4 table_unknown2;
 
 	//Other
@@ -61,7 +61,7 @@ void main() {
 		normalize(mapNormal);
 		table_color = texture2D(uColorSetTex, vec2(0.125, mapNormal.a));
         table_specular = texture2D(uColorSetTex, vec2(0.375, mapNormal.a));
-        table_unknown1 = texture2D(uColorSetTex, vec2(0.625, mapNormal.a));
+        table_glow = texture2D(uColorSetTex, vec2(0.625, mapNormal.a));
         table_unknown2 = texture2D(uColorSetTex, vec2(0.875, mapNormal.a));              
 	}
 
@@ -96,6 +96,8 @@ void main() {
 		color = mix(table_color.xyz, table_color.xyz + table_specular.xyz, mapMask.g);
     	mapDiffuse = vec4(mapDiffuse.xyz * color * mapMask.r, 1.0);
     }       
+    
+    mapDiffuse.xyz += table_glow.xyz;        
     
     //Diffuse           	
     float lambertian = max(dot(L,normal), 0.0);    
