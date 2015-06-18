@@ -350,6 +350,7 @@ public class ModelViewerItems extends JPanel {
 		          currentCategory = slots.keyAt(selected);
 		          
 		          ((ItemsListModel)lstItems.getModel()).refresh();
+		          lstItems.clearSelection();
 				}
 			}
         });
@@ -376,6 +377,10 @@ public class ModelViewerItems extends JPanel {
 	
 	private void loadModel(int charNumberOverride, int selected)
 	{
+
+		if (selected == -1)
+			return;
+		
 		String modelPath = null;
 		byte[] modelData = null;
 		ModelItemEntry currentItem = entries[currentCategory].get(selected);

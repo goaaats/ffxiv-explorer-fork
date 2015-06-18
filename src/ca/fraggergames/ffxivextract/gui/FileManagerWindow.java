@@ -364,9 +364,9 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 					return;
 				}
 				
-				ModelViewerWindow modelviewer = new ModelViewerWindow(Constants.datPath);
-				modelviewer.setLocationRelativeTo(FileManagerWindow.this);
-				modelviewer.setVisible(true);
+				ModelViewerWindow modelviewer = new ModelViewerWindow(FileManagerWindow.this, Constants.datPath);
+				//modelviewer.setLocationRelativeTo(FileManagerWindow.this);
+				modelviewer.beginLoad();
 			}
 			else if (event.getActionCommand().equals("musicswapper"))
 			{

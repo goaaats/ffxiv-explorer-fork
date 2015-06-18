@@ -64,9 +64,9 @@ public class IMC_File {
 	}
 	
 	public VarianceInfo getVarianceInfo(int i)
-	{
-		if (i >= numVariances)
-			return null;
+	{			
+		if (i >= numVariances || i == -1)
+			return varianceInfoList[0];
 		
 		return varianceInfoList[i];
 	}

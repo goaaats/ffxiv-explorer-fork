@@ -11,6 +11,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JTabbedPane;
+import javax.swing.SwingWorker;
 
 import ca.fraggergames.ffxivextract.Constants;
 import ca.fraggergames.ffxivextract.Strings;
@@ -18,10 +19,12 @@ import ca.fraggergames.ffxivextract.models.SqPack_IndexFile;
 
 public class ModelViewerWindow extends JFrame {
 	
+	JFrame parent;
+	Loading_Dialog dialog;
 	String sqPackPath;
 	SqPack_IndexFile exdIndexFile, modelIndexFile, buildingIndexFile;
-	
-	public ModelViewerWindow(String sqPackPath) {
+	JTabbedPane tabbedPane;
+	public ModelViewerWindow(JFrame parent, String sqPackPath) {
 		
 		this.setTitle(Strings.DIALOG_TITLE_MODELVIEWER);
 		URL imageURL = getClass().getResource("/res/frameicon.png");
@@ -29,26 +32,12 @@ public class ModelViewerWindow extends JFrame {
 		this.setIconImage(image.getImage());
 		setSize(800, 600);				
 		
+		this.parent = parent;
 		this.sqPackPath = sqPackPath;
 		
-		JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
+		tabbedPane = new JTabbedPane(JTabbedPane.TOP);
 		getContentPane().add(tabbedPane, BorderLayout.CENTER);
-		
-        try {
-        	exdIndexFile = new SqPack_IndexFile(getSqpackPath() + "\\game\\sqpack\\ffxiv\\0a0000.win32.index", true);
-			modelIndexFile = new SqPack_IndexFile(getSqpackPath() + "\\game\\sqpack\\ffxiv\\040000.win32.index", true);
-			buildingIndexFile = new SqPack_IndexFile(getSqpackPath() + "\\game\\sqpack\\ffxiv\\010000.win32.index", true);
-		} catch (IOException e1) {
-			e1.printStackTrace();
-			getContentPane().removeAll();
-			getContentPane().add(new JLabel("Error: Could not find game files. Is DAT path correct?"));
-			return;
-		}
-
-		tabbedPane.add("Monsters", new ModelViewerMonsters(this, modelIndexFile));
-		tabbedPane.add("Items", new ModelViewerItems(this, modelIndexFile));
-		tabbedPane.add("Furniture", new ModelViewerFurniture(this, buildingIndexFile));
-		
+		       
 	}
 
 	public SqPack_IndexFile getExdIndexFile()
@@ -70,4 +59,52 @@ public class ModelViewerWindow extends JFrame {
 		return sqPackPath;
 	}
 
+	public void beginLoad()
+	{
+		OpenIndexTask task = new OpenIndexTask();				 
+		dialog = new Loading_Dialog(ModelViewerWindow.this, 4);		
+		task.execute();
+		dialog.setLocationRelativeTo(null);
+		dialog.setVisible(true);
+	}
+	
+	class OpenIndexTask extends SwingWorker<Void, Void>{
+		
+		public OpenIndexTask() {	
+					
+		}
+
+		@Override
+		protected Void doInBackground() throws Exception {
+				
+			
+			try {
+					dialog.nextFile(0, getSqpackPath() + "\\game\\sqpack\\ffxiv\\0a0000.win32.index");
+		        	exdIndexFile = new SqPack_IndexFile(getSqpackPath() + "\\game\\sqpack\\ffxiv\\0a0000.win32.index", true);
+		        	dialog.nextFile(1, getSqpackPath() + "\\game\\sqpack\\ffxiv\\040000.win32.index");
+					modelIndexFile = new SqPack_IndexFile(getSqpackPath() + "\\game\\sqpack\\ffxiv\\040000.win32.index", true);
+		        	dialog.nextFile(2, getSqpackPath() + "\\game\\sqpack\\ffxiv\\010000.win32.index");
+					buildingIndexFile = new SqPack_IndexFile(getSqpackPath() + "\\game\\sqpack\\ffxiv\\010000.win32.index", true);
+					dialog.nextFile(3, "Setting up lists...");
+					tabbedPane.add("Monsters", new ModelViewerMonsters(ModelViewerWindow.this, modelIndexFile));
+					tabbedPane.add("Items", new ModelViewerItems(ModelViewerWindow.this, modelIndexFile));
+					tabbedPane.add("Furniture", new ModelViewerFurniture(ModelViewerWindow.this, buildingIndexFile));
+				} catch (IOException e1) {
+					e1.printStackTrace();
+					getContentPane().removeAll();
+					getContentPane().add(new JLabel("Error: Could not find game files. Is DAT path correct?"));
+					return null;
+				}
+			return null;								
+		}
+		
+		@Override
+		protected void done() {
+			dialog.dispose();
+			
+			ModelViewerWindow.this.setLocationRelativeTo(parent);
+			ModelViewerWindow.this.setVisible(true);
+		}
+	}
+	
 }
