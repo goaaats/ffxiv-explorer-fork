@@ -1,6 +1,9 @@
 package ca.fraggergames.ffxivextract.gui.modelviewer;
 
 import java.awt.BorderLayout;
+import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
@@ -14,10 +17,13 @@ import javax.media.opengl.GLCapabilities;
 import javax.media.opengl.GLProfile;
 import javax.media.opengl.awt.GLCanvas;
 import javax.swing.AbstractListModel;
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.border.TitledBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
@@ -39,6 +45,9 @@ public class ModelViewerFurniture extends JPanel {
 	
 	OpenGL_View view3D;
 	JList lstFurniture;	
+	
+	JLabel txtPath;
+	JButton btnResetCamera;
 	
 	FPSAnimator animator;
 	
@@ -65,10 +74,37 @@ public class ModelViewerFurniture extends JPanel {
 		panel_1.setLayout(new BorderLayout(0, 0));
 		
 		JPanel panel_2 = new JPanel();
+		panel_2.setBorder(new TitledBorder(null, "Info", TitledBorder.LEADING, TitledBorder.TOP, null, null));
 		panel_1.add(panel_2, BorderLayout.NORTH);
+		panel_2.setLayout(new BoxLayout(panel_2, BoxLayout.Y_AXIS));
 		
-		JLabel lblInfoAndControls = new JLabel("Info and controls go here");
-		panel_2.add(lblInfoAndControls);
+		JPanel panelInfo_1 = new JPanel();
+		FlowLayout flowLayout = (FlowLayout) panelInfo_1.getLayout();
+		flowLayout.setVgap(1);
+		flowLayout.setAlignment(FlowLayout.LEFT);
+		panel_2.add(panelInfo_1);
+		
+		JLabel lblBleh = new JLabel("Path: ");
+		panelInfo_1.add(lblBleh);
+					
+		txtPath = new JLabel("-");
+		panelInfo_1.add(txtPath);
+		
+		JPanel panelInfo_3 = new JPanel();
+		FlowLayout flowLayout_2 = (FlowLayout) panelInfo_3.getLayout();
+		flowLayout_2.setAlignment(FlowLayout.LEFT);
+		panel_2.add(panelInfo_3);
+		
+		btnResetCamera = new JButton("Reset Camera");
+		panelInfo_3.add(btnResetCamera);
+		
+		btnResetCamera.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				renderer.resetCamera();
+			}
+		});
 		
 		JPanel panel_3 = new JPanel();
 		panel_1.add(panel_3, BorderLayout.CENTER);
@@ -173,7 +209,13 @@ public class ModelViewerFurniture extends JPanel {
 		});
         
         try {
-			loadFurniture();
+			if (!loadFurniture())
+			{
+				removeAll();
+				JLabel errorLabel = new JLabel("There was an error loading the furniture list.");
+				add(errorLabel);
+				return;
+			}
 		} catch (FileNotFoundException e1) {
 			e1.printStackTrace();
 		} catch (IOException e1) {
@@ -198,7 +240,7 @@ public class ModelViewerFurniture extends JPanel {
 					modelPath = String.format("bgcommon/hou/indoor/general/%04d/bgparts/fun_b0_m%04d.mdl", entries.get(selected).model, entries.get(selected).model);
 					modelData = modelIndexFile.extractFile(modelPath);
 					
-						
+					
 				} catch (FileNotFoundException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -212,6 +254,8 @@ public class ModelViewerFurniture extends JPanel {
 					Model model = new Model(modelPath,modelIndexFile,modelData);
 					renderer.setModel(model);
 				}
+				
+				txtPath.setText(modelPath);
 			}
 		});		
         
@@ -219,7 +263,7 @@ public class ModelViewerFurniture extends JPanel {
                 
 	}
 
-	private void loadFurniture() throws FileNotFoundException, IOException
+	private boolean loadFurniture() throws FileNotFoundException, IOException
 	{
 		SqPack_IndexFile indexFile = parent.getExdIndexFile();
 		EXHF_File exhfFileHousingFurniture = new EXHF_File(indexFile.extractFile("exd/housingfurniture.exh"));
@@ -230,28 +274,35 @@ public class ModelViewerFurniture extends JPanel {
 		EXDF_View view2 = new EXDF_View(indexFile, "exd/item.exh", exhfFileItem);
 		EXDF_View view3 = new EXDF_View(indexFile, "exd/housingitemcategory.exh", exhfFileHousingCategory);		
 		
-		for (int i = 0; i < view1.getTable().getRowCount(); i++){
-						
-			long itemId = (Long) view1.getTable().getValueAt(i, 3);
-			int modelNumber = (Integer)view1.getTable().getValueAt(i, 4);
-			int furnitureType = (Integer)view1.getTable().getValueAt(i, 5);			
-			
-			String name = (String) view2.getTable().getValueAt((int)itemId, 4);
-			
-			if (itemId == 0)
-				name = "Unknown";
-			
-			if (name.isEmpty())
-				name = "Placeholder?";
-			
-			if (modelNumber == 0)
-				continue;
-			
-			String furnitureTypeName = (String) view3.getTable().getValueAt(furnitureType, 1);
-			
-			entries.add(new ModelFurnitureEntry(i, name, modelNumber, furnitureTypeName));
-		}
+		try{
+			for (int i = 0; i < view1.getTable().getRowCount(); i++){
+							
+				long itemId = (Long) view1.getTable().getValueAt(i, 3);
+				int modelNumber = (Integer)view1.getTable().getValueAt(i, 4);
+				int furnitureType = (Integer)view1.getTable().getValueAt(i, 5);			
 				
+				String name = (String) view2.getTable().getValueAt((int)itemId, 4);
+				
+				if (itemId == 0)
+					name = "Unknown";
+				
+				if (name.isEmpty())
+					name = "Placeholder?";
+				
+				if (modelNumber == 0)
+					continue;
+				
+				String furnitureTypeName = (String) view3.getTable().getValueAt(furnitureType, 1);
+				
+				entries.add(new ModelFurnitureEntry(i, name, modelNumber, furnitureTypeName));
+			}
+		}
+		catch (Exception e)
+		{
+			//e.printStackTrace();
+			return false;			
+		}
+	
 		lstFurniture.setModel(new AbstractListModel() {			
 			public int getSize() {
 				return entries.size();
@@ -260,7 +311,8 @@ public class ModelViewerFurniture extends JPanel {
 				return entries.get(index).name + (entries.get(index).type.isEmpty() ? "" : "("+ entries.get(index).type+")");
 			}
 		});
-				
+			
+		return true;
 	}
 	
 }

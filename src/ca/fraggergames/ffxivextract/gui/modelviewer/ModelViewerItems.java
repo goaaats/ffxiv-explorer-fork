@@ -1,6 +1,8 @@
 package ca.fraggergames.ffxivextract.gui.modelviewer;
 
 import java.awt.BorderLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.MouseEvent;
@@ -16,6 +18,7 @@ import javax.media.opengl.GLCapabilities;
 import javax.media.opengl.GLProfile;
 import javax.media.opengl.awt.GLCanvas;
 import javax.swing.AbstractListModel;
+import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
@@ -63,6 +66,12 @@ public class ModelViewerItems extends JPanel {
 	JComboBox cmbBodyStyle;
 	JComboBox cmbCategory;
 	FPSAnimator animator;
+	
+	//Info Section
+	JLabel txtPath;
+	JLabel txtModelInfo;
+	JButton btnColorSet;
+	JButton btnResetCamera;
 	
 	ModelRenderer renderer;
 	
@@ -131,9 +140,48 @@ public class ModelViewerItems extends JPanel {
 		
 		JPanel panel_2 = new JPanel();
 		panel_1.add(panel_2, BorderLayout.NORTH);
+		panel_2.setBorder(new TitledBorder(null, "Info", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+		panel_2.setLayout(new BoxLayout(panel_2, BoxLayout.Y_AXIS));
 		
-		JLabel lblInfoAndControls = new JLabel("Info and controls go here");
-		panel_2.add(lblInfoAndControls);
+		JPanel panelInfo_1 = new JPanel();
+		FlowLayout flowLayout = (FlowLayout) panelInfo_1.getLayout();
+		flowLayout.setVgap(1);
+		flowLayout.setAlignment(FlowLayout.LEFT);
+		panel_2.add(panelInfo_1);
+		
+		JLabel lblBleh = new JLabel("Path: ");
+		panelInfo_1.add(lblBleh);
+		
+		txtPath = new JLabel("-");
+		panelInfo_1.add(txtPath);
+		
+		JPanel panelInfo_2 = new JPanel();
+		FlowLayout flowLayout_1 = (FlowLayout) panelInfo_2.getLayout();
+		flowLayout_1.setVgap(1);
+		flowLayout_1.setAlignment(FlowLayout.LEFT);
+		panel_2.add(panelInfo_2);
+		
+		JLabel label = new JLabel("Info: ");
+		panelInfo_2.add(label);
+		
+		txtModelInfo = new JLabel("Type: -, Id: -, Model: -, Variant: -");
+		panelInfo_2.add(txtModelInfo);
+		
+		JPanel panelInfo_3 = new JPanel();
+		FlowLayout flowLayout_2 = (FlowLayout) panelInfo_3.getLayout();
+		flowLayout_2.setAlignment(FlowLayout.LEFT);
+		panel_2.add(panelInfo_3);
+		
+		btnResetCamera = new JButton("Reset Camera");
+		panelInfo_3.add(btnResetCamera);
+		
+		btnResetCamera.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				renderer.resetCamera();
+			}
+		});
 		
 		JPanel panel_3 = new JPanel();
 		panel_1.add(panel_3, BorderLayout.CENTER);
@@ -259,7 +307,13 @@ public class ModelViewerItems extends JPanel {
 		});
         
         try {
-        	loadItems();
+        	if (!loadItems())
+        	{
+        		removeAll();
+    			JLabel errorLabel = new JLabel("There was an error loading the item list.");
+    			add(errorLabel);
+    			return;
+        	}
 		} catch (FileNotFoundException e1) {
 			e1.printStackTrace();
 		} catch (IOException e1) {
@@ -332,7 +386,8 @@ public class ModelViewerItems extends JPanel {
 			
 			switch (currentCategory)
 			{
-			case 13:		
+			case 13:
+			case 0:
 			case 1:
 			case 2:
 				modelPath = String.format("chara/weapon/w%04d/obj/body/b%04d/model/w%04db%04d.mdl", currentItem.id, currentItem.model, currentItem.id, currentItem.model);
@@ -363,7 +418,25 @@ public class ModelViewerItems extends JPanel {
 				break;
 			case 12:
 				modelPath = String.format("chara/accessory/a%04d/model/c%04da%04d_rir.mdl", currentItem.id, characterNumber, currentItem.id);
-				break;					
+				break;
+			case 15:
+				modelPath = String.format("chara/equipment/e%04d/model/c%04de%04d_top.mdl", currentItem.id, characterNumber, currentItem.id);
+				break;
+			case 16:
+				modelPath = String.format("chara/equipment/e%04d/model/c%04de%04d_top.mdl", currentItem.id, characterNumber, currentItem.id);
+				break;
+			case 18:
+				modelPath = String.format("chara/equipment/e%04d/model/c%04de%04d_dwn.mdl", currentItem.id, characterNumber, currentItem.id);
+				break;
+			case 19:
+				modelPath = String.format("chara/equipment/e%04d/model/c%04de%04d_top.mdl", currentItem.id, characterNumber, currentItem.id);
+				break;
+			case 20:
+				modelPath = String.format("chara/equipment/e%04d/model/c%04de%04d_top.mdl", currentItem.id, characterNumber, currentItem.id);
+				break;
+			case 21:
+				modelPath = String.format("chara/equipment/e%04d/model/c%04de%04d_top.mdl", currentItem.id, characterNumber, currentItem.id);
+				break;			
 			}
 			
 			modelData = modelIndexFile.extractFile(modelPath);
@@ -392,41 +465,50 @@ public class ModelViewerItems extends JPanel {
 			model.loadMaterials(currentItem.varient == 0 ? 1 : currentItem.varient);
 			renderer.setModel(model);
 		}
+		
+		txtPath.setText(modelPath);
+		txtModelInfo.setText(String.format("Id: %d, Model: %d, Variant: %d", currentItem.id, currentItem.model, currentItem.varient));
 				
 	}
 	
-	private void loadItems() throws FileNotFoundException, IOException
+	private boolean loadItems() throws FileNotFoundException, IOException
 	{
 		SqPack_IndexFile indexFile = parent.getExdIndexFile();
 		EXHF_File exhfFile = new EXHF_File(indexFile.extractFile("exd/item.exh"));
 		EXDF_View view = new EXDF_View(indexFile, "exd/item.exh", exhfFile);
 		
-		for (int i = 0; i < view.getTable().getRowCount(); i++){
-			if (view.getTable().getValueAt(i, 0) instanceof Integer && !((String)view.getTable().getValueAt(i, 11)).equals("0, 0, 0, 0"))
-			{				
-				String model1Split[] = ((String)view.getTable().getValueAt(i, 11)).split(",");
-				String model2Split[] = ((String)view.getTable().getValueAt(i, 12)).split(",");										
-				
-				int slot = (Integer) view.getTable().getValueAt(i, 48);
-				
-				String name = (String)view.getTable().getValueAt(i, 4);
-				int id = Integer.parseInt(model1Split[0].trim());
+		try{
+			for (int i = 0; i < view.getTable().getRowCount(); i++){
+				if (view.getTable().getValueAt(i, 0) instanceof Integer && !((String)view.getTable().getValueAt(i, 11)).equals("0, 0, 0, 0"))
+				{				
+					String model1Split[] = ((String)view.getTable().getValueAt(i, 11)).split(",");
+					String model2Split[] = ((String)view.getTable().getValueAt(i, 12)).split(",");										
 					
-				boolean isWeap = false;
-				if (slot == 1 || slot == 2 || slot == 13)
-					isWeap = true;
-				
-				int model = !isWeap ? Integer.parseInt(model1Split[2].trim()) : Integer.parseInt(model1Split[1].trim());
-				int varient = !isWeap ? Integer.parseInt(model1Split[1].trim()) : Integer.parseInt(model1Split[2].trim());
-				
-				int type = slot;
-				
-				entries[slot].add(new ModelItemEntry(name, id, model, varient, type));			
-			}
-		}		
-				
+					int slot = (Integer) view.getTable().getValueAt(i, 48);
+					
+					String name = (String)view.getTable().getValueAt(i, 4);
+					int id = Integer.parseInt(model1Split[0].trim());
+						
+					boolean isWeap = false;
+					if (slot == 1 || slot == 2 || slot == 13)
+						isWeap = true;
+					
+					int model = !isWeap ? Integer.parseInt(model1Split[2].trim()) : Integer.parseInt(model1Split[1].trim());
+					int varient = !isWeap ? Integer.parseInt(model1Split[1].trim()) : Integer.parseInt(model1Split[2].trim());
+					
+					int type = slot;
+					
+					entries[slot].add(new ModelItemEntry(name, id, model, varient, type));			
+				}
+			}		
+		}
+		catch (Exception e)
+		{
+			return false;
+		}
 		lstItems.setModel(new ItemsListModel());
 				
+		return true;
 	}
 	
 	private int fallback(int characterCode)

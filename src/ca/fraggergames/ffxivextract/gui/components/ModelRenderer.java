@@ -67,6 +67,11 @@ public class ModelRenderer implements GLEventListener{
 		drawQuad = Buffers.newDirectFloatBuffer(new float[]{-1.0f, -1.0f, 1.0f, -1.0f, -1.0f, 1.0f, -1.0f, 1.0f, 1.0f, -1.0f, 1.0f, 1.0f});
 	}
 
+	public void clear()
+	{
+		models.clear();
+	}
+	
 	public void setModel(Model model)
 	{
 		models.clear();
@@ -111,6 +116,14 @@ public class ModelRenderer implements GLEventListener{
 	{
 		panX += x * 0.05f;
 		panY += -y * 0.05f;
+	}
+	
+	public void resetCamera(){
+		panX = 0.0f;
+		panY = 0.0f;
+		angleX = 0.0f;
+		angleY = 0.0f;
+		zoom = -7;
 	}
 	
 	public void setLoD(int level)
