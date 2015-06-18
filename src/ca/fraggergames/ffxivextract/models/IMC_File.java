@@ -58,7 +58,8 @@ public class IMC_File {
 				short materialNumber = bb.getShort();
 				short partMask = bb.getShort();
 				short effectNumber = bb.getShort();
-				varianceInfoList[i] = new VarianceInfo(materialNumber, partMask, effectNumber);
+				if (i == p)
+					varianceInfoList[i] = new VarianceInfo(materialNumber, partMask, effectNumber);
 			}
 		}
 	}

@@ -83,28 +83,19 @@ void main() {
     vec3 R = normalize(2.0 * dot(L, normal) * normal - L);	
     vec3 H = normalize(L+E);       
     
-    //Color
-    vec3 color = table_color.xyz;       	
-    if (uHasDiffuse && uHasColorSet){    
-    	mapDiffuse = vec4((table_color.xyz * mapDiffuse.xyz + table_unknown1.xyz),1.0);    
-    } 
+    //Color    
+    vec3 color = mapDiffuse.xyz;
+    vec3 color2;        	
+    if (uHasDiffuse && uHasColorSet){
+    	  color = (mapDiffuse.xyz * table_color.xyz); //Correct
+    	
+    } 	    
+    mapDiffuse.xyz = color;    
+    
 	if (uHasMask && uHasNormal && uHasColorSet){
 		color = mix(table_color.xyz, table_color.xyz + table_specular.xyz, mapMask.g);
     	mapDiffuse = vec4(mapDiffuse.xyz * color * mapMask.r, 1.0);
-    }
-    
-  /*  if (uHasDiffuse && uHasColorSet)
-    {
-    	color = (table_color+table_specular).xyz;		
-    	mapDiffuse = vec4(mapDiffuse.xyz * color, 1.0);
-    }*/
-    
-   // if (table_unknown1.a > 0.1)
-    	//mapDiffuse.rgb = table_unknown1.rgb;
-    
-    //mapDiffuse.r = 0.0;
-    //mapDiffuse.g = 0.0;
-    //mapDiffuse.b = 0.0;
+    }       
     
     //Diffuse           	
     float lambertian = max(dot(L,normal), 0.0);    
@@ -115,9 +106,9 @@ void main() {
 		// this is blinn phong		
 		float specAngle = max(dot(H, normal), 0.0);			
 		
-		specular.x = pow(specAngle, 25.0) * table_specular.x;
-		specular.y = pow(specAngle, 25.0) * table_specular.y;
-		specular.z = pow(specAngle, 25.0) * table_specular.z;	
+		specular.x = pow(specAngle, 8.0) * table_specular.x;
+		specular.y = pow(specAngle, 8.0) * table_specular.y;
+		specular.z = pow(specAngle, 8.0) * table_specular.z;	
 		
 		if (uHasSpecular)
 			specColor = mapSpecular.xyz;					
@@ -125,7 +116,8 @@ void main() {
 	else if (lambertian > 0.0 && uHasMask)
 	{
 		float specAngle = max(dot(H, normal), 0.0);					
-		specular = vec3(pow(specAngle, 8.0)*mapMask.b, pow(specAngle, 8.0)*mapMask.b, pow(specAngle, 8.0)*mapMask.b);		
+		specular = vec3(pow(specAngle, 8.0)*mapMask.b, pow(specAngle, 8.0)*mapMask.b, pow(specAngle, 8.0)*mapMask.b);
+				
 	}
 	
 	//Fresnel approximation
@@ -144,8 +136,7 @@ void main() {
 
 	gl_FragColor = vec4(
                      
-                      ambientColor * 0.1 +      
-                      //specular * specColor +               
+                      specular * specColor +               
                       lambertian * mapDiffuse.xyz, 1.0);
 
 }

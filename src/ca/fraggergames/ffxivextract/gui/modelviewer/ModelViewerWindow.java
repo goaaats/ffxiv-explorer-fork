@@ -79,11 +79,11 @@ public class ModelViewerWindow extends JFrame {
 				
 			
 			try {
-					dialog.nextFile(0, getSqpackPath() + "\\game\\sqpack\\ffxiv\\0a0000.win32.index");
+					dialog.nextFile(0, "..\\game\\sqpack\\ffxiv\\0a0000.win32.index");
 		        	exdIndexFile = new SqPack_IndexFile(getSqpackPath() + "\\game\\sqpack\\ffxiv\\0a0000.win32.index", true);
-		        	dialog.nextFile(1, getSqpackPath() + "\\game\\sqpack\\ffxiv\\040000.win32.index");
+		        	dialog.nextFile(1, "..\\game\\sqpack\\ffxiv\\040000.win32.index");
 					modelIndexFile = new SqPack_IndexFile(getSqpackPath() + "\\game\\sqpack\\ffxiv\\040000.win32.index", true);
-		        	dialog.nextFile(2, getSqpackPath() + "\\game\\sqpack\\ffxiv\\010000.win32.index");
+		        	dialog.nextFile(2, "..\\game\\sqpack\\ffxiv\\010000.win32.index");
 					buildingIndexFile = new SqPack_IndexFile(getSqpackPath() + "\\game\\sqpack\\ffxiv\\010000.win32.index", true);
 					dialog.nextFile(3, "Setting up lists...");
 					tabbedPane.add("Monsters", new ModelViewerMonsters(ModelViewerWindow.this, modelIndexFile));

@@ -366,12 +366,14 @@ public class Model {
 			if (variantNumber == -1 || imcFile == null)
 				materialFolderPath = String.format("%smaterial", modelPath.substring(0, modelPath.indexOf("model")));
 			else
-				materialFolderPath = String.format("%smaterial/v%04d", modelPath.substring(0, modelPath.indexOf("model")), imcFile.getVarianceInfo(variantNumber-1).materialNumber);
+				materialFolderPath = String.format("%smaterial/v%04d", modelPath.substring(0, modelPath.indexOf("model")), variantNumber);
 		}		
-		else if (imcFile != null && imcFile.getVarianceInfo(variantNumber-1) != null)
-			materialFolderPath = String.format("%smaterial/v%04d", modelPath.substring(0, modelPath.indexOf("model")), imcFile.getVarianceInfo(variantNumber-1).materialNumber);
-		else
-			materialFolderPath = String.format("%smaterial/v%04d", modelPath.substring(0, modelPath.indexOf("model")), 1);
+		else// if (imcFile != null && imcFile.getVarianceInfo(variantNumber-1) != null)
+			materialFolderPath = String.format("%smaterial/v%04d", modelPath.substring(0, modelPath.indexOf("model")), variantNumber);
+		//else
+		//	materialFolderPath = String.format("%smaterial/v%04d", modelPath.substring(0, modelPath.indexOf("model")), 1);
+		
+		//imcFile.getVarianceInfo(variantNumber-1).materialNumber
 		
 		//HACK HERE
 		int bodyMaterialSpot = -1;

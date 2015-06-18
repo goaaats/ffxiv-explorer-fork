@@ -58,7 +58,7 @@ public class ModelViewerItems extends JPanel {
 	
 	SparseArray<String> charIds = new SparseArray<String>();
 
-	int currentBody = 0;
+	int currentBody = 01;
 	int currentCategory = 0;
 	
 	OpenGL_View view3D;
