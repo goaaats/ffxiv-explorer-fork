@@ -2,47 +2,48 @@
 #Syntax is ID:NAME, if duplicate ids are found, last in list will be used. Empty or missing names will return index instead.
 
 #IDs 1-20 are equipable models 
-0:Human
-1:Chocobo
-2:Magitek Armour
-3:Amalja
-4:Ixali
-5:Kobold
-6:Goblin
-7:Sylph
-8:Moogle
-9:Sahagin
-10:Mamoolja
-11:Gigas 1
-12:Gigas 2
-13:Gigas 3
-14:Quijrn
-15:Moogle Postman
-16:Lamia
-17:Skel
-18:Succubus
-19:Demon
+0:Human (Demihuman)
+1:Chocobo (Demihuman)
+2:Magitek Armour (Demihuman)
+3:Amalja (Demihuman)
+4:Ixali (Demihuman)
+5:Kobold (Demihuman)
+6:Goblin (Demihuman)
+7:Sylph (Demihuman)
+8:Moogle (Demihuman)
+9:Sahagin (Demihuman)
+10:Mamoolja (Demihuman)
+11:Gigas 1 (Demihuman)
+12:Gigas 2 (Demihuman)
+13:Gigas 3(Demihuman)
+14:Quijrn (Demihuman)
+15:Moogle Postman (Demihuman)
+16:Lamia (Demihuman)
+17:Skeleton (Demihuman)
+18:Succubus (Demihuman)
+19:Demon (Demihuman)
 
 #Monster ids
 20:Diremite
 21:Banemite (Grey)
 22:Banemite (Purple)
-23:Banemite (Wtf?)
+23:Graffias (Thousand Maws of Toto-Rak)
 24:Rat
 25:Squirrel
 26:Squirrel
 27:Squirrel
 28:Toadstool (Red)
 29:Toadstool (Purple)
-31:Toadstool (Green)
+30:Toadstool (Blue)
+31:Opo-opo
 32:Opo-opo
 33:Opo-opo
-34:Opo-opo
-35:Ochu (Orange)
-36:Ochu (Red)
-37:Mosquto
-38:Mosquto
-39:Mosquto
+34:Ochu (Orange)
+35:Ochu (Red)
+36:Mosquito
+37:Mosquito
+38:Mosquito
+39:Carrion Bird
 40:Carrion Bird
 41:Carrion Bird
 42:Carrion Bird
@@ -145,9 +146,9 @@
 134:Hippocerf 2
 
 #Figure out the difference between these piestes/basalisks
-135:SNAKE
-136:SNAKE
-137:IT'S A SNAKE
+135:Basilisk
+136:Pieste (Brown)
+137:Pieste (White)
 138:Buffalo
 139:Buffalo
 140:Buffalo
@@ -194,16 +195,16 @@
 181:Drake (Red Glow)
 
 #Moose Fix the sheeps please 
-182:Sheep
-183:Sheep
-184:IT'S 
-185:A SHEEP
+182:Elbst (Blue)
+183:Aldgoat 1
+184:Aldgoat 2
+185:Aldgoat 3
 186:Rusty Juggarnaut
 187:Ogre
 188:Ogre (Red Glow)
 189:Ogre (Blue)
 190:Apkallu
-191:NONE
+191:BLANK
 
 #And these
 192:Ant
@@ -214,7 +215,7 @@
 
 197:Chimera
 198:Gobbue
-199:NONE
+199:BLANK
 200:Gobbue (Mount)
 201:Pudding (Red)
 202:Pudding (White)
@@ -252,7 +253,7 @@
 233:
 234:Snake
 235:Snake
-236:NONE
+236:BLANK
 237:Titan Rock 1
 238:Worm
 239:Worm
@@ -269,7 +270,7 @@
 
 250:Boss From LoA
 251:Amon
-252:NONE
+252:BLANK
 253:Suit of Armor (Black)
 254:Suit of Armor (Red)
 255:Suit of Armor (Blue)
@@ -300,6 +301,31 @@
 280:Jellyfish 2
 281:Jellyfish 3
 
+##HERE FINAL##
+282:Mole 
+283:Mole (Spiked)
+284:Lamb 1
+285:Lamb 2
+286:Lamb 3
+287:Lamb 4
+288:Lamb 5
+289:Lamb 6
+
+290:Lamb 7
+291:Lamb 8
+292:Slime (Green)
+293:Slime (Yellow)
+294:Slime (Purple)
+295:Slime (Light Yellow)
+296:Slime (Dark Matter) 
+297:Mandragora (Flowers)
+298:Ifrit Infernal Nail
+299:~~Unknown 1~~
+300:~~Unknown 2~~
+
+301:Garuda Pillar
+302:Garuda Feather
+303:Garuda
 304:Ifrit
 305:Leviathen
 306:Titan
@@ -321,15 +347,32 @@
 323:ADS (Orange)
 324:Ultima Hand
 #GAP HERE
+
+325:BLANK
+326:BLANK
+327:BLANK
+
 328:Morbol Sproutling
 329:Kraken
+
+330:BLANK
+331:Magitek Death Claw
+332:Allagan Death Claw (Labyrinth of the Ancients)
+333:Diabolos (Ruins of Amdapor)
+334:BLANK
+335:Bahamut (Gold)(Final Coil - Turn 4)
+336:Bahamut (Blue)(Final Coil - Turn 4)
+337:Pheonix (Final Coil - Turn 3)
+338:BLANK
+339:BLANK
+
 340:FFXIII?
 341:FFXIII?
 342:FFXIII?
-343:NONE
+343:BLANK
 344:Mummy
 345:Ramuh
-346:?
+346:BLANK
 347:Guy From Sycus
 348:Scylla
 349:Xandes
@@ -348,8 +391,44 @@
 360:Bird (Hunt mob)
 361:Dreadnaught
 362:Dragonfly
-363:
-364:
+363:Vodoriga
+364:Uraninite
+365:Gargoyal
+366:Adjudicator (Sunken Temple of Quarn)
+367:Facer 1 (Sunken Temple of Quarn)
+368:Facer 2 (Sunken Temple of Quarn)
+369:Facer 3 (Sunken Temple of Quarn)
+370:Facer 4 (Sunken Temple of Quarn)
+371:Neurolinked Dragon (Blue)
+372:Alligator
+373:Alligator 
+374:~~Unknown~~ (Green)
+375:~~Unknown~~ (Green)
+376:~~Unknown~~ (Red)
+377:Aevis
+378:Mirror Knight
+379:Dread Knight (First Coil - Turn 5)
+
+380:Spinning Rook (First Coil - Turn 4)
+
+386:Rock
+387:Clockwork Soldier (First Coil - Turn 4)
+388:Clockwork Knight (First Coil - Turn 4)
+
+393:Limsa Lominsa Cannon
+394:Gridania Cannon
+395:U'dah Cannon
+396:Gremlin (White)
+397:Gremlin (Red)
+398:Gremlin (Green)
+399:Gremlin (Yellow)
+400:FFXIII Bahamut (FFXIII Event)
+401:Anubis (FFXIII Event?)
+402:Broken Neurolink (First Coil - Turn 5)
+403:Dragon (Blue)
+404:Magitek Death Claw (Castle Meridianum)
+405:Magitek Cannon (Castle Meridianum)
+406:Shantotto (2014 Anniversary Event)
 
 #Pet Summons
 407:Eos
@@ -365,8 +444,62 @@
 417:Garuda-Egi
 418:Ramuh-Egi
 
-######I AM HERE############
+######MINIONS############
 
+419:Mammet #001 (Minion)
+420:Mammet #003L (Minion)
+421:Mammet #003G (Minion)
+422:Mammet #003U (Minion)
+423:Wayward Hatchling (Minion)
+424:Storm Hatchling (Minion)
+425:Serpent Hatchling (Minion)
+426:Flame Hatchling (Minion)
+427:Cherry Bomb (Minion)
+428:Baby Behemoth (Minion)
+429:Morbol Seedling (Minion)
+
+430:Cait Sith Doll (Minion)
+431:Tiny Rat (Minion)
+432:Baby Bun (Minion)
+433:Chigoe Larva (Minion)
+434:Bluebird (Minion)
+435:Wide-eyed Fawn (Minion)
+436:Infant Imp (Minion)
+437:Coeurl Kitten (Minion)
+438:Black Coeurl (Minion)
+#MARK
+439:BLANK
+
+440:Gravel Golem (Minion)
+441:Wind-up Tonberry (Minion)
+442:Tiny Tortoise (Minion)
+443:Baby Raptor (Minion)
+444:Baby Bat (Minion)
+445:Tiny Bulb (Minion)
+446:Dust Bunny (Minion)
+447:Wind-up Dullahan (Minion)
+448:Gigantpole (Minion)
+449:Pudgy Puk (Minion)
+450:Buffalo Calf (Minion)
+451:Cactaur Cutting (Minion)
+452:Smallshell (Minion)
+453:Wolf Pup (Minion)
+454:Beady Eye (Minion)
+455:Fledgling Dodo (Minion)
+456:Coblyn Larva (Minion)
+457:Wind-up Aldgoat (Minion)
+458:Fledgling Apkallu (Minion)
+459:Goobbue Sproutling (Minion)
+460:Bite-sized Pudding (Minion)
+461:Model Vanguard (Minion)
+462:Demon Brick (Minion)
+463:Mini Mole (Minion)
+464:Tender Lamb (Minion)
+465:Slime Puddle (Minion)
+466:Kidragora (Minion)
+467:Wind-up Goblin (Minion)
+468:Wind-up Sylph (Minion)
+469:Wind-up Cursor (Minion)
 470:Wind-up Airship (Minion)
 471:Wind-up Qiqirn (Minion)
 472:Wind-up Dalamud (Minion)
@@ -374,7 +507,7 @@
 474:Carriage
 475:BLANK
 478:Garuda Tornado
-479:Thing
+479:~~Unknown~~
 
 482:BLANK
 483:BLANK
@@ -397,7 +530,7 @@
 500:BLANK
 501:BLANK
 502:BLANK
-503:Cube Thing (Scenery)
+503:~~Unknown~~ (Scenery)
 504:BLANK
 505:Black Chocobo Chick (Minion)
 506:Tonberry (Scholar, Glow)
@@ -891,6 +1024,15 @@
 
 #Particle Cubes
 
+0381:Particle Cube
+0382:Particle Cube
+0383:Particle Cube
+0384:Particle Cube
+0385:Particle Cube
+0389:Particle Cube
+0390:Particle Cube
+0391:Particle Cube
+0392:Particle Cube
 0476:Particle Cube (Gaius X Attack)
 0477:Particle Cube (Gaius X Attack)
 0511:Particle Cube (Dark Orb)
