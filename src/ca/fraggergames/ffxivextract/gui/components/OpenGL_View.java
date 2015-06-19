@@ -233,7 +233,7 @@ public class OpenGL_View extends JPanel {
         
         JPanel panel_6 = new JPanel();
         panel_6.setBorder(null);
-        add(panel_6, BorderLayout.SOUTH);
+        //add(panel_6, BorderLayout.SOUTH);
         panel_6.setLayout(new FlowLayout(FlowLayout.LEFT, 5, 5));
         
         JLabel lblAnimation = new JLabel("Animation: ");
