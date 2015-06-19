@@ -29,7 +29,10 @@ public class Material {
 	
 	Texture_File diffuse, mask, normal, specular;
 	Texture_File colorSet;
-	private boolean shaderReady = false;
+	
+	byte[] colorSetData;
+	
+	private boolean shaderReady = false;	
 	
 	Shader shader;
 	
@@ -118,7 +121,17 @@ public class Material {
 				}
 				
 			}
-		}				
+		}	
+		
+		//This is for the new material file setup
+		if (colorSet == null)
+		{
+			bb.position(16 + (4 * (numPaths + numMaps + numColorSets)) + stringBuffer.length);
+			if (bb.getInt() == 0x0)
+				return;
+			colorSetData = new byte[512];
+			bb.get(colorSetData);
+		}
 	}
 	
 	public void loadShader(GL3 gl)
@@ -185,6 +198,10 @@ public class Material {
 		return colorSet;
 	}
 
+	public byte[] getColorSetData(){
+		return colorSetData;
+	}
+	
 	public int[] getGLTextureIds() {
 		return textureIds;
 	}

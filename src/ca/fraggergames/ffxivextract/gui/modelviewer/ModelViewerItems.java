@@ -50,6 +50,11 @@ import javax.swing.border.EmptyBorder;
 
 public class ModelViewerItems extends JPanel {
 	
+	public static final int INDEX_ITEM_NAME = 4;
+	public static final int INDEX_ITEM_MODEL1 = 11;
+	public static final int INDEX_ITEM_MODEL2 = 12;
+	public static final int INDEX_ITEM_SLOT = 49;
+	
 	ModelViewerWindow parent;
 	
 	ArrayList<ModelItemEntry> entries[] = new ArrayList[22];
@@ -486,14 +491,14 @@ public class ModelViewerItems extends JPanel {
 		
 		try{
 			for (int i = 0; i < view.getTable().getRowCount(); i++){
-				if (view.getTable().getValueAt(i, 0) instanceof Integer && !((String)view.getTable().getValueAt(i, 11)).equals("0, 0, 0, 0"))
+				if (view.getTable().getValueAt(i, 0) instanceof Integer && !((String)view.getTable().getValueAt(i, INDEX_ITEM_MODEL1)).equals("0, 0, 0, 0"))
 				{				
-					String model1Split[] = ((String)view.getTable().getValueAt(i, 11)).split(",");
-					String model2Split[] = ((String)view.getTable().getValueAt(i, 12)).split(",");										
+					String model1Split[] = ((String)view.getTable().getValueAt(i, INDEX_ITEM_MODEL1)).split(",");
+					String model2Split[] = ((String)view.getTable().getValueAt(i, INDEX_ITEM_MODEL1)).split(",");										
 					
-					int slot = (Integer) view.getTable().getValueAt(i, 48);
+					int slot = (Integer) view.getTable().getValueAt(i, INDEX_ITEM_SLOT);
 					
-					String name = (String)view.getTable().getValueAt(i, 4);
+					String name = (String)view.getTable().getValueAt(i, INDEX_ITEM_NAME);
 					int id = Integer.parseInt(model1Split[0].trim());
 						
 					boolean isWeap = false;

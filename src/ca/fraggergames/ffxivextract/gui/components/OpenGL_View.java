@@ -9,17 +9,10 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
-import java.io.IOException;
-import java.nio.FloatBuffer;
 
-import javax.media.opengl.GL3;
-import javax.media.opengl.GL3bc;
-import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLCapabilities;
-import javax.media.opengl.GLEventListener;
 import javax.media.opengl.GLProfile;
 import javax.media.opengl.awt.GLCanvas;
-import javax.media.opengl.glu.GLU;
 import javax.swing.BoxLayout;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
@@ -29,14 +22,9 @@ import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import ca.fraggergames.ffxivextract.helpers.Matrix;
 import ca.fraggergames.ffxivextract.models.Mesh;
 import ca.fraggergames.ffxivextract.models.Model;
-import ca.fraggergames.ffxivextract.shaders.BlurShader;
-import ca.fraggergames.ffxivextract.shaders.DefaultShader;
-import ca.fraggergames.ffxivextract.shaders.FXAAShader;
 
-import com.jogamp.common.nio.Buffers;
 import com.jogamp.opengl.util.FPSAnimator;
 
 public class OpenGL_View extends JPanel {
