@@ -37,6 +37,7 @@ import ca.fraggergames.ffxivextract.helpers.Utils;
 import ca.fraggergames.ffxivextract.models.EXHF_File;
 import ca.fraggergames.ffxivextract.models.Model;
 import ca.fraggergames.ffxivextract.models.SqPack_IndexFile;
+import ca.fraggergames.ffxivextract.storage.HashDatabase;
 
 import javax.swing.BoxLayout;
 import javax.swing.JComboBox;
@@ -473,6 +474,9 @@ public class ModelViewerItems extends JPanel {
 		
 		if (modelData != null)
 		{
+			System.out.println("Adding Entry: " + modelPath);
+			HashDatabase.addPathToDB(modelPath, "040000");
+			
 			Model model = new Model(modelPath,modelIndexFile,modelData);
 			model.loadMaterials(currentItem.varient == 0 ? 1 : currentItem.varient);
 			renderer.setModel(model);

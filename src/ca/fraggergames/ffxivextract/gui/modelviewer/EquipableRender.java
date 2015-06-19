@@ -6,6 +6,7 @@ import java.util.ArrayList;
 
 import ca.fraggergames.ffxivextract.models.Model;
 import ca.fraggergames.ffxivextract.models.SqPack_IndexFile;
+import ca.fraggergames.ffxivextract.storage.HashDatabase;
 
 public class EquipableRender {
 
@@ -38,6 +39,9 @@ public class EquipableRender {
 		
 		if (modelData == null)
 			return;
+		
+		System.out.println("Adding Entry: " + modelPath);
+		HashDatabase.addPathToDB(modelPath, "040000");
 		
 		Model model = new Model(modelPath,modelIndexFile,modelData);
 		model.loadMaterials(varient);

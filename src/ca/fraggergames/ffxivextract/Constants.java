@@ -8,9 +8,9 @@ import javax.swing.UIManager;
 public class Constants {
 
 	public static final String APPNAME = "FFXIV Data Explorer";
-	public static final String VERSION = "v1.5";
-	public static final int APP_VERSION_CODE = 6;
-	public static final int DB_VERSION_CODE = 7;	
+	public static final String VERSION = "v1.5.1";
+	public static final int APP_VERSION_CODE = 7;
+	public static final int DB_VERSION_CODE = 8;	
 	
 	public static final String COMMIT = "8c8567c5b0c266a5106da5f3f1995c91391b18fc";
 	public static boolean HAVOK_ENABLED = true;

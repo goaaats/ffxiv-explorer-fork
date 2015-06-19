@@ -407,11 +407,27 @@ public class Model {
 					continue;
 				}
 				
+				//Fix the body model it's pointing to
+				if (materialFolderPath.contains("/obj/body/b"))
+				{
+					String splitFileString[] = fileString.split("_");
+					String weaponIdString = splitFileString[1].substring(0, 5);
+					String weaponBodyString = splitFileString[1].substring(5);
+					String splitString[] = materialFolderPath.split("/");
+					materialFolderPath = splitString[0] + "/" + splitString[1] + "/" + weaponIdString + "/" + splitString[3] + "/" + splitString[4] + "/" + weaponBodyString + "/" + splitString[6] + "/" + splitString[7];
+				}
+				
 				try {
 					byte materialData[] = currentIndex.extractFile(materialFolderPath, fileString);
 					
 					if (materialData != null)
+					{
 						materials[i] = new Material(materialFolderPath, currentIndex, materialData);
+						
+						System.out.println("Adding Entry: " + materialFolderPath +"/"+ fileString);
+						HashDatabase.addPathToDB(materialFolderPath +"/"+ fileString, "040000");
+						
+					}
 				} catch (FileNotFoundException e) {
 					e.printStackTrace();
 				} catch (IOException e) {
@@ -430,6 +446,9 @@ public class Model {
 			int chara = Integer.parseInt(s1.substring(0, 4));
 			int body = Integer.parseInt(s1.substring(5, 9));
 			materialFolderPath = String.format("chara/human/c%04d/obj/body/b%04d/material",chara,body);
+			
+			System.out.println("Adding Entry: " + materialFolderPath);
+			HashDatabase.addPathToDB(materialFolderPath, "040000");
 			
 			try {
 				materials[bodyMaterialSpot] = new Material(materialFolderPath, currentIndex, currentIndex.extractFile(materialFolderPath, s));
