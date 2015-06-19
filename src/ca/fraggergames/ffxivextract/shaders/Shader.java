@@ -158,7 +158,7 @@ public class Shader {
     			gl.glUniform1i(usesNormalLocation, 1);
     		if (mat.getSpecularMapTexture() != null)
     			gl.glUniform1i(usesSpecularLocation, 1);
-    		if (mat.getColorSetTexture() != null)
+    		if (mat.getColorSetTexture() != null || mat.getColorSetData() != null)
     			gl.glUniform1i(usesColorSetLocation, 1);
 	    	
 	    	gl.glUniform1i(diffuseTexLocation, 0);

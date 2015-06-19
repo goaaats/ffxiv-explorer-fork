@@ -611,6 +611,8 @@ public class Model {
 			for (int j = 0; j < 5; j++){
 				
 				Texture_File tex = null;
+				boolean isBytes = false;
+				byte byteData[] = null;
 				
 				switch(j)
 				{
@@ -625,13 +627,18 @@ public class Model {
 					break;
 				case 3: 
 					tex = m.getColorSetTexture();
+					if (tex == null)
+					{
+						isBytes = true;
+						byteData = m.getColorSetData();
+					}
 					break;
 				case 4: 
 					tex = m.getMaskTexture();
 					break;
 				}
 				
-				if (tex == null)
+				if (tex == null && byteData == null)
 					continue;						
 				
 		        //Load into VRAM
@@ -646,55 +653,63 @@ public class Model {
 				float[] ansio = new float[1];
 				gl.glGetFloatv(GL3.GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, ansio,0);
 				gl.glTexParameterf(GL3.GL_TEXTURE_2D, GL3.GL_TEXTURE_MAX_ANISOTROPY_EXT, ansio[0]);
-				*/				
+				*/											
 				
-				ByteBuffer dxtBB = Buffers.newDirectByteBuffer(tex.data);
-				dxtBB.position(tex.mipmapOffsets[0]);
-				dxtBB.order(ByteOrder.LITTLE_ENDIAN);
-				
-				
-				switch(tex.compressionType){
-				case 0x3420: 
-					gl.glCompressedTexImage2D(GL3.GL_TEXTURE_2D, 0, GL3.GL_COMPRESSED_RGBA_S3TC_DXT1_EXT, tex.uncompressedWidth, tex.uncompressedHeight, 0, tex.mipmapOffsets[1]-tex.mipmapOffsets[0], dxtBB);
-					break;
-				case 0x3430: 
-					gl.glCompressedTexImage2D(GL3.GL_TEXTURE_2D, 0, GL3.GL_COMPRESSED_RGBA_S3TC_DXT3_EXT, tex.uncompressedWidth, tex.uncompressedHeight, 0, tex.mipmapOffsets[1]-tex.mipmapOffsets[0], dxtBB);
-					break;
-				case 0x3431: 
-					gl.glCompressedTexImage2D(GL3.GL_TEXTURE_2D, 0, GL3.GL_COMPRESSED_RGBA_S3TC_DXT5_EXT, tex.uncompressedWidth, tex.uncompressedHeight, 0, tex.mipmapOffsets[1]-tex.mipmapOffsets[0], dxtBB);
-					break;
-				case 0x2460:
-					gl.glTexImage2D(GL3.GL_TEXTURE_2D, 0, GL3.GL_RGBA, tex.uncompressedWidth, tex.uncompressedHeight, 0, GL3.GL_RGBA, GL3.GL_HALF_FLOAT, dxtBB);
-					break;
-				default:
-					BufferedImage img = null;
-					try {
-						img = tex.decode(0, null);
-					} catch (ImageDecodingException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}								
+				if (isBytes)
+				{
+					ByteBuffer colorTable = Buffers.newDirectByteBuffer(byteData);
+					colorTable.position(0);
+					colorTable.order(ByteOrder.LITTLE_ENDIAN);
+					gl.glTexImage2D(GL3.GL_TEXTURE_2D, 0, GL3.GL_RGBA, 4, 16, 0, GL3.GL_RGBA, GL3.GL_HALF_FLOAT, colorTable);
+				}
+				else
+				{
+					ByteBuffer dxtBB = Buffers.newDirectByteBuffer(tex.data);
+					dxtBB.position(tex.mipmapOffsets[0]);
+					dxtBB.order(ByteOrder.LITTLE_ENDIAN);
 					
-					int[] pixels = new int[img.getWidth() * img.getHeight()];
-					img.getRGB(0, 0, img.getWidth(), img.getHeight(), pixels, 0, img.getWidth());				
-					
-					ByteBuffer buffer = Buffers.newDirectByteBuffer(img.getWidth() * img.getHeight() * 4);
-					
-					//Fucking Java Trash
-					for(int y = 0; y < img.getHeight(); y++){
-			            for(int x = 0; x < img.getWidth(); x++){
-			                int pixel = pixels[y * img.getWidth() + x];
-			                buffer.put((byte) ((pixel >> 16) & 0xFF));     
-			                buffer.put((byte) ((pixel >> 8) & 0xFF));      
-			                buffer.put((byte) (pixel & 0xFF));               
-			                buffer.put((byte) ((pixel >> 24) & 0xFF));
-			            }
-			        }				
-			        buffer.flip(); //FOR THE LOVE OF GOD DO NOT FORGET THIS
-					buffer.position(0);
-					gl.glTexImage2D(GL3.GL_TEXTURE_2D, 0, GL3.GL_RGBA, img.getWidth(), img.getHeight(), 0, GL3.GL_RGBA, GL3.GL_UNSIGNED_BYTE, buffer);
-				}				
-				
+					switch(tex.compressionType){
+					case 0x3420: 
+						gl.glCompressedTexImage2D(GL3.GL_TEXTURE_2D, 0, GL3.GL_COMPRESSED_RGBA_S3TC_DXT1_EXT, tex.uncompressedWidth, tex.uncompressedHeight, 0, tex.mipmapOffsets[1]-tex.mipmapOffsets[0], dxtBB);
+						break;
+					case 0x3430: 
+						gl.glCompressedTexImage2D(GL3.GL_TEXTURE_2D, 0, GL3.GL_COMPRESSED_RGBA_S3TC_DXT3_EXT, tex.uncompressedWidth, tex.uncompressedHeight, 0, tex.mipmapOffsets[1]-tex.mipmapOffsets[0], dxtBB);
+						break;
+					case 0x3431: 
+						gl.glCompressedTexImage2D(GL3.GL_TEXTURE_2D, 0, GL3.GL_COMPRESSED_RGBA_S3TC_DXT5_EXT, tex.uncompressedWidth, tex.uncompressedHeight, 0, tex.mipmapOffsets[1]-tex.mipmapOffsets[0], dxtBB);
+						break;
+					case 0x2460:
+						gl.glTexImage2D(GL3.GL_TEXTURE_2D, 0, GL3.GL_RGBA, tex.uncompressedWidth, tex.uncompressedHeight, 0, GL3.GL_RGBA, GL3.GL_HALF_FLOAT, dxtBB);
+						break;
+					default:
+						BufferedImage img = null;
+						try {
+							img = tex.decode(0, null);
+						} catch (ImageDecodingException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}								
+						
+						int[] pixels = new int[img.getWidth() * img.getHeight()];
+						img.getRGB(0, 0, img.getWidth(), img.getHeight(), pixels, 0, img.getWidth());				
+						
+						ByteBuffer buffer = Buffers.newDirectByteBuffer(img.getWidth() * img.getHeight() * 4);
+						
+						//Fucking Java Trash
+						for(int y = 0; y < img.getHeight(); y++){
+				            for(int x = 0; x < img.getWidth(); x++){
+				                int pixel = pixels[y * img.getWidth() + x];
+				                buffer.put((byte) ((pixel >> 16) & 0xFF));     
+				                buffer.put((byte) ((pixel >> 8) & 0xFF));      
+				                buffer.put((byte) (pixel & 0xFF));               
+				                buffer.put((byte) ((pixel >> 24) & 0xFF));
+				            }
+				        }				
+				        buffer.flip(); //FOR THE LOVE OF GOD DO NOT FORGET THIS
+						buffer.position(0);
+						gl.glTexImage2D(GL3.GL_TEXTURE_2D, 0, GL3.GL_RGBA, img.getWidth(), img.getHeight(), 0, GL3.GL_RGBA, GL3.GL_UNSIGNED_BYTE, buffer);
+					}				
+				}
 				//if (j != 3)
 				//	gl.glGenerateMipmap(GL3.GL_TEXTURE_2D);
 				
