@@ -931,7 +931,6 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 							File mkDirPath = new File(path);
 							mkDirPath.getParentFile().mkdirs();																																	
 							
-							path += "\\" + fileName;	
 							tempView.saveCSV(path + (tempView.getNumLangs()==1 ? "" : "_" + EXDF_View.langs[l]) + ".csv", l);
 						}
 						
