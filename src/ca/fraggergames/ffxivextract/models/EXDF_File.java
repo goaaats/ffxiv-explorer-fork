@@ -141,6 +141,12 @@ public class EXDF_File {
 			return quad;
 		}		
 		
+		public boolean getByteBool(int datatype, int offset)
+		{
+			int i = 1 << (datatype - 0x19);
+			return i == 1;
+		}
+		
 		public int getInt(int offset)
 		{
 			ByteBuffer buffer = ByteBuffer.wrap(dataChunk);
@@ -187,6 +193,11 @@ public class EXDF_File {
 		
 		public int getIndex() {
 			return index;
+		}
+
+		public boolean getByteBool(short offset2) {
+			// TODO Auto-generated method stub
+			return false;
 		}
 
 	}

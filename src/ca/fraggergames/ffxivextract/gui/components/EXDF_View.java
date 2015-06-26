@@ -442,34 +442,44 @@ public class EXDF_View extends JScrollPane implements ItemListener{
 					return entry.getIndex();
 				
 				//Data
-				EXDF_Dataset dataset = exhFile.getDatasetTable()[columnIndex-1];									
-				switch (dataset.type)
-				{									
-				case 0x0b: // QUAD
-					int quad[] = entry.getQuad(dataset.offset);
-					return quad[3] + ", " + quad[2] + ", " + quad[1] + ", " + quad[0];
-				case 0x09: // FLOAT
-				//case 0x08:
-					return entry.getFloat(dataset.offset);
-				case 0x07: // UINT
-					return (long)entry.getInt(dataset.offset);
-				case 0x06: // INT 
-					return entry.getInt(dataset.offset);
-				case 0x05: // USHORT
-					return ((int)entry.getShort(dataset.offset) & 0xFFFF);
-				case 0x04: // SHORT
-					return entry.getShort(dataset.offset);
-				case 0x03: // UBYTE
-					return (((int)entry.getByte(dataset.offset)) & 0xFF);
-				case 0x02: // BYTE
-					return entry.getByte(dataset.offset);	
-				case 0x01: // BOOL
-					return entry.getBoolean(dataset.offset);
-				case 0x00: // STRING; Points to offset from end of dataset part. Read until 0x0.
-					//return new String(entry.getString(exhFile.getDatasetChunkSize(), dataset.offset));
-					return FFXIV_String.parseFFXIVString(entry.getString(exhFile.getDatasetChunkSize(), dataset.offset));				
-				default:
-					return "?";// Value: " + ((int)entry.getByte(dataset.offset)&0xFF);
+				EXDF_Dataset dataset = exhFile.getDatasetTable()[columnIndex-1];
+				
+				//Special case for byte bools
+				if (dataset.type >= 0x19)
+				{
+					boolean bool = entry.getByteBool(dataset.type, dataset.offset);
+					return bool;
+				}
+				else
+				{
+					switch (dataset.type)
+					{									
+					case 0x0b: // QUAD
+						int quad[] = entry.getQuad(dataset.offset);
+						return quad[3] + ", " + quad[2] + ", " + quad[1] + ", " + quad[0];
+					case 0x09: // FLOAT
+					//case 0x08:
+						return entry.getFloat(dataset.offset);
+					case 0x07: // UINT
+						return (long)entry.getInt(dataset.offset);
+					case 0x06: // INT 
+						return entry.getInt(dataset.offset);
+					case 0x05: // USHORT
+						return ((int)entry.getShort(dataset.offset) & 0xFFFF);
+					case 0x04: // SHORT
+						return entry.getShort(dataset.offset);
+					case 0x03: // UBYTE
+						return (((int)entry.getByte(dataset.offset)) & 0xFF);
+					case 0x02: // BYTE
+						return entry.getByte(dataset.offset);	
+					case 0x01: // BOOL
+						return entry.getBoolean(dataset.offset);
+					case 0x00: // STRING; Points to offset from end of dataset part. Read until 0x0.
+						//return new String(entry.getString(exhFile.getDatasetChunkSize(), dataset.offset));
+						return FFXIV_String.parseFFXIVString(entry.getString(exhFile.getDatasetChunkSize(), dataset.offset));				
+					default:
+						return "?";// Value: " + ((int)entry.getByte(dataset.offset)&0xFF);
+					}
 				}
 			}
 			catch (Exception e)
