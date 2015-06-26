@@ -385,7 +385,13 @@ public class ModelViewerMonsters extends JPanel {
 							renderer.setModel(model);
 						}
 						else
+						{
 							System.out.println("Model not found");
+							txtPath.setText(modelPath);
+							txtModelInfo.setText("Model not found");
+							renderer.clear();
+							return;
+						}
 						
 						txtPath.setText(modelPath);
 						txtModelInfo.setText(String.format("Type: %d, Id: %d, Model: %d, Variant: %d",  entries.get(selected).type, entries.get(selected).id, entries.get(selected).model, entries.get(selected).varient));
@@ -430,8 +436,11 @@ public class ModelViewerMonsters extends JPanel {
         splitPane.setLeftComponent(panel);
         splitPane.setRightComponent(panel_1);             
         splitPane.setDividerLocation(200);
-	}
-
+        
+        lstMonsters.setSelectedIndex(311);
+        
+	}	
+	
 	private boolean loadMonsters() throws FileNotFoundException, IOException
 	{
 		SqPack_IndexFile indexFile = parent.getExdIndexFile();

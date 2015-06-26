@@ -14,6 +14,7 @@ import javax.media.opengl.glu.GLU;
 
 import ca.fraggergames.ffxivextract.helpers.Matrix;
 import ca.fraggergames.ffxivextract.models.Model;
+import ca.fraggergames.ffxivextract.shaders.BlendShader;
 import ca.fraggergames.ffxivextract.shaders.BlurShader;
 import ca.fraggergames.ffxivextract.shaders.DefaultShader;
 import ca.fraggergames.ffxivextract.shaders.FXAAShader;
@@ -32,6 +33,7 @@ public class ModelRenderer implements GLEventListener{
 	DefaultShader defaultShader;
 	FXAAShader fxaaShader;
 	BlurShader blurShader;
+	BlendShader blendShader;
 	
 	static int currentLoD = 0;		
 	
@@ -41,9 +43,9 @@ public class ModelRenderer implements GLEventListener{
 	float[] projMatrix = new float[16];
 	
 	//Frame Buffer
-	int rboId[] = new int[2];
-	int fboId[] = new int[2];
-	int fboTexture[] = new int[2];
+	int rboId[] = new int[3];
+	int fboId[] = new int[3];
+	int fboTexture[] = new int[3];
 	int canvasWidth, canvasHeight;
 	
 	//Frame Buffer Quad
@@ -149,22 +151,80 @@ public class ModelRenderer implements GLEventListener{
 	    Matrix.rotateM(modelMatrix, 0, angleX, 0, 1, 0);
 	    Matrix.rotateM(modelMatrix, 0, angleY, 1, 0, 0);		     		   		    		    		    
 	   
+	    //Not Glowed
+	    gl.glBindFramebuffer(GL3.GL_FRAMEBUFFER, fboId[0]);
+	    gl.glViewport(0,0, canvasWidth, canvasHeight);		    
+	    gl.glClear(GL3.GL_COLOR_BUFFER_BIT | GL3.GL_DEPTH_BUFFER_BIT);
+	    				    	    
+	    for (Model model : models)
+	    	model.render(defaultShader, viewMatrix, modelMatrix, projMatrix, gl, currentLoD, false);
+	        	
+	    //Glowed
+	    gl.glBindFramebuffer(GL3.GL_FRAMEBUFFER, fboId[1]);
+	    gl.glViewport(0,0, canvasWidth, canvasHeight);		    
+	    gl.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	    gl.glClear(GL3.GL_COLOR_BUFFER_BIT | GL3.GL_DEPTH_BUFFER_BIT);
+	    
+	    gl.glColorMask(false, false, false, false);
+	    
+	    for (Model model : models)
+	    	model.render(defaultShader, viewMatrix, modelMatrix, projMatrix, gl, currentLoD, false);	    	    
+	    
+	    gl.glColorMask(true, true, true, true);
+	    
+	    for (Model model : models)
+	    	model.render(defaultShader, viewMatrix, modelMatrix, projMatrix, gl, currentLoD, true);
+	    gl.glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
+	    
+	   
+	    //Blur	
+	    gl.glBindFramebuffer(GL3.GL_FRAMEBUFFER, fboId[2]);
+	    gl.glViewport(0,0, canvasWidth, canvasHeight);		    
+	    gl.glClear(GL3.GL_COLOR_BUFFER_BIT | GL3.GL_DEPTH_BUFFER_BIT);
+    
+	    gl.glUseProgram(blurShader.getShaderProgramID());	    
+	    blurShader.setUniforms(gl, fboTexture[1], 1, 10, 1.0f, 0.3f, canvasWidth, canvasHeight);
+	    gl.glVertexAttribPointer(blurShader.getAttribPosition(), 2, GL3.GL_FLOAT, false, 0, drawQuad);
+	    gl.glEnableVertexAttribArray(blurShader.getAttribPosition());		
+	    gl.glDrawArrays(GL3.GL_TRIANGLES, 0, 6);
+	    gl.glDisableVertexAttribArray(blurShader.getAttribPosition());
+	       
 	    gl.glBindFramebuffer(GL3.GL_FRAMEBUFFER, fboId[1]);
 	    gl.glViewport(0,0, canvasWidth, canvasHeight);		    
 	    gl.glClear(GL3.GL_COLOR_BUFFER_BIT | GL3.GL_DEPTH_BUFFER_BIT);
-	    			
-	    for (Model model : models)
-	    	model.render(defaultShader, viewMatrix, modelMatrix, projMatrix, gl, currentLoD);
-	        		   
+	    
+	    blurShader.setUniforms(gl, fboTexture[2], 0, 10, 1.0f, 0.3f, canvasWidth, canvasHeight);
+	    gl.glVertexAttribPointer(blurShader.getAttribPosition(), 2, GL3.GL_FLOAT, false, 0, drawQuad);
+	    gl.glEnableVertexAttribArray(blurShader.getAttribPosition());		
+	    gl.glDrawArrays(GL3.GL_TRIANGLES, 0, 6);
+	    gl.glDisableVertexAttribArray(blurShader.getAttribPosition());
+	    	    
+	    
+	    
+	    //Combine blur/notblur
+	    gl.glBindFramebuffer(GL3.GL_FRAMEBUFFER, 0);
+	    gl.glViewport(0,0, canvasWidth, canvasHeight);
+	    gl.glClear(GL3.GL_COLOR_BUFFER_BIT | GL3.GL_DEPTH_BUFFER_BIT);
+	    
+	    gl.glUseProgram(blendShader.getShaderProgramID());	    
+	    blendShader.setTextures(gl, fboTexture[0], fboTexture[1]);
+	    gl.glVertexAttribPointer(blendShader.getAttribPosition(), 2, GL3.GL_FLOAT, false, 0, drawQuad);
+	    gl.glEnableVertexAttribArray(blendShader.getAttribPosition());		
+	    gl.glDrawArrays(GL3.GL_TRIANGLES, 0, 6);
+	    gl.glDisableVertexAttribArray(blendShader.getAttribPosition());
+
+	    
+	    /*
 	    //FXAA
 	    gl.glBindFramebuffer(GL3.GL_FRAMEBUFFER, 0);
 	    gl.glViewport(0,0, canvasWidth, canvasHeight);
 	    gl.glUseProgram(fxaaShader.getShaderProgramID());
-	    fxaaShader.setTexture(gl, fboTexture[1]);
+	    fxaaShader.setTexture(gl, fboTexture[0]);
 	    gl.glVertexAttribPointer(fxaaShader.getAttribPosition(), 2, GL3.GL_FLOAT, false, 0, drawQuad);
-		gl.glEnableVertexAttribArray(fxaaShader.getAttribPosition());		    
+		gl.glEnableVertexAttribArray(fxaaShader.getAttribPosition());		   		
 	    gl.glDrawArrays(GL3.GL_TRIANGLES, 0, 6);
 	    gl.glDisableVertexAttribArray(fxaaShader.getAttribPosition());
+	    */
 	}
 
 	@Override
@@ -174,7 +234,7 @@ public class ModelRenderer implements GLEventListener{
 	@Override
 	public void init(GLAutoDrawable drawable) {
 		GL3 gl = drawable.getGL().getGL3();      // get the OpenGL graphics context
-	      gl.glClearColor(0.3f, 0.3f, 0.3f, 0.3f); // set background (clear) color
+	      gl.glClearColor(0.3f, 0.3f, 0.3f, 1.0f); // set background (clear) color
 	      gl.glClearDepth(1.0f);      // set clear depth value to farthest
 	      gl.glEnable(GL3.GL_DEPTH_TEST); // enables depth testing
 	      gl.glDepthFunc(GL3.GL_LEQUAL);  // the type of depth test to do
@@ -187,6 +247,7 @@ public class ModelRenderer implements GLEventListener{
 			defaultShader = new DefaultShader(gl);
 			fxaaShader = new FXAAShader(gl);
 			blurShader = new BlurShader(gl);
+			blendShader = new BlendShader(gl);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -209,8 +270,14 @@ public class ModelRenderer implements GLEventListener{
 	 
 	      deleteFrameBuffers(gl);
 	      genFrameBuffers(gl);
-	      initFrameBuffer(gl, 0, width, height);
-	      initFrameBuffer(gl, 1, width, height);
+	      
+	      for (int i = 0; i < fboId.length; i++)
+	      {
+	    	  //if (i == 2)
+	    		//  initFrameBuffer(gl, i, 256,256);
+	    	  //else
+	    		  initFrameBuffer(gl, i, width, height);
+	      }
 	      
 	      Matrix.setIdentityM(projMatrix, 0);
 	      Matrix.perspectiveM(projMatrix, 0, 45.0f, aspect, 0.1f, 5000.0f);		     
@@ -248,13 +315,13 @@ public class ModelRenderer implements GLEventListener{
 	    gl.glBindFramebuffer(GL3.GL_FRAMEBUFFER, fboId[id]);
 	    gl.glBindRenderbuffer(GL3.GL_RENDERBUFFER, rboId[id]);
 	    gl.glRenderbufferStorage(GL3.GL_RENDERBUFFER, GL3.GL_DEPTH_COMPONENT, width, height);
+	    gl.glBindRenderbuffer(GL3.GL_RENDERBUFFER, 0);
 	    		    
 	    gl.glFramebufferTexture2D(GL3.GL_FRAMEBUFFER, GL3.GL_COLOR_ATTACHMENT0, GL3.GL_TEXTURE_2D, fboTexture[id], 0);
 	    gl.glFramebufferRenderbuffer(GL3.GL_FRAMEBUFFER, GL3.GL_DEPTH_ATTACHMENT, GL3.GL_RENDERBUFFER, rboId[id]); 
 	    
 	    gl.glBindTexture(GL3.GL_TEXTURE_2D, 0);
 	    gl.glBindFramebuffer(GL3.GL_FRAMEBUFFER, 0);
-	    gl.glBindRenderbuffer(GL3.GL_RENDERBUFFER, 0);
 	    
 	    if(gl.glCheckFramebufferStatus(GL3.GL_FRAMEBUFFER) != GL3.GL_FRAMEBUFFER_COMPLETE)
 	    	System.out.println("Error creating framebuffer!");

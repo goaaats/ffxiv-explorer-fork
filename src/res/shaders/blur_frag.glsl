@@ -5,45 +5,59 @@ varying vec2 vTexCoord;
 
 uniform sampler2D uInTex;
 
-uniform vec2 uResolution;
-uniform float uRadius;
-uniform vec2 uDir;
+uniform vec2 uTexelSize;
+uniform int uBlurDirection;
+uniform int uBlurAmount;
+uniform float uBlurScale;
+uniform float uBlurStrength;
+
+float Gaussian (float x, float deviation)
+{
+    return (1.0 / sqrt(2.0 * 3.141592 * deviation)) * exp(-((x * x) / (2.0 * deviation)));  
+}
 
 void main() {	
 
-	vec2 fragCoord = vTexCoord;
-
-   //this will be our RGBA sum
-    vec4 sum = vec4(0.0);
-
-    //the amount to blur, i.e. how far off center to sample from 
-    //1.0 -> blur by one pixel
-    //2.0 -> blur by two pixels, efragCoord.
-    float blurX = uRadius/uResolution.x; 
-	float blurY = uRadius/uResolution.y;
-
-    //the uDirection of our blur
-    //(1.0, 0.0) -> x-axis blur
-    //(0.0, 1.0) -> y-axis blur
-    float hstep = uDir.x;
-    float vstep = uDir.y;
-
-    //apply blurring, using a 9-tap filter with predefined gaussian weights
-
-    sum += texture2D(uInTex, vec2(fragCoord.x - 4.0*blurX*hstep, fragCoord.y - 4.0*blurY*vstep)) * 0.0162162162;
-    sum += texture2D(uInTex, vec2(fragCoord.x - 3.0*blurX*hstep, fragCoord.y - 3.0*blurY*vstep)) * 0.0540540541;
-    sum += texture2D(uInTex, vec2(fragCoord.x - 2.0*blurX*hstep, fragCoord.y - 2.0*blurY*vstep)) * 0.1216216216;
-    sum += texture2D(uInTex, vec2(fragCoord.x - 1.0*blurX*hstep, fragCoord.y - 1.0*blurY*vstep)) * 0.1945945946;
-
-    sum += texture2D(uInTex, vec2(fragCoord.x, fragCoord.y)) * 0.2270270270;
-
-    sum += texture2D(uInTex, vec2(fragCoord.x + 1.0*blurX*hstep, fragCoord.y + 1.0*blurY*vstep)) * 0.1945945946;
-    sum += texture2D(uInTex, vec2(fragCoord.x + 2.0*blurX*hstep, fragCoord.y + 2.0*blurY*vstep)) * 0.1216216216;
-    sum += texture2D(uInTex, vec2(fragCoord.x + 3.0*blurX*hstep, fragCoord.y + 3.0*blurY*vstep)) * 0.0540540541;
-    sum += texture2D(uInTex, vec2(fragCoord.x + 4.0*blurX*hstep, fragCoord.y + 4.0*blurY*vstep)) * 0.0162162162;
-
-
-	gl_FragColor = vec4(sum.rgb, 1.0);
+	 // Locals
+    float halfBlur = float(uBlurAmount) * 0.5;
+    vec4 colour = vec4(0.0);
+    vec4 texColour = vec4(0.0);
+    
+    // Gaussian deviation
+    float deviation = halfBlur * 0.35;
+    deviation *= deviation;
+    float strength = 1.0 - uBlurStrength;
+    
+    if ( uBlurDirection == 0 )
+    {
+        // Horizontal blur
+        for (int i = 0; i < 10; ++i)
+        {
+            if ( i >= uBlurAmount )
+                break;
+            
+            float offset = float(i) - halfBlur;
+            texColour = texture2D(uInTex, vTexCoord + vec2(offset * uTexelSize.x * uBlurScale, 0.0)) * Gaussian(offset * strength, deviation);
+            colour += texColour;
+        }
+    }
+    else
+    {
+        // Vertical blur
+        for (int i = 0; i < 10; ++i)
+        {
+            if ( i >= uBlurAmount )
+                break;
+            
+            float offset = float(i) - halfBlur;
+            texColour = texture2D(uInTex, vTexCoord + vec2(0.0, offset * uTexelSize.y * uBlurScale)) * Gaussian(offset * strength, deviation);
+            colour += texColour;
+        }
+    }
+    
+    // Apply colour
+    gl_FragColor = clamp(colour, 0.0, 1.0);
+    
 }
 
 

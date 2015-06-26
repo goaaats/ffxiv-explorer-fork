@@ -44,7 +44,11 @@ public class Shader {
 	private int usesMaskLocation;
 	private int usesNormalLocation;
 	private int usesSpecularLocation;
-	private int usesColorSetLocation;	
+	private int usesColorSetLocation;
+	
+	private int isGlowPassLocation;
+	
+	private boolean isGlowPass = false;
 	
 	private int numSampler = 4;
 	
@@ -93,7 +97,7 @@ public class Shader {
 		viewLocation = gl.glGetUniformLocation(shaderProgram, "uViewMatrix");
 		projLocation = gl.glGetUniformLocation(shaderProgram, "uProjMatrix");
 		numBonesLocation = gl.glGetUniformLocation(shaderProgram, "uNumBones");
-		boneArrayLocation = gl.glGetUniformLocation(shaderProgram, "uBones");
+		boneArrayLocation = gl.glGetUniformLocation(shaderProgram, "uBones");				
 		
 		//Set Uniform Tex Locations
 		diffuseTexLocation = gl.glGetUniformLocation(shaderProgram, "uDiffuseTex");
@@ -107,6 +111,9 @@ public class Shader {
 		usesNormalLocation = gl.glGetUniformLocation(shaderProgram, "uHasNormal");
 		usesSpecularLocation = gl.glGetUniformLocation(shaderProgram, "uHasSpecular");
 		usesColorSetLocation = gl.glGetUniformLocation(shaderProgram, "uHasColorSet");
+		
+		//Other
+		isGlowPassLocation = gl.glGetUniformLocation(shaderProgram, "uIsGlow");
 	}	
 	
 	private String readFromStream(InputStream ins) throws IOException {
@@ -179,6 +186,12 @@ public class Shader {
 	    	gl.glBindTexture(GL3.GL_TEXTURE_2D, mat.getGLTextureIds()[4]);	    	    	
     	}
     	    	
+	}
+	
+	public void isGlowPass(GL3 gl, boolean b)
+	{
+		isGlowPass = b;
+		gl.glUniform1i(isGlowPassLocation, b ? 1 : 0);
 	}
 	
 	public int getShaderProgramID()

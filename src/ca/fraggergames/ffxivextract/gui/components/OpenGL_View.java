@@ -22,6 +22,7 @@ import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import ca.fraggergames.ffxivextract.Constants;
 import ca.fraggergames.ffxivextract.models.Mesh;
 import ca.fraggergames.ffxivextract.models.Model;
 
@@ -233,7 +234,8 @@ public class OpenGL_View extends JPanel {
         
         JPanel panel_6 = new JPanel();
         panel_6.setBorder(null);
-        //add(panel_6, BorderLayout.SOUTH);
+        if (Constants.HAVOK_ENABLED)
+        	add(panel_6, BorderLayout.SOUTH);
         panel_6.setLayout(new FlowLayout(FlowLayout.LEFT, 5, 5));
         
         JLabel lblAnimation = new JLabel("Animation: ");

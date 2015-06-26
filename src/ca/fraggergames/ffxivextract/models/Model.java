@@ -497,7 +497,7 @@ public class Model {
 	}
 
 	public void render(DefaultShader defaultShader, float[] viewMatrix, float[] modelMatrix,
-			float[] projMatrix, GL3bc gl, int currentLoD) {
+			float[] projMatrix, GL3bc gl, int currentLoD, boolean isGlow) {
 		
 		if (simpleShader == null)
 			try {
@@ -510,17 +510,19 @@ public class Model {
 		if (numBones != -1){
 	    	boneMatrixBuffer.position(0);
 	    	HavokNative.getBonesWithNames(boneMatrixBuffer, boneStrings);
-	    	boneMatrixBuffer.position(0);
 		}
 		
 		for (int i = 0; i < getNumMesh(currentLoD); i++){
 	    	
+			
 	    	Mesh mesh = getMeshes(currentLoD)[i];
 	    	Material material = getMaterial(mesh.materialNumber);		    	
 	    	Shader shader = material == null || !material.isShaderReady() ? defaultShader : material.getShader();
 	    	
 	    	gl.glUseProgram(shader.getShaderProgramID());
-	    	
+
+	    	if (numBones != -1)
+	    		boneMatrixBuffer.position(0);
 	    	mesh.vertBuffer.position(0);
 	    	mesh.indexBuffer.position(0);	    	
 	    	
@@ -575,6 +577,7 @@ public class Model {
 	    	
 	    	shader.setTextures(gl, material);
 	    	shader.setMatrix(gl, modelMatrix, viewMatrix, projMatrix);
+	    	shader.isGlowPass(gl, isGlow);
 		    	
 	    	if (shader instanceof HairShader)
 	    		((HairShader)shader).setHairColor(gl, Constants.defaultHairColor, Constants.defaultHighlightColor);
@@ -609,13 +612,15 @@ public class Model {
 		    gl.glEnable(GL3.GL_DEPTH_TEST);
 		    */
 		    
-		    //Advance Animation		
-		    if (numBones != -1)
-		    {
-		    	HavokNative.stepAnimation(animSpeed);
-		    	HavokNative.debugRenderBones();
-		    }
+		   
 		}
+		
+		 //Advance Animation		
+	    if (numBones != -1)
+	    {
+	    	HavokNative.stepAnimation(animSpeed);
+	    	HavokNative.debugRenderBones();
+	    }
 	}
 
 	public void loadToVRAM(GL3bc gl) {

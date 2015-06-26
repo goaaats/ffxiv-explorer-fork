@@ -23,6 +23,8 @@ uniform bool uHasNormal;
 uniform bool uHasSpecular;
 uniform bool uHasColorSet;
 
+uniform bool uIsGlow;
+
 vec3 lightPos = vec3(1.0,1.0,1.0);
 vec3 ambientColor = vec3(1.0,1.0,1.0);
 vec3 diffuseColor = vec3(1.0, 1.0, 1.0);
@@ -82,6 +84,17 @@ void main() {
     vec3 E = normalize(vEyeVec);
     vec3 R = normalize(2.0 * dot(L, normal) * normal - L);	
     vec3 H = normalize(L+E);       
+    
+    //IF GLOW STEP
+    if (uIsGlow)
+    {		       
+    	if (table_glow.x == 0.0 && table_glow.y == 0.0 && table_glow.z == 0.0)
+    		discard;
+    	else
+    		gl_FragColor = vec4(table_glow.xyz, 1.0);
+    	    
+    	return;
+    }
     
     //Color    
     vec3 color = mapDiffuse.xyz;
