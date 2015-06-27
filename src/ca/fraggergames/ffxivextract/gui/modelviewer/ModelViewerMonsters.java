@@ -47,6 +47,11 @@ import java.awt.FlowLayout;
 import javax.swing.border.TitledBorder;
 
 public class ModelViewerMonsters extends JPanel {
+
+	public static final int INDEX_MODELCHARA_TYPE = 1;
+	public static final int INDEX_MODELCHARA_ID = 2;
+	public static final int INDEX_MODELCHARA_MODEL = 3;
+	public static final int INDEX_MODELCHARA_VARIANT = 4;
 	
 	ModelViewerWindow parent;
 
@@ -451,10 +456,10 @@ public class ModelViewerMonsters extends JPanel {
 			for (int i = 0; i < view.getTable().getRowCount(); i++){
 				
 				int index = (Integer)view.getTable().getValueAt(i, 0);
-				int v1 = (Integer)view.getTable().getValueAt(i, 1);
-				int v2 = (Integer)view.getTable().getValueAt(i, 4);
-				int v3 = (Integer)view.getTable().getValueAt(i, 5);
-				int v4 = (Integer)view.getTable().getValueAt(i, 3);
+				int v1 = (Integer)view.getTable().getValueAt(i, INDEX_MODELCHARA_ID);
+				int v2 = (Integer)view.getTable().getValueAt(i, INDEX_MODELCHARA_MODEL);
+				int v3 = (Integer)view.getTable().getValueAt(i, INDEX_MODELCHARA_VARIANT);
+				int v4 = (Integer)view.getTable().getValueAt(i, INDEX_MODELCHARA_TYPE);
 				
 				if (v4 <= 1 || (names.get(index) != null && names.get(index).equals("BLANK")))
 					continue;

@@ -2,6 +2,8 @@ package ca.fraggergames.ffxivextract.helpers;
 
 import java.nio.ByteBuffer;
 
+import ca.fraggergames.ffxivextract.Constants;
+
 public class HavokNative {
 
 	static public native void startHavok(); //Will initialize Havok. If Havok was already initialized, it will be shutdown first.
@@ -17,6 +19,9 @@ public class HavokNative {
 	
 	public static void initHavokNativ()
 	{
+		if (!Constants.HAVOK_ENABLED)
+			return;
+		
 		try{
 			System.loadLibrary("havok");
 		}catch (UnsatisfiedLinkError e)
