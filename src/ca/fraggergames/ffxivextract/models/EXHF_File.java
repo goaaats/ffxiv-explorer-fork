@@ -70,12 +70,12 @@ public class EXHF_File {
 			for (int i = 0; i < numDataSetTable; i++)			
 				datasetTable[i] = new EXDF_Dataset(buffer.getShort(), buffer.getShort());			
 			
-			Arrays.sort(datasetTable, new Comparator<EXDF_Dataset>() {
+			/*Arrays.sort(datasetTable, new Comparator<EXDF_Dataset>() {
 				@Override
 				public int compare(EXDF_Dataset a, EXDF_Dataset b) {
 					return a.offset - b.offset;
 				}
-			});
+			});*/
 			
 			//Page Table
 			for (int i = 0; i < numPageTable; i++)

@@ -51,10 +51,10 @@ import javax.swing.border.EmptyBorder;
 
 public class ModelViewerItems extends JPanel {
 	
-	public static final int INDEX_ITEM_NAME = 4;
-	public static final int INDEX_ITEM_MODEL1 = 11;
-	public static final int INDEX_ITEM_MODEL2 = 12;
-	public static final int INDEX_ITEM_SLOT = 49;
+	public static final int INDEX_ITEM_NAME = 10;
+	public static final int INDEX_ITEM_MODEL1 = 29;
+	public static final int INDEX_ITEM_MODEL2 = 30;
+	public static final int INDEX_ITEM_SLOT = 28;
 	
 	ModelViewerWindow parent;
 	

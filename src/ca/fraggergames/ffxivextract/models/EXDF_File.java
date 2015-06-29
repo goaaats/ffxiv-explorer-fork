@@ -143,8 +143,13 @@ public class EXDF_File {
 		
 		public boolean getByteBool(int datatype, int offset)
 		{
-			int i = 1 << (datatype - 0x19);
-			return i == 1;
+			ByteBuffer buffer = ByteBuffer.wrap(dataChunk);
+			buffer.position(offset);
+			int val = buffer.get();
+			int shift = (datatype - 0x19);
+			int i = 1 << shift;
+			val &= i;
+			return (val & i) == i;
 		}
 		
 		public int getInt(int offset)

@@ -40,6 +40,12 @@ import ca.fraggergames.ffxivextract.storage.HashDatabase;
 
 public class ModelViewerFurniture extends JPanel {
 	
+	public static final int INDEX_ITEM_NAME = 10;
+	public static final int INDEX_HOUSINGFURNITURE_ITEMID = 7;
+	public static final int INDEX_HOUSINGFURNITURE_TYPEID = 2;
+	public static final int INDEX_HOUSINGFURNITURE_MODELNUMBER = 1; 
+	public static final int INDEX_FURNITURETYPE_NAME = 1;
+		
 	ModelViewerWindow parent;
 
 	ArrayList<ModelFurnitureEntry> entries = new ArrayList<ModelFurnitureEntry>();
@@ -280,11 +286,11 @@ public class ModelViewerFurniture extends JPanel {
 		try{
 			for (int i = 0; i < view1.getTable().getRowCount(); i++){
 							
-				long itemId = (Long) view1.getTable().getValueAt(i, 3);
-				int modelNumber = (Integer)view1.getTable().getValueAt(i, 4);
-				int furnitureType = (Integer)view1.getTable().getValueAt(i, 5);			
+				long itemId = (Long) view1.getTable().getValueAt(i, INDEX_HOUSINGFURNITURE_ITEMID);
+				int modelNumber = (Integer)view1.getTable().getValueAt(i, INDEX_HOUSINGFURNITURE_MODELNUMBER);
+				int furnitureType = (Integer)view1.getTable().getValueAt(i, INDEX_HOUSINGFURNITURE_TYPEID);			
 				
-				String name = (String) view2.getTable().getValueAt((int)itemId, 4);
+				String name = (String) view2.getTable().getValueAt((int)itemId, INDEX_ITEM_NAME);
 				
 				if (itemId == 0)
 					name = "Unknown";
@@ -295,7 +301,7 @@ public class ModelViewerFurniture extends JPanel {
 				if (modelNumber == 0)
 					continue;
 				
-				String furnitureTypeName = (String) view3.getTable().getValueAt(furnitureType, 1);
+				String furnitureTypeName = (String) view3.getTable().getValueAt(furnitureType, INDEX_FURNITURETYPE_NAME);
 				
 				entries.add(new ModelFurnitureEntry(i, name, modelNumber, furnitureTypeName));
 			}
