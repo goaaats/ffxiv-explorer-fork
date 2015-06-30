@@ -52,7 +52,7 @@ public class Material {
 		bb.getInt();
 		int fileSize = bb.getInt();
 		short stringSectionSize = bb.getShort();
-		bb.getShort();
+		int shaderStringOffset = bb.getShort();
 		numPaths = bb.get();
 		numMaps = bb.get();
 		numColorSets = bb.get();
@@ -123,9 +123,9 @@ public class Material {
 			}
 		}	
 		
-		//This is for the new material file setup
-		if (colorSet == null)
-		{
+		//This is for the new material file setup. ALso bgcolorchange doesn't have a table color but can't find where it says that.
+		if (colorSet == null && !stringArray[stringArray.length-1].equals("bgcolorchange.shpk"))
+		{			
 			bb.position(16 + (4 * (numPaths + numMaps + numColorSets)) + stringBuffer.length);
 			if (bb.getInt() == 0x0)
 				return;
