@@ -183,7 +183,7 @@ public class ModelRenderer implements GLEventListener{
 	    gl.glClear(GL3.GL_COLOR_BUFFER_BIT | GL3.GL_DEPTH_BUFFER_BIT);
     
 	    gl.glUseProgram(blurShader.getShaderProgramID());	    
-	    blurShader.setUniforms(gl, fboTexture[1], 1, 10, 1.0f, 0.3f, canvasWidth, canvasHeight);
+	    blurShader.setUniforms(gl, fboTexture[1], 1, 1, canvasWidth, canvasHeight);
 	    gl.glVertexAttribPointer(blurShader.getAttribPosition(), 2, GL3.GL_FLOAT, false, 0, drawQuad);
 	    gl.glEnableVertexAttribArray(blurShader.getAttribPosition());		
 	    gl.glDrawArrays(GL3.GL_TRIANGLES, 0, 6);
@@ -193,16 +193,15 @@ public class ModelRenderer implements GLEventListener{
 	    gl.glViewport(0,0, canvasWidth, canvasHeight);		    
 	    gl.glClear(GL3.GL_COLOR_BUFFER_BIT | GL3.GL_DEPTH_BUFFER_BIT);
 	    
-	    blurShader.setUniforms(gl, fboTexture[2], 0, 10, 1.0f, 0.3f, canvasWidth, canvasHeight);
+	    blurShader.setUniforms(gl, fboTexture[2], 0, 1, canvasWidth, canvasHeight);
 	    gl.glVertexAttribPointer(blurShader.getAttribPosition(), 2, GL3.GL_FLOAT, false, 0, drawQuad);
 	    gl.glEnableVertexAttribArray(blurShader.getAttribPosition());		
 	    gl.glDrawArrays(GL3.GL_TRIANGLES, 0, 6);
 	    gl.glDisableVertexAttribArray(blurShader.getAttribPosition());
 	    	    
-	    
-	    
+	    	   
 	    //Combine blur/notblur
-	    gl.glBindFramebuffer(GL3.GL_FRAMEBUFFER, 0);
+	    gl.glBindFramebuffer(GL3.GL_FRAMEBUFFER, fboId[2]);
 	    gl.glViewport(0,0, canvasWidth, canvasHeight);
 	    gl.glClear(GL3.GL_COLOR_BUFFER_BIT | GL3.GL_DEPTH_BUFFER_BIT);
 	    
@@ -212,19 +211,18 @@ public class ModelRenderer implements GLEventListener{
 	    gl.glEnableVertexAttribArray(blendShader.getAttribPosition());		
 	    gl.glDrawArrays(GL3.GL_TRIANGLES, 0, 6);
 	    gl.glDisableVertexAttribArray(blendShader.getAttribPosition());
-
-	    
-	    /*
+	    	    
 	    //FXAA
 	    gl.glBindFramebuffer(GL3.GL_FRAMEBUFFER, 0);
 	    gl.glViewport(0,0, canvasWidth, canvasHeight);
 	    gl.glUseProgram(fxaaShader.getShaderProgramID());
-	    fxaaShader.setTexture(gl, fboTexture[0]);
+	    fxaaShader.setTexture(gl, fboTexture[2]);
+	    fxaaShader.setCanvasSize(gl, canvasWidth, canvasHeight);
 	    gl.glVertexAttribPointer(fxaaShader.getAttribPosition(), 2, GL3.GL_FLOAT, false, 0, drawQuad);
 		gl.glEnableVertexAttribArray(fxaaShader.getAttribPosition());		   		
 	    gl.glDrawArrays(GL3.GL_TRIANGLES, 0, 6);
 	    gl.glDisableVertexAttribArray(fxaaShader.getAttribPosition());
-	    */
+	    
 	}
 
 	@Override
