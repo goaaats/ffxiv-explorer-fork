@@ -188,10 +188,13 @@ public class Shader {
     	    	
 	}
 	
-	public void isGlowPass(GL3 gl, boolean b)
+	public boolean isGlowPass(GL3 gl, boolean b)
 	{
+		if (isGlowPassLocation == -1)
+			return false;
 		isGlowPass = b;
 		gl.glUniform1i(isGlowPassLocation, b ? 1 : 0);
+		return true;
 	}
 	
 	public int getShaderProgramID()

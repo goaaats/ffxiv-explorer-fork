@@ -7,9 +7,9 @@ import javax.swing.UIManager;
 
 public class Constants {
 
-	public static final String APPNAME = "FFXIV Data Explorer !EARLY COPY FOR VEKIEN!";
-	public static final String VERSION = "v1.5.2B";
-	public static final int APP_VERSION_CODE = 7;
+	public static final String APPNAME = "FFXIV Data Explorer !Test Build!";
+	public static final String VERSION = "v1.6";
+	public static final int APP_VERSION_CODE = 8;
 	public static final int DB_VERSION_CODE = 8;	
 	
 	public static final String COMMIT = "32161031d61ec0efa02ada880db61af0826c79c0";

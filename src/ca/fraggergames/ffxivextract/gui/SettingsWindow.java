@@ -55,8 +55,8 @@ public class SettingsWindow extends JDialog {
 		gbl_panel.rowWeights = new double[]{0.0, Double.MIN_VALUE};
 		panel.setLayout(gbl_panel);		
 		
-		txtDatPath = new JTextField();
-		//textField.setText("Point to your MACRO.DAT file");
+		txtDatPath = new JTextField();		
+		txtDatPath.setText(Constants.datPath);
 		txtDatPath.setPreferredSize(new Dimension(200, 20));
 		
 		GridBagConstraints gbc_textField = new GridBagConstraints();

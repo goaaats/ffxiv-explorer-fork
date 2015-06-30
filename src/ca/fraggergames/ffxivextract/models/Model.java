@@ -577,7 +577,9 @@ public class Model {
 	    	
 	    	shader.setTextures(gl, material);
 	    	shader.setMatrix(gl, modelMatrix, viewMatrix, projMatrix);
-	    	shader.isGlowPass(gl, isGlow);
+	    	boolean f = shader.isGlowPass(gl, isGlow);
+	    	if (isGlow && !f)
+	    		return;
 		    	
 	    	if (shader instanceof HairShader)
 	    		((HairShader)shader).setHairColor(gl, Constants.defaultHairColor, Constants.defaultHighlightColor);
