@@ -1,7 +1,9 @@
 package ca.fraggergames.ffxivextract.gui.components;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -10,8 +12,10 @@ import java.util.Hashtable;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 
+import ca.fraggergames.ffxivextract.Constants;
 import ca.fraggergames.ffxivextract.helpers.FFXIV_String;
 import ca.fraggergames.ffxivextract.helpers.LERandomAccessFile;
+import ca.fraggergames.ffxivextract.helpers.SparseArray;
 import ca.fraggergames.ffxivextract.helpers.Utils;
 import ca.fraggergames.ffxivextract.models.EXDF_File;
 import ca.fraggergames.ffxivextract.models.EXDF_File.EXDF_Entry;
@@ -77,7 +81,9 @@ public class EXDF_View extends JScrollPane implements ItemListener{
 	private JComboBox cmbLanguage;
 	private JTable table;
 	
-	private int langOverride = -1;
+	private int langOverride = -1;	
+	
+	private SparseArray<String> columnNames = new SparseArray<String>();
 	
 	//Given a EXD file, figure out EXH name, and look for it.
 	public EXDF_View(SqPack_IndexFile currentIndex, String fullPath, EXDF_File file) {		
@@ -141,7 +147,7 @@ public class EXDF_View extends JScrollPane implements ItemListener{
 		
 		getEXDFiles(exhFile, parsedExdName, numPages, numLanguages);
 		
-		setupUI();
+		setupUI();		
 	}
 
 	//Given a EXH file, figure out EXD name, and look for it.
@@ -175,7 +181,7 @@ public class EXDF_View extends JScrollPane implements ItemListener{
 		
 		getEXDFiles(exhFile, exdName, numPages, numLanguages);
 		
-		setupUI();
+		setupUI();		
 		
 		///if (fullPath.contains("item"))
 			//addAllWeaponModels();
@@ -268,7 +274,7 @@ public class EXDF_View extends JScrollPane implements ItemListener{
 		panel_2.setLayout(new BorderLayout(0, 0));
 		
 		JScrollPane scrollPane = new JScrollPane();
-		panel_2.add(scrollPane, BorderLayout.CENTER);
+		panel_2.add(scrollPane, BorderLayout.CENTER);		
 		
 		table = new JTable();		
 		scrollPane.setViewportView(table);
@@ -336,6 +342,9 @@ public class EXDF_View extends JScrollPane implements ItemListener{
 			cmbLanguage.setModel(new DefaultComboBoxModel(new String[] {"N/A"}));
 			cmbLanguage.setEnabled(false);
 		}
+
+		loadColumnNames(exhName);
+		
 		table.setModel(new EXDTableModel(exhFile, exdFile));
 		table.setAutoResizeMode( JTable.AUTO_RESIZE_OFF );
 		
@@ -382,7 +391,7 @@ public class EXDF_View extends JScrollPane implements ItemListener{
 			if (column == 0)
 				return "Index";
 			else
-				return (column-1) + " ["+String.format("0x%x",exhFile.getDatasetTable()[column-1].type)+"]" + "["+String.format("0x%x",exhFile.getDatasetTable()[column-1].offset)+"]";
+				return columnNames.get(column-1, (column-1) + " ["+String.format("0x%x",exhFile.getDatasetTable()[column-1].type)+"]" + "["+String.format("0x%x",exhFile.getDatasetTable()[column-1].offset)+"]");
 		}		
 		
 		@Override
@@ -716,4 +725,30 @@ public class EXDF_View extends JScrollPane implements ItemListener{
 	{
 		return table;
 	}
+	
+	private void loadColumnNames(String exhname)
+	{
+		try{
+			BufferedReader br = new BufferedReader(new FileReader(Constants.EXH_NAMES_PATH + exhname.replace("exh", "lst")));
+		    for(String line; (line = br.readLine()) != null; ) {
+		    	//Skip comments and whitespace
+		        if (line.startsWith("#") || line.isEmpty() || line.equals(""))
+		        	continue;		        
+		        if (line.contains(":"))
+		        {
+		        	String split[] = line.split(":", 2);
+		        	if (split.length != 2)
+		        		continue;
+		        	
+		        	if (split[1].isEmpty())
+		        		continue;
+		        	columnNames.put(Integer.parseInt(split[0]), split[1]);
+		        }
+		    } 
+		}
+		catch (IOException e){
+			
+		}
+	}
+	
 }

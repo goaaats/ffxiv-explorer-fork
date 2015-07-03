@@ -442,7 +442,7 @@ public class ModelViewerMonsters extends JPanel {
         splitPane.setRightComponent(panel_1);             
         splitPane.setDividerLocation(200);
         
-        lstMonsters.setSelectedIndex(311);
+       // lstMonsters.setSelectedIndex(311);
         
 	}	
 	

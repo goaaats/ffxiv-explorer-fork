@@ -32,6 +32,8 @@ public class Constants {
 	public static final String PREF_DO_DB_UPDATE = "pref_dbupdate";
 	public static final String PREF_DAT_PATH = "pref_datpath";
 	
+	public static final String EXH_NAMES_PATH = "./tablenames/";
+	
 	public static String datPath = null;
 
 	// ///DEFAULT COLORS//////
@@ -52,6 +54,7 @@ public class Constants {
 			66310, 66311, 66312, 66313, 66314, 66315, 66316, 66317, 66318,
 			66319, 66320, 66321, 66322, 66323, 66324, 66325, 66326, 20007,
 			20009, 20010, 20012, 20011, 20008 };
+	
 
 	public static void setUIFont(javax.swing.plaf.FontUIResource f) {
 		Enumeration<Object> keys = UIManager.getDefaults().keys();

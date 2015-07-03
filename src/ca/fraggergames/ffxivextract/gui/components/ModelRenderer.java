@@ -43,9 +43,9 @@ public class ModelRenderer implements GLEventListener{
 	float[] projMatrix = new float[16];
 	
 	//Frame Buffer
-	int rboId[] = new int[3];
-	int fboId[] = new int[3];
-	int fboTexture[] = new int[3];
+	int rboId[] = new int[4];
+	int fboId[] = new int[4];
+	int fboTexture[] = new int[4];
 	int canvasWidth, canvasHeight;
 	
 	//Frame Buffer Quad
@@ -161,7 +161,7 @@ public class ModelRenderer implements GLEventListener{
 	        	
 	    //Glowed
 	    gl.glBindFramebuffer(GL3.GL_FRAMEBUFFER, fboId[1]);
-	    gl.glViewport(0,0, canvasWidth, canvasHeight);		    
+	    gl.glViewport(0,0, canvasWidth/2, canvasHeight/2);		    
 	    gl.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	    gl.glClear(GL3.GL_COLOR_BUFFER_BIT | GL3.GL_DEPTH_BUFFER_BIT);
 	    
@@ -179,29 +179,28 @@ public class ModelRenderer implements GLEventListener{
 	   
 	    //Blur	
 	    gl.glBindFramebuffer(GL3.GL_FRAMEBUFFER, fboId[2]);
-	    gl.glViewport(0,0, canvasWidth, canvasHeight);		    
+	    gl.glViewport(0,0, canvasWidth/2, canvasHeight/2);		    
 	    gl.glClear(GL3.GL_COLOR_BUFFER_BIT | GL3.GL_DEPTH_BUFFER_BIT);
     
 	    gl.glUseProgram(blurShader.getShaderProgramID());	    
-	    blurShader.setUniforms(gl, fboTexture[1], 1, 1, canvasWidth, canvasHeight);
+	    blurShader.setUniforms(gl, fboTexture[1], 1, 1, canvasWidth/2, canvasHeight/2);
 	    gl.glVertexAttribPointer(blurShader.getAttribPosition(), 2, GL3.GL_FLOAT, false, 0, drawQuad);
 	    gl.glEnableVertexAttribArray(blurShader.getAttribPosition());		
 	    gl.glDrawArrays(GL3.GL_TRIANGLES, 0, 6);
 	    gl.glDisableVertexAttribArray(blurShader.getAttribPosition());
 	       
 	    gl.glBindFramebuffer(GL3.GL_FRAMEBUFFER, fboId[1]);
-	    gl.glViewport(0,0, canvasWidth, canvasHeight);		    
+	    gl.glViewport(0,0, canvasWidth/2, canvasHeight/2);		    
 	    gl.glClear(GL3.GL_COLOR_BUFFER_BIT | GL3.GL_DEPTH_BUFFER_BIT);
 	    
-	    blurShader.setUniforms(gl, fboTexture[2], 0, 1, canvasWidth, canvasHeight);
+	    blurShader.setUniforms(gl, fboTexture[2], 0, 1, canvasWidth/2, canvasHeight/2);
 	    gl.glVertexAttribPointer(blurShader.getAttribPosition(), 2, GL3.GL_FLOAT, false, 0, drawQuad);
 	    gl.glEnableVertexAttribArray(blurShader.getAttribPosition());		
 	    gl.glDrawArrays(GL3.GL_TRIANGLES, 0, 6);
-	    gl.glDisableVertexAttribArray(blurShader.getAttribPosition());
-	    	    
+	    gl.glDisableVertexAttribArray(blurShader.getAttribPosition());	    	 
 	    	   
 	    //Combine blur/notblur
-	    gl.glBindFramebuffer(GL3.GL_FRAMEBUFFER, fboId[2]);
+	    gl.glBindFramebuffer(GL3.GL_FRAMEBUFFER, fboId[3]);
 	    gl.glViewport(0,0, canvasWidth, canvasHeight);
 	    gl.glClear(GL3.GL_COLOR_BUFFER_BIT | GL3.GL_DEPTH_BUFFER_BIT);
 	    
@@ -216,7 +215,7 @@ public class ModelRenderer implements GLEventListener{
 	    gl.glBindFramebuffer(GL3.GL_FRAMEBUFFER, 0);
 	    gl.glViewport(0,0, canvasWidth, canvasHeight);
 	    gl.glUseProgram(fxaaShader.getShaderProgramID());
-	    fxaaShader.setTexture(gl, fboTexture[2]);
+	    fxaaShader.setTexture(gl, fboTexture[3]);
 	    fxaaShader.setCanvasSize(gl, canvasWidth, canvasHeight);
 	    gl.glVertexAttribPointer(fxaaShader.getAttribPosition(), 2, GL3.GL_FLOAT, false, 0, drawQuad);
 		gl.glEnableVertexAttribArray(fxaaShader.getAttribPosition());		   		
@@ -271,9 +270,9 @@ public class ModelRenderer implements GLEventListener{
 	      
 	      for (int i = 0; i < fboId.length; i++)
 	      {
-	    	  //if (i == 2)
-	    		//  initFrameBuffer(gl, i, 256,256);
-	    	  //else
+	    	  if (i == 1 || i == 2)
+	    		  initFrameBuffer(gl, i, canvasWidth/2, canvasHeight/2);
+	    	  else
 	    		  initFrameBuffer(gl, i, width, height);
 	      }
 	      
