@@ -68,18 +68,19 @@ public class SHCD_File {
 		//Read in parameter info
 		paramInfo = new ParameterInfo[numConstants + numSamplers + numX + numY];
 		for (int i = 0; i < paramInfo.length; i++)
-			paramInfo[i] = new ParameterInfo(bb);
-			
-		//Read in ? if vertex shader
-		if (shaderType == SHADERTYPE_VERTEX)
-			bb.getInt();
+			paramInfo[i] = new ParameterInfo(bb);					
 		
 		//Set the param strings
 		//for (int i = 0; i < paramInfo.length; i++)
 	
 		//Read in bytecode
 		bb.position(shaderBytecodeOffset);
-		shaderBytecode = new byte[shaderBytecodeSize];
+		
+		//Read in ? if vertex shader
+		if (shaderType == SHADERTYPE_VERTEX)
+			bb.getInt();
+		
+		shaderBytecode = new byte[shaderBytecodeSize - (shaderType == SHADERTYPE_VERTEX?4 : 0)];
 		bb.get(shaderBytecode);
 	}
 	
