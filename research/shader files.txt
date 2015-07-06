@@ -1,0 +1,44 @@
+#### SHADER FILE RESEARCH #### By Ioncannon
+
+Last Updated: 7/6/2015
+
+FFXIV seems to contain two types of shader oriented files. The shader container (shcd) and shader pack (shpk). The shader container 
+contains a single DirectX vertex or pixel shader while the shader pack may contain many. The shaders are compiled bytecode.
+
+=> SHCD
+
+=====ShCd Header=====
+0x00: ShCd Signature			Int32;
+0x04: ~~Unknown~~				Short; Changes between 0x301 and 0x501.
+0x06: Shader Type				 Byte; 0 == Vertex, 1 == Pixel
+0x08: DirectX Version			Int32;
+0x0c: Filesize   				Int32;
+0x10: Shader Bytecode Offset	Int32; From start of file
+0x14: Input String Block Offset	Int32; From start of file
+0x18: NULL						Int32; Seems to be always 0
+0x1c: Shader Bytecode Size		Int32;
+0x20: Num Constants				Short;
+0x22: Num Samplers				Short;
+0x24: ~~Unknown~~				Short;
+0x26: ~~Unknown~~				Short;  
+
+=====Input Table=====
+0x00: Internal ID				Int32; Used by FFXIV to reference input without using a string
+0x04: Input String Offset		Int32; From Input String Block Offset
+0x08: Input String Size 		Int32;
+0x0a: Register Position?		Short;
+0x0c: Register Type?			Short;
+
+!!If vertex shader!! ~~Unknown
+0x00:							 Byte;
+0x01:							 Byte;
+0x02:							 Byte;
+0x03:							 Byte;
+
+
+-----Shader Bytecode-----
+
+-----Shader Strings------
+
+=> ShPk
+
