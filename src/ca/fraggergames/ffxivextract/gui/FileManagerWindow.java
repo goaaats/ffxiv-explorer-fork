@@ -70,6 +70,7 @@ import ca.fraggergames.ffxivextract.models.EXHF_File;
 import ca.fraggergames.ffxivextract.models.Model;
 import ca.fraggergames.ffxivextract.models.PAP_File;
 import ca.fraggergames.ffxivextract.models.SCD_File;
+import ca.fraggergames.ffxivextract.models.SHCD_File;
 import ca.fraggergames.ffxivextract.models.SCD_File.SCD_Sound_Info;
 import ca.fraggergames.ffxivextract.models.SKLB_File;
 import ca.fraggergames.ffxivextract.models.SqPack_IndexFile;
@@ -773,6 +774,8 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 			return ".hkx";
 		else if (data.length >= 4 && data[0] == 'b' && data[1] == 'l' && data[2] == 'k' && data[3] == 's' )		
 			return ".hkx";		
+		else if (data.length >= 4 && data[0] == 'S' && data[1] == 'h' && data[2] == 'C' && data[3] == 'd' )		
+			return ".cso";	
 		else if (contentType == 3)
 		{
 			return ".obj";
@@ -971,6 +974,12 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 						}
 						
 						extension = ".hkx";
+					}
+					else if (extension.equals(".cso") && doConvert)
+					{						
+						SHCD_File shader = new SHCD_File(data);
+						dataToSave = shader.getShaderBytecode();
+						extension = ".cso";
 					}
 					else if (extension.equals(".png") && doConvert)
 					{
