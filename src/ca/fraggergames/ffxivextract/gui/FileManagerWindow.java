@@ -712,6 +712,15 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 				e.printStackTrace();
 			}
 		}
+		else if (data.length >= 4 && data[0] == 'S' && data[1] == 'h' && data[2] == 'C' && data[3] == 'd')
+		{
+			try {
+				SHCD_File shader = new SHCD_File(data);
+				
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
 		
 		hexView.setBytes(data);	
 		//if (contentType != 3)

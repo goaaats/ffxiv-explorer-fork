@@ -1,4 +1,4 @@
-package ca.fraggergames.ffxivextract.models;
+package ca.fraggergames.ffxivextract.models.directx;
 
 public class DX9VertexElement {
 

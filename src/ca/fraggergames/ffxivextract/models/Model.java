@@ -19,6 +19,7 @@ import ca.fraggergames.ffxivextract.helpers.HavokNative;
 import ca.fraggergames.ffxivextract.helpers.Utils;
 import ca.fraggergames.ffxivextract.models.SqPack_IndexFile.SqPack_File;
 import ca.fraggergames.ffxivextract.models.SqPack_IndexFile.SqPack_Folder;
+import ca.fraggergames.ffxivextract.models.directx.DX9VertexElement;
 import ca.fraggergames.ffxivextract.shaders.DefaultShader;
 import ca.fraggergames.ffxivextract.shaders.HairShader;
 import ca.fraggergames.ffxivextract.shaders.IrisShader;

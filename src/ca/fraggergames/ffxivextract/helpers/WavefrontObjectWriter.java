@@ -7,9 +7,9 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
 import ca.fraggergames.ffxivextract.Constants;
-import ca.fraggergames.ffxivextract.models.DX9VertexElement;
 import ca.fraggergames.ffxivextract.models.Mesh;
 import ca.fraggergames.ffxivextract.models.Model;
+import ca.fraggergames.ffxivextract.models.directx.DX9VertexElement;
 
 public class WavefrontObjectWriter {
 	

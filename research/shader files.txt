@@ -5,7 +5,7 @@ Last Updated: 7/6/2015
 FFXIV seems to contain two types of shader oriented files. The shader container (shcd) and shader pack (shpk). The shader container 
 contains a single DirectX vertex or pixel shader while the shader pack may contain many. The shaders are compiled bytecode.
 
-=> SHCD
+-----------------------------ShCd----------------------------------- 
 
 =====ShCd Header=====
 0x00: ShCd Signature			Int32;
@@ -26,8 +26,8 @@ contains a single DirectX vertex or pixel shader while the shader pack may conta
 0x00: Internal ID				Int32; Used by FFXIV to reference input without using a string
 0x04: Input String Offset		Int32; From Input String Block Offset
 0x08: Input String Size 		Int32;
-0x0a: Register Position?		Short;
-0x0c: Register Type?			Short;
+0x0a: Register Index			Short;
+0x0c: Register Count			Short;
 
 !!If vertex shader!! ~~Unknown
 0x00:							 Byte;
@@ -40,5 +40,14 @@ contains a single DirectX vertex or pixel shader while the shader pack may conta
 
 -----Shader Strings------
 
-=> ShPk
+----------------------------ShPk-------------------------------------
+
+----------------------MS Constant Table------------------------------
+
+Shaders contain a single comment token called CTAB if compiled by a HLSL compiler. This contains the constant table, defining all constants and shader info for this
+shader. The data is stored in this order:
+
+D3DXSHADER_CONSTANTTABLE - https://msdn.microsoft.com/en-us/library/windows/desktop/bb205440%28v=vs.85%29.aspx
+D3DXSHADER_CONSTANTINFO (table of these) - https://msdn.microsoft.com/en-us/library/windows/desktop/bb205439%28v=vs.85%29.aspx
+D3DXSHADER_TYPEINFO (referenced by above) - https://msdn.microsoft.com/en-us/library/windows/desktop/bb205443%28v=vs.85%29.aspx
 

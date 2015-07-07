@@ -7,6 +7,9 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
 
+import ca.fraggergames.ffxivextract.Constants;
+import ca.fraggergames.ffxivextract.models.directx.D3DXShader_ConstantTable;
+
 public class SHCD_File {
 
 	public final static int SHADERTYPE_VERTEX = 0;
@@ -23,6 +26,8 @@ public class SHCD_File {
 	private byte[] shaderBytecode;	
 	
 	private ParameterInfo paramInfo[];
+	
+	private D3DXShader_ConstantTable constantTable;
 	
 	public SHCD_File(String path) throws IOException{
 		File file = new File(path);
@@ -82,6 +87,32 @@ public class SHCD_File {
 		
 		shaderBytecode = new byte[shaderBytecodeSize - (shaderType == SHADERTYPE_VERTEX?4 : 0)];
 		bb.get(shaderBytecode);
+		
+		//Constant Table in bytecode
+		constantTable = D3DXShader_ConstantTable.getConstantTable(shaderBytecode);
+		
+		if (Constants.DEBUG)
+		{
+			System.out.println(constantTable.Creator);
+			System.out.println(constantTable.Target);
+			System.out.println("Constants:");
+			for (int i = 0; i < constantTable.constantInfo.length; i++)
+			{
+				System.out.println(constantTable.constantInfo[i].Name + " " + constantTable.constantInfo[i].TypeInfo.Columns + "x" +constantTable.constantInfo[i].TypeInfo.Rows + " Index: " + constantTable.constantInfo[i].RegisterIndex + " Count: " + constantTable.constantInfo[i].RegisterCount);
+				
+				if (constantTable.constantInfo[i].TypeInfo.StructMembers != 0)
+				{
+					System.out.println("Struct!:");
+					for (int j = 0; j < constantTable.constantInfo[i].TypeInfo.StructMemberInfo.length; j++)
+						System.out.println("=>" + constantTable.constantInfo[i].TypeInfo.StructMemberInfo[j].Name);
+				}
+			}
+		}
+	}
+	
+	public D3DXShader_ConstantTable getConstantTable()
+	{
+		return constantTable;
 	}
 	
 	public int getShaderType()
