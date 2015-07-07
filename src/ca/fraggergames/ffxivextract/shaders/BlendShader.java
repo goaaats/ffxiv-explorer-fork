@@ -3,10 +3,11 @@ package ca.fraggergames.ffxivextract.shaders;
 import java.io.IOException;
 
 import javax.media.opengl.GL3;
+import javax.media.opengl.GL3bc;
 
 public class BlendShader extends Shader {
 	
-	int tex1Location, tex2Location;
+	int tex1Location, tex2Location, intensityLocation;
 	
 	public BlendShader(GL3 gl)
 			throws IOException {
@@ -15,9 +16,11 @@ public class BlendShader extends Shader {
 		
 		tex1Location = gl.glGetUniformLocation(shaderProgram, "uInTex1");
 		tex2Location = gl.glGetUniformLocation(shaderProgram, "uInTex2");
+		intensityLocation = gl.glGetUniformLocation(shaderProgram, "uGlowIntensity");
 	}
 
-	public void setTextures(GL3 gl, int texId1, int texId2) {
+	public void setUniforms(GL3bc gl, int texId1, int texId2, float glowIntensity) {
+		
 		gl.glUniform1i(tex1Location, 0);
     	gl.glUniform1i(tex2Location, 1);
     	
@@ -25,7 +28,10 @@ public class BlendShader extends Shader {
     	gl.glBindTexture(GL3.GL_TEXTURE_2D, texId1);
     	
     	gl.glActiveTexture(GL3.GL_TEXTURE1);
-    	gl.glBindTexture(GL3.GL_TEXTURE_2D, texId2);    	    	
+    	gl.glBindTexture(GL3.GL_TEXTURE_2D, texId2);    
+    	
+    	gl.glUniform1f(intensityLocation, glowIntensity);
+		
 	}
 
 }

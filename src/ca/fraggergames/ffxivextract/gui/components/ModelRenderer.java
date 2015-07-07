@@ -142,7 +142,8 @@ public class ModelRenderer implements GLEventListener{
 			if (!model.isVRAMLoaded())
 				model.loadToVRAM(gl);
 		}
-		
+
+	    gl.glClearColor(0.3f,0.3f,0.3f,1.0f);
 	    gl.glClear(GL3.GL_COLOR_BUFFER_BIT | GL3.GL_DEPTH_BUFFER_BIT); 		  
 	    
 	    Matrix.setIdentityM(viewMatrix, 0);
@@ -160,9 +161,9 @@ public class ModelRenderer implements GLEventListener{
 	    	model.render(defaultShader, viewMatrix, modelMatrix, projMatrix, gl, currentLoD, false);
 	        	
 	    //Glowed
+	    gl.glClearColor(0.0f,0.0f,0.0f,1.0f);
 	    gl.glBindFramebuffer(GL3.GL_FRAMEBUFFER, fboId[1]);
-	    gl.glViewport(0,0, canvasWidth/2, canvasHeight/2);		    
-	    gl.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	    gl.glViewport(0,0, canvasWidth/2, canvasHeight/2);	
 	    gl.glClear(GL3.GL_COLOR_BUFFER_BIT | GL3.GL_DEPTH_BUFFER_BIT);
 	    
 	    gl.glColorMask(false, false, false, false);
@@ -173,9 +174,7 @@ public class ModelRenderer implements GLEventListener{
 	    gl.glColorMask(true, true, true, true);
 	    
 	    for (Model model : models)
-	    	model.render(defaultShader, viewMatrix, modelMatrix, projMatrix, gl, currentLoD, true);
-	    gl.glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
-	    
+	    	model.render(defaultShader, viewMatrix, modelMatrix, projMatrix, gl, currentLoD, true);	   	    
 	   
 	    //Blur	
 	    gl.glBindFramebuffer(GL3.GL_FRAMEBUFFER, fboId[2]);
@@ -205,7 +204,7 @@ public class ModelRenderer implements GLEventListener{
 	    gl.glClear(GL3.GL_COLOR_BUFFER_BIT | GL3.GL_DEPTH_BUFFER_BIT);
 	    
 	    gl.glUseProgram(blendShader.getShaderProgramID());	    
-	    blendShader.setTextures(gl, fboTexture[0], fboTexture[1]);
+	    blendShader.setUniforms(gl, fboTexture[0], fboTexture[1], 1.5f);
 	    gl.glVertexAttribPointer(blendShader.getAttribPosition(), 2, GL3.GL_FLOAT, false, 0, drawQuad);
 	    gl.glEnableVertexAttribArray(blendShader.getAttribPosition());		
 	    gl.glDrawArrays(GL3.GL_TRIANGLES, 0, 6);

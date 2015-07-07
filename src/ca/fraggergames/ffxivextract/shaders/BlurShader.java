@@ -26,7 +26,7 @@ public class BlurShader extends Shader {
     	
     	gl.glUniform2f(texelSizeLocation, width != 0.0f ? 1.0f/(float)width : 0.0f, height != 0.0f ? 1.0f/(float)height : 0.0f);
     	gl.glUniform1i(dirLocation, direction);
-    	gl.glUniform1i(radiusLocation, 3);    	  
+    	gl.glUniform1i(radiusLocation, 1);    	  
 	}
 
 }
