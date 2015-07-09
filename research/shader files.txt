@@ -8,21 +8,23 @@ contains a single DirectX vertex or pixel shader while the shader pack may conta
 -----------------------------ShCd----------------------------------- 
 
 =====ShCd Header=====
-0x00: ShCd Signature			Int32;
+0x00: ShCd Signature			Int32; "ShCd"
 0x04: ~~Unknown~~				Short; Changes between 0x301 and 0x501.
 0x06: Shader Type				 Byte; 0 == Vertex, 1 == Pixel
-0x08: DirectX Version			Int32;
+0x08: DirectX Version			Int32; "DX9\0" or "DX10"
 0x0c: Filesize   				Int32;
 0x10: Shader Bytecode Offset	Int32; From start of file
 0x14: Input String Block Offset	Int32; From start of file
-0x18: NULL						Int32; Seems to be always 0
+
+====Shader Header====
+0x18: Shader Bytecode Offset	Int32; Always 0 for ShCd, starting from ShCd's Shader Bytecode Offset
 0x1c: Shader Bytecode Size		Int32;
 0x20: Num Constants				Short;
 0x22: Num Samplers				Short;
 0x24: ~~Unknown~~				Short;
 0x26: ~~Unknown~~				Short;  
 
-=====Input Table=====
+=====Input Table===== (Size of Num Constants + Num Samples + ~~Unknown~~ + ~~Unknown~~)
 0x00: Internal ID				Int32; Used by FFXIV to reference input without using a string
 0x04: Input String Offset		Int32; From Input String Block Offset
 0x08: Input String Size 		Int32;
@@ -41,6 +43,42 @@ contains a single DirectX vertex or pixel shader while the shader pack may conta
 -----Shader Strings------
 
 ----------------------------ShPk-------------------------------------
+
+=====ShPk Header=====
+0x00: ShPd Signature			Int32;
+0x04: ~~Unknown~~				Int32; 0xb01 always... header size?
+0x08: DirectX Version			Int32; "DX9 " or "DX10"
+0x0c: Filesize   				Int32;
+0x10: Shader Bytecode Offset	Int32; From start of file
+0x14: Input String Block Offset	Int32; From start of file
+0x18: Num Vertex Shaders		Int32;
+0x1c: Num Pixel Shaders 		Int32;
+0x20: 							Int32;
+0x24: 							Int32;
+0x28: Num Scalar Parameter		Int32;
+0x2c: Num Resource Parameter	Int32;
+
+--------IN ARRAY------------- (First Vertex Shaders then Pixel)
+
+=====Shader Header Table===== (Size of Num Vertex Shaders + Num Pixel Shaders)
+0x00: Shader Bytecode Offset	Int32;
+0x04: Shader Bytecode Size		Int32;
+0x08: Num Constants				Short;
+0x0a: Num Samplers				Short;
+0x0c: ~~Unknown~~				Short;
+0x0e: ~~Unknown~~				Short; 
+
+=====Input Table===== (Size of Num Constants + Num Samples + ~~Unknown~~ + ~~Unknown~~)
+0x00: Internal ID				Int32; Used by FFXIV to reference input without using a string
+0x04: Input String Offset		Int32; From Input String Block Offset
+0x08: Input String Size 		Int32;
+0x0a: Register Index			Short;
+0x0c: Register Count			Short;
+
+--------IN ARRAY-------------
+
+=====Pack Input Table======
+
 
 ----------------------MS Constant Table------------------------------
 

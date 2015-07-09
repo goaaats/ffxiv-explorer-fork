@@ -58,6 +58,7 @@ import ca.fraggergames.ffxivextract.gui.components.Lua_View;
 import ca.fraggergames.ffxivextract.gui.components.OpenGL_View;
 import ca.fraggergames.ffxivextract.gui.components.PAP_View;
 import ca.fraggergames.ffxivextract.gui.components.Path_to_Hash_Window;
+import ca.fraggergames.ffxivextract.gui.components.Shader_View;
 import ca.fraggergames.ffxivextract.gui.components.Sound_View;
 import ca.fraggergames.ffxivextract.gui.modelviewer.ModelViewerWindow;
 import ca.fraggergames.ffxivextract.helpers.HavokNative;
@@ -72,6 +73,7 @@ import ca.fraggergames.ffxivextract.models.PAP_File;
 import ca.fraggergames.ffxivextract.models.SCD_File;
 import ca.fraggergames.ffxivextract.models.SHCD_File;
 import ca.fraggergames.ffxivextract.models.SCD_File.SCD_Sound_Info;
+import ca.fraggergames.ffxivextract.models.SHPK_File;
 import ca.fraggergames.ffxivextract.models.SKLB_File;
 import ca.fraggergames.ffxivextract.models.SqPack_IndexFile;
 import ca.fraggergames.ffxivextract.models.SqPack_IndexFile.SqPack_File;
@@ -715,8 +717,17 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 		else if (data.length >= 4 && data[0] == 'S' && data[1] == 'h' && data[2] == 'C' && data[3] == 'd')
 		{
 			try {
-				SHCD_File shader = new SHCD_File(data);
-				
+				Shader_View shaderView = new Shader_View(new SHCD_File(data));
+				tabs.addTab("Shader File", shaderView);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		else if (data.length >= 4 && data[0] == 'S' && data[1] == 'h' && data[2] == 'P' && data[3] == 'k')
+		{
+			try {
+				Shader_View shaderView = new Shader_View(new SHPK_File(data));
+				tabs.addTab("Shader Pack", shaderView);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -784,7 +795,9 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 		else if (data.length >= 4 && data[0] == 'b' && data[1] == 'l' && data[2] == 'k' && data[3] == 's' )		
 			return ".hkx";		
 		else if (data.length >= 4 && data[0] == 'S' && data[1] == 'h' && data[2] == 'C' && data[3] == 'd' )		
-			return ".cso";	
+			return ".cso";
+		else if (data.length >= 4 && data[0] == 'S' && data[1] == 'h' && data[2] == 'P' && data[3] == 'k' )		
+			return ".shpk";
 		else if (contentType == 3)
 		{
 			return ".obj";
@@ -989,6 +1002,59 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 						SHCD_File shader = new SHCD_File(data);
 						dataToSave = shader.getShaderBytecode();
 						extension = ".cso";
+					}
+					else if (extension.equals(".shpk") && doConvert)
+					{
+						try {
+							SHPK_File shader = new SHPK_File(data);
+							
+							for (int j = 0; j < shader.getNumVertShaders(); j++)
+							{
+								dataToSave = shader.getShaderBytecode(j);
+								extension = ".vs.cso";
+								String path = lastSaveLocation.getCanonicalPath();
+								
+								if (fileName == null)				
+									fileName = String.format("%X", files.get(i).getId() & 0xFFFFFFFF);
+																
+								if (folderName == null)
+									folderName = String.format("%X", files.get(i).getId2() & 0xFFFFFFFF);
+								
+								path = lastSaveLocation.getCanonicalPath() + "\\" + folderName + "\\" + fileName;
+								
+								File mkDirPath = new File(path);
+								mkDirPath.getParentFile().mkdirs();																															
+								
+								LERandomAccessFile out = new LERandomAccessFile(path + j + extension, "rw");
+								out.write(dataToSave, 0, dataToSave.length);
+								out.close();
+							}
+							for (int j = 0; j < shader.getNumPixelShaders(); j++)
+							{
+								dataToSave = shader.getShaderBytecode(shader.getNumVertShaders()+j);
+								extension = ".ps.cso";
+								String path = lastSaveLocation.getCanonicalPath();
+								
+								if (fileName == null)				
+									fileName = String.format("%X", files.get(i).getId() & 0xFFFFFFFF);
+																
+								if (folderName == null)
+									folderName = String.format("%X", files.get(i).getId2() & 0xFFFFFFFF);
+								
+								path = lastSaveLocation.getCanonicalPath() + "\\" + folderName + "\\" + fileName;
+								
+								File mkDirPath = new File(path);
+								mkDirPath.getParentFile().mkdirs();																															
+								
+								LERandomAccessFile out = new LERandomAccessFile(path + j + extension, "rw");
+								out.write(dataToSave, 0, dataToSave.length);
+								out.close();
+							}
+							
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+						
 					}
 					else if (extension.equals(".png") && doConvert)
 					{

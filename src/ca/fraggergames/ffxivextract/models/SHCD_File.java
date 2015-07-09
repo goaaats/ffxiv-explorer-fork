@@ -18,14 +18,12 @@ public class SHCD_File {
 	private int fileLength;
 	private int shaderType;	
 	private String directXVersion;
-	private int shaderBytecodeOffset;
-	private int shaderBytecodeSize;
-	private int shaderStringBlockoffset;
-	private int numConstants, numSamplers, numX, numY;
+	private ShaderHeader shaderHeader;
 	
 	private byte[] shaderBytecode;	
 	
-	private ParameterInfo paramInfo[];
+	private int shaderStartBytecodeOffset;
+	private int shaderStringBlockoffset;
 	
 	private D3DXShader_ConstantTable constantTable;
 	
@@ -61,37 +59,36 @@ public class SHCD_File {
 		directXVersion = new String(dxStringBuffer);
 		
 		fileLength = bb.getInt();
-		shaderBytecodeOffset = bb.getInt();
+		shaderStartBytecodeOffset = bb.getInt();
 		shaderStringBlockoffset = bb.getInt();
-		bb.getInt();
-		shaderBytecodeSize = bb.getInt();
-		numConstants = bb.getShort();
-		numSamplers = bb.getShort();
-		numX = bb.getShort();
-		numY = bb.getShort();
-		    
-		//Read in parameter info
-		paramInfo = new ParameterInfo[numConstants + numSamplers + numX + numY];
-		for (int i = 0; i < paramInfo.length; i++)
-			paramInfo[i] = new ParameterInfo(bb);					
 		
+		//Read in shader header
+		shaderHeader = new ShaderHeader(shaderType, bb);		    						
+	
 		//Set the param strings
-		//for (int i = 0; i < paramInfo.length; i++)
+		for (int i = 0; i < shaderHeader.paramInfo.length; i++)
+		{
+			bb.position(shaderStringBlockoffset + shaderHeader.paramInfo[i].stringOffset);
+			byte buffer[] = new byte[shaderHeader.paramInfo[i].stringSize];
+			bb.get(buffer);
+			shaderHeader.paramInfo[i].parameterName = new String(buffer);
+		}
 	
 		//Read in bytecode
-		bb.position(shaderBytecodeOffset);
+		bb.position(shaderStartBytecodeOffset + shaderHeader.shaderBytecodeOffset);
 		
 		//Read in ? if vertex shader
 		if (shaderType == SHADERTYPE_VERTEX)
 			bb.getInt();
 		
-		shaderBytecode = new byte[shaderBytecodeSize - (shaderType == SHADERTYPE_VERTEX?4 : 0)];
+		shaderBytecode = new byte[shaderHeader.shaderBytecodeSize - (shaderType == SHADERTYPE_VERTEX?4 : 0)];
 		bb.get(shaderBytecode);
 		
-		//Constant Table in bytecode
-		constantTable = D3DXShader_ConstantTable.getConstantTable(shaderBytecode);
+		//Constant Table in bytecode IF DX9
+		if (directXVersion.equals("DX9\0"))
+			constantTable = D3DXShader_ConstantTable.getConstantTable(shaderBytecode);
 		
-		if (Constants.DEBUG)
+		if (Constants.DEBUG && constantTable != null)
 		{
 			System.out.println(constantTable.Creator);
 			System.out.println(constantTable.Target);
@@ -123,27 +120,6 @@ public class SHCD_File {
 	public byte[] getShaderBytecode()
 	{
 		return shaderBytecode;
-	}
-	
-	public static class ParameterInfo
-	{
-		final public int id;
-		final public int stringOffset;
-		final public int stringSize;
-		final public int unknown1;
-		final public int unknown2;
-		
-		public String parameterName = "";
-		
-		public ParameterInfo(ByteBuffer bb){
-
-			id = bb.getInt();
-			stringOffset = bb.getInt();
-			stringSize = bb.getInt();
-			unknown1 = bb.getShort();
-			unknown2 = bb.getShort();
-			
-		}
-	}
+	}	
 	
 }

@@ -93,7 +93,7 @@ public class FFXIV_String {
 			switch (type)
 			{
 			case TYPE_NEWLINE:
-				buffOut.put("\\n".getBytes("UTF-8"));
+				buffOut.put("<br>".getBytes("UTF-8"));
 				break;
 			}
 			return;
