@@ -93,6 +93,28 @@ public class SHPK_File {
   		paramInfo = new ParameterInfo[numConstants + numSamplers];
   		for (int i = 0; i < paramInfo.length; i++)
   			paramInfo[i] = new ParameterInfo(bb);	
+  		
+  		//Read in strings for headers
+  		for (int i = 0; i < shaderHeaders.size(); i++)
+  		{
+  			ShaderHeader header = shaderHeaders.get(i);
+  			for (int j = 0; j < header.paramInfo.length; j++)
+  			{
+  				byte buff[] = new byte[header.paramInfo[j].stringSize];
+  				bb.position(parameterOffset + header.paramInfo[j].stringOffset);
+  				bb.get(buff);
+  				header.paramInfo[j].parameterName = new String(buff);  				
+  			}
+  		}
+  		
+  		//Read in strings for shaderpack
+  		for (int j = 0; j < paramInfo.length; j++)
+		{
+			byte buff[] = new byte[paramInfo[j].stringSize];
+			bb.position(parameterOffset + paramInfo[j].stringOffset);
+			bb.get(buff);
+			paramInfo[j].parameterName = new String(buff);  				
+		}
 	}
 	
 	public D3DXShader_ConstantTable getConstantTable(int shaderIndex)
@@ -127,5 +149,10 @@ public class SHPK_File {
 	
 	public int getNumPixelShaders() {
 		return numPixelShaders;
+	}
+	
+	public ShaderHeader getShaderHeader(int i)
+	{
+		return shaderHeaders.get(i);
 	}
 }

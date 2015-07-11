@@ -20,6 +20,7 @@ import javax.swing.JComboBox;
 import javax.swing.border.EmptyBorder;
 
 import ca.fraggergames.ffxivextract.models.Mesh;
+import ca.fraggergames.ffxivextract.models.ParameterInfo;
 import ca.fraggergames.ffxivextract.models.SHCD_File;
 import ca.fraggergames.ffxivextract.models.SHPK_File;
 import ca.fraggergames.ffxivextract.models.directx.D3DXShader_ConstantTable;
@@ -46,7 +47,6 @@ public class Shader_View extends JPanel {
 		initUi();
 		
 		cmbShaderIndex.addItem(shader.getShaderType() == 0 ? "Vertex Shader #0" : "Pixel Shader #0");
-		cmbShaderIndex.setModel(new DefaultComboBoxModel());
 		cmbShaderIndex.setEnabled(false);
 				
 		loadShader(0);
@@ -85,13 +85,19 @@ public class Shader_View extends JPanel {
 	private void loadShader(int i) {
 		if (shader != null)
 		{			
-			processCTable(shader.getShaderType(), shader.getConstantTable());
+			processCTable(shader.getShaderType(), shader.getConstantTable());						
 			hexView.setBytes(shader.getShaderBytecode());
+			
+			for (ParameterInfo pi:shader.getShaderHeader().paramInfo)
+				System.out.println(String.format("Name: %s, Id: 0x%04x", pi.parameterName, pi.id));
 		}
 		else
 		{			
 			processCTable(shaderPack.getShaderType(i), shaderPack.getConstantTable(i));
 			hexView.setBytes(shaderPack.getShaderBytecode(i));
+			
+			for (ParameterInfo pi:shaderPack.getShaderHeader(i).paramInfo)
+				System.out.println(String.format("Name: %s, Id: 0x%04x", pi.parameterName, pi.id));
 		}
 	}
 
@@ -102,7 +108,7 @@ public class Shader_View extends JPanel {
 		
 		for (int i = 0; i < ctab.constantInfo.length; i++)
 		{
-			DefaultMutableTreeNode node = new DefaultMutableTreeNode(ctab.constantInfo[i].Name + "["+ ctab.constantInfo[i].TypeInfo.Columns +"x"+ ctab.constantInfo[i].TypeInfo.Rows +"]" + "Index: " + ctab.constantInfo[i].RegisterIndex);
+			DefaultMutableTreeNode node = new DefaultMutableTreeNode(ctab.constantInfo[i].Name + "["+ ctab.constantInfo[i].TypeInfo.Columns +"x"+ ctab.constantInfo[i].TypeInfo.Rows +"]" + " Index: " + ctab.constantInfo[i].RegisterIndex);
 			root.add(node);
 			
 			for (int j = 0; j < ctab.constantInfo[i].TypeInfo.StructMemberInfo.length; j++)
