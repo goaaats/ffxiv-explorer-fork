@@ -122,4 +122,8 @@ public class SHCD_File {
 		return shaderBytecode;
 	}	
 	
+	public ShaderHeader getShaderHeader()
+	{
+		return shaderHeader;
+	}
 }

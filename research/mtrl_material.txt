@@ -2,9 +2,10 @@
 
 ===Material File===
 0x00: ~~Unknown~~				  Int32;
-0x04: Filesize					  Int32;
+0x04: Filesize					  Short;
+0x06: Color Table Size			  Short;
 0x08: Size of All Strings		  Short;
-0x0a: 							  Short;
+0x0a: Shader String Offset		  Short;
 0x0c: Path Count				  Byte;
 0x0d: Map Count					  Byte;
 0x0e: Colorset Count			  Byte;
@@ -21,4 +22,33 @@
 0x28: ~Paths are here~
 0xZZ: Shader name
 
- 
+===Color Table=== (Size of Color Table Size)
+
+Unknown					Size of X Count;
+
+===Shader Parameters===
+
+0x00: Unknown Size				  Short; Size of last bytes
+0x02: Count 1					  Short;
+0x04: Count 2					  Short;
+0x06: Count 3					  Short;
+0x08: Unknown					  Short;
+0x0a: Unknown 					  Short;
+
+---Type 1---
+
+0x00: Unknown					  Int32;
+0x04: Unknown2					  Int32;
+
+---Type 2---
+
+0x00: Unknown					  Int32;
+0x04: Unknown Offset			  Short; Offset to last bytes
+0x06: Unknown Size				  Short;
+
+---Type 3---
+
+0x00: Parameter Id				  Int32;
+0x04: Unknown					  Short;
+0x06: Unknown					  Short;
+0x08: Index						  Int32;

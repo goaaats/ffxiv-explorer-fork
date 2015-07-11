@@ -21,10 +21,15 @@ import ca.fraggergames.ffxivextract.storage.HashDatabase;
 
 public class Material {
 	
-	String materialPath;
+	String materialPath;	
 	
 	//Data
+	int fileSize;
+	int colorTableSize;
+	int stringSectionSize;
+	int shaderStringOffset;
 	short numPaths, numMaps, numColorSets, numUnknown;	
+	
 	String stringArray[];
 	
 	Texture_File diffuse, mask, normal, specular;
@@ -50,9 +55,10 @@ public class Material {
 		ByteBuffer bb = ByteBuffer.wrap(data);
 		bb.order(ByteOrder.LITTLE_ENDIAN);
 		bb.getInt();
-		int fileSize = bb.getInt();
-		short stringSectionSize = bb.getShort();
-		int shaderStringOffset = bb.getShort();
+		fileSize = bb.getShort();
+		colorTableSize = bb.getShort();
+		stringSectionSize = bb.getShort();
+		shaderStringOffset = bb.getShort();
 		numPaths = bb.get();
 		numMaps = bb.get();
 		numColorSets = bb.get();
@@ -124,7 +130,7 @@ public class Material {
 		}	
 		
 		//This is for the new material file setup. ALso bgcolorchange doesn't have a table color but can't find where it says that.
-		if (colorSet == null && !stringArray[stringArray.length-1].equals("bgcolorchange.shpk"))
+		if (colorSet == null && colorTableSize >= 512)
 		{			
 			bb.position(16 + (4 * (numPaths + numMaps + numColorSets)) + stringBuffer.length);
 			if (bb.getInt() == 0x0)
