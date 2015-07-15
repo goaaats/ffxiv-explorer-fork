@@ -59,9 +59,7 @@ import javax.swing.DefaultComboBoxModel;
 
 @SuppressWarnings("serial")
 public class EXDF_View extends JScrollPane implements ItemListener{	
-	
-	public static final String[] langs = {"en","ja", "fr", "de"};
-	
+		
 	//EXH Context
 	SqPack_IndexFile currentIndex;	
 	EXHF_File exhFile = null;
@@ -109,7 +107,8 @@ public class EXDF_View extends JScrollPane implements ItemListener{
 		exhName = exhName.replace("_ja.exd", "");
 		exhName = exhName.replace("_de.exd", "");
 		exhName = exhName.replace("_fr.exd", "");
-		exhName = exhName.replace("_chs.exd", "");
+		exhName = exhName.replace("_cht.exd", "");
+		exhName = exhName.replace("_ko.exd", "");
 		exhName = exhName.substring(0, exhName.lastIndexOf("_"));
 		String folderName = exhName.substring(0, fullPath.lastIndexOf("/"));
 		exhName = exhName.substring(fullPath.lastIndexOf("/")+1, exhName.length()) +".exh";
@@ -285,20 +284,17 @@ public class EXDF_View extends JScrollPane implements ItemListener{
 	//Given a exd name, find all related exds (by page/language)
 	private void getEXDFiles(EXHF_File exhFile, String exdName, int numPages, int numLanguages)
 	{
-		exdFile = new EXDF_File[numPages * 4];
+		exdFile = new EXDF_File[exhFile.getNumPages()*exhFile.getNumLanguages()];
 		for (int i = 0; i < numPages; i++){
 		
-			for (int j = 0; j < numLanguages; j++){
+			for (int j = 0; j < numLanguages; j++){							
 				
-				if (j>= 4)
-					break;
+				if (EXHF_File.languageCodes[exhFile.getLanguageTable()[j]].equals("Unknown"))
+					continue;
 				
 				String formattedExdName = exdName;
-				
-				if (numLanguages > 1)					
-					formattedExdName = String.format(exdName, exhFile.getPageTable()[i].pageNum, "_"+langs[j]);
-				else
-					formattedExdName = String.format(exdName, exhFile.getPageTable()[i].pageNum, "");
+								
+				formattedExdName = String.format(exdName, exhFile.getPageTable()[i].pageNum, EXHF_File.languageCodes[exhFile.getLanguageTable()[j]]);
 				
 				formattedExdName = formattedExdName.substring(formattedExdName.lastIndexOf("/")+1);
 				
@@ -307,15 +303,13 @@ public class EXDF_View extends JScrollPane implements ItemListener{
 					//Hey we accidently found something
 					if (HashDatabase.getFileName(HashDatabase.computeCRC(formattedExdName.getBytes(), 0, formattedExdName.getBytes().length)) == null){
 						System.out.println("Adding: " + formattedExdName);
-						if (numLanguages > 1)					
-							HashDatabase.addPathToDB(String.format(exdName, exhFile.getPageTable()[i].pageNum, "_"+langs[j]), currentIndex.getIndexName());
-						else
-							HashDatabase.addPathToDB(String.format(exdName, exhFile.getPageTable()[i].pageNum, ""), currentIndex.getIndexName());
+						
+						HashDatabase.addPathToDB(exhFolder +"/"+formattedExdName, currentIndex.getIndexName());					
 					}
 					byte[] data = currentIndex.extractFile(exhFolder, formattedExdName);
 					
-					if (exdFile != null)
-						exdFile[(i*(numLanguages == 1 ? 1 : 4))+j] = new EXDF_File(data);
+					if (exdFile != null && data != null)
+						exdFile[i+j] = new EXDF_File(data);
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
@@ -330,11 +324,14 @@ public class EXDF_View extends JScrollPane implements ItemListener{
 	private void setupUI() {
 		lblExhName.setText(exhName);
 		lblExhNumEntries.setText(""+exhFile.getNumEntries() + ((exhFile.getNumEntries() == exhFile.getTrueNumEntries()? "": " (Page Sum: " +exhFile.getTrueNumEntries() + ")")));
-		lblExhNumLangs.setText(""+(exhFile.getNumLanguages()-1));
+		lblExhNumLangs.setText("" + (exhFile.getLanguageTable()[0] == 0x0 ? 0 : exhFile.getNumLanguages()));
 		lblExhNumPages.setText(""+exhFile.getNumPages());
-		if (exhFile.getNumLanguages() != 1)
+		
+		cmbLanguage.removeAllItems();
+		if (exhFile.getNumLanguages() != 0 && exhFile.getLanguageTable()[0] != 0x0)
 		{
-			cmbLanguage.setModel(new DefaultComboBoxModel(new String[] {"English", "Japanese", "French", "German"}));
+			for (int i = 0; i < numLanguages; i++)
+				cmbLanguage.addItem(EXHF_File.languageNames[exhFile.getLanguageTable()[i]]);			
 			cmbLanguage.addItemListener(this);
 		}
 		else
@@ -401,6 +398,12 @@ public class EXDF_View extends JScrollPane implements ItemListener{
 				
 //				rowIndex += exhFile.getPageTable()[0].pageNum;
 				
+				//Check if we got data for this langauge
+				if (exdFile[(langOverride != -1 ? langOverride : cmbLanguage.getSelectedIndex())] == null)
+				{
+					return "";
+				}
+				
 				//Find Page
 				int totalRealEntries = 0;				
 				if (numPages != 1)
@@ -435,16 +438,16 @@ public class EXDF_View extends JScrollPane implements ItemListener{
 						}
 					}
 										
-				}
+				}				
 				
 				//Grab Data		
-				totalRealEntries = 0;		
+				totalRealEntries = 0;						
 				for (int i = 0; i < page; i++)
 				{															
-					totalRealEntries += exdFiles[((numLanguages == 1? 1 : 4)*i) + (langOverride != -1 ? langOverride : cmbLanguage.getSelectedIndex())].getNumEntries();					
+					totalRealEntries += exdFiles[(numLanguages*i) + (langOverride != -1 ? langOverride : cmbLanguage.getSelectedIndex())].getNumEntries();					
 				}
 				
-				EXDF_Entry entry = exdFiles[((numLanguages == 1? 1 : 4)*page) + (langOverride != -1 ? langOverride : cmbLanguage.getSelectedIndex())].getEntry(rowIndex-totalRealEntries);
+				EXDF_Entry entry = exdFiles[(numLanguages*page) + (langOverride != -1 ? langOverride : cmbLanguage.getSelectedIndex())].getEntry(rowIndex-totalRealEntries);
 				
 				//Index
 				if (columnIndex == 0)
@@ -519,7 +522,8 @@ public class EXDF_View extends JScrollPane implements ItemListener{
 		checkString = checkString.replace("_ja.exd", "");
 		checkString = checkString.replace("_de.exd", "");
 		checkString = checkString.replace("_fr.exd", "");
-		checkString = checkString.replace("_chs.exd", "");
+		checkString = checkString.replace("_cht.exd", "");
+		checkString = checkString.replace("_ko.exd", "");
 		checkString = checkString.substring(0, checkString.lastIndexOf("_")) +".exh";
 		return exhName.equals(checkString);			
 	}
@@ -688,7 +692,12 @@ public class EXDF_View extends JScrollPane implements ItemListener{
 	public void saveCSV(String path, int lang) throws IOException
 	{
 		langOverride = lang;
-		OutputStreamWriter out = new OutputStreamWriter(new FileOutputStream(path),"UTF-8");		
+		
+		//Skip this if langauge doesn't exist
+		if (exdFile[(langOverride != -1 ? langOverride : cmbLanguage.getSelectedIndex())] == null)
+			return;
+		
+		OutputStreamWriter out = new OutputStreamWriter(new FileOutputStream(path),"UTF-8");				
 		
 		//Write columns
 		for (int col = 0; col < table.getColumnCount(); col++)
@@ -705,7 +714,11 @@ public class EXDF_View extends JScrollPane implements ItemListener{
 		    for (int col = 0; col < table.getColumnCount(); col++) {
 		    	Object value = table.getValueAt(row, col);
 		    	if (value instanceof String)
-		    		out.write("\""+(String) value+"\""); 
+		    	{
+		    		String string = (String)value;
+		    		string = string.replace("\"", "\"\"");
+		    		out.write("\""+(String) string+"\"");
+		    	}
 		    	else 
 		    		out.write("" + value);
 		    	if (col != table.getColumnCount()-1)
@@ -749,6 +762,10 @@ public class EXDF_View extends JScrollPane implements ItemListener{
 		catch (IOException e){
 			
 		}
+	}
+
+	public EXHF_File getExhFile() {
+		return exhFile;
 	}
 	
 }
