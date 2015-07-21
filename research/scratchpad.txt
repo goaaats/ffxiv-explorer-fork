@@ -1,0 +1,6 @@
+
+--How do abilities turn into animations?--
+
+Action.exh -> Has a list of actions, description etc. Column 3 seems to link to the action_timeline to use.
+ActionTimeline.exh -> Defines the tmb file to use.
+tmb file -> Defines what sounds, vfx, and animation to use.
