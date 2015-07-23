@@ -310,7 +310,7 @@ public class EXDF_View extends JScrollPane implements ItemListener{
 					byte[] data = currentIndex.extractFile(exhFolder, formattedExdName);
 					
 					if (exdFile != null && data != null)
-						exdFile[i+j] = new EXDF_File(data);
+						exdFile[(i*numLanguages)+j] = new EXDF_File(data);
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
@@ -731,6 +731,11 @@ public class EXDF_View extends JScrollPane implements ItemListener{
 		langOverride = -1;
 	}
 
+	public void setLangOverride(int override)
+	{
+		langOverride = override;
+	}
+	
 	public int getNumLangs() {
 		return exhFile.getNumLanguages();
 	}	
