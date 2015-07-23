@@ -492,6 +492,7 @@ public class ModelViewerItems extends JPanel {
 		SqPack_IndexFile indexFile = parent.getExdIndexFile();
 		EXHF_File exhfFile = new EXHF_File(indexFile.extractFile("exd/item.exh"));
 		EXDF_View view = new EXDF_View(indexFile, "exd/item.exh", exhfFile);
+		view.setLangOverride(1);
 		
 		try{
 			for (int i = 0; i < view.getTable().getRowCount(); i++){
