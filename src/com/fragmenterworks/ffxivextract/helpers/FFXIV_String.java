@@ -7,37 +7,74 @@ import java.util.Arrays;
 
 public class FFXIV_String {
 
-	final static int START_BYTE = 0x02;
-	final static int END_BYTE = 0x03;
+	final static int START_BYTE 		   = 0x02;
+	final static int END_BYTE 			   = 0x03;
 
-	final static int TYPE_NEWLINE = 0x10;
-	final static int TYPE_INFO = 0x29;
-	final static int TYPE_REFERENCE = 0x28;
-	final static int TYPE_REFERENCE2 = 0x40;
-	final static int TYPE_IF = 0x08;
-	final static int TYPE_SWITCH = 0x09;
-	final static int TYPE_SPLIT = 0x2c;
-	final static int TYPE_ITALICS = 0x1a;
-	final static int TYPE_COLOR_CHANGE = 0x13;
-	final static int TYPE_SERVER_VALUE0 = 0x20;
-	final static int TYPE_SERVER_VALUE1 = 0x21;
-	final static int TYPE_SERVER_VALUE2 = 0x22;
-	final static int TYPE_SERVER_VALUE3 = 0x24;
-	final static int TYPE_SERVER_VALUE4 = 0x25;
-	final static int TYPE_ICON1 = 0x12;
-	final static int TYPE_ICON2 = 0x1E;
-	final static int TYPE_DASH = 0x1F;
+	final static int TYPE_NONE             = 0x00;
+	final static int TYPE_TIME             = 0x07;
+	final static int TYPE_IF               = 0x08;
+	final static int TYPE_SWITCH           = 0x09;
+	final static int TYPE_NEWLINE          = 0x10;
+	final static int TYPE_ICON1            = 0x12;
+	final static int TYPE_COLOR_CHANGE     = 0x13;	
+	final static int TYPE_ITALICS          = 0x1a;
+	final static int TYPE_INDENT           = 0x1d;
+	final static int TYPE_ICON2            = 0x1e;
+	final static int TYPE_DASH             = 0x1f;
 
-	final static int TYPE_PLAYERLINK = 0x27;
+	final static int TYPE_SERVER_VALUE0    = 0x20;
+	final static int TYPE_SERVER_VALUE1    = 0x21;
+	final static int TYPE_SERVER_VALUE2    = 0x22;
+	final static int TYPE_SERVER_VALUE3    = 0x24;
+	final static int TYPE_SERVER_VALUE4    = 0x25;
 	
-	final static int TYPE_UNKNOWN2 = 0x2b;
+	final static int TYPE_PLAYERLINK       = 0x27;
 
-	final static int TYPE_UNKNOWN = 0x07;
+	final static int TYPE_REFERENCE        = 0x28;
+	final static int TYPE_INFO             = 0x29;
+	
+	final static int TYPE_LINK             = 0x2b;
+	
+	final static int TYPE_SPLIT            = 0x2c;
+	
+	final static int TYPE_REFERENCE_JA     = 0x30;
+	final static int TYPE_REFERENCE_EN     = 0x31;
+	final static int TYPE_REFERENCE_DE     = 0x32;
+	final static int TYPE_REFERENCE_FR     = 0x33;	
+	final static int TYPE_REFERENCE2       = 0x40;	
 
-	final static int TYPE_ITEM_LOOKUP = 0x31;
+	final static int TYPE_ITEM_LOOKUP      = 0x31;
 
 	final static int INFO_NAME = 235;
 	final static int INFO_GENDER = 233;
+		
+	final static int SIZE_DATATYPE_BYTE    = 0xF0;
+	final static int SIZE_DATATYPE_BYTE256 = 0xF1;
+	final static int SIZE_DATATYPE_INT16   = 0xF2;
+	final static int SIZE_DATATYPE_INT24   = 0xFA;
+	final static int SIZE_DATATYPE_INT32   = 0xFE;
+	
+	final static int DECODE_BYTE	   	   = 0xF0;
+	final static int DECODE_INT16_MINUS1   = 0xF1;
+	final static int DECODE_INT16_1   	   = 0xF2;
+	final static int DECODE_INT16_2   	   = 0xF4;
+	final static int DECODE_INT24_MINUS1   = 0xF5;
+	final static int DECODE_INT24          = 0xF6;
+	final static int DECODE_INT24_1   	   = 0xFA;
+	final static int DECODE_INT24_2   	   = 0xFD;
+	final static int DECODE_INT32   	   = 0xFE;
+	final static int DECODE_VARIABLE   	   = 0xFF;
+	
+	final static int COMPARISON_GE   	   = 0xE0;
+	final static int COMPARISON_UN   	   = 0xE1; 
+	final static int COMPARISON_LE   	   = 0xE2; 
+	final static int COMPARISON_NEQ   	   = 0xE3;
+	final static int COMPARISON_EQ   	   = 0xE4;
+	
+	final static int INFO_INTEGER		   = 0xE8;
+	final static int INFO_PLAYER		   = 0xE9;
+	final static int INFO_STRING		   = 0xEA;	
+	final static int INFO_OBJECT		   = 0xEB;
 
 	//Hard Coded Payloads that are known
 	final static byte forenamePayload[] = {-1, 7, 2, 41, 3, -21, 2, 3, -1, 2, 32, 2, 3};
@@ -99,9 +136,8 @@ public class FFXIV_String {
 			return;
 		}
 
-		if (payloadSize > buffIn.remaining())
-			payloadSize = buffIn.remaining();
-
+		payloadSize = getPayloadSize(payloadSize, buffIn);
+		
 		byte[] payload = new byte[payloadSize];
 
 		buffIn.get(payload);
@@ -183,7 +219,7 @@ public class FFXIV_String {
 			else
 				buffOut.put("</i>".getBytes("UTF-8"));
 			break;
-		case TYPE_UNKNOWN:
+		case TYPE_TIME:
 			break;
 		case TYPE_COLOR_CHANGE:
 			if (payload[0] == -20)
@@ -192,7 +228,7 @@ public class FFXIV_String {
 				buffOut.put(String.format("<color #%02X%02X%02X>", payload[2], payload[3], payload[4]).getBytes("UTF-8"));
 			else buffOut.put("<color?>".getBytes("UTF-8"));
 			break;
-		case TYPE_UNKNOWN2:
+		case TYPE_LINK:
 
 			/*byte unknownBuffer[] = new byte[payload[1]];
 			System.arraycopy(payload, 2, unknownBuffer, 0, unknownBuffer.length);
@@ -216,55 +252,24 @@ public class FFXIV_String {
 			buffOut.put(String.format("<ref:%s>", new String(exdName)).getBytes("UTF-8"));
 			break;
 		case TYPE_IF:
-			int pos1 = 2;
-			String ifString = "<if:";
+			
+			ByteBuffer payloadBB = ByteBuffer.wrap(payload);
+			payloadBB.order(ByteOrder.LITTLE_ENDIAN);
+			
+			StringBuilder builder = new StringBuilder();
+			
+			builder.append("<if");
 
-			if((((int)payload[0])&0xFF) == 0xDB){
-				buffOut.put("<if:#s>".getBytes("UTF-8"));
-				break;
-			}
-			//if ((((int)payload[0])&0xFF) == 0xE9 || (((int)payload[0])&0xFF) == 0xE3)
-			//{
-				while (true)
-				{
-					//Skip till hit marker
-						for (int i = 0; i <= 4; i++)
-					{
-
-						if (payload[pos1] == -1)
-							break;
-						else
-							pos1++;
-					}
-					pos1++;
-					int stringSize = (((int)payload[pos1])&0xFF);
-					pos1++;
-
-					if(stringSize == 1)
-					{
-						ifString += "none";
-						if (payload[pos1] == 3 || payload[pos1] != -1 || (pos1+1 < payload.length && payload[pos1+1] == 3))
-							break;
-						else
-						{
-							ifString +="/";
-							continue;
-						}
-					}
-
-					byte ifBuffer[] = new byte[stringSize-1];
-					System.arraycopy(payload, pos1, ifBuffer, 0, stringSize-1);
-					ifString += parseFFXIVString(ifBuffer);
-					pos1+=stringSize-1;
-					if (payload[pos1] != -1 && (payload[pos1] == 3 || (pos1+1 < payload.length && (payload[pos1+1] == 3) || (pos1+2 < payload.length && (payload[pos1+2] == 3)))))
-						break;
-					ifString += "/";
-				}
-
-				buffOut.put((ifString+">").getBytes("UTF-8"));
-			//}
-			//else
-				//buffOut.put("<if?>".getBytes("UTF-8"));*/
+			builder.append("(");
+			processCondition(payloadBB, builder);
+			builder.append(") {");
+			decode(payloadBB, builder);
+			builder.append("} else {");
+			decode(payloadBB, builder);
+			builder.append("}>");
+			
+			buffOut.put(builder.toString().getBytes("UTF-8"));
+			
 			break;
 		case TYPE_SWITCH:
 			int pos2 = 1;
@@ -334,6 +339,111 @@ public class FFXIV_String {
 			break;
 		}
 
+	}
+
+	private static void processCondition(ByteBuffer buffIn, StringBuilder builder) {
+				
+		String compareStr;
+		int code = buffIn.get() & 0xFF;
+		switch (code)
+		{
+		case COMPARISON_EQ:
+			compareStr = "==";
+			break;
+		case COMPARISON_LE:
+			compareStr = "<=";
+			break;
+		case COMPARISON_GE:
+			compareStr = ">=";
+			break;
+		case COMPARISON_UN:
+			compareStr = "?";
+			break;
+		default:
+			decode(buffIn, builder);
+			return;
+		}
+		
+		decode(buffIn, builder);
+		builder.append(compareStr);
+		decode(buffIn, builder);
+		
+	}
+	
+	private static void decode(ByteBuffer buffIn, StringBuilder builder)
+	{
+		int code = buffIn.get() & 0xFF;
+		
+		if (code < 0xD0)
+		{
+			builder.append(" " + code + " ");
+			return;
+		}
+		else if (code < 0xE0)
+		{
+			builder.append(" " + code + " ");
+			return;
+		}
+		
+		switch (code)
+		{
+		case INFO_INTEGER:
+			builder.append("INT:");
+			decode(buffIn, builder);
+			return;
+		case INFO_PLAYER:
+			builder.append("PLYR:");
+			decode(buffIn, builder);
+			return;
+		case INFO_STRING:
+			builder.append("STR:");
+			decode(buffIn, builder);
+			return;
+		case INFO_OBJECT:			
+			builder.append("OBJ:");
+			decode(buffIn, builder);
+			return;
+		case DECODE_VARIABLE:
+			int size = buffIn.get() & 0xFF;
+			size = getPayloadSize(size, buffIn)-1;
+			byte data[] = new byte[size];
+			buffIn.get(data);
+			builder.append(parseFFXIVString(data));
+			break;
+		}
+	}
+	
+	private static void getParam(ByteBuffer buffIn, StringBuilder builder)
+	{
+		
+	}
+
+	private static int getPayloadSize(int payloadSize, ByteBuffer buffIn) {
+		
+		if (payloadSize < (int)0xF0)
+			return payloadSize;
+		
+		switch (payloadSize)
+		{
+		case SIZE_DATATYPE_BYTE:
+		{
+			int valByte = buffIn.get() & 0xFF; 
+			return valByte;
+		}
+		case SIZE_DATATYPE_BYTE256:
+		case SIZE_DATATYPE_INT16:
+			return buffIn.getShort();
+		case SIZE_DATATYPE_INT24:
+			int val24 = 0;
+			val24 |= buffIn.get() << 16;
+			val24 |= buffIn.get() << 8;
+			val24 |= buffIn.get();
+			return val24;
+		case SIZE_DATATYPE_INT32:
+			return buffIn.getInt();
+		}
+		
+		return payloadSize;
 	}
 
 }
