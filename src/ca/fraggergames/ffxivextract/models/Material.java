@@ -7,6 +7,7 @@ import java.nio.ByteOrder;
 
 import javax.media.opengl.GL3;
 
+import ca.fraggergames.ffxivextract.helpers.ShaderIdHelper;
 import ca.fraggergames.ffxivextract.helpers.Utils;
 import ca.fraggergames.ffxivextract.models.SqPack_IndexFile.SqPack_File;
 import ca.fraggergames.ffxivextract.models.SqPack_IndexFile.SqPack_Folder;
@@ -35,8 +36,16 @@ public class Material {
 	Texture_File diffuse, mask, normal, specular;
 	Texture_File colorSet;
 	
-	byte[] colorSetData;
+	Unknown1 unknownList1[];
+	Unknown2 unknownList2[];
+	Parameter parameterList[];
 	
+	byte colorSetData[];
+
+	int unknownDataSize;
+	byte unknownData[];
+	
+	//Rendering
 	private boolean shaderReady = false;	
 	
 	Shader shader;
@@ -47,11 +56,11 @@ public class Material {
 	//Constructor grabs info about material
 	public Material(byte[] data) {
 		this(null, null, data);
-	}	
+	}		
 	
 	//Constructor grabs info and texture files
 	public Material(String folderPath, SqPack_IndexFile currentIndex, byte[] data) {
-	
+			
 		ByteBuffer bb = ByteBuffer.wrap(data);
 		bb.order(ByteOrder.LITTLE_ENDIAN);
 		bb.getInt();
@@ -102,7 +111,7 @@ public class Material {
 				String fileString = s.substring(s.lastIndexOf("/")+1, s.length());
 			
 				System.out.println("Adding Entry: " + s);
-				HashDatabase.addPathToDB(s, currentIndex.getIndexName());																			
+				HashDatabase.addPathToDB(s, currentIndex.getName());																			
 				
 				try {
 					byte extracted[] = currentIndex.extractFile(folderName, fileString);
@@ -138,6 +147,30 @@ public class Material {
 			colorSetData = new byte[512];
 			bb.get(colorSetData);
 		}
+		
+		//Shader links and unknowns start here		
+		bb.position(16 + (4 * (numPaths + numMaps + numColorSets)) + stringBuffer.length + colorTableSize + numUnknown);
+		
+		unknownDataSize = bb.getShort();
+		int count1 = bb.getShort();
+		int count2 = bb.getShort();
+		int count3 = bb.getShort();
+		bb.getShort();
+		bb.getShort();
+		
+		unknownData = new byte[unknownDataSize];
+		unknownList1 = new Unknown1[count1];
+		unknownList2 = new Unknown2[count2];
+		parameterList = new Parameter[count3];
+		
+		for (int i = 0; i < unknownList1.length; i++)
+			unknownList1[i] = new Unknown1(bb.getInt(), bb.getInt());
+		for (int i = 0; i < unknownList2.length; i++)
+			unknownList2[i] = new Unknown2(bb.getInt(), bb.getShort(), bb.getShort());
+		for (int i = 0; i < parameterList.length; i++)
+			parameterList[i] = new Parameter(bb.getInt(), bb.getShort(), bb.getShort(), bb.getInt());
+		
+		bb.get(unknownData);
 	}
 	
 	public void loadShader(GL3 gl)
@@ -212,5 +245,43 @@ public class Material {
 		return textureIds;
 	}
 	
+	class Unknown1{
+		final public int unknown1;
+		final public int unknown2;
+		
+		public Unknown1(int unknown1, int unknown2)
+		{
+			this.unknown1 = unknown1;
+			this.unknown2 = unknown2;
+		}
+	}
 	
+	class Unknown2{
+		final public int unknown1;
+		final public short offset;
+		final public short size;
+		
+		public Unknown2(int unknown1, short offset, short size){
+			this.unknown1 = unknown1;
+			this.offset = offset;
+			this.size = size;
+		}
+	}
+	
+	class Parameter{
+		final public int id;
+		final public short unknown1;
+		final public short unknown2;
+		final public int index;
+		
+		public Parameter(int id, short unknown1, short unknown2, int index)
+		{
+			this.id = id;
+			this.unknown1 = unknown1;
+			this.unknown2 = unknown2;
+			this.index = index;
+			
+			System.out.println(ShaderIdHelper.getName(id));
+		}
+	}
 }

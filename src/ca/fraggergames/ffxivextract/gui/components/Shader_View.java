@@ -85,7 +85,7 @@ public class Shader_View extends JPanel {
 	private void loadShader(int i) {
 		if (shader != null)
 		{			
-			processCTable(shader.getShaderType(), shader.getConstantTable());						
+			processCTable(0, shader.getShaderType(), shader.getConstantTable());						
 			hexView.setBytes(shader.getShaderBytecode());
 			
 			for (ParameterInfo pi:shader.getShaderHeader().paramInfo)
@@ -93,7 +93,7 @@ public class Shader_View extends JPanel {
 		}
 		else
 		{			
-			processCTable(shaderPack.getShaderType(i), shaderPack.getConstantTable(i));
+			processCTable(i, shaderPack.getShaderType(i), shaderPack.getConstantTable(i));
 			hexView.setBytes(shaderPack.getShaderBytecode(i));
 			
 			for (ParameterInfo pi:shaderPack.getShaderHeader(i).paramInfo)
@@ -101,14 +101,24 @@ public class Shader_View extends JPanel {
 		}
 	}
 
-	private void processCTable(int type, D3DXShader_ConstantTable ctab)
+	private void processCTable(int num, int type, D3DXShader_ConstantTable ctab)
 	{				
 		DefaultMutableTreeNode root =  new DefaultMutableTreeNode();
 		root.setUserObject(type == 0 ? "Vertex Shader":"Pixel Shader");
 		
 		for (int i = 0; i < ctab.constantInfo.length; i++)
 		{
-			DefaultMutableTreeNode node = new DefaultMutableTreeNode(ctab.constantInfo[i].Name + "["+ ctab.constantInfo[i].TypeInfo.Columns +"x"+ ctab.constantInfo[i].TypeInfo.Rows +"]" + " Index: " + ctab.constantInfo[i].RegisterIndex);
+			String paramId = "";
+			
+			if (shader == null){
+				for (int j = 0; j < shaderPack.getShaderHeader(num).paramInfo.length; j++){
+					if (shaderPack.getShaderHeader(num).paramInfo[j].parameterName.equals(ctab.constantInfo[i].Name)){
+						paramId = String.format("0x%x",shaderPack.getShaderHeader(num).paramInfo[j].id);
+						break;
+					}
+				}
+			}
+			DefaultMutableTreeNode node = new DefaultMutableTreeNode(ctab.constantInfo[i].Name + "["+ ctab.constantInfo[i].TypeInfo.Columns +"x"+ ctab.constantInfo[i].TypeInfo.Rows +"]" + " Index: " + ctab.constantInfo[i].RegisterIndex + ", ParamId: " + paramId);
 			root.add(node);
 			
 			for (int j = 0; j < ctab.constantInfo[i].TypeInfo.StructMemberInfo.length; j++)

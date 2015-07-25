@@ -380,7 +380,9 @@ public class HashDatabase {
 			Statement statement = conn.createStatement();
 			statement.setQueryTimeout(30); // set timeout to 30 sec.
 			statement.executeUpdate(String.format("insert or ignore into folders values(%d, '%s', 0, '%s', '%s')", folderHash, folder, archive, Constants.DB_VERSION_CODE));
+			statement.executeUpdate(String.format("UPDATE  folders set path='%s' where hash=%d", folder, folderHash));
 			statement.executeUpdate(String.format("insert or ignore into filenames values(%d, '%s', 0, '%s', '%s')", fileHash, filename, archive, Constants.DB_VERSION_CODE));
+			statement.executeUpdate(String.format("UPDATE  filenames set name='%s' where hash=%d", filename, fileHash));
 			statement.close();
 		} catch (SQLException e) {
 			System.err.println(e.getMessage());

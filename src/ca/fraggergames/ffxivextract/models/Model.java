@@ -58,6 +58,9 @@ public class Model {
 	
 	private boolean isVRAMLoaded = false;
 	
+	//Incase a material in a different archive is needed
+	SqPack_IndexFile bgCommonIndex;
+	
 	public Model(byte[] data)
 	{
 		this(null, null, data);
@@ -339,7 +342,7 @@ public class Model {
 				return null;
 			
 			System.out.println("Adding Entry: " + imcPath);
-			HashDatabase.addPathToDB(imcPath, currentIndex.getIndexName());			
+			HashDatabase.addPathToDB(imcPath, currentIndex.getName());			
 
 			return new IMC_File(data);
 		} catch (FileNotFoundException e) {
@@ -354,7 +357,7 @@ public class Model {
 	
 	public void loadMaterials(int variantNumber)
 	{		
-		if (modelPath == null || modelPath.contains("null") || (!modelPath.contains("chara") && !modelPath.contains("bg") && !modelPath.contains("bgcommon")))
+		if (modelPath == null || modelPath.contains("null") || (!modelPath.contains("chara") && !modelPath.contains("bg")))
 			return;
 		
 		String split[] = modelPath.split("/");		
@@ -419,14 +422,37 @@ public class Model {
 				}
 				
 				try {
+					SqPack_IndexFile indexToUse = currentIndex;
 					byte materialData[] = currentIndex.extractFile(materialFolderPath, fileString);
 					
-					if (materialData != null)
+					//If not found, check other archives
+					if (materialData == null)
 					{
-						materials[i] = new Material(materialFolderPath, currentIndex, materialData);
+						//If we need bgcommon, open it
+						if (materialFolderPath.startsWith("bgcommon"))
+						{
+							if (bgCommonIndex == null)
+							{
+								String path = currentIndex.getPath();
+								if (path.lastIndexOf("/") != -1)
+									path = path.substring(0, path.lastIndexOf("/sqpack"));
+								else
+									path = path.substring(0, path.lastIndexOf("\\sqpack"));
+								path += "/sqpack/ffxiv/010000.win32.index";
+								bgCommonIndex = new SqPack_IndexFile(path, true);
+							}
+
+							materialData = bgCommonIndex.extractFile(materialFolderPath, fileString);
+							indexToUse = bgCommonIndex;
+						}
+					}
+					
+					if (materialData != null)
+					{					
+						materials[i] = new Material(materialFolderPath, indexToUse, materialData);
 						
 						System.out.println("Adding Entry: " + materialFolderPath +"/"+ fileString);
-						HashDatabase.addPathToDB(materialFolderPath +"/"+ fileString, "040000");
+						HashDatabase.addPathToDB(materialFolderPath +"/"+ fileString, indexToUse.getName());
 						
 					}
 				} catch (FileNotFoundException e) {

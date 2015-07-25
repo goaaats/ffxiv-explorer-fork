@@ -452,7 +452,7 @@ public class SqPack_IndexFile {
 	/** Extracts the file at the specified folder with the given filename.  */
     public byte[] extractFile(String foldername, String filename) throws IOException, FileNotFoundException 
     {
-    	if (getIndexName().contains("index2"))
+    	if (getPath().contains("index2"))
     	{
     		String fullPath = foldername + "/" + filename;
     		int hash = HashDatabase.computeCRC(fullPath.getBytes(), 0, fullPath.getBytes().length);
@@ -527,10 +527,22 @@ public class SqPack_IndexFile {
 	}
 
 	/** Returns the index file's name.  */
-	public String getIndexName() {
-		return path;
+	public String getName() {
+		
+		if (path.lastIndexOf("/") == -1)
+		{
+			String frontStripped = path.substring(path.lastIndexOf("\\")+1, path.length());
+			return frontStripped.substring(0, frontStripped.indexOf("."));
+		}
+		
+		String frontStripped = path.substring(path.lastIndexOf("/")+1, path.length());
+		return frontStripped.substring(0, frontStripped.indexOf("."));
+		
 	}
 
+	public String getPath() {
+		return path;
+	}
 	public Calendar getDatTimestmap(int datNum) throws IOException
 	{
 		String pathToOpen = path;
