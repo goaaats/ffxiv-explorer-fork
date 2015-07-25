@@ -57,7 +57,7 @@ public class PathSearcher extends JFrame {
 	*/
 	
 	static String folders[] = {
-		"ui/"
+		"bgcommon/"
 	};
 	
  	public static void doPathSearch(String path) throws IOException {

@@ -1,33 +1,23 @@
 package com.fragmenterworks.ffxivextract.gui.components;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.FileOutputStream;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.util.Hashtable;
 
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 
 import com.fragmenterworks.ffxivextract.helpers.FFXIV_String;
-import com.fragmenterworks.ffxivextract.helpers.LERandomAccessFile;
 import com.fragmenterworks.ffxivextract.helpers.SparseArray;
-import com.fragmenterworks.ffxivextract.helpers.Utils;
 import com.fragmenterworks.ffxivextract.models.EXDF_File;
 import com.fragmenterworks.ffxivextract.models.EXDF_File.EXDF_Entry;
 import com.fragmenterworks.ffxivextract.models.EXHF_File.EXDF_Dataset;
 import com.fragmenterworks.ffxivextract.models.EXHF_File;
-import com.fragmenterworks.ffxivextract.models.SqPack_DatFile;
 import com.fragmenterworks.ffxivextract.models.SqPack_IndexFile;
 
 import javax.swing.JPanel;
-
-import java.awt.GridBagLayout;
-import java.awt.GridBagConstraints;
-import java.awt.Insets;
 
 import javax.swing.border.TitledBorder;
 
@@ -323,6 +313,12 @@ public class EXDF_View extends JScrollPane implements ItemListener{
 
 	//Setup UI with known data
 	private void setupUI() {
+
+		loadColumnNames(exhName);
+		
+		table.setModel(new EXDTableModel(exhFile, exdFile));
+		table.setAutoResizeMode( JTable.AUTO_RESIZE_OFF );
+		
 		lblExhName.setText(exhName);
 		lblExhNumEntries.setText(""+exhFile.getNumEntries() + ((exhFile.getNumEntries() == exhFile.getTrueNumEntries()? "": " (Page Sum: " +exhFile.getTrueNumEntries() + ")")));
 		lblExhNumLangs.setText("" + (exhFile.getLanguageTable()[0] == 0x0 ? 0 : exhFile.getNumLanguages()));
@@ -341,12 +337,8 @@ public class EXDF_View extends JScrollPane implements ItemListener{
 			cmbLanguage.setEnabled(false);
 		}
 
-		loadColumnNames(exhName);
+		cmbLanguage.setSelectedIndex(Constants.defaultLanguage > exhFile.getNumLanguages()-1 ? 0 : Constants.defaultLanguage);			
 		
-		table.setModel(new EXDTableModel(exhFile, exdFile));
-		table.setAutoResizeMode( JTable.AUTO_RESIZE_OFF );
-		
-
 	}
 	
 	//Setup UI to complain that the EXH file was not found
@@ -474,7 +466,7 @@ public class EXDF_View extends JScrollPane implements ItemListener{
 					//case 0x08:
 						return entry.getFloat(dataset.offset);
 					case 0x07: // UINT
-						return (long)entry.getInt(dataset.offset);
+						return (long)entry.getInt(dataset.offset) & 0xFFFFFFFF;
 					case 0x06: // INT 
 						return entry.getInt(dataset.offset);
 					case 0x05: // USHORT
@@ -764,6 +756,7 @@ public class EXDF_View extends JScrollPane implements ItemListener{
 		        	columnNames.put(Integer.parseInt(split[0]), split[1]);
 		        }
 		    } 
+		    br.close();
 		}
 		catch (IOException e){
 			

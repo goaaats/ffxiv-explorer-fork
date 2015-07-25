@@ -31,10 +31,12 @@ public class Constants {
 	public static final String PREF_LASTOPENED = "pref_lastopened";
 	public static final String PREF_DO_DB_UPDATE = "pref_dbupdate";
 	public static final String PREF_DAT_PATH = "pref_datpath";
+	public static final String PREF_DEFAULT_LANG = "pref_deflang";
 	
 	public static final String EXH_NAMES_PATH = "./tablenames/";
 	
 	public static String datPath = null;
+	public static int defaultLanguage = 1;
 
 	// ///DEFAULT COLORS//////
 	public static float defaultHairColor[] = { 0.2941176f, 0.2117647f,

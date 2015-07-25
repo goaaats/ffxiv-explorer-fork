@@ -244,7 +244,11 @@ public class ModelViewerFurniture extends JPanel {
 				byte[] modelData = null;
 				try {
 					
-					modelPath = String.format("bgcommon/hou/indoor/general/%04d/bgparts/fun_b0_m%04d.mdl", entries.get(selected).model, entries.get(selected).model);
+					if (entries.get(selected).modelType == ModelFurnitureEntry.TYPE_FURNITURE)
+						modelPath = String.format("bgcommon/hou/indoor/general/%04d/bgparts/fun_b0_m%04d.mdl", entries.get(selected).model, entries.get(selected).model);
+					else if (entries.get(selected).modelType == ModelFurnitureEntry.TYPE_YARDOBJECT)
+						modelPath = String.format("bgcommon/hou/outdoor/general/%04d/bgparts/gar_b0_m%04d.mdl", entries.get(selected).model, entries.get(selected).model);
+					
 					modelData = modelIndexFile.extractFile(modelPath);
 					
 					
@@ -276,12 +280,14 @@ public class ModelViewerFurniture extends JPanel {
 	{
 		SqPack_IndexFile indexFile = parent.getExdIndexFile();
 		EXHF_File exhfFileHousingFurniture = new EXHF_File(indexFile.extractFile("exd/housingfurniture.exh"));
+		EXHF_File exhfFileHousingYardObject = new EXHF_File(indexFile.extractFile("exd/housingyardobject.exh"));
 		EXHF_File exhfFileItem = new EXHF_File(indexFile.extractFile("exd/item.exh"));
-		EXHF_File exhfFileHousingCategory = new EXHF_File(indexFile.extractFile("exd/housingitemcategory.exh"));
+		EXHF_File exhfFileHousingCategory = new EXHF_File(indexFile.extractFile("exd/housingitemcategory.exh"));		
 		
 		EXDF_View view1 = new EXDF_View(indexFile, "exd/housingfurniture.exh", exhfFileHousingFurniture);
 		EXDF_View view2 = new EXDF_View(indexFile, "exd/item.exh", exhfFileItem);
-		EXDF_View view3 = new EXDF_View(indexFile, "exd/housingitemcategory.exh", exhfFileHousingCategory);		
+		EXDF_View view3 = new EXDF_View(indexFile, "exd/housingitemcategory.exh", exhfFileHousingCategory);
+		EXDF_View view4 = new EXDF_View(indexFile, "exd/housingyardobject.exh", exhfFileHousingYardObject);
 		
 		try{
 			for (int i = 0; i < view1.getTable().getRowCount(); i++){
@@ -303,7 +309,28 @@ public class ModelViewerFurniture extends JPanel {
 				
 				String furnitureTypeName = (String) view3.getTable().getValueAt(furnitureType, INDEX_FURNITURETYPE_NAME);
 				
-				entries.add(new ModelFurnitureEntry(i, name, modelNumber, furnitureTypeName));
+				entries.add(new ModelFurnitureEntry(ModelFurnitureEntry.TYPE_FURNITURE, i, name, modelNumber, furnitureTypeName));
+			}
+			for (int i = 0; i < view4.getTable().getRowCount(); i++){
+				
+				long itemId = (Long) view4.getTable().getValueAt(i, INDEX_HOUSINGFURNITURE_ITEMID);
+				int modelNumber = (Integer)view4.getTable().getValueAt(i, INDEX_HOUSINGFURNITURE_MODELNUMBER);
+				int furnitureType = (Integer)view4.getTable().getValueAt(i, INDEX_HOUSINGFURNITURE_TYPEID);			
+				
+				String name = (String) view2.getTable().getValueAt((int)itemId, INDEX_ITEM_NAME);
+				
+				if (itemId == 0)
+					name = "Unknown";
+				
+				if (name.isEmpty())
+					name = "Placeholder?";
+				
+				if (modelNumber == 0)
+					continue;
+				
+				String furnitureTypeName = (String) view3.getTable().getValueAt(furnitureType, INDEX_FURNITURETYPE_NAME);
+				
+				entries.add(new ModelFurnitureEntry(ModelFurnitureEntry.TYPE_YARDOBJECT, i, name, modelNumber, furnitureTypeName));
 			}
 		}
 		catch (Exception e)

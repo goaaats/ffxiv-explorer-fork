@@ -616,7 +616,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 		
 		if (contentType == 3)
 		{		
-			/*
+			
 			OpenGL_View view = null;
 					
 			try{
@@ -635,7 +635,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 				return;
 			}
 			
-			tabs.addTab("3D Model", view);			*/
+			tabs.addTab("3D Model", view);		
 		}
 		
 		if (data == null)
