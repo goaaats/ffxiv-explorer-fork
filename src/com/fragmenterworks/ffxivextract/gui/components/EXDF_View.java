@@ -295,7 +295,7 @@ public class EXDF_View extends JScrollPane implements ItemListener{
 					if (HashDatabase.getFileName(HashDatabase.computeCRC(formattedExdName.getBytes(), 0, formattedExdName.getBytes().length)) == null){
 						System.out.println("Adding: " + formattedExdName);
 						
-						HashDatabase.addPathToDB(exhFolder +"/"+formattedExdName, currentIndex.getIndexName());					
+						HashDatabase.addPathToDB(exhFolder +"/"+formattedExdName, currentIndex.getName());					
 					}
 					byte[] data = currentIndex.extractFile(exhFolder, formattedExdName);
 					

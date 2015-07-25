@@ -7,18 +7,16 @@ import java.nio.ByteOrder;
 
 import javax.media.opengl.GL3;
 
-import ca.fraggergames.ffxivextract.helpers.ShaderIdHelper;
-import ca.fraggergames.ffxivextract.helpers.Utils;
-import ca.fraggergames.ffxivextract.models.SqPack_IndexFile.SqPack_File;
-import ca.fraggergames.ffxivextract.models.SqPack_IndexFile.SqPack_Folder;
-import ca.fraggergames.ffxivextract.shaders.BGShader;
-import ca.fraggergames.ffxivextract.shaders.CharacterShader;
-import ca.fraggergames.ffxivextract.shaders.DefaultShader;
-import ca.fraggergames.ffxivextract.shaders.HairShader;
-import ca.fraggergames.ffxivextract.shaders.IrisShader;
-import ca.fraggergames.ffxivextract.shaders.Shader;
-import ca.fraggergames.ffxivextract.shaders.SkinShader;
-import ca.fraggergames.ffxivextract.storage.HashDatabase;
+import com.fragmenterworks.ffxivextract.helpers.ShaderIdHelper;
+import com.fragmenterworks.ffxivextract.shaders.BGShader;
+import com.fragmenterworks.ffxivextract.shaders.CharacterShader;
+import com.fragmenterworks.ffxivextract.shaders.DefaultShader;
+import com.fragmenterworks.ffxivextract.shaders.HairShader;
+import com.fragmenterworks.ffxivextract.shaders.IrisShader;
+import com.fragmenterworks.ffxivextract.shaders.Shader;
+import com.fragmenterworks.ffxivextract.shaders.SkinShader;
+import com.fragmenterworks.ffxivextract.storage.HashDatabase;
+
 
 public class Material {
 	

@@ -407,7 +407,7 @@ public class MusicSwapperWindow extends JFrame {
 				String lastLoaded = "";						
 				try {
 					//Generate DAT
-					customDatPath = edittingIndexFile.getParent() + "\\" + originalMusicFile.getIndexName().replace(".index", ".dat") + currentDatIndex;
+					customDatPath = edittingIndexFile.getParent() + "\\" + originalMusicFile.getName().replace(".index", ".dat") + currentDatIndex;
 					File datlstfile = new File(customDatPath + ".lst");
 					datlstfile.delete();
 					
@@ -879,7 +879,7 @@ public class MusicSwapperWindow extends JFrame {
 		try{
 			
 			String json = null;
-			BufferedReader br = new BufferedReader(new FileReader(edittingIndexFile.getParent() + "\\" + originalMusicFile.getIndexName().replace(".index", ".dat") + currentDatIndex + ".lst"));
+			BufferedReader br = new BufferedReader(new FileReader(edittingIndexFile.getParent() + "\\" + originalMusicFile.getName().replace(".index", ".dat") + currentDatIndex + ".lst"));
 		    try {
 		        StringBuilder sb = new StringBuilder();
 		        String line = br.readLine();

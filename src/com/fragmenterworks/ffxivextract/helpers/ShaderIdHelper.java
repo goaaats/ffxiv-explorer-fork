@@ -1,4 +1,4 @@
-package ca.fraggergames.ffxivextract.helpers;
+package com.fragmenterworks.ffxivextract.helpers;
 
 public class ShaderIdHelper {
 
