@@ -14,10 +14,13 @@ import java.util.Comparator;
 
 public class EXHF_File {	
 
+	public final static String languageCodes[] = {"", "_ja", "_en", "_de", "_fr", "_chs", "_cht", "_ko"};
+	public final static String languageNames[] = {"", "Japanese", "English", "German", "French", "Chinese - Singapore", "Chinese - Traditional", "Korean"};
+	
 	private EXDF_Dataset datasetTable[];
 	private EXDF_Page pageTable[];
+	private int langTable[];
 	private int datasetChunkSize = 0;
-	private int numLangs = 0;
 	private int numEntries = 0;
 	private int trueNumEntries = 0;
 	
@@ -55,7 +58,7 @@ public class EXHF_File {
 			datasetChunkSize = buffer.getShort();
 			int numDataSetTable = buffer.getShort();
 			int numPageTable = buffer.getShort();
-			numLangs = buffer.getShort();
+			int numLangTable = buffer.getShort();
 			buffer.getShort();
 			buffer.getShort();
 			buffer.getShort();
@@ -65,6 +68,7 @@ public class EXHF_File {
 			
 			datasetTable = new EXDF_Dataset[numDataSetTable];
 			pageTable = new EXDF_Page[numPageTable];
+			langTable = new int[numLangTable];
 			
 			//Dataset Table
 			for (int i = 0; i < numDataSetTable; i++)			
@@ -82,6 +86,13 @@ public class EXHF_File {
 			{
 				pageTable[i] = new EXDF_Page(buffer.getInt(), buffer.getInt());
 				trueNumEntries += pageTable[i].numEntries;
+			}
+			
+			//Lang Table
+			for (int i = 0; i < numLangTable; i++)
+			{
+				langTable[i] = buffer.get();
+				buffer.get();
 			}
 						
 		} 
@@ -116,11 +127,15 @@ public class EXHF_File {
 	}
 
 	public int getNumLanguages() {
-		return numLangs;
+		return langTable.length;
 	}
 
 	public EXDF_Page[] getPageTable() {
 		return pageTable;
+	}
+	
+	public int[] getLanguageTable() {
+		return langTable;
 	}
 
 	public int getTrueNumEntries(){

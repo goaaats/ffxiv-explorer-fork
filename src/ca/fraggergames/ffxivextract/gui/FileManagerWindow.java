@@ -646,7 +646,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 		}
 					
 		if (data.length >= 3 && data[0] == 'E' && data[1] == 'X' && data[2] == 'H' && data[3] == 'F')
-		{							
+		{	
 			try {
 				if (exhfComponent == null || !exhfComponent.isSame(file.getName()))				
 					exhfComponent = new EXDF_View(currentIndexFile, HashDatabase.getFolder(file.getId2()) + "/" + file.getName(), new EXHF_File(data));				
@@ -902,7 +902,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 						
 						tempView = new EXDF_View(currentIndexFile, HashDatabase.getFolder(fileTree.getSelectedFiles().get(i).getId2()) + "/" + fileTree.getSelectedFiles().get(i).getName(), file);						
 						
-						for (int l = 0; l < (tempView.getNumLangs() == 1 ? 1 : 4); l++)
+						for (int l = 0; l < (tempView.getNumLangs()); l++)
 						{
 											
 							String path = lastSaveLocation.getCanonicalPath();
@@ -918,7 +918,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 							File mkDirPath = new File(path);
 							mkDirPath.getParentFile().mkdirs();						
 													
-							tempView.saveCSV(path + (tempView.getNumLangs()==1 ? "" : "_" + EXDF_View.langs[l]) +  ".csv", l);
+							tempView.saveCSV(path + EXHF_File.languageCodes[tempView.getExhFile().getLanguageTable()[l]] +  ".csv", l);
 														
 						}
 						
@@ -935,14 +935,13 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 						//Remove the thing
 						String exhName = files.get(i).getName(); 
 						System.out.println(exhName);
-						exhName = exhName.replace("_en.exd", "");
-						exhName = exhName.replace("_ja.exd", "");
-						exhName = exhName.replace("_de.exd", "");
-						exhName = exhName.replace("_fr.exd", "");
-						exhName = exhName.replace("_chs.exd", "");
+						
+						for (int l = 0; l < EXHF_File.languageCodes.length; l++)
+							exhName = exhName.replace(String.format("%s.exd", EXHF_File.languageCodes[l]), "");
+						
 						exhName = exhName.substring(0, exhName.lastIndexOf("_")) +".exh";
 						
-						for (int l = 0; l < (tempView.getNumLangs() == 1 ? 1 : 4); l++)
+						for (int l = 0; l < (tempView.getNumLangs()); l++)
 						{	
 							String path = lastSaveLocation.getCanonicalPath();
 							
@@ -956,7 +955,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 							File mkDirPath = new File(path);
 							mkDirPath.getParentFile().mkdirs();																																	
 							
-							tempView.saveCSV(path + (tempView.getNumLangs()==1 ? "" : "_" + EXDF_View.langs[l]) + ".csv", l);
+							tempView.saveCSV(path + EXHF_File.languageCodes[tempView.getExhFile().getLanguageTable()[l]] + ".csv", l);
 						}
 						
 						continue;

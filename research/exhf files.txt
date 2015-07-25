@@ -1,5 +1,7 @@
 #### EXHF RESEARCH #### By Ioncannon
 
+Updated: 7/14/2015
+
 Current research on EXHF files
 
 !!!NOTE: FILE IS IN BIG ENDIAN FORM!!!
@@ -10,7 +12,7 @@ Current research on EXHF files
 0x006 Size of Dataset Chunk Short; How large the data set chunk will be. 
 0x008 Number of Datasets    Short; Size of Dataset Definition table; 
 0x00A Number of Pages       Short; The size of the Page table below.
-0x00C Number of EXDs??? 	Short; Seems to be the number of EXD languages?. String files are usually 0x05, while settings/data are 0x01.
+0x00C Number of Lang Codes 	Short; Size of the language table at the end of the file.
 0x00E Unknown   	   		Short;
 0x010 Unknown           	Int32; Always 0x010000.
 0x014 Number of entries		Int32; How many total entries are in this file (spanning multiple EXDFs)
@@ -24,12 +26,21 @@ Current research on EXHF files
 0x000 Page Entry            Int32; Page Entry Name. See Items Page entry names.
 0x004 Page Entry Size       Int32; Number of entries in a page. For example Item_0.exd has 500 entries... 0x1F4, with item_500.exd being the next file.  
 
-===SOMETHING HERE==== 
+===Languge Table==== (Size of Number of Lang Codes)
 
-Usually 01, 00, 02, 00, 03, 00, 04, 00, 05, 00
-Has something to do with strings?
+0x000 Language Code			Short;
+
+The language codes are:
+
+0x0 - n/a (No language)
+0x1 - ja (Japanese)
+0x2 - en (English)
+0x3 - de (German)
+0x4 - fr (French)
+0x5 - chs (Chinese - Singapore)
+0x6 - cht (Chinese - Traditional)
+0x7 - ko (Korean)
 
 -----------------------NOTES---------------------
   
 -The items.exd files span multiple pages. Start at items_0, then items__500, then items__1000, etc.
--Strings and item.exh files end with 0x100, 0x200, 0x300, 0x400, 0x500
