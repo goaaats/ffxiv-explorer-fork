@@ -48,6 +48,7 @@ import java.awt.Color;
 import java.awt.FlowLayout;
 
 import javax.swing.border.EmptyBorder;
+import java.awt.Component;
 
 public class ModelViewerItems extends JPanel {
 	
@@ -58,7 +59,9 @@ public class ModelViewerItems extends JPanel {
 	
 	ModelViewerWindow parent;
 	
-	ArrayList<ModelItemEntry> entries[] = new ArrayList[22];
+	ArrayList<ModelItemEntry> entries[] = new ArrayList[22];	
+	
+	ModelItemEntry addedItems[] = new ModelItemEntry[22];
 	
 	SparseArray<String> slots = new SparseArray<String>();
 	
@@ -71,6 +74,8 @@ public class ModelViewerItems extends JPanel {
 	JList lstItems;	
 	JComboBox cmbBodyStyle;
 	JComboBox cmbCategory;
+	JButton btnAddModels;	
+	JButton btnClearModels;
 	FPSAnimator animator;
 	
 	//Info Section
@@ -201,6 +206,7 @@ public class ModelViewerItems extends JPanel {
 		panel_4.setLayout(new BoxLayout(panel_4, BoxLayout.Y_AXIS));
 		
 		JPanel panel_5 = new JPanel();
+		panel_5.setAlignmentX(Component.LEFT_ALIGNMENT);
 		panel_5.setBorder(new EmptyBorder(2, 1, 0, 1));
 		panel_4.add(panel_5);
 		panel_5.setLayout(new BoxLayout(panel_5, BoxLayout.X_AXIS));
@@ -208,13 +214,54 @@ public class ModelViewerItems extends JPanel {
 		cmbBodyStyle = new JComboBox();
 		panel_5.add(cmbBodyStyle);
 		
+		cmbBodyStyle.addItemListener(new ItemListener() {
+			
+			@Override
+			public void itemStateChanged(ItemEvent e) {
+				if (e.getStateChange() == ItemEvent.SELECTED) {
+		          int selected = cmbBodyStyle.getSelectedIndex();		          
+		          currentBody = charIds.keyAt(selected);
+		          
+		          if (currentCategory != -1 && lstItems.getSelectedIndex() != 0)
+		        	  loadModel(-1, lstItems.getSelectedIndex());
+				}
+			}
+		});
+		
 		JPanel panel_6 = new JPanel();
+		panel_6.setAlignmentX(Component.LEFT_ALIGNMENT);
 		panel_6.setBorder(new EmptyBorder(2, 1, 2, 1));
 		panel_4.add(panel_6);
 		panel_6.setLayout(new BoxLayout(panel_6, BoxLayout.X_AXIS));
 		
 		cmbCategory = new JComboBox();
 		panel_6.add(cmbCategory);
+		
+		cmbCategory.addItemListener(new ItemListener() {
+			
+			@Override
+			public void itemStateChanged(ItemEvent e) {
+				if (e.getStateChange() == ItemEvent.SELECTED) {
+		          int selected = cmbCategory.getSelectedIndex();
+		          
+		          currentCategory = slots.keyAt(selected);
+		          
+		          ((ItemsListModel)lstItems.getModel()).refresh();
+		          lstItems.clearSelection();
+				}
+			}
+		});
+		
+		JPanel panel_7 = new JPanel();
+		panel_7.setAlignmentX(Component.LEFT_ALIGNMENT);
+		panel_4.add(panel_7);
+		panel_7.setLayout(new FlowLayout(FlowLayout.LEFT, 5, 5));
+		
+		btnAddModels = new JButton("Add Model");
+		panel_7.add(btnAddModels);
+		
+		btnClearModels = new JButton("Clear Models");
+		panel_7.add(btnClearModels);
 		
 		JScrollPane scrollPane = new JScrollPane();
 		panel.add(scrollPane, BorderLayout.CENTER);
@@ -327,37 +374,8 @@ public class ModelViewerItems extends JPanel {
         for (int i = 0; i < charIds.size(); i++)
         	cmbBodyStyle.addItem(charIds.valueAt(i));
         
-        cmbBodyStyle.addItemListener(new ItemListener() {
-			
-			@Override
-			public void itemStateChanged(ItemEvent e) {
-				if (e.getStateChange() == ItemEvent.SELECTED) {
-		          int selected = cmbBodyStyle.getSelectedIndex();		          
-		          currentBody = charIds.keyAt(selected);
-		          
-		          if (currentCategory != -1 && lstItems.getSelectedIndex() != 0)
-		        	  loadModel(-1, lstItems.getSelectedIndex());
-				}
-			}
-        });
-        
         for (int i = 0; i < slots.size(); i++)
         	cmbCategory.addItem(slots.valueAt(i));
-        
-        cmbCategory.addItemListener(new ItemListener() {
-			
-			@Override
-			public void itemStateChanged(ItemEvent e) {
-				if (e.getStateChange() == ItemEvent.SELECTED) {
-		          int selected = cmbCategory.getSelectedIndex();
-		          
-		          currentCategory = slots.keyAt(selected);
-		          
-		          ((ItemsListModel)lstItems.getModel()).refresh();
-		          lstItems.clearSelection();
-				}
-			}
-        });
         
         //Add all the slots        
         lstItems.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
@@ -375,7 +393,7 @@ public class ModelViewerItems extends JPanel {
 			}
 		});		
         
-        panel_3.add( glcanvas, BorderLayout.CENTER);
+        //panel_3.add( glcanvas, BorderLayout.CENTER);
                 
 
         ((ItemsListModel)lstItems.getModel()).refresh();
