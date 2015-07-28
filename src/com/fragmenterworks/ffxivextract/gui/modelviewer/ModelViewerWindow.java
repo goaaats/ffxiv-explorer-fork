@@ -15,7 +15,8 @@ import javax.swing.SwingWorker;
 
 import com.fragmenterworks.ffxivextract.Constants;
 import com.fragmenterworks.ffxivextract.Strings;
-
+import com.fragmenterworks.ffxivextract.gui.components.EXDF_View;
+import com.fragmenterworks.ffxivextract.models.EXHF_File;
 import com.fragmenterworks.ffxivextract.models.SqPack_IndexFile;
 
 public class ModelViewerWindow extends JFrame {
@@ -25,6 +26,8 @@ public class ModelViewerWindow extends JFrame {
 	String sqPackPath;
 	SqPack_IndexFile exdIndexFile, modelIndexFile, buildingIndexFile;
 	JTabbedPane tabbedPane;
+	EXDF_View itemView;
+	
 	public ModelViewerWindow(JFrame parent, String sqPackPath) {
 		
 		this.setTitle(Strings.DIALOG_TITLE_MODELVIEWER);
@@ -87,9 +90,13 @@ public class ModelViewerWindow extends JFrame {
 		        	dialog.nextFile(2, "..\\game\\sqpack\\ffxiv\\010000.win32.index");
 					buildingIndexFile = new SqPack_IndexFile(getSqpackPath() + "\\game\\sqpack\\ffxiv\\010000.win32.index", true);
 					dialog.nextFile(3, "Setting up lists...");
+					EXHF_File exhfFile = new EXHF_File(exdIndexFile.extractFile("exd/item.exh"));
+					itemView = new EXDF_View(exdIndexFile, "exd/item.exh", exhfFile);
+					
 					tabbedPane.add("Monsters", new ModelViewerMonsters(ModelViewerWindow.this, modelIndexFile));
-					tabbedPane.add("Items", new ModelViewerItems(ModelViewerWindow.this, modelIndexFile));
+					tabbedPane.add("Items", new ModelViewerItems(ModelViewerWindow.this, modelIndexFile, itemView));
 					tabbedPane.add("Furniture", new ModelViewerFurniture(ModelViewerWindow.this, buildingIndexFile));
+					tabbedPane.add("Character", new ModelViewerCharacter(ModelViewerWindow.this, modelIndexFile, itemView));
 				} catch (IOException e1) {
 					e1.printStackTrace();
 					getContentPane().removeAll();
