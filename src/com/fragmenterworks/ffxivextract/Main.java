@@ -248,6 +248,16 @@ public class Main {
 
 		// Arguments
 		if (args.length > 0) {
+			
+			// Info
+			if (args.length == 1)
+			{
+				if (args[0].equals("-help"))
+					System.out.println("Commands: -help, -debug, -pathsearch");
+				else if (args[0].equals("-pathsearch"))
+					System.out.println("Searches an archive for strings that start with <str>\n-pathsearch <path to index> <str>");
+			}
+			
 			// DEBUG ON
 			if (args[0].equals("-debug")) {
 				Constants.DEBUG = true;
@@ -256,44 +266,23 @@ public class Main {
 
 			// PATHSEARCH
 			if (args[0].equals("-pathsearch")) {
-				if (args.length < 2) {
+				if (args.length < 3) {
 					System.out
-							.println("No path to the FFXIV folder or to an index file was given.");
+							.println("Not enough args.");
 					return;
 				}
 
 				System.out
 						.println("Starting Path Searcher (this will take a while)");
 
-				if (args[1].endsWith(".index")) {
-					try {
-						PathSearcher.doPathSearch(args[1]);
-					} catch (IOException e) {
-						System.out
-								.println("There was an error searching. Stacktrace: ");
-						e.printStackTrace();
-					}
-				} else {
-					File file = new File(args[1].replace("\"", "")
-							+ "/game/sqpack/ffxiv/");
-					File fileList[] = file.listFiles();
-
-					for (File f : fileList) {
-						if ((!f.getName().contains("02")
-								&& !f.getName().contains("04") && !f.getName()
-								.contains("07"))
-								&& f.getName().endsWith(".index")) {
-							try {
-								PathSearcher.doPathSearch(f.getAbsolutePath());
-								System.gc();
-							} catch (IOException e) {
-								System.out
-										.println("There was an error searching. Stacktrace: ");
-								e.printStackTrace();
-							}
-						}
-					}
-				}
+				
+				try {
+					PathSearcher.doPathSearch(args[1], args[2]);
+				} catch (IOException e) {
+					System.out
+							.println("There was an error searching. Stacktrace: ");
+					e.printStackTrace();
+				}				
 
 				return;
 			}
