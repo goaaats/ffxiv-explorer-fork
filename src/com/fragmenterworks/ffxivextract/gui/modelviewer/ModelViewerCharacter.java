@@ -820,6 +820,10 @@ public class ModelViewerCharacter extends JPanel {
 				if (chosen != currentWeap1Item && chosen != -2){
 					currentWeap1Item = chosen;
 					loadEquipModel(-1, 1, currentWeap1Item);
+					if (currentWeap1Item == -1)
+						((JButton)e.getSource()).setToolTipText("NONE");
+					else
+						((JButton)e.getSource()).setToolTipText((String)itemView.getTable().getValueAt(currentWeap1Item, INDEX_ITEM_NAME));
 				}
 			}
 			else if (e.getActionCommand().equals("offhand"))
@@ -828,6 +832,10 @@ public class ModelViewerCharacter extends JPanel {
 				if (chosen != currentWeap2Item && chosen != -2){
 					currentWeap2Item = chosen;
 					loadEquipModel(-1, 2, currentWeap2Item);
+					if (currentWeap2Item == -1)
+						((JButton)e.getSource()).setToolTipText("NONE");
+					else
+						((JButton)e.getSource()).setToolTipText((String)itemView.getTable().getValueAt(currentWeap2Item, INDEX_ITEM_NAME));
 				}
 			}
 			else if (e.getActionCommand().equals("head"))
@@ -836,6 +844,10 @@ public class ModelViewerCharacter extends JPanel {
 				if (chosen != currentHeadItem && chosen != -2){
 					currentHeadItem = chosen;
 					loadEquipModel(-1, 3, currentHeadItem);
+					if (currentHeadItem == -1)
+						((JButton)e.getSource()).setToolTipText("NONE");
+					else
+						((JButton)e.getSource()).setToolTipText((String)itemView.getTable().getValueAt(currentHeadItem, INDEX_ITEM_NAME));
 				}				
 			}
 			else if (e.getActionCommand().equals("body"))
@@ -844,6 +856,10 @@ public class ModelViewerCharacter extends JPanel {
 				if (chosen != currentBodyItem && chosen != -2){
 					currentBodyItem = chosen;
 					loadEquipModel(-1, 4, currentBodyItem);
+					if (currentBodyItem == -1)
+						((JButton)e.getSource()).setToolTipText("NONE");
+					else
+						((JButton)e.getSource()).setToolTipText((String)itemView.getTable().getValueAt(currentBodyItem, INDEX_ITEM_NAME));
 				}					
 			}
 			else if (e.getActionCommand().equals("gloves"))
@@ -852,6 +868,10 @@ public class ModelViewerCharacter extends JPanel {
 				if (chosen != currentHandsItem && chosen != -2){
 					currentHandsItem = chosen;
 					loadEquipModel(-1, 5, currentHandsItem);
+					if (currentHandsItem == -1)
+						((JButton)e.getSource()).setToolTipText("NONE");
+					else
+						((JButton)e.getSource()).setToolTipText((String)itemView.getTable().getValueAt(currentHandsItem, INDEX_ITEM_NAME));
 				}				
 			}
 			else if (e.getActionCommand().equals("pants"))
@@ -860,6 +880,10 @@ public class ModelViewerCharacter extends JPanel {
 				if (chosen != currentPantsItem && chosen != -2){
 					currentPantsItem = chosen;
 					loadEquipModel(-1, 7, currentPantsItem);
+					if (currentPantsItem == -1)
+						((JButton)e.getSource()).setToolTipText("NONE");
+					else
+						((JButton)e.getSource()).setToolTipText((String)itemView.getTable().getValueAt(currentPantsItem, INDEX_ITEM_NAME));
 				}				
 			}
 			else if (e.getActionCommand().equals("shoes"))
@@ -868,6 +892,10 @@ public class ModelViewerCharacter extends JPanel {
 				if (chosen != currentFeetItem && chosen != -2){
 					currentFeetItem = chosen;
 					loadEquipModel(-1, 8, currentFeetItem);
+					if (currentFeetItem == -1)
+						((JButton)e.getSource()).setToolTipText("NONE");
+					else
+						((JButton)e.getSource()).setToolTipText((String)itemView.getTable().getValueAt(currentFeetItem, INDEX_ITEM_NAME));
 				}			
 			}
 		}
