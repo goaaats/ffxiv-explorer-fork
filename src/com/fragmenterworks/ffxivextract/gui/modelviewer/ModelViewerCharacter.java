@@ -31,6 +31,8 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
 import javax.swing.JSplitPane;
+import javax.swing.SpinnerModel;
+import javax.swing.SpinnerNumberModel;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
@@ -71,9 +73,9 @@ public class ModelViewerCharacter extends JPanel {
 	
 	//Builder	
 	private int currentBody = 0;
-	private int currentFace = 0;
+	private int currentFace = 1;
 	private int currentFaceOptions = 0;
-	private int currentHair = 0;
+	private int currentHair = 1;
 	private float[] currentHairColor = Constants.defaultHairColor;
 	private float[] currentHairHighlightsColor = Constants.defaultHairColor;
 	private float[] currentEyeColor = Constants.defaultEyeColor;
@@ -108,7 +110,6 @@ public class ModelViewerCharacter extends JPanel {
 	EXDF_View itemView;
 	
 	public ModelViewerCharacter(ModelViewerWindow parent, SqPack_IndexFile modelIndex, EXDF_View itemView) {
-		
 		this.parent = parent;
 		this.modelIndexFile = modelIndex;
 		this.itemView = itemView;
@@ -138,8 +139,7 @@ public class ModelViewerCharacter extends JPanel {
 		
 		slots.append(0, "Non-Equipment");
 		
-		//Fill the char ids
-		charIds.append(-1, "--Body Type--");		
+		//Fill the char ids	
 		charIds.append(1, "Midlander Male");
 		charIds.append(2, "Midlander  Female");
 		charIds.append(3, "Highlander Male");
@@ -152,6 +152,8 @@ public class ModelViewerCharacter extends JPanel {
 		charIds.append(10, "Roegadyn  Female");
 		charIds.append(11, "Lalafell Male");
 		charIds.append(12, "Lalafell Female");
+		charIds.append(13, "Au Ra Male");
+		charIds.append(14, "Au Ra Female");
 		
 		for (int i = 0; i < entries.length; i++)
 			entries[i] = new ArrayList<ModelItemEntry>();
@@ -202,9 +204,18 @@ public class ModelViewerCharacter extends JPanel {
 		          int selected = cmbBodyStyle.getSelectedIndex();		          
 		          currentBody = charIds.keyAt(selected);
 		          
-		          //loadBodyModel(3);
+		          loadBodyModel(-1);
 		          loadHairModel(currentHair);
 		          loadHeadModel(currentFace);
+		       		          
+	        	  loadEquipModel(-1, 1, currentWeap1Item);
+	        	  loadEquipModel(-1, 2, currentWeap2Item);
+	        	  loadEquipModel(-1, 3, currentHeadItem);
+	        	  loadEquipModel(-1, 4, currentBodyItem);
+	        	  loadEquipModel(-1, 5, currentHandsItem);
+	        	  loadEquipModel(-1, 7, currentPantsItem);
+	        	  loadEquipModel(-1, 8, currentFeetItem);
+		        	
 				}
 			}
 		});
@@ -220,7 +231,11 @@ public class ModelViewerCharacter extends JPanel {
 		JLabel lblFace = new JLabel("Face");
 		panel_4.add(lblFace);
 		
-		final JSpinner spnFace = new JSpinner();
+		SpinnerModel sm = new SpinnerNumberModel(1, 1, 9999, 1);
+		SpinnerModel sm2 = new SpinnerNumberModel(1, 0, 9999, 1);
+		
+		final JSpinner spnFace = new JSpinner();	
+		spnFace.setModel(sm);
 		spnFace.addChangeListener(new ChangeListener() {
 			
 			@Override
@@ -245,6 +260,7 @@ public class ModelViewerCharacter extends JPanel {
 		panel_7.add(lblHair);
 		
 		final JSpinner spnHair = new JSpinner();
+		spnHair.setModel(sm2);
 		spnHair.addChangeListener(new ChangeListener() {
 			
 			@Override
@@ -375,7 +391,7 @@ public class ModelViewerCharacter extends JPanel {
 		
 		JButton btnHands = new JButton("Hands");
 		panel_6.add(btnHands);
-		btnHands.setActionCommand("hands");
+		btnHands.setActionCommand("gloves");
 		btnHands.addActionListener(equipListener);
 		
 		JButton btnLRing = new JButton("L. Ring");
@@ -385,7 +401,7 @@ public class ModelViewerCharacter extends JPanel {
 		
 		JButton btnLegs = new JButton("Legs");
 		panel_6.add(btnLegs);
-		btnLegs.setActionCommand("legs");
+		btnLegs.setActionCommand("pants");
 		btnLegs.addActionListener(equipListener);
 		
 		JButton btnRRing = new JButton("R. Ring");
@@ -395,7 +411,7 @@ public class ModelViewerCharacter extends JPanel {
 		
 		JButton btnFeet = new JButton("Feet");
 		panel_6.add(btnFeet);
-		btnFeet.setActionCommand("feet");
+		btnFeet.setActionCommand("shoes");
 		btnFeet.addActionListener(equipListener);
 
 		GLProfile glProfile = GLProfile.getDefault();
@@ -526,6 +542,8 @@ public class ModelViewerCharacter extends JPanel {
 			model.loadMaterials(-1);
 			renderer.setModel(0, model);
 		}
+		else
+			renderer.setModel(0, null);
 				
 	}
 	
@@ -561,6 +579,8 @@ public class ModelViewerCharacter extends JPanel {
 			model.loadMaterials(-1);
 			renderer.setModel(2, model);
 		}
+		else
+			renderer.setModel(2, null);
 				
 	}
 	
@@ -595,6 +615,8 @@ public class ModelViewerCharacter extends JPanel {
 			model.loadMaterials(-1);
 			renderer.setModel(1, model);
 		}
+		else
+			renderer.setModel(1, null);
 				
 	}
 	
@@ -627,46 +649,52 @@ public class ModelViewerCharacter extends JPanel {
 			model.loadMaterials(-1);
 			renderer.setModel(0, model);
 		}
+		else
+			renderer.setModel(0, null);
 				
 	}
 	
 	private void loadEquipModel(int charNumberOverride, int modelSlot, int selected)
 	{
-
-		if (selected == -1)
-			return;
-		
+				
 		int slot;
 		String modelPath = null;
 		byte[] modelData = null;
 		
 		ModelItemEntry currentItem = null;
-		
-		try{
-			int i = selected;		
-			String model1Split[] = ((String)itemView.getTable().getValueAt(i, INDEX_ITEM_MODEL1)).split(",");
-			String model2Split[] = ((String)itemView.getTable().getValueAt(i, INDEX_ITEM_MODEL1)).split(",");										
-			
-			slot = (Integer) itemView.getTable().getValueAt(i, INDEX_ITEM_SLOT);
-			
-			String name = (String)itemView.getTable().getValueAt(i, INDEX_ITEM_NAME);
-			int id = Integer.parseInt(model1Split[0].trim());
-				
-			boolean isWeap = false;
-			if (slot == 0 || slot == 1 || slot == 2 || slot == 13)
-				isWeap = true;
-			
-			int model = !isWeap ? Integer.parseInt(model1Split[2].trim()) : Integer.parseInt(model1Split[1].trim());
-			int varient = !isWeap ? Integer.parseInt(model1Split[1].trim()) : Integer.parseInt(model1Split[2].trim());
-			
-			int type = slot;
-			
-			currentItem = new ModelItemEntry(name, id, model, varient, type);							
-		}
-		catch (Exception e)
+		if (selected != -1)
 		{
-			e.printStackTrace();
-			return;
+			try{
+				int i = selected;		
+				String model1Split[] = ((String)itemView.getTable().getValueAt(i, INDEX_ITEM_MODEL1)).split(",");
+				String model2Split[] = ((String)itemView.getTable().getValueAt(i, INDEX_ITEM_MODEL1)).split(",");										
+				
+				slot = (Integer) itemView.getTable().getValueAt(i, INDEX_ITEM_SLOT);
+				
+				String name = (String)itemView.getTable().getValueAt(i, INDEX_ITEM_NAME);
+				int id = Integer.parseInt(model1Split[0].trim());
+					
+				boolean isWeap = false;
+				if (slot == 0 || slot == 1 || slot == 2 || slot == 13)
+					isWeap = true;
+				
+				int model = !isWeap ? Integer.parseInt(model1Split[2].trim()) : Integer.parseInt(model1Split[1].trim());
+				int varient = !isWeap ? Integer.parseInt(model1Split[1].trim()) : Integer.parseInt(model1Split[2].trim());
+				
+				int type = slot;
+				
+				currentItem = new ModelItemEntry(name, id, model, varient, type);							
+			}
+			catch (Exception e)
+			{
+				e.printStackTrace();
+				return;
+			}
+		}
+		else //Load small clothes
+		{
+			slot = modelSlot;
+			currentItem = new ModelItemEntry("SmallClothes", 0, 0, 0, slot);
 		}
 		
 		if (currentItem == null)
@@ -693,6 +721,7 @@ public class ModelViewerCharacter extends JPanel {
 			case 5:
 				modelPath = String.format("chara/equipment/e%04d/model/c%04de%04d_glv.mdl", currentItem.id, characterNumber, currentItem.id);
 				break;
+			case 6:
 			case 7:
 				modelPath = String.format("chara/equipment/e%04d/model/c%04de%04d_dwn.mdl", currentItem.id, characterNumber, currentItem.id);
 				break;
@@ -731,6 +760,12 @@ public class ModelViewerCharacter extends JPanel {
 				break;			
 			}
 			
+			if (modelPath == null)
+			{
+				System.out.println("Error couldn't build path");
+				return;
+			}
+			
 			modelData = modelIndexFile.extractFile(modelPath);
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
@@ -760,6 +795,8 @@ public class ModelViewerCharacter extends JPanel {
 			model.loadMaterials(currentItem.varient == 0 ? 1 : currentItem.varient);
 			renderer.setModel(2+modelSlot, model);
 		}
+		else
+			renderer.setModel(2+modelSlot, null);
 				
 	}
 	
@@ -777,10 +814,61 @@ public class ModelViewerCharacter extends JPanel {
 		
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			if (e.getActionCommand().equals("body"))
+			if (e.getActionCommand().equals("main"))
 			{
-				currentBodyItem = ItemChooserDialog.showDialog(parent, itemView, 4);
-				loadEquipModel(currentBody, 4, currentBodyItem);
+				int chosen = ItemChooserDialog.showDialog(parent, itemView, 1);				
+				if (chosen != currentWeap1Item && chosen != -2){
+					currentWeap1Item = chosen;
+					loadEquipModel(-1, 1, currentWeap1Item);
+				}
+			}
+			else if (e.getActionCommand().equals("offhand"))
+			{
+				int chosen = ItemChooserDialog.showDialog(parent, itemView, 2);				
+				if (chosen != currentWeap2Item && chosen != -2){
+					currentWeap2Item = chosen;
+					loadEquipModel(-1, 2, currentWeap2Item);
+				}
+			}
+			else if (e.getActionCommand().equals("head"))
+			{
+				int chosen = ItemChooserDialog.showDialog(parent, itemView, 3);				
+				if (chosen != currentHeadItem && chosen != -2){
+					currentHeadItem = chosen;
+					loadEquipModel(-1, 3, currentHeadItem);
+				}				
+			}
+			else if (e.getActionCommand().equals("body"))
+			{
+				int chosen = ItemChooserDialog.showDialog(parent, itemView, 4);				
+				if (chosen != currentBodyItem && chosen != -2){
+					currentBodyItem = chosen;
+					loadEquipModel(-1, 4, currentBodyItem);
+				}					
+			}
+			else if (e.getActionCommand().equals("gloves"))
+			{
+				int chosen = ItemChooserDialog.showDialog(parent, itemView, 5);				
+				if (chosen != currentHandsItem && chosen != -2){
+					currentHandsItem = chosen;
+					loadEquipModel(-1, 5, currentHandsItem);
+				}				
+			}
+			else if (e.getActionCommand().equals("pants"))
+			{
+				int chosen = ItemChooserDialog.showDialog(parent, itemView, 7);				
+				if (chosen != currentPantsItem && chosen != -2){
+					currentPantsItem = chosen;
+					loadEquipModel(-1, 7, currentPantsItem);
+				}				
+			}
+			else if (e.getActionCommand().equals("shoes"))
+			{
+				int chosen = ItemChooserDialog.showDialog(parent, itemView, 8);				
+				if (chosen != currentFeetItem && chosen != -2){
+					currentFeetItem = chosen;
+					loadEquipModel(-1, 8, currentFeetItem);
+				}			
 			}
 		}
 	};

@@ -34,7 +34,7 @@ public class ItemChooserDialog extends JDialog {
 
 	private JTextField edtSearch;
 	private JList lstItems;
-	private int chosenItem;
+	private int chosenItem = -2;
 
 	ArrayList<ItemIdCombo> masterItemList = new ArrayList<ItemIdCombo>();
 	ArrayList<ItemIdCombo> filterItemList = new ArrayList<ItemIdCombo>();

@@ -590,22 +590,17 @@ public class Model {
 	    		case 3://Normal
 	    			gl.glVertexAttribPointer(shader.getAttribNormal(), components, datatype, isNormalized, size, origin);
 	    			break;
-	    		case 4://PSize
-	    			gl.glVertexAttribPointer(shader.getAttribTexCoord(), components, datatype, isNormalized, size, origin);
-	    			break;
-	    		case 5://Tex Coord
+	    		case 4://Tex Coord
 	    			gl.glVertexAttribPointer(shader.getAttribTexCoord(), components, datatype, isNormalized, size, origin);
 	    			break;
 	    		case 6://Tangent
 	    			gl.glVertexAttribPointer(shader.getAttribTangent(), components, datatype, isNormalized, size, origin);
 	    			break;
-	    		case 7://Binormal
-	    			gl.glVertexAttribPointer(shader.getAttribBiNormal(), components, datatype, isNormalized, size, origin);
-	    			break;
-	    		case 10://Color
+	    		case 7://Color
 	    			gl.glVertexAttribPointer(shader.getAttribColor(), components, datatype, isNormalized, size, origin);
 	    			break;
 	    		}
+
 	    		
 	    	}
 	    	
