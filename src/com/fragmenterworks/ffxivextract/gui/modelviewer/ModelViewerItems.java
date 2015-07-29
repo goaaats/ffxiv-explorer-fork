@@ -74,8 +74,6 @@ public class ModelViewerItems extends JPanel {
 	JList lstItems;	
 	JComboBox cmbBodyStyle;
 	JComboBox cmbCategory;
-	JButton btnAddModels;	
-	JButton btnClearModels;
 	FPSAnimator animator;
 	
 	//Info Section
@@ -94,12 +92,14 @@ public class ModelViewerItems extends JPanel {
 	private int lastX, lastY;	
 	
 	SqPack_IndexFile modelIndexFile;
+	EXDF_View itemView;
 	
-	public ModelViewerItems(ModelViewerWindow parent, SqPack_IndexFile modelIndex) {
+	public ModelViewerItems(ModelViewerWindow parent, SqPack_IndexFile modelIndex, EXDF_View itemView) {
 		
 		this.parent = parent;
 		this.modelIndexFile = modelIndex;
-				
+		this.itemView = itemView;
+		
 		//Fill the Equipment Slots
 		slots.append(1, "One-Handed Weapon");
 		slots.append(13, "Two-Handed Weapon");
@@ -257,12 +257,6 @@ public class ModelViewerItems extends JPanel {
 		panel_4.add(panel_7);
 		panel_7.setLayout(new FlowLayout(FlowLayout.LEFT, 5, 5));
 		
-		btnAddModels = new JButton("Add Model");
-		panel_7.add(btnAddModels);
-		
-		btnClearModels = new JButton("Clear Models");
-		panel_7.add(btnClearModels);
-		
 		JScrollPane scrollPane = new JScrollPane();
 		panel.add(scrollPane, BorderLayout.CENTER);
 		
@@ -393,7 +387,7 @@ public class ModelViewerItems extends JPanel {
 			}
 		});		
         
-        //panel_3.add( glcanvas, BorderLayout.CENTER);
+        panel_3.add( glcanvas, BorderLayout.CENTER);
                 
 
         ((ItemsListModel)lstItems.getModel()).refresh();
@@ -506,10 +500,8 @@ public class ModelViewerItems extends JPanel {
 	}
 	
 	private boolean loadItems() throws FileNotFoundException, IOException
-	{
-		SqPack_IndexFile indexFile = parent.getExdIndexFile();
-		EXHF_File exhfFile = new EXHF_File(indexFile.extractFile("exd/item.exh"));
-		EXDF_View view = new EXDF_View(indexFile, "exd/item.exh", exhfFile);
+	{		
+		EXDF_View view = itemView;
 		view.setLangOverride(1);
 		
 		try{
@@ -539,6 +531,7 @@ public class ModelViewerItems extends JPanel {
 		}
 		catch (Exception e)
 		{
+			e.printStackTrace();
 			return false;
 		}
 		lstItems.setModel(new ItemsListModel());

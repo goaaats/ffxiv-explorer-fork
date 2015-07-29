@@ -827,5 +827,10 @@ public class Model {
 	public void resetVRAM() {
 		isVRAMLoaded = false;
 	}
+
+	public void unload() {
+		isVRAMLoaded = false;
+		
+	}
 	
 }

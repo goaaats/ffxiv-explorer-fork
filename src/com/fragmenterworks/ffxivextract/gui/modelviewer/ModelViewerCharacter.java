@@ -1,8 +1,16 @@
 package com.fragmenterworks.ffxivextract.gui.modelviewer;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.FlowLayout;
+import java.awt.GridLayout;
+import java.awt.color.ColorSpace;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
@@ -15,42 +23,39 @@ import java.util.ArrayList;
 import javax.media.opengl.GLCapabilities;
 import javax.media.opengl.GLProfile;
 import javax.media.opengl.awt.GLCanvas;
-import javax.swing.AbstractListModel;
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JLabel;
-import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.event.ListDataListener;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
+import javax.swing.JSpinner;
+import javax.swing.JSplitPane;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.TitledBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
+import com.bric.swing.ColorPicker;
 import com.fragmenterworks.ffxivextract.Constants;
-import com.jogamp.opengl.util.FPSAnimator;
-
 import com.fragmenterworks.ffxivextract.gui.components.EXDF_View;
-import com.fragmenterworks.ffxivextract.gui.components.ModelRenderer;
+import com.fragmenterworks.ffxivextract.gui.components.ModelCharacterRenderer;
 import com.fragmenterworks.ffxivextract.gui.components.OpenGL_View;
 import com.fragmenterworks.ffxivextract.helpers.SparseArray;
-import com.fragmenterworks.ffxivextract.helpers.Utils;
 import com.fragmenterworks.ffxivextract.models.EXHF_File;
 import com.fragmenterworks.ffxivextract.models.Model;
 import com.fragmenterworks.ffxivextract.models.SqPack_IndexFile;
+import com.fragmenterworks.ffxivextract.storage.HashDatabase;
+import com.jogamp.opengl.util.FPSAnimator;
 
-import javax.swing.BoxLayout;
-import javax.swing.JComboBox;
-import javax.swing.border.TitledBorder;
-import javax.swing.UIManager;
-
-import java.awt.Color;
-import java.awt.FlowLayout;
-
-import javax.swing.border.EmptyBorder;
-import javax.swing.JSpinner;
-import javax.swing.JButton;
-
-import java.awt.Component;
+import javax.swing.border.BevelBorder;
 
 public class ModelViewerCharacter extends JPanel {
+	
+	public static final int INDEX_ITEM_NAME = 10;
+	public static final int INDEX_ITEM_MODEL1 = 29;
+	public static final int INDEX_ITEM_MODEL2 = 30;
+	public static final int INDEX_ITEM_SLOT = 28;
 	
 	ModelViewerWindow parent;
 	
@@ -73,21 +78,25 @@ public class ModelViewerCharacter extends JPanel {
 	private float[] currentHairHighlightsColor = Constants.defaultHairColor;
 	private float[] currentEyeColor = Constants.defaultEyeColor;
 	
-	private ModelItemEntry currentWeap1Item = null;
-	private ModelItemEntry currentWeap2Item = null;
-	private ModelItemEntry currentHeadItem = null;
-	private ModelItemEntry currentBodyItem = null;
-	private ModelItemEntry currentBeltItem = null;
-	private ModelItemEntry currentHandsItem = null;
-	private ModelItemEntry currentPantsItem = null;
-	private ModelItemEntry currentFeetItem = null;
-	private ModelItemEntry currentNeckItem = null;
-	private ModelItemEntry currentBracletItem = null;
-	private ModelItemEntry currentRing1Item = null;
-	private ModelItemEntry currentRing2Item = null;
+	private int currentWeap1Item = -1;
+	private int currentWeap2Item = -1;
+	private int currentHeadItem = -1;
+	private int currentBodyItem = -1;
+	private int currentBeltItem = -1;
+	private int currentHandsItem = -1;
+	private int currentPantsItem = -1;
+	private int currentFeetItem = -1;
+	private int currentNeckItem = -1;
+	private int currentBracletItem = -1;
+	private int currentRing1Item = -1;
+	private int currentRing2Item = -1;
+	
+	private Color hairColor = new Color(Constants.defaultHairColor[0], Constants.defaultHairColor[1], Constants.defaultHairColor[2], Constants.defaultHairColor[3]);
+	private Color highlightColor = new Color(Constants.defaultHighlightColor[0], Constants.defaultHighlightColor[1], Constants.defaultHighlightColor[2], Constants.defaultHighlightColor[3]);
+	private Color eyeColor = new Color(Constants.defaultEyeColor[0], Constants.defaultEyeColor[1], Constants.defaultEyeColor[2], Constants.defaultEyeColor[3]);
 	
 	//Render Stuff
-	private ModelRenderer renderer;
+	private ModelCharacterRenderer renderer;
 		
 	private boolean leftMouseDown = false;
 	private boolean rightMouseDown = false;
@@ -96,12 +105,14 @@ public class ModelViewerCharacter extends JPanel {
 	private int lastX, lastY;	
 	
 	SqPack_IndexFile modelIndexFile;
+	EXDF_View itemView;
 	
-	public ModelViewerCharacter(ModelViewerWindow parent, SqPack_IndexFile modelIndex) {
+	public ModelViewerCharacter(ModelViewerWindow parent, SqPack_IndexFile modelIndex, EXDF_View itemView) {
 		
 		this.parent = parent;
 		this.modelIndexFile = modelIndex;
-				
+		this.itemView = itemView;
+		
 		//Fill the Equipment Slots
 		slots.append(-1, "--Equipment Slot--");		
 		slots.append(1, "One-Handed Weapon");
@@ -128,7 +139,7 @@ public class ModelViewerCharacter extends JPanel {
 		slots.append(0, "Non-Equipment");
 		
 		//Fill the char ids
-		charIds.append(-1, "--Body Style--");		
+		charIds.append(-1, "--Body Type--");		
 		charIds.append(1, "Midlander Male");
 		charIds.append(2, "Midlander  Female");
 		charIds.append(3, "Highlander Male");
@@ -147,12 +158,14 @@ public class ModelViewerCharacter extends JPanel {
 		
 		setLayout(new BorderLayout(0, 0));
 		
+		JSplitPane splitPane = new JSplitPane();
+		
 		JPanel panel_1 = new JPanel();
-		add(panel_1, BorderLayout.CENTER);
+		add(splitPane, BorderLayout.CENTER);
 		panel_1.setLayout(new BorderLayout(0, 0));
 		
 		JPanel panel_2 = new JPanel();
-		panel_1.add(panel_2, BorderLayout.NORTH);
+		//panel_1.add(panel_2, BorderLayout.NORTH);
 		
 		JLabel lblInfoAndControls = new JLabel("Info and controls go here");
 		panel_2.add(lblInfoAndControls);
@@ -169,7 +182,7 @@ public class ModelViewerCharacter extends JPanel {
 		panel_9.add(scrollPane);
 		
 		JPanel panel = new JPanel();
-		scrollPane.setViewportView(panel);
+		//scrollPane.setViewportView(panel);
 		panel.setBorder(new EmptyBorder(0, 0, 0, 0));
 		panel.setLayout(new BorderLayout(0, 0));
 		
@@ -178,9 +191,25 @@ public class ModelViewerCharacter extends JPanel {
 		panel_5.setBorder(new TitledBorder(null, "Appearance", TitledBorder.LEADING, TitledBorder.TOP, null, null));
 		panel_5.setLayout(new BoxLayout(panel_5, BoxLayout.Y_AXIS));
 		
-		JComboBox cmbRace = new JComboBox();
-		cmbRace.setAlignmentX(Component.LEFT_ALIGNMENT);
-		panel_5.add(cmbRace);
+		final JComboBox cmbBodyStyle = new JComboBox();
+		cmbBodyStyle.setAlignmentX(Component.LEFT_ALIGNMENT);
+		
+		cmbBodyStyle.addItemListener(new ItemListener() {
+			
+			@Override
+			public void itemStateChanged(ItemEvent e) {
+				if (e.getStateChange() == ItemEvent.SELECTED) {
+		          int selected = cmbBodyStyle.getSelectedIndex();		          
+		          currentBody = charIds.keyAt(selected);
+		          
+		          //loadBodyModel(3);
+		          loadHairModel(currentHair);
+		          loadHeadModel(currentFace);
+				}
+			}
+		});
+		
+		panel_5.add(cmbBodyStyle);
 		
 		JPanel panel_4 = new JPanel();
 		panel_4.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -191,8 +220,20 @@ public class ModelViewerCharacter extends JPanel {
 		JLabel lblFace = new JLabel("Face");
 		panel_4.add(lblFace);
 		
-		JSpinner spnFace = new JSpinner();
+		final JSpinner spnFace = new JSpinner();
+		spnFace.addChangeListener(new ChangeListener() {
+			
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				currentFace = (Integer) spnFace.getValue();
+				loadHeadModel(currentFace);
+			}
+		});
 		panel_4.add(spnFace);
+		
+		JButton btnFaceOptions = new JButton("Face Options");
+		panel_4.add(btnFaceOptions);
+		btnFaceOptions.setAlignmentX(Component.CENTER_ALIGNMENT);
 		
 		JPanel panel_7 = new JPanel();
 		panel_7.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -203,55 +244,164 @@ public class ModelViewerCharacter extends JPanel {
 		JLabel lblHair = new JLabel("Hair ");
 		panel_7.add(lblHair);
 		
-		JSpinner spnHair = new JSpinner();
+		final JSpinner spnHair = new JSpinner();
+		spnHair.addChangeListener(new ChangeListener() {
+			
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				currentHair = (Integer) spnHair.getValue();
+				loadHairModel(currentHair);
+			}
+		});
 		panel_7.add(spnHair);
+		
+		JLabel lblColor = new JLabel("Color: ");
+		panel_7.add(lblColor);
+		
+		final JPanel btnHairColor = new JPanel();
+		btnHairColor.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null, null));
+		btnHairColor.addMouseListener(new MouseAdapter() {
+		     @Override
+		     public void mouseClicked(MouseEvent mouseEvent) {
+		         int count = mouseEvent.getClickCount();
+		         if (count == 1) {
+		        	 Color newColor = ColorPicker.showDialog(
+		        			 ModelViewerCharacter.this.parent, hairColor);
+		        	 hairColor = newColor;
+		        	 btnHairColor.setBackground(hairColor);
+		        	 renderer.setHairColor(hairColor.getColorComponents(null));
+		         }
+		     }
+		});
+		btnHairColor.setBackground(hairColor);
+		panel_7.add(btnHairColor);
+		
+		JLabel lblHighlights = new JLabel("Highlights:");
+		panel_7.add(lblHighlights);
+		
+		final JPanel btnHighlightColor = new JPanel();
+		btnHighlightColor.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null, null));
+		btnHighlightColor.addMouseListener(new MouseAdapter() {
+		     @Override
+		     public void mouseClicked(MouseEvent mouseEvent) {
+		         int count = mouseEvent.getClickCount();
+		         if (count == 1) {
+		        	 Color newColor = ColorPicker.showDialog(
+		        		     ModelViewerCharacter.this.parent, highlightColor);
+		        	 highlightColor = newColor;
+		        	 btnHighlightColor.setBackground(highlightColor);
+		        	 renderer.setHighlightColor(highlightColor.getColorComponents(null));
+		         }
+		     }
+		});
+		btnHighlightColor.setBackground(highlightColor);
+		panel_7.add(btnHighlightColor);
 		
 		JPanel panel_8 = new JPanel();
 		panel_8.setAlignmentX(Component.LEFT_ALIGNMENT);
 		panel_5.add(panel_8);
-		panel_8.setLayout(new BoxLayout(panel_8, BoxLayout.Y_AXIS));
+		panel_8.setLayout(new FlowLayout(FlowLayout.LEFT, 5, 5));
 		
-		JButton btnFaceOptions = new JButton("Face Options");
-		btnFaceOptions.setAlignmentX(Component.CENTER_ALIGNMENT);
-		panel_8.add(btnFaceOptions);
+		JLabel lblEye = new JLabel("Eye Color:");
+		panel_8.add(lblEye);
 		
-		JButton btnColorOptions = new JButton("Color Options");
-		btnColorOptions.setAlignmentX(Component.CENTER_ALIGNMENT);
-		panel_8.add(btnColorOptions);
+		final JPanel btnEyeColor = new JPanel();
+		btnEyeColor.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null, null));
+		btnEyeColor.setBackground(new Color(75, 54, 27));
+		btnEyeColor.addMouseListener(new MouseAdapter() {
+		     @Override
+		     public void mouseClicked(MouseEvent mouseEvent) {
+		         int count = mouseEvent.getClickCount();
+		         if (count == 1) {
+		        	 Color newColor = ColorPicker.showDialog(
+		        		     ModelViewerCharacter.this.parent, eyeColor);
+		        	 eyeColor = newColor;
+		        	 btnEyeColor.setBackground(eyeColor);
+		        	 renderer.setEyeColor(eyeColor.getColorComponents(null));
+		         }
+		     }
+		});
+		btnEyeColor.setBackground(eyeColor);
+		panel_8.add(btnEyeColor);
+		
+		JPanel panel_17 = new JPanel();
+		panel.add(panel_17, BorderLayout.CENTER);
+		panel_17.setLayout(new BorderLayout(0, 0));
 		
 		JPanel panel_6 = new JPanel();
-		panel.add(panel_6, BorderLayout.CENTER);
+		panel_17.add(panel_6, BorderLayout.NORTH);
 		panel_6.setBorder(new TitledBorder(null, "Equipment", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		panel_6.setLayout(new BoxLayout(panel_6, BoxLayout.Y_AXIS));
+		panel_6.setLayout(new GridLayout(7, 2, 0, 0));
 		
 		JButton btnMainhand = new JButton("Main Hand");
 		panel_6.add(btnMainhand);
+		btnMainhand.setActionCommand("main");
+		btnMainhand.addActionListener(equipListener);
 		
 		JButton btnOffhand = new JButton("Off hand");
 		panel_6.add(btnOffhand);
+		btnOffhand.setActionCommand("off");
+		btnOffhand.addActionListener(equipListener);
 		
 		JButton btnHead = new JButton("Head");
 		panel_6.add(btnHead);
+		btnHead.setActionCommand("head");
+		btnHead.addActionListener(equipListener);
+		
+		JButton btnNeck = new JButton("Neck");
+		panel_6.add(btnNeck);
+		btnNeck.setActionCommand("neck");
+		btnNeck.addActionListener(equipListener);
 		
 		JButton btnBody = new JButton("Body");
 		panel_6.add(btnBody);
+		btnBody.setActionCommand("body");
+		btnBody.addActionListener(equipListener);
+		
+		JButton btnEarring = new JButton("Earring");
+		panel_6.add(btnEarring);
+		btnEarring.setActionCommand("ear");
+		btnEarring.addActionListener(equipListener);
 		
 		JButton btnBelt = new JButton("Belt");
 		panel_6.add(btnBelt);
+		btnBelt.setActionCommand("belt");
+		btnBelt.addActionListener(equipListener);
+		
+		JButton btnWrist = new JButton("Wrist");
+		panel_6.add(btnWrist);
+		btnWrist.setActionCommand("wrist");
+		btnWrist.addActionListener(equipListener);
 		
 		JButton btnHands = new JButton("Hands");
 		panel_6.add(btnHands);
+		btnHands.setActionCommand("hands");
+		btnHands.addActionListener(equipListener);
+		
+		JButton btnLRing = new JButton("L. Ring");
+		panel_6.add(btnLRing);
+		btnLRing.setActionCommand("lring");
+		btnLRing.addActionListener(equipListener);
 		
 		JButton btnLegs = new JButton("Legs");
 		panel_6.add(btnLegs);
+		btnLegs.setActionCommand("legs");
+		btnLegs.addActionListener(equipListener);
+		
+		JButton btnRRing = new JButton("R. Ring");
+		panel_6.add(btnRRing);
+		btnRRing.setActionCommand("rring");
+		btnRRing.addActionListener(equipListener);
 		
 		JButton btnFeet = new JButton("Feet");
 		panel_6.add(btnFeet);
+		btnFeet.setActionCommand("feet");
+		btnFeet.addActionListener(equipListener);
 
 		GLProfile glProfile = GLProfile.getDefault();
 		GLCapabilities glcapabilities = new GLCapabilities( glProfile );
         final GLCanvas glcanvas = new GLCanvas( glcapabilities );
-        renderer = new ModelRenderer();
+        renderer = new ModelCharacterRenderer();
         glcanvas.addGLEventListener(renderer);
         animator = new FPSAnimator(glcanvas, 30);
         animator.start();
@@ -335,10 +485,304 @@ public class ModelViewerCharacter extends JPanel {
 			}
 		});
         
+        splitPane.setLeftComponent(panel);
+        splitPane.setRightComponent(panel_1);             
+        splitPane.setDividerLocation(220);        
         
-       // panel_3.add( glcanvas, BorderLayout.CENTER);
-                
+        panel_3.add( glcanvas, BorderLayout.CENTER);
+        
+        for (int i = 0; i < charIds.size(); i++)
+        	cmbBodyStyle.addItem(charIds.valueAt(i));        
 	}	
 	
+	private void loadBodyModel(int id)
+	{
+
+		if (id == -1){
+			renderer.setModel(0, null);
+			return;
+		}
+		
+		String modelPath = null;
+		byte[] modelData = null;
+		
+		int characterNumber = currentBody * 100+ 01; 
+		
+		try {
+			modelPath = String.format("chara/human/c%04d/obj/body/b%04d/model/c%04db%04d_top.mdl", characterNumber, id, characterNumber, id);
+			modelData = modelIndexFile.extractFile(modelPath);
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		if (modelData != null)
+		{
+			System.out.println("Adding Entry: " + modelPath);
+			HashDatabase.addPathToDB(modelPath, "040000");
+			
+			Model model = new Model(modelPath,modelIndexFile,modelData);
+			model.loadMaterials(-1);
+			renderer.setModel(0, model);
+		}
+				
+	}
+	
+	private void loadHairModel(int id)
+	{
+
+		if (id <= 0)
+		{
+			renderer.setModel(2, null);
+			return;
+		}
+		
+		String modelPath = null;
+		byte[] modelData = null;
+		
+		int characterNumber = currentBody * 100+ 01; 
+		
+		try {
+			modelPath = String.format("chara/human/c%04d/obj/hair/h%04d/model/c%04dh%04d_hir.mdl", characterNumber, id, characterNumber, id);
+			modelData = modelIndexFile.extractFile(modelPath);
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		if (modelData != null)
+		{
+			System.out.println("Adding Entry: " + modelPath);
+			HashDatabase.addPathToDB(modelPath, "040000");
+			
+			Model model = new Model(modelPath,modelIndexFile,modelData);
+			model.loadMaterials(-1);
+			renderer.setModel(2, model);
+		}
+				
+	}
+	
+	private void loadHeadModel(int id)
+	{
+
+		if (id <= 0){
+			renderer.setModel(1, null);
+			return;
+		}
+		
+		String modelPath = null;
+		byte[] modelData = null;
+		
+		int characterNumber = currentBody * 100+ 01; 
+		
+		try {
+			modelPath = String.format("chara/human/c%04d/obj/face/f%04d/model/c%04df%04d_fac.mdl", characterNumber, id, characterNumber, id);
+			modelData = modelIndexFile.extractFile(modelPath);
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		if (modelData != null)
+		{
+			System.out.println("Adding Entry: " + modelPath);
+			HashDatabase.addPathToDB(modelPath, "040000");
+			
+			Model model = new Model(modelPath,modelIndexFile,modelData);
+			model.loadMaterials(-1);
+			renderer.setModel(1, model);
+		}
+				
+	}
+	
+	private void loadTailModel(int id)
+	{
+
+		if (id == -1)
+			return;
+		
+		String modelPath = null;
+		byte[] modelData = null;
+		
+		int characterNumber = currentBody * 100+ 01; 
+		
+		try {
+			modelPath = String.format("chara/human/c%04d/obj/tail/t%04d/model/c%04dt%04d_til.mdl", characterNumber, id, characterNumber, id);
+			modelData = modelIndexFile.extractFile(modelPath);
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		if (modelData != null)
+		{
+			System.out.println("Adding Entry: " + modelPath);
+			HashDatabase.addPathToDB(modelPath, "040000");
+			
+			Model model = new Model(modelPath,modelIndexFile,modelData);
+			model.loadMaterials(-1);
+			renderer.setModel(0, model);
+		}
+				
+	}
+	
+	private void loadEquipModel(int charNumberOverride, int modelSlot, int selected)
+	{
+
+		if (selected == -1)
+			return;
+		
+		int slot;
+		String modelPath = null;
+		byte[] modelData = null;
+		
+		ModelItemEntry currentItem = null;
+		
+		try{
+			int i = selected;		
+			String model1Split[] = ((String)itemView.getTable().getValueAt(i, INDEX_ITEM_MODEL1)).split(",");
+			String model2Split[] = ((String)itemView.getTable().getValueAt(i, INDEX_ITEM_MODEL1)).split(",");										
+			
+			slot = (Integer) itemView.getTable().getValueAt(i, INDEX_ITEM_SLOT);
+			
+			String name = (String)itemView.getTable().getValueAt(i, INDEX_ITEM_NAME);
+			int id = Integer.parseInt(model1Split[0].trim());
+				
+			boolean isWeap = false;
+			if (slot == 0 || slot == 1 || slot == 2 || slot == 13)
+				isWeap = true;
+			
+			int model = !isWeap ? Integer.parseInt(model1Split[2].trim()) : Integer.parseInt(model1Split[1].trim());
+			int varient = !isWeap ? Integer.parseInt(model1Split[1].trim()) : Integer.parseInt(model1Split[2].trim());
+			
+			int type = slot;
+			
+			currentItem = new ModelItemEntry(name, id, model, varient, type);							
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			return;
+		}
+		
+		if (currentItem == null)
+			return;
+		
+		int characterNumber = ((charNumberOverride == -1 ? currentBody * 100+ 01: charNumberOverride)); 
+		
+		try {
+			
+			switch (slot)
+			{
+			case 13:
+			case 0:
+			case 1:
+			case 2:
+				modelPath = String.format("chara/weapon/w%04d/obj/body/b%04d/model/w%04db%04d.mdl", currentItem.id, currentItem.model, currentItem.id, currentItem.model);
+				break;
+			case 3:
+				modelPath = String.format("chara/equipment/e%04d/model/c%04de%04d_met.mdl", currentItem.id, characterNumber, currentItem.id);	
+				break;
+			case 4:					
+				modelPath = String.format("chara/equipment/e%04d/model/c%04de%04d_top.mdl", currentItem.id, characterNumber, currentItem.id);
+				break;
+			case 5:
+				modelPath = String.format("chara/equipment/e%04d/model/c%04de%04d_glv.mdl", currentItem.id, characterNumber, currentItem.id);
+				break;
+			case 7:
+				modelPath = String.format("chara/equipment/e%04d/model/c%04de%04d_dwn.mdl", currentItem.id, characterNumber, currentItem.id);
+				break;
+			case 8:
+				modelPath = String.format("chara/equipment/e%04d/model/c%04de%04d_sho.mdl", currentItem.id, characterNumber, currentItem.id);
+				break;	
+			case 9:
+				modelPath = String.format("chara/accessory/a%04d/model/c%04da%04d_ear.mdl", currentItem.id, characterNumber, currentItem.id);
+				break;
+			case 10:
+				modelPath = String.format("chara/accessory/a%04d/model/c%04da%04d_nek.mdl", currentItem.id, characterNumber, currentItem.id);
+				break;
+			case 11:
+				modelPath = String.format("chara/accessory/a%04d/model/c%04da%04d_wrs.mdl", currentItem.id, characterNumber, currentItem.id);
+				break;
+			case 12:
+				modelPath = String.format("chara/accessory/a%04d/model/c%04da%04d_rir.mdl", currentItem.id, characterNumber, currentItem.id);
+				break;
+			case 15:
+				modelPath = String.format("chara/equipment/e%04d/model/c%04de%04d_top.mdl", currentItem.id, characterNumber, currentItem.id);
+				break;
+			case 16:
+				modelPath = String.format("chara/equipment/e%04d/model/c%04de%04d_top.mdl", currentItem.id, characterNumber, currentItem.id);
+				break;
+			case 18:
+				modelPath = String.format("chara/equipment/e%04d/model/c%04de%04d_dwn.mdl", currentItem.id, characterNumber, currentItem.id);
+				break;
+			case 19:
+				modelPath = String.format("chara/equipment/e%04d/model/c%04de%04d_top.mdl", currentItem.id, characterNumber, currentItem.id);
+				break;
+			case 20:
+				modelPath = String.format("chara/equipment/e%04d/model/c%04de%04d_top.mdl", currentItem.id, characterNumber, currentItem.id);
+				break;
+			case 21:
+				modelPath = String.format("chara/equipment/e%04d/model/c%04de%04d_top.mdl", currentItem.id, characterNumber, currentItem.id);
+				break;			
+			}
+			
+			modelData = modelIndexFile.extractFile(modelPath);
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		if (modelData == null && (characterNumber != 101 && characterNumber != 201))
+		{
+			System.out.println(String.format("Model for charId %04d not detected, falling back to %s Hyur model.", characterNumber, currentBody % 2 == 0 ? "female" : "male"));
+			
+			if (currentBody % 2 == 0)
+				loadEquipModel(201, modelSlot, selected);
+			else
+				loadEquipModel(101, modelSlot, selected);
+			
+			
+			return;			
+		}
+		
+		if (modelData != null)
+		{
+			System.out.println("Adding Entry: " + modelPath);
+			HashDatabase.addPathToDB(modelPath, "040000");
+			
+			Model model = new Model(modelPath,modelIndexFile,modelData);
+			model.loadMaterials(currentItem.varient == 0 ? 1 : currentItem.varient);
+			renderer.setModel(2+modelSlot, model);
+		}
+				
+	}
+	
+	private int fallback(int characterCode)
+	{
+		switch (characterCode)
+		{
+			
+		}
+		
+		return 101;
+	}
+	
+	ActionListener equipListener = new ActionListener() {
+		
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			if (e.getActionCommand().equals("body"))
+			{
+				currentBodyItem = ItemChooserDialog.showDialog(parent, itemView, 4);
+				loadEquipModel(currentBody, 4, currentBodyItem);
+			}
+		}
+	};
 	
 }

@@ -59,6 +59,9 @@ public class Material {
 	//Constructor grabs info and texture files
 	public Material(String folderPath, SqPack_IndexFile currentIndex, byte[] data) {
 			
+		if (data == null)
+			return;
+		
 		ByteBuffer bb = ByteBuffer.wrap(data);
 		bb.order(ByteOrder.LITTLE_ENDIAN);
 		bb.getInt();
@@ -185,16 +188,26 @@ public class Material {
 		}
 		
 		//Load Shader
+		String shaderName = "";
+		for (int i = 0; i < stringArray.length; i++)
+		{
+			if (stringArray[i].contains(".shpk"))
+			{
+				shaderName = stringArray[i];
+				break;
+			}
+		}				
+		
 		try {
-			if (stringArray[stringArray.length-1].equals("character.shpk"))		
+			if (shaderName.equals("character.shpk"))		
 				shader = new CharacterShader(gl);
-			else if (stringArray[stringArray.length-1].equals("hair.shpk"))		
+			else if (shaderName.equals("hair.shpk"))		
 				shader = new HairShader(gl);
-			else if (stringArray[stringArray.length-1].equals("iris.shpk"))		
+			else if (shaderName.equals("iris.shpk"))		
 				shader = new IrisShader(gl);
-			else if (stringArray[stringArray.length-1].equals("skin.shpk"))		
+			else if (shaderName.equals("skin.shpk"))		
 				shader = new SkinShader(gl);
-			else if (stringArray[stringArray.length-1].equals("bg.shpk"))		
+			else if (shaderName.equals("bg.shpk"))		
 				shader = new BGShader(gl);
 			else 		
 				shader = new DefaultShader(gl);

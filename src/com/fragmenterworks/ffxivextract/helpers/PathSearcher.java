@@ -61,6 +61,11 @@ public class PathSearcher extends JFrame {
 		"bgcommon/"
 	};
 	
+	public static void doPathSearch(String path, String folder) throws IOException {
+		folders[0] = folder;
+		doPathSearch(path);
+	}
+	
  	public static void doPathSearch(String path) throws IOException {
 
 		System.out.println("Opening " + path + "....");
