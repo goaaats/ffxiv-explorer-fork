@@ -31,7 +31,9 @@ public class Shader {
 	private int blendIndexLocation;
 	private int normalLocation;
 	private int texCoordLocation;
+	private int tangentLocation;
 	private int binormalLocation;
+	
 	private int colorLocation;
 	
 	private int diffuseTexLocation;
@@ -89,7 +91,8 @@ public class Shader {
 		blendIndexLocation = gl.glGetAttribLocation(shaderProgram, "aBlendIndex");
 		normalLocation = gl.glGetAttribLocation(shaderProgram, "aNormal");
 		texCoordLocation = gl.glGetAttribLocation(shaderProgram, "aTexCoord");
-		binormalLocation = gl.glGetAttribLocation(shaderProgram, "aBiTangent");
+		tangentLocation = gl.glGetAttribLocation(shaderProgram, "aBiTangent");
+		binormalLocation = gl.glGetAttribLocation(shaderProgram, "aBiNormal");
 		colorLocation = gl.glGetAttribLocation(shaderProgram, "aColor");
 		
 		//Set Uniform Locations
@@ -230,7 +233,10 @@ public class Shader {
 	public int getAttribNormal()
 	{return normalLocation;}
 
-	public int getAttribBiTangent()
+	public int getAttribTangent()
+	{return tangentLocation;}
+	
+	public int getAttribBiNormal()
 	{return binormalLocation;}
 	
 	public int getAttribTexCoord()
@@ -242,6 +248,7 @@ public class Shader {
 		gl.glEnableVertexAttribArray(blendIndexLocation);
     	gl.glEnableVertexAttribArray(normalLocation);
     	gl.glEnableVertexAttribArray(texCoordLocation);
+    	gl.glEnableVertexAttribArray(tangentLocation);
     	gl.glEnableVertexAttribArray(binormalLocation);
     	gl.glEnableVertexAttribArray(colorLocation);	
 	}
@@ -252,6 +259,7 @@ public class Shader {
 		gl.glDisableVertexAttribArray(blendIndexLocation);
     	gl.glDisableVertexAttribArray(normalLocation);
     	gl.glDisableVertexAttribArray(texCoordLocation);
+    	gl.glDisableVertexAttribArray(tangentLocation);
     	gl.glDisableVertexAttribArray(binormalLocation);
     	gl.glDisableVertexAttribArray(colorLocation);			  
 	}
