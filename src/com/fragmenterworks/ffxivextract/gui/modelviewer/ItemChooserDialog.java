@@ -47,17 +47,8 @@ public class ItemChooserDialog extends JDialog {
 		panel.setBorder(new EmptyBorder(2, 2, 2, 0));
 		getContentPane().add(panel, BorderLayout.NORTH);
 		panel.setLayout(new BorderLayout(0, 0));
-
-		JLabel lblSearch = new JLabel("Search:");
-		panel.add(lblSearch, BorderLayout.WEST);
-
-		edtSearch = new JTextField();
-		panel.add(edtSearch, BorderLayout.CENTER);
-		edtSearch.setColumns(10);
-
-		JButton btnSearch = new JButton("Search");
-		panel.add(btnSearch, BorderLayout.EAST);
-		btnSearch.addActionListener(new ActionListener() {
+		
+		ActionListener searchListener =	new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -73,7 +64,19 @@ public class ItemChooserDialog extends JDialog {
 
 				((ItemsListModel) lstItems.getModel()).refresh();
 			}
-		});
+		};
+		
+		JLabel lblSearch = new JLabel("Search:");
+		panel.add(lblSearch, BorderLayout.WEST);
+
+		edtSearch = new JTextField();
+		panel.add(edtSearch, BorderLayout.CENTER);
+		edtSearch.setColumns(10);
+		edtSearch.addActionListener(searchListener);
+
+		JButton btnSearch = new JButton("Search");
+		panel.add(btnSearch, BorderLayout.EAST);
+		btnSearch.addActionListener(searchListener);
 
 		JScrollPane scrollPane = new JScrollPane();
 		getContentPane().add(scrollPane, BorderLayout.CENTER);

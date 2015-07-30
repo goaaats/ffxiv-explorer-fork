@@ -562,6 +562,7 @@ public class Model {
 	    		boolean isNormalized = GLHelper.isNormalized(element.datatype);
 	    		int size = 0;
 	    		
+	    		
 	    		//Set offset and size of buffer
 	    		ByteBuffer origin = mesh.vertBuffer.duplicate();	
 	    		if (element.stream == 0)	    	
@@ -698,8 +699,8 @@ public class Model {
 				
 		        //Load into VRAM
 		        gl.glBindTexture(GL3.GL_TEXTURE_2D, m.getGLTextureIds()[j]);
-				gl.glTexParameteri(GL3.GL_TEXTURE_2D, GL3.GL_TEXTURE_WRAP_S, GL3.GL_CLAMP_TO_EDGE);
-				gl.glTexParameteri(GL3.GL_TEXTURE_2D, GL3.GL_TEXTURE_WRAP_T, GL3.GL_CLAMP_TO_EDGE);
+				gl.glTexParameteri(GL3.GL_TEXTURE_2D, GL3.GL_TEXTURE_WRAP_S, GL3.GL_REPEAT);
+				gl.glTexParameteri(GL3.GL_TEXTURE_2D, GL3.GL_TEXTURE_WRAP_T, GL3.GL_REPEAT);
 				gl.glTexParameteri(GL3.GL_TEXTURE_2D, GL3.GL_TEXTURE_MIN_FILTER, j == 1 ? GL3.GL_NEAREST : GL3.GL_LINEAR);
 				gl.glTexParameteri(GL3.GL_TEXTURE_2D, GL3.GL_TEXTURE_MAG_FILTER, j == 1 ? GL3.GL_NEAREST : GL3.GL_LINEAR);
 				
