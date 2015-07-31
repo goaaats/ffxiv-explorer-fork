@@ -8,6 +8,7 @@ import com.fragmenterworks.ffxivextract.Constants;
 
 public class LoDSubModel {
 
+	final public short meshOffset;
 	final public short numMeshes;
     final public int vertTableOffset;
     final public int indexTableOffset;
@@ -16,7 +17,8 @@ public class LoDSubModel {
     
     public Mesh[] meshList;
 	
-	private LoDSubModel(short numMeshes, int vertBuffSize, int indexBuffSize, int vertOffset, int indexOffset){
+	private LoDSubModel(short meshOffset, short numMeshes, int vertBuffSize, int indexBuffSize, int vertOffset, int indexOffset){
+		this.meshOffset = meshOffset;
 		this.numMeshes = numMeshes;
 		this.vertTableOffset = vertOffset;
 		this.indexTableOffset = indexOffset;
@@ -26,7 +28,7 @@ public class LoDSubModel {
 	
 	public static LoDSubModel loadInfo(ByteBuffer bb){
 		
-		bb.getShort();
+		short meshOffset = bb.getShort();
 		short numMeshes = bb.getShort();    
 		
         bb.position(bb.position()+0x28);
@@ -41,7 +43,7 @@ public class LoDSubModel {
 	        System.out.println(String.format("Vert Table Size: %d\nIndex Table Size: %d\nVert Table Offset: %d\nIndex Table Offset: %d\n", vertBuffSize, indexBuffSize, vertOffset, indexOffset));
         }
         
-		return new LoDSubModel(numMeshes, vertBuffSize, indexBuffSize, vertOffset, indexOffset);
+		return new LoDSubModel(meshOffset, numMeshes, vertBuffSize, indexBuffSize, vertOffset, indexOffset);
 	}
 	
 	public void setMeshList(Mesh[] list)

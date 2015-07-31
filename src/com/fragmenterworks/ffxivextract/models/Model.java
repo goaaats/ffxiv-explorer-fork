@@ -39,11 +39,26 @@ public class Model {
 	private IMC_File imcFile;
 	private DX9VertexElement vertexElements[][];
 	private String stringArray[];
-	private short numAtrStrings, numBoneStrings, numMaterialStrings, numShpStrings;		
+	private short numMeshes, numAtrStrings, numBoneStrings, numMaterialStrings, numShpStrings, numParts;
+	private MeshPartHeader[] parts;		
+	
+	//From Rogueadyn's Code
+	private int unknownCount1;
+	private int unknownCount2;
+	private int unknownCount3;
+	private int unknownCount4;
+	private int unknownCount5;
+	private int unknownCount6;
+	private int unknownCount7;
+	private int unknownCount8;
 	
 	private Material materials[];
 	private LoDSubModel lodModels[] = new LoDSubModel[3];
-		
+	private MeshPartHeader partHeaders[];	
+	private BoneList boneLists[];	
+	private short[] boneIndices;
+	private BoundingBox boundingBoxes[] = new BoundingBox[4];
+	
 	private ByteBuffer boneMatrixBuffer;
 	private int numBones = -1;
 	
@@ -134,15 +149,25 @@ public class Model {
 		
 		//Counts
 		bb.getInt();
-		bb.getShort();		
+		numMeshes = bb.getShort();		
 		numAtrStrings = bb.getShort();		
-		bb.getShort();				
+		numParts = bb.getShort();				
 		numMaterialStrings = bb.getShort( );
 		numBoneStrings = bb.getShort();						
-		numShpStrings = bb.getShort();		
-		bb.getShort();
-		bb.getShort();
+		unknownCount4 = bb.getShort(); //numShpStrings?		
+		unknownCount5 =bb.getShort();
+		unknownCount6 = bb.getShort();
+		unknownCount7 = bb.getShort();
+		unknownCount8 = bb.getShort();
+		unknownCount1 = bb.getShort();
+		unknownCount2 = bb.get() & 0xFF;
+		bb.get();
+		bb.position(bb.position()+10);
+		unknownCount3 = bb.getShort();
+		bb.position(bb.position()+16);
 
+		parts = new MeshPartHeader[numParts];
+		boneLists = new BoneList[unknownCount4];
 		boneStrings = new String[numBoneStrings];
 		System.arraycopy(stringArray, numAtrStrings, boneStrings, 0, numBoneStrings);
 		
@@ -158,11 +183,7 @@ public class Model {
 		loadMaterials(1);
 		
 		//Skip Stuff
-		bb.position(bb.position()+0x4);
-		short numStructs = bb.getShort();
-		bb.position(bb.position()+0x1e);
-				
-		bb.position(bb.position()+(0x20 * numStructs));		
+		bb.position(bb.position()+(32*unknownCount1));		
 		
 		//LOD Headers		
 		if (Constants.DEBUG)
@@ -173,6 +194,7 @@ public class Model {
 				System.out.println(String.format("LoD Level %d:", i));
 			lodModels[i] = LoDSubModel.loadInfo(bb);
 		}
+		
         //Load Mesh Info
 		if (Constants.DEBUG)
 			System.out.println("-----LoD Mesh Info-----");
@@ -192,18 +214,31 @@ public class Model {
 				int vertCount = bb.getInt();
 	        	int indexCount = bb.getInt();	    	        
 	        	
-	        	short meshNum = bb.getShort();
-	        	bb.getShort();
-	        	bb.getInt();
+	        	short materialNum = bb.getShort();
+	        	short partOffset = bb.getShort();
+	        	short partCount = bb.getShort();
+	        	short boneListIndex = bb.getShort();
+	        	
+	        	if (i == 0){
+	        	System.out.println(String.format("0x%04x", partOffset));
+	        	System.out.println(partCount);
+	        	System.out.println(boneListIndex);
+	        	}
 	        	
 	        	int indexBufferOffset = bb.getInt();
-	        	int vertexBufferOffset = bb.getInt();
 	        	
-	        	bb.getInt();bb.getInt();        	
-	        		        	        	        	
-	        	int sizeInfo = bb.getInt();	        	
+	        	//Seems FFXIV already stores the offset of the aux buffer (and others). DOH! Learned from Saint Coinach...
+	        	int vertexBufferOffsets[] = new int[3];
+	        	for (int x = 0; x < vertexBufferOffsets.length; x++)
+	        		vertexBufferOffsets[x] = bb.getInt();        	
+	        		     
+	        	int vertexSizes[] = new int[3];
+	        	for (int x = 0; x < vertexSizes.length; x++)
+	        		vertexSizes[x] = bb.get() & 0xFF;	      
 	        	
-	        	meshList[j] = new Mesh(vertCount, indexCount, meshNum, vertexBufferOffset, indexBufferOffset, sizeInfo, vertElementNumber);
+	        	int numBuffers = bb.get() & 0xFF;
+	        	
+	        	meshList[j] = new Mesh(vertCount, indexCount, materialNum, vertexBufferOffsets, indexBufferOffset, vertexSizes, numBuffers, vertElementNumber);
 	        	
 	        	vertElementNumber++;
 	        	
@@ -214,13 +249,49 @@ public class Model {
 		        	System.out.println("numVerts: " + vertCount);
 		        	System.out.println("numIndex: " + indexCount);	   
 		        	
-		        	System.out.println("vertOffset: " + vertexBufferOffset);
+		        	System.out.println("vertOffset: " + vertexBufferOffsets[0]);
 		        	System.out.println("indexOffset: " + indexBufferOffset);
 	        	}
 	        	
 			}
-		}     
+		}
         
+		//New stuff added from SaintCoinach
+		
+		bb.position(bb.position()+(numAtrStrings*4));
+		
+		bb.position(bb.position()+(unknownCount2 * 20));//Skip this data
+		
+		for (int i = 0; i < numParts; i++)
+			parts[i] = new MeshPartHeader(bb);			
+		
+		bb.position(bb.position()+(unknownCount3 * 12));//Skip this data
+		
+		bb.position(bb.position()+(numMaterialStrings*4));
+		bb.position(bb.position()+(numBoneStrings*4));
+		
+		for (int i = 0; i < unknownCount4; i++)
+			boneLists[i] = new BoneList(bb);
+		
+		bb.position(bb.position()+(unknownCount5 * 16));//Skip this data
+		bb.position(bb.position()+(unknownCount6 * 12));//Skip this data
+		bb.position(bb.position()+(unknownCount7 * 4));//Skip this data
+				
+		int boneIndexSize = bb.getInt();
+		boneIndices = new short[boneIndexSize/2];
+		for (int i = 0; i < boneIndices.length; i++)
+		boneIndices[i] = bb.getShort();
+				
+		//Skip padding
+		int paddingToSkip = bb.get();
+		bb.position(bb.position() + paddingToSkip);
+		
+		//Read in bounding boxes
+		for (int i = 0; i < boundingBoxes.length; i ++)
+			boundingBoxes[i] = new BoundingBox(bb);
+		
+		
+		//Load in the meshes from the mesh info
         for (int i = 0; i < lodModels.length; i++) {
         	lodModels[i].loadMeshes(bb);
         }
@@ -539,8 +610,7 @@ public class Model {
 	    	HavokNative.getBonesWithNames(boneMatrixBuffer, boneStrings);
 		}
 		
-		for (int i = 0; i < getNumMesh(currentLoD); i++){
-	    	
+		for (int i = 0; i < getNumMesh(currentLoD); i++){	    	
 			
 	    	Mesh mesh = getMeshes(currentLoD)[i];
 	    	Material material = getMaterial(mesh.materialNumber);		    	
@@ -550,7 +620,6 @@ public class Model {
 
 	    	if (numBones != -1)
 	    		boneMatrixBuffer.position(0);
-	    	mesh.vertBuffer.position(0);
 	    	mesh.indexBuffer.position(0);	    	
 	    	
 	    	for (int e = 0; e < vertexElements[mesh.getVertexElementIndex()].length; e++)
@@ -560,22 +629,13 @@ public class Model {
 	    		int components = GLHelper.getComponents(element.datatype);
 	    		int datatype = GLHelper.getDatatype(element.datatype);	    
 	    		boolean isNormalized = GLHelper.isNormalized(element.datatype);
-	    		int size = 0;
-	    		
-	    		
+	    			    		
 	    		//Set offset and size of buffer
-	    		ByteBuffer origin = mesh.vertBuffer.duplicate();	
-	    		if (element.stream == 0)	    	
-	    		{
-	    			origin.position(element.offset);
-	    			size = mesh.vertexSize;
-	    		}
-	    		else	    
-	    		{
-	    			origin.position(mesh.numVerts*mesh.vertexSize + element.offset);
-	    			size = mesh.auxVertexSize;
-	    		}
-	    		
+	    		ByteBuffer origin = mesh.vertBuffers[element.stream].duplicate();		    			
+    			origin.position(element.offset);
+    			int size = mesh.vertexSizes[element.stream];
+    			
+	    			    		
 	    		//Set Pointer
 	    		switch (element.usage)
 	    		{

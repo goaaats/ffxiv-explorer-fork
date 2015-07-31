@@ -91,12 +91,12 @@ public class WavefrontObjectWriter {
 	private static void writeVerts(DX9VertexElement vertElement, Mesh mesh, BufferedWriter out) throws IOException {
 		out.write("#Verts\r\n");
 		
-		ByteBuffer vertBuffer = mesh.vertBuffer;
+		ByteBuffer vertBuffer = mesh.vertBuffers[vertElement.stream];
 		vertBuffer.order(ByteOrder.LITTLE_ENDIAN);
 		
 		for (int i = 0; i < mesh.numVerts; i++)
 		{			
-			vertBuffer.position((i*mesh.vertexSize) + vertElement.offset);
+			vertBuffer.position((i*mesh.vertexSizes[vertElement.stream]) + vertElement.offset);
 		
 			if (vertElement.datatype == 13 || vertElement.datatype == 14)
 				out.write(String.format("v %f %f %f \r\n", Utils.convertHalfToFloat(vertBuffer.getShort()), Utils.convertHalfToFloat(vertBuffer.getShort()), Utils.convertHalfToFloat(vertBuffer.getShort())));			
@@ -110,12 +110,12 @@ public class WavefrontObjectWriter {
 	private static void writeNormals(DX9VertexElement normalElement, Mesh mesh, BufferedWriter out) throws IOException {
 		out.write("#Normals\r\n");
 		
-		ByteBuffer vertBuffer = mesh.vertBuffer;
+		ByteBuffer vertBuffer = mesh.vertBuffers[normalElement.stream];
 		vertBuffer.order(ByteOrder.LITTLE_ENDIAN);
 		
 		for (int i = 0; i < mesh.numVerts; i++)
 		{
-			vertBuffer.position((mesh.numVerts*mesh.vertexSize) + (i*mesh.auxVertexSize) + normalElement.offset);		    		
+			vertBuffer.position((i*mesh.vertexSizes[normalElement.stream]) + normalElement.offset);		    		
 			out.write(String.format("vn %f %f %f \r\n", Utils.convertHalfToFloat(vertBuffer.getShort()), Utils.convertHalfToFloat(vertBuffer.getShort()), Utils.convertHalfToFloat(vertBuffer.getShort())));
 		}		
 		
@@ -125,12 +125,12 @@ public class WavefrontObjectWriter {
 	private static void writeTexCoords(DX9VertexElement texCoordElement, Mesh mesh, BufferedWriter out) throws IOException {
 		out.write("#Tex Coords\r\n");
 		
-		ByteBuffer vertBuffer = mesh.vertBuffer;
+		ByteBuffer vertBuffer = mesh.vertBuffers[texCoordElement.stream];
 		vertBuffer.order(ByteOrder.LITTLE_ENDIAN);
 		
 		for (int i = 0; i < mesh.numVerts; i++)
 		{
-			vertBuffer.position((mesh.numVerts*mesh.vertexSize) + (i*mesh.auxVertexSize) + texCoordElement.offset);
+			vertBuffer.position((i*mesh.vertexSizes[texCoordElement.stream]) + texCoordElement.offset);
 			out.write(String.format("vt %f %f \r\n", Utils.convertHalfToFloat(vertBuffer.getShort()), Utils.convertHalfToFloat(vertBuffer.getShort())*-1));
 		}		
 		
