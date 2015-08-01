@@ -364,6 +364,7 @@ public class Model {
 		        catch (UnsatisfiedLinkError e)
 		        { 
 		        	numBones = -1;
+		        	e.printStackTrace();
 		        	return;
 		        }
 		        
@@ -603,18 +604,18 @@ public class Model {
 			} catch (IOException e1) {
 				e1.printStackTrace();
 			}
-		
-
-		if (numBones != -1){
-	    	boneMatrixBuffer.position(0);
-	    	HavokNative.getBonesWithNames(boneMatrixBuffer, boneStrings);
-		}
+				
 		
 		for (int i = 0; i < getNumMesh(currentLoD); i++){	    	
 			
 	    	Mesh mesh = getMeshes(currentLoD)[i];
 	    	Material material = getMaterial(mesh.materialNumber);		    	
 	    	Shader shader = material == null || !material.isShaderReady() ? defaultShader : material.getShader();
+	    
+	    	if (numBones != -1){
+		    	boneMatrixBuffer.position(0);
+		    	HavokNative.getBonesWithNames(boneMatrixBuffer, boneStrings, boneLists[i].boneList, boneLists[i].boneCount);
+			}
 	    	
 	    	gl.glUseProgram(shader.getShaderProgramID());
 
@@ -709,10 +710,15 @@ public class Model {
 		
 		 //Advance Animation		
 	    if (numBones != -1)
-	    {
-	    	HavokNative.stepAnimation(animSpeed);
+	    {	    	
 	    	HavokNative.debugRenderBones();
 	    }
+	}
+	
+	public void stepAnimation()
+	{
+		if (numBones != -1)
+			HavokNative.stepAnimation(animSpeed);
 	}
 
 	public void loadToVRAM(GL3bc gl) {

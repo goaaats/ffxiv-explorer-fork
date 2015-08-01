@@ -221,6 +221,8 @@ public class ModelRenderer implements GLEventListener{
 	    gl.glDrawArrays(GL3.GL_TRIANGLES, 0, 6);
 	    gl.glDisableVertexAttribArray(fxaaShader.getAttribPosition());
 	    
+	    for (Model model : models)
+	    	model.stepAnimation();
 	}
 
 	@Override

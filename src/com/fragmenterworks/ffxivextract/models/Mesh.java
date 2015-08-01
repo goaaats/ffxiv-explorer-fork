@@ -52,7 +52,7 @@ public class Mesh{
 	    	vertBuffers[i].put(bbTemp);
 		}
 		//Index Table
-		bb.position(lodIndexOffset);		
+		bb.position(lodIndexOffset + (indexOffset*2));		
 		bbTemp = bb.duplicate ();    	
     	bbTemp.limit (bbTemp.position() + (2 * numIndex));
     	indexBuffer.put (bbTemp);

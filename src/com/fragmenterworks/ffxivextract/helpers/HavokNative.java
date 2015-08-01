@@ -14,7 +14,7 @@ public class HavokNative {
 	static public native void stepAnimation(float deltaTime); //Steps the animation
 	static public native int getNumBones(); //Get's the number of bones in the skeleton
 	static public native void getBones(ByteBuffer buffer); //Fills a buffer with all the bone transform matrices
-	static public native boolean getBonesWithNames(ByteBuffer buffer, String[] boneNames); //Fills a buffer with all the bone transform matrices based on a bone name list
+	static public native boolean getBonesWithNames(ByteBuffer buffer, String[] boneNames, short[] boneIndices, int numIndices); //Fills a buffer with all the bone transform matrices based on a bone name list
 	static public native void debugRenderBones(); //Steps the Visual Debugger
 	
 	public static void initHavokNativ()
