@@ -48,7 +48,7 @@ public class Mesh{
 		for (int i = 0; i < numBuffers; i++){
 	    	bb.position(lodVertexOffset + vertexBufferOffsets[i]);	
 	    	bbTemp = bb.duplicate();
-	    	bbTemp.limit (bbTemp.position() + (vertexSizes[i] * numVerts));
+	    	bbTemp.limit (bbTemp.position() + ((vertexSizes[i] * numVerts)));
 	    	vertBuffers[i].put(bbTemp);
 		}
 		//Index Table
