@@ -12,6 +12,7 @@ import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLEventListener;
 import javax.media.opengl.glu.GLU;
 
+import com.fragmenterworks.ffxivextract.helpers.HavokNative;
 import com.fragmenterworks.ffxivextract.helpers.Matrix;
 import com.fragmenterworks.ffxivextract.models.Model;
 import com.fragmenterworks.ffxivextract.shaders.BlendShader;
@@ -226,7 +227,8 @@ public class ModelRenderer implements GLEventListener{
 	}
 
 	@Override
-	public void dispose(GLAutoDrawable drawable) {
+	public void dispose(GLAutoDrawable drawable) {	
+		HavokNative.endHavok();
 	}
 
 	@Override

@@ -269,8 +269,9 @@ public class OpenGL_View extends JPanel {
         panel_6.add(lblAnimationSpeed);
         
         sldSpeed = new JSlider();
-        sldSpeed.setMinimum(1);
-        sldSpeed.setValue(60);
+        sldSpeed.setMinimum(0);
+        sldSpeed.setMaximum(100);
+        sldSpeed.setValue(100);
         panel_6.add(sldSpeed);
         
         sldSpeed.addChangeListener(new ChangeListener() {
@@ -278,7 +279,7 @@ public class OpenGL_View extends JPanel {
 			@Override
 			public void stateChanged(ChangeEvent e) {
 				
-	            int speed = (int)sldSpeed.getValue();
+	            float speed = (float)sldSpeed.getValue()/100.0f;
 	            
 	            if (model != null)
 	            	model.setAnimationSpeed(speed);

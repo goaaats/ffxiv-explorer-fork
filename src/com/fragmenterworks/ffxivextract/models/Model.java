@@ -680,8 +680,7 @@ public class Model {
 	    	//Upload Bone Matrix	    	
 	    	if (numBones != -1)
 	    	{	
-	    		shader.setBoneMatrix(gl, numBones, boneMatrixBuffer);
-	    		
+	    		shader.setBoneMatrix(gl, numBones, boneMatrixBuffer);	    		
 	    	}
 	    	
 	    	//Draw	    	
@@ -713,12 +712,23 @@ public class Model {
 	    {	    	
 	    	HavokNative.debugRenderBones();
 	    }
-	}
+	}	
+	
+	double currentTime = (double)System.currentTimeMillis()/1000.0f;
 	
 	public void stepAnimation()
 	{
+		float timestep = 1.0f/300.0f;
 		if (numBones != -1)
-			HavokNative.stepAnimation(animSpeed);
+		{ 										
+			double newTime = (double)System.currentTimeMillis()/1000.0f;
+			
+			while ((double)System.currentTimeMillis()/1000.0f < newTime + timestep);			
+			newTime += timestep;			
+			
+			HavokNative.stepAnimation((float)(newTime - currentTime));
+			currentTime = newTime;
+		}
 	}
 
 	public void loadToVRAM(GL3bc gl) {
@@ -877,8 +887,9 @@ public class Model {
 				
 	}
 
-	public void setAnimationSpeed(int speed) {
-		animSpeed = 1/(float)speed;
+	public void setAnimationSpeed(float speed) {
+		animSpeed = speed;
+		HavokNative.setPlaybackSpeed(speed);
 	}
 	
 	public boolean isVRAMLoaded()
