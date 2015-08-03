@@ -18,6 +18,9 @@ import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
+import javax.swing.JSpinner;
+import javax.swing.SpinnerModel;
+import javax.swing.SpinnerNumberModel;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -27,13 +30,17 @@ import com.fragmenterworks.ffxivextract.models.Model;
 
 import com.fragmenterworks.ffxivextract.Constants;
 import com.jogamp.opengl.util.FPSAnimator;
+import java.awt.Dimension;
+import javax.swing.JSeparator;
+import javax.swing.SwingConstants;
 
 public class OpenGL_View extends JPanel {
 
 	//UI
 	JLabel lblVertices, lblIndices, lblMeshes;
 	JComboBox cmbLodChooser, cmbVariantChooser, cmbAnimation;
-	JSlider sldSpeed;
+	JSpinner spnSpeed;
+	JSlider sldFrame;
 	
 	FPSAnimator animator;
 	ModelRenderer renderer;
@@ -238,18 +245,26 @@ public class OpenGL_View extends JPanel {
         	add(panel_6, BorderLayout.SOUTH);
         panel_6.setLayout(new FlowLayout(FlowLayout.LEFT, 5, 5));
         
-        JLabel lblAnimation = new JLabel("Animation: ");
+        JLabel lblAnimation = new JLabel("Animation");
         panel_6.add(lblAnimation);
         
         cmbAnimation = new JComboBox();
         cmbAnimation.setLightWeightPopupEnabled(false);
         panel_6.add(cmbAnimation);
         
+        int idleAnimIndex = 0;
         for (int i = 0; i < model.getNumAnimations(); i++)
-        	cmbAnimation.addItem(model.getAnimationName(i));
+        {
+        	String animName = model.getAnimationName(i);        	
+        	cmbAnimation.addItem(animName);
+        	if (animName.contains("id0"))
+				idleAnimIndex = i;
+        }             
         
         if (model.getNumAnimations() == 0)
         	cmbAnimation.addItem("No Animations Detected");
+        else
+        	cmbAnimation.setSelectedIndex(idleAnimIndex);
         
         cmbAnimation.addItemListener(new ItemListener() {
 			
@@ -258,28 +273,64 @@ public class OpenGL_View extends JPanel {
 				if (e.getStateChange() == ItemEvent.SELECTED) {
 			          if (!((String)e.getItem()).equals("No Animations Detected"))
 			          {
-			        	  if (model != null)
+			        	  if (model != null){
 			        		  model.setCurrentAnimation(cmbAnimation.getSelectedIndex());
+			        		  float speed = (float)((Integer)spnSpeed.getValue())/100.0f;
+			        		  model.setAnimationSpeed(speed);
+			        		  int frames = model.getNumAnimationFrames(cmbAnimation.getSelectedIndex());
+			        		  if (frames == -1)
+			        			  frames = 0;
+			        		  sldFrame.setMaximum(frames);
+			        	  }			        		  
 			          }
 			    }
 			}
 		});
         
-        JLabel lblAnimationSpeed = new JLabel("Animation Speed: ");
+        if (model.getNumAnimations() != 0)
+        	model.setCurrentAnimation(cmbAnimation.getSelectedIndex());
+        
+        JSeparator separator_1 = new JSeparator();
+        separator_1.setPreferredSize(new Dimension(1, 16));
+        separator_1.setOrientation(SwingConstants.VERTICAL);
+        panel_6.add(separator_1);
+        
+        JLabel lblAnimationSpeed = new JLabel("Speed");
         panel_6.add(lblAnimationSpeed);
         
-        sldSpeed = new JSlider();
-        sldSpeed.setMinimum(0);
-        sldSpeed.setMaximum(100);
-        sldSpeed.setValue(100);
-        panel_6.add(sldSpeed);
+        spnSpeed = new JSpinner();
+        spnSpeed.setPreferredSize(new Dimension(50, 23));
+        SpinnerModel sm = new SpinnerNumberModel(100, 0, 300, 1);
+        spnSpeed.setModel(sm);
+        panel_6.add(spnSpeed);
         
-        sldSpeed.addChangeListener(new ChangeListener() {
+        JLabel label = new JLabel("% ");
+        panel_6.add(label);
+        
+        JSeparator separator = new JSeparator();
+        separator.setOrientation(SwingConstants.VERTICAL);
+        separator.setPreferredSize(new Dimension(1, 16));
+        panel_6.add(separator);
+        
+        JLabel lblNewLabel = new JLabel("Frame");
+        panel_6.add(lblNewLabel);
+        
+        sldFrame = new JSlider();
+        sldFrame.setSnapToTicks(true);
+        sldFrame.setMinorTickSpacing(5);
+        sldFrame.setMajorTickSpacing(10);
+        sldFrame.setPaintTicks(true);
+        sldFrame.setValue(0);
+        sldFrame.setMinimum(0);    
+        sldFrame.setMaximum(model.getNumAnimationFrames(cmbAnimation.getSelectedIndex()));
+        panel_6.add(sldFrame);        
+        
+        spnSpeed.addChangeListener(new ChangeListener() {
 			
 			@Override
 			public void stateChanged(ChangeEvent e) {
 				
-	            float speed = (float)sldSpeed.getValue()/100.0f;
+	            float speed = (float)((Integer)spnSpeed.getValue())/100.0f;
 	            
 	            if (model != null)
 	            	model.setAnimationSpeed(speed);

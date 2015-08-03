@@ -318,6 +318,12 @@ public class Model {
         		skeletonPath = String.format("chara/human/%s/skeleton/%s/%s/skl_%s%s.sklb", modelPathSplit[2], modelPathSplit[4], modelPathSplit[5], modelPathSplit[2], modelPathSplit[5]);
         		animationPath = String.format("chara/human/%s/animation/%s/resident/face.pap", modelPathSplit[2], modelPathSplit[5]);
         	}  
+        	else if (modelPathSplit[1].equals("equipment"))
+        	{
+        		skeletonPath = "chara/human/c0101/skeleton/base/b0001/skl_c0101b0001.sklb";
+        		animationPath = "chara/human/c0101/animation/a0001/bt_2ax_emp/ws/bt_2ax_emp/ws_s03.pap";
+        		//animationPath = "chara/human/c1101/animation/a0001/bt_common/emote/panic.pap";
+        	}
         	        		       
         	if (skeletonPath == null || animationPath == null)
         	{
@@ -904,6 +910,13 @@ public class Model {
 	public void unload() {
 		isVRAMLoaded = false;
 		
+	}
+
+	public int getNumAnimationFrames(int animationNumber) {		
+		if (numBones != -1)
+			return HavokNative.getNumAnimationFrames(animationNumber);
+		else
+			return -1;
 	}
 	
 }
