@@ -231,7 +231,7 @@ public class ModelViewerCharacter extends JPanel {
 		JLabel lblFace = new JLabel("Face");
 		panel_4.add(lblFace);
 		
-		SpinnerModel sm = new SpinnerNumberModel(1, 1, 9999, 1);
+		SpinnerModel sm = new SpinnerNumberModel(1, 0, 9999, 1);
 		SpinnerModel sm2 = new SpinnerNumberModel(1, 0, 9999, 1);
 		
 		final JSpinner spnFace = new JSpinner();	
@@ -347,7 +347,7 @@ public class ModelViewerCharacter extends JPanel {
 		JPanel panel_6 = new JPanel();
 		panel_17.add(panel_6, BorderLayout.NORTH);
 		panel_6.setBorder(new TitledBorder(null, "Equipment", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		panel_6.setLayout(new GridLayout(7, 2, 0, 0));
+		panel_6.setLayout(new GridLayout(6, 2, 0, 0));
 		
 		JButton btnMainhand = new JButton("Main Hand");
 		panel_6.add(btnMainhand);
@@ -378,41 +378,38 @@ public class ModelViewerCharacter extends JPanel {
 		panel_6.add(btnEarring);
 		btnEarring.setActionCommand("ear");
 		btnEarring.addActionListener(equipListener);
-		
-		JButton btnBelt = new JButton("Belt");
-		panel_6.add(btnBelt);
-		btnBelt.setActionCommand("belt");
-		btnBelt.addActionListener(equipListener);
+
+		JButton btnHands = new JButton("Hands");
+		panel_6.add(btnHands);
+		btnHands.setActionCommand("gloves");
+		btnHands.addActionListener(equipListener);
 		
 		JButton btnWrist = new JButton("Wrist");
 		panel_6.add(btnWrist);
 		btnWrist.setActionCommand("wrist");
 		btnWrist.addActionListener(equipListener);
 		
-		JButton btnHands = new JButton("Hands");
-		panel_6.add(btnHands);
-		btnHands.setActionCommand("gloves");
-		btnHands.addActionListener(equipListener);
+
+		JButton btnLegs = new JButton("Legs");
+		panel_6.add(btnLegs);
+		btnLegs.setActionCommand("pants");
+		btnLegs.addActionListener(equipListener);
 		
 		JButton btnLRing = new JButton("L. Ring");
 		panel_6.add(btnLRing);
 		btnLRing.setActionCommand("lring");
 		btnLRing.addActionListener(equipListener);
 		
-		JButton btnLegs = new JButton("Legs");
-		panel_6.add(btnLegs);
-		btnLegs.setActionCommand("pants");
-		btnLegs.addActionListener(equipListener);
-		
+
+		JButton btnFeet = new JButton("Feet");
+		panel_6.add(btnFeet);
+		btnFeet.setActionCommand("shoes");
+		btnFeet.addActionListener(equipListener);
 		JButton btnRRing = new JButton("R. Ring");
 		panel_6.add(btnRRing);
 		btnRRing.setActionCommand("rring");
 		btnRRing.addActionListener(equipListener);
 		
-		JButton btnFeet = new JButton("Feet");
-		panel_6.add(btnFeet);
-		btnFeet.setActionCommand("shoes");
-		btnFeet.addActionListener(equipListener);
 
 		GLProfile glProfile = GLProfile.getDefault();
 		GLCapabilities glcapabilities = new GLCapabilities( glProfile );
@@ -777,11 +774,8 @@ public class ModelViewerCharacter extends JPanel {
 		{
 			System.out.println(String.format("Model for charId %04d not detected, falling back to %s Hyur model.", characterNumber, currentBody % 2 == 0 ? "female" : "male"));
 			
-			if (currentBody % 2 == 0)
-				loadEquipModel(201, modelSlot, selected);
-			else
-				loadEquipModel(101, modelSlot, selected);
-			
+			loadEquipModel(fallback(characterNumber), modelSlot, selected);
+						
 			
 			return;			
 		}
@@ -804,10 +798,15 @@ public class ModelViewerCharacter extends JPanel {
 	{
 		switch (characterCode)
 		{
-			
+		case 1201:
+			return 1101;
+		default:
+				if (currentBody % 2 == 0)
+					return 201;
+				else
+					return 101;
 		}
 		
-		return 101;
 	}
 	
 	ActionListener equipListener = new ActionListener() {
