@@ -16,8 +16,6 @@ import com.fragmenterworks.ffxivextract.helpers.ImageDecoding.ImageDecodingExcep
 import com.fragmenterworks.ffxivextract.helpers.GLHelper;
 import com.fragmenterworks.ffxivextract.helpers.HavokNative;
 import com.fragmenterworks.ffxivextract.helpers.Utils;
-import com.fragmenterworks.ffxivextract.models.SqPack_IndexFile.SqPack_File;
-import com.fragmenterworks.ffxivextract.models.SqPack_IndexFile.SqPack_Folder;
 import com.fragmenterworks.ffxivextract.models.directx.DX9VertexElement;
 import com.fragmenterworks.ffxivextract.shaders.DefaultShader;
 import com.fragmenterworks.ffxivextract.shaders.HairShader;
@@ -40,7 +38,7 @@ public class Model {
 	private DX9VertexElement vertexElements[][];
 	private String stringArray[];
 	private short numMeshes, numAtrStrings, numBoneStrings, numMaterialStrings, numShpStrings, numParts;
-	private MeshPartHeader[] parts;		
+	private MeshPart[] meshPartTable;		
 	
 	//From Rogueadyn's Code
 	private int unknownCount1;
@@ -54,7 +52,6 @@ public class Model {
 	
 	private Material materials[];
 	private LoDSubModel lodModels[] = new LoDSubModel[3];
-	private MeshPartHeader partHeaders[];	
 	private BoneList boneLists[];	
 	private short[] boneIndices;
 	private BoundingBox boundingBoxes[] = new BoundingBox[4];
@@ -67,7 +64,6 @@ public class Model {
 	//Skeleton/Animation
 	private SKLB_File skelFile;
 	private PAP_File animFile;
-	private float animSpeed = 1f/60f;
 	
 	private SimpleShader simpleShader;
 	
@@ -166,7 +162,7 @@ public class Model {
 		unknownCount3 = bb.getShort();
 		bb.position(bb.position()+16);
 
-		parts = new MeshPartHeader[numParts];
+		meshPartTable = new MeshPart[numParts];
 		boneLists = new BoneList[unknownCount4];
 		boneStrings = new String[numBoneStrings];
 		System.arraycopy(stringArray, numAtrStrings, boneStrings, 0, numBoneStrings);
@@ -209,51 +205,11 @@ public class Model {
 			for (int j = 0; j < lodModels[i].numMeshes; j++)
 			{		
 				if (Constants.DEBUG)
-					System.out.println(String.format("Mesh %d:", j));
-				
-				int vertCount = bb.getInt();
-	        	int indexCount = bb.getInt();	    	        
-	        	
-	        	short materialNum = bb.getShort();
-	        	short partOffset = bb.getShort();
-	        	short partCount = bb.getShort();
-	        	short boneListIndex = bb.getShort();
-	        	
-	        	if (i == 0){
-	        	System.out.println(String.format("0x%04x", partOffset));
-	        	System.out.println(partCount);
-	        	System.out.println(boneListIndex);
-	        	}
-	        	
-	        	int indexBufferOffset = bb.getInt();
-	        	
-	        	//Seems FFXIV already stores the offset of the aux buffer (and others). DOH! Learned from Saint Coinach...
-	        	int vertexBufferOffsets[] = new int[3];
-	        	for (int x = 0; x < vertexBufferOffsets.length; x++)
-	        		vertexBufferOffsets[x] = bb.getInt();        	
-	        		     
-	        	int vertexSizes[] = new int[3];
-	        	for (int x = 0; x < vertexSizes.length; x++)
-	        		vertexSizes[x] = bb.get() & 0xFF;	      
-	        	
-	        	int numBuffers = bb.get() & 0xFF;
-	        	
-	        	meshList[j] = new Mesh(vertCount, indexCount, materialNum, vertexBufferOffsets, indexBufferOffset, vertexSizes, numBuffers, vertElementNumber);
-	        	
-	        	vertElementNumber++;
-	        	
-	        	lodModels[i].setMeshList(meshList);
-	        	
-	        	if (Constants.DEBUG)
-	        	{
-		        	System.out.println("numVerts: " + vertCount);
-		        	System.out.println("numIndex: " + indexCount);	   
-		        	
-		        	System.out.println("vertOffset: " + vertexBufferOffsets[0]);
-		        	System.out.println("indexOffset: " + indexBufferOffset);
-	        	}
-	        	
+					System.out.println(String.format("Mesh %d:", j));				
+	        	meshList[j] = new Mesh(bb, vertElementNumber);	        	
+	        	vertElementNumber++;	        		        			       
 			}
+			lodModels[i].setMeshList(meshList);
 		}
         
 		//New stuff added from SaintCoinach
@@ -263,7 +219,7 @@ public class Model {
 		bb.position(bb.position()+(unknownCount2 * 20));//Skip this data
 		
 		for (int i = 0; i < numParts; i++)
-			parts[i] = new MeshPartHeader(bb);			
+			meshPartTable[i] = new MeshPart(bb);			
 		
 		bb.position(bb.position()+(unknownCount3 * 12));//Skip this data
 		
@@ -620,80 +576,85 @@ public class Model {
 	    
 	    	if (numBones != -1){
 		    	boneMatrixBuffer.position(0);
-		    	HavokNative.getBonesWithNames(boneMatrixBuffer, boneStrings, boneLists[i].boneList, boneLists[i].boneCount);
+		    	HavokNative.getBonesWithNames(boneMatrixBuffer, boneStrings, boneLists[mesh.boneListIndex].boneList, boneLists[mesh.boneListIndex].boneCount);
 			}
 	    	
 	    	gl.glUseProgram(shader.getShaderProgramID());
-
+	    	
 	    	if (numBones != -1)
-	    		boneMatrixBuffer.position(0);
-	    	mesh.indexBuffer.position(0);	    	
+	    		boneMatrixBuffer.position(0);	    	
 	    	
-	    	for (int e = 0; e < vertexElements[mesh.getVertexElementIndex()].length; e++)
-	    	{
-	    		DX9VertexElement element = vertexElements[mesh.getVertexElementIndex()][e];
+	    	for (int partNum = 0; partNum < mesh.partCount; partNum++)
+	    	{		  
+	    		int fullMask = 0;
+	    		for (int m = 0; m < numAtrStrings; m++)
+	    			fullMask |= (meshPartTable[mesh.partOffset+partNum].attributes << m);
 	    		
-	    		int components = GLHelper.getComponents(element.datatype);
-	    		int datatype = GLHelper.getDatatype(element.datatype);	    
-	    		boolean isNormalized = GLHelper.isNormalized(element.datatype);
-	    			    		
-	    		//Set offset and size of buffer
-	    		ByteBuffer origin = mesh.vertBuffers[element.stream].duplicate();		    			
-    			origin.position(element.offset);
-    			int size = mesh.vertexSizes[element.stream];
-    			
-	    			    		
-	    		//Set Pointer
-	    		switch (element.usage)
-	    		{
-	    		case 0://Position
-	    			gl.glVertexAttribPointer(shader.getAttribPosition(), components, datatype, isNormalized, size, origin);
-	    			break;
-	    		case 1://Blend Weights	    
-	    			gl.glVertexAttribIPointer(shader.getAttribBlendWeight(), components, datatype, size, origin);
-	    			break;
-	    		case 2://Blend Indices
-	    			gl.glVertexAttribIPointer(shader.getAttribBlendIndex(), components, datatype, size, origin);
-	    			break;
-	    		case 3://Normal
-	    			gl.glVertexAttribPointer(shader.getAttribNormal(), components, datatype, isNormalized, size, origin);
-	    			break;
-	    		case 4://Tex Coord
-	    			gl.glVertexAttribPointer(shader.getAttribTexCoord(), components, datatype, isNormalized, size, origin);
-	    			break;
-	    		case 6://Tangent
-	    			gl.glVertexAttribPointer(shader.getAttribTangent(), components, datatype, isNormalized, size, origin);
-	    			break;
-	    		case 7://Color
-	    			gl.glVertexAttribPointer(shader.getAttribColor(), components, datatype, isNormalized, size, origin);
-	    			break;
-	    		}
-
-	    		
-	    	}
-	    	
-	    	shader.setTextures(gl, material);
-	    	shader.setMatrix(gl, modelMatrix, viewMatrix, projMatrix);
-	    	boolean f = shader.isGlowPass(gl, isGlow);
-	    	if (isGlow && !f)
-	    		return;
+		    	for (int e = 0; e < vertexElements[mesh.getVertexElementIndex()].length; e++)
+		    	{
+		    		DX9VertexElement element = vertexElements[mesh.getVertexElementIndex()][e];
+		    		
+		    		int components = GLHelper.getComponents(element.datatype);
+		    		int datatype = GLHelper.getDatatype(element.datatype);	    
+		    		boolean isNormalized = GLHelper.isNormalized(element.datatype);
+		    			    		
+		    		//Set offset and size of buffer
+		    		ByteBuffer origin = mesh.vertBuffers[element.stream].duplicate();		    			
+					origin.position(element.offset);
+					int size = mesh.vertexSizes[element.stream];
+					
+		    			    		
+		    		//Set Pointer
+		    		switch (element.usage)
+		    		{
+		    		case 0://Position
+		    			gl.glVertexAttribPointer(shader.getAttribPosition(), components, datatype, isNormalized, size, origin);
+		    			break;
+		    		case 1://Blend Weights	    
+		    			gl.glVertexAttribIPointer(shader.getAttribBlendWeight(), components, datatype, size, origin);
+		    			break;
+		    		case 2://Blend Indices
+		    			gl.glVertexAttribIPointer(shader.getAttribBlendIndex(), components, datatype, size, origin);
+		    			break;
+		    		case 3://Normal
+		    			gl.glVertexAttribPointer(shader.getAttribNormal(), components, datatype, isNormalized, size, origin);
+		    			break;
+		    		case 4://Tex Coord
+		    			gl.glVertexAttribPointer(shader.getAttribTexCoord(), components, datatype, isNormalized, size, origin);
+		    			break;
+		    		case 6://Tangent
+		    			gl.glVertexAttribPointer(shader.getAttribTangent(), components, datatype, isNormalized, size, origin);
+		    			break;
+		    		case 7://Color
+		    			gl.glVertexAttribPointer(shader.getAttribColor(), components, datatype, isNormalized, size, origin);
+		    			break;
+		    		}
+				    		
+		    	}
 		    	
-	    	if (shader instanceof HairShader)
-	    		((HairShader)shader).setHairColor(gl, Constants.defaultHairColor, Constants.defaultHighlightColor);
-	    	else if (shader instanceof IrisShader)
-	    		((IrisShader)shader).setEyeColor(gl, Constants.defaultEyeColor);		    	
-	    		    	
-	    	//Upload Bone Matrix	    	
-	    	if (numBones != -1)
-	    	{	
-	    		shader.setBoneMatrix(gl, numBones, boneMatrixBuffer);	    		
+		    	shader.setTextures(gl, material);
+		    	shader.setMatrix(gl, modelMatrix, viewMatrix, projMatrix);
+		    	boolean f = shader.isGlowPass(gl, isGlow);
+		    	if (isGlow && !f)
+		    		return;
+			    	
+		    	if (shader instanceof HairShader)
+		    		((HairShader)shader).setHairColor(gl, Constants.defaultHairColor, Constants.defaultHighlightColor);
+		    	else if (shader instanceof IrisShader)
+		    		((IrisShader)shader).setEyeColor(gl, Constants.defaultEyeColor);		    	
+		    		    	
+		    	//Upload Bone Matrix	    	
+		    	if (numBones != -1)
+		    	{	
+		    		shader.setBoneMatrix(gl, numBones, boneMatrixBuffer);	    		
+		    	}	    
+		    	
+		    	//Draw	    			    	
+		    	mesh.indexBuffer.position((meshPartTable[mesh.partOffset+partNum].indexOffset*2) - (mesh.indexBufferOffset*2));
+		    	shader.enableAttribs(gl);
+		    	gl.glDrawElements(GL3.GL_TRIANGLES, meshPartTable[mesh.partOffset+partNum].indexCount , GL3.GL_UNSIGNED_SHORT, mesh.indexBuffer);
+			    shader.disableAttribs(gl);		
 	    	}
-	    	
-	    	//Draw	    	
-	    	shader.enableAttribs(gl);
-		    gl.glDrawElements(GL3.GL_TRIANGLES, mesh.numIndex, GL3.GL_UNSIGNED_SHORT, mesh.indexBuffer);		 		    
-		    shader.disableAttribs(gl);			  		    		   
-
 		    //Draw Skeleton
 		    /*
 		    gl.glDisable(GL3.GL_DEPTH_TEST);
@@ -894,7 +855,6 @@ public class Model {
 	}
 
 	public void setAnimationSpeed(float speed) {
-		animSpeed = speed;
 		HavokNative.setPlaybackSpeed(speed);
 	}
 	

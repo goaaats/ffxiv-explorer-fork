@@ -4,7 +4,7 @@ import java.nio.ByteBuffer;
 
 //Based off of Rogueadyn's finds
 
-public class MeshPartHeader {
+public class MeshPart {
 	
 	final public int indexOffset;
 	final public int indexCount;
@@ -12,7 +12,7 @@ public class MeshPartHeader {
 	final public short boneReferenceOffset; 
 	final public short boneReferenceCount; 
 	
-    public MeshPartHeader(ByteBuffer bb)
+    public MeshPart(ByteBuffer bb)
     {
     	indexOffset = bb.getInt();
     	indexCount = bb.getInt();
