@@ -367,8 +367,9 @@ public class ModelViewerMonsters extends JPanel {
 							demihuman.setModel(EquipableRender.TOP, modelIndexFile, "chara/demihuman/d1024/obj/equipment/e0001/model/d1024e0001_met.mdl", 0);		
 							break;
 						case 1025: //											
-							//demihuman.setModel(EquipableRender.MET, modelIndexFile, "chara/demihuman/d1024/obj/equipment/e0001/model/d1024e0001_met.mdl", 0);
-							demihuman.setModel(EquipableRender.TOP, modelIndexFile, "chara/demihuman/d1025/obj/equipment/e0001/model/d1025e0001_met.mdl", 0);							
+							demihuman.setModel(EquipableRender.MET, modelIndexFile, "chara/demihuman/d1025/obj/equipment/e0001/model/d1025e0001_met.mdl", 0);
+							demihuman.setModel(EquipableRender.TOP, modelIndexFile, "chara/demihuman/d1025/obj/equipment/e0001/model/d1025e0001_top.mdl", 0);
+							demihuman.setModel(EquipableRender.DWN, modelIndexFile, "chara/demihuman/d1025/obj/equipment/e0001/model/d1025e0001_dwn.mdl", 0);
 							break;
 						}		
 												
