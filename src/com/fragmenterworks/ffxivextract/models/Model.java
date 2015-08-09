@@ -68,6 +68,7 @@ public class Model {
 	private SimpleShader simpleShader;
 	
 	private boolean isVRAMLoaded = false;
+	private boolean isMarkedForDelete = false;
 	
 	//Incase a material in a different archive is needed
 	SqPack_IndexFile bgCommonIndex;
@@ -867,9 +868,11 @@ public class Model {
 		isVRAMLoaded = false;
 	}
 
-	public void unload() {
-		isVRAMLoaded = false;
-		
+	public void unload(GL3 gl) {		
+		for (int i = 0; i < materials.length; i++)
+		{			
+			gl.glDeleteTextures(5, materials[i].textureIds, 0);
+		}
 	}
 
 	public int getNumAnimationFrames(int animationNumber) {		

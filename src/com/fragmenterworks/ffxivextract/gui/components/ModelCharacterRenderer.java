@@ -25,6 +25,7 @@ import com.jogamp.common.nio.Buffers;
 public class ModelCharacterRenderer implements GLEventListener{
 
 	private Model models[] = new Model[3+13]; //0: Body, 1: Head, 2: Hair, 3+:Equip
+	private ArrayList<Model> modelsToUnload = new ArrayList<Model>();	
 	
 	private float zoom = -7;
 	private float panX = 0;
@@ -68,7 +69,7 @@ public class ModelCharacterRenderer implements GLEventListener{
 	{
 		for (int i = 0; i < models.length; i++)
 		{
-			models[i].unload();
+			modelsToUnload.add(models[i]);
 			models[i] = null;
 		}
 	}
@@ -76,7 +77,7 @@ public class ModelCharacterRenderer implements GLEventListener{
 	public void setModel(int i, Model model)
 	{
 		if (models[i] != null)		
-			models[i].unload();
+			modelsToUnload.add(models[i]);
 		
 		models[i] = model;
 		
@@ -87,7 +88,7 @@ public class ModelCharacterRenderer implements GLEventListener{
 	public void resetMaterial() {
 		
 		for (Model m : models)
-			m.unload();		
+			m.resetVRAM();
 	}
 
 	public void zoom(int notches) {
@@ -131,6 +132,14 @@ public class ModelCharacterRenderer implements GLEventListener{
 			if (!model.isVRAMLoaded())
 				model.loadToVRAM(gl);
 		}
+		
+		for (Model model : modelsToUnload)
+		{
+				model.unload(gl);
+				System.out.println("Model unloaded");
+		}
+		
+		modelsToUnload.clear();
 
 	    gl.glClearColor(0.3f,0.3f,0.3f,1.0f);
 	    gl.glClear(GL3.GL_COLOR_BUFFER_BIT | GL3.GL_DEPTH_BUFFER_BIT); 		  

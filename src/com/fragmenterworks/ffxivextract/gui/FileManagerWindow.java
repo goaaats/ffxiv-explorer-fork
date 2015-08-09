@@ -63,6 +63,8 @@ import com.fragmenterworks.ffxivextract.gui.components.Path_to_Hash_Window;
 import com.fragmenterworks.ffxivextract.gui.components.Shader_View;
 import com.fragmenterworks.ffxivextract.gui.components.Sound_View;
 import com.fragmenterworks.ffxivextract.gui.modelviewer.ModelViewerWindow;
+import com.fragmenterworks.ffxivextract.gui.outfitter.Outfitter;
+import com.fragmenterworks.ffxivextract.gui.outfitter.OutfitterWindow;
 import com.fragmenterworks.ffxivextract.helpers.HavokNative;
 import com.fragmenterworks.ffxivextract.helpers.LERandomAccessFile;
 import com.fragmenterworks.ffxivextract.helpers.LuaDec;
@@ -372,6 +374,22 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 				//modelviewer.setLocationRelativeTo(FileManagerWindow.this);
 				modelviewer.beginLoad();
 			}
+			else if (event.getActionCommand().equals("outfitter"))
+			{				
+				if (Constants.datPath == null || Constants.datPath.isEmpty() || !new File(Constants.datPath).exists())
+				{
+					JOptionPane.showMessageDialog(
+			                FileManagerWindow.this,
+			                "You have not set a valid FFXIV path. Please set it first in Settings under the Options menu.",
+			                "FFXIV Path Not Set",
+			                JOptionPane.ERROR_MESSAGE);					
+					return;
+				}
+				
+				OutfitterWindow outfitter = new OutfitterWindow(FileManagerWindow.this, Constants.datPath);
+				//modelviewer.setLocationRelativeTo(FileManagerWindow.this);
+				outfitter.beginLoad();
+			}
 			else if (event.getActionCommand().equals("musicswapper"))
 			{
 				MusicSwapperWindow swapper = new MusicSwapperWindow();
@@ -460,6 +478,10 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 		dataviewer_modelViewer.setActionCommand("modelviewer");
 		dataviewer_modelViewer.addActionListener(menuHandler);
 		
+		JMenuItem dataviewer_outfitter = new JMenuItem(Strings.MENUITEM_OUTFITTER);		
+		dataviewer_outfitter.setActionCommand("outfitter");
+		dataviewer_outfitter.addActionListener(menuHandler);
+		
 		JMenuItem tools_musicswapper = new JMenuItem(Strings.MENUITEM_MUSICSWAPPER);
 		tools_musicswapper.setActionCommand("musicswapper");
 		tools_musicswapper.addActionListener(menuHandler);
@@ -502,6 +524,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 		search.add(search_searchAgain);
 		
 		dataviewers.add(dataviewer_modelViewer);
+		dataviewers.add(dataviewer_outfitter);
 		
 		tools.add(tools_musicswapper);
 		tools.add(tools_macroEditor);

@@ -1,4 +1,4 @@
-package com.fragmenterworks.ffxivextract.gui.modelviewer;
+package com.fragmenterworks.ffxivextract.gui.outfitter;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -43,6 +43,9 @@ import com.fragmenterworks.ffxivextract.Constants;
 import com.fragmenterworks.ffxivextract.gui.components.EXDF_View;
 import com.fragmenterworks.ffxivextract.gui.components.ModelCharacterRenderer;
 import com.fragmenterworks.ffxivextract.gui.components.OpenGL_View;
+import com.fragmenterworks.ffxivextract.gui.modelviewer.ItemChooserDialog;
+import com.fragmenterworks.ffxivextract.gui.modelviewer.ModelItemEntry;
+import com.fragmenterworks.ffxivextract.gui.modelviewer.ModelViewerWindow;
 import com.fragmenterworks.ffxivextract.helpers.SparseArray;
 import com.fragmenterworks.ffxivextract.models.EXHF_File;
 import com.fragmenterworks.ffxivextract.models.Model;
@@ -52,7 +55,7 @@ import com.jogamp.opengl.util.FPSAnimator;
 
 import javax.swing.border.BevelBorder;
 
-public class ModelViewerCharacter extends JPanel {
+public class Outfitter extends JPanel {
 	
 	public static final int INDEX_ITEM_NAME = 10;
 	public static final int INDEX_ITEM_MODEL1 = 29;
@@ -109,7 +112,7 @@ public class ModelViewerCharacter extends JPanel {
 	SqPack_IndexFile modelIndexFile;
 	EXDF_View itemView;
 	
-	public ModelViewerCharacter(ModelViewerWindow parent, SqPack_IndexFile modelIndex, EXDF_View itemView) {
+	public Outfitter(SqPack_IndexFile modelIndex, EXDF_View itemView) {
 		this.parent = parent;
 		this.modelIndexFile = modelIndex;
 		this.itemView = itemView;
@@ -287,7 +290,7 @@ public class ModelViewerCharacter extends JPanel {
 		         int count = mouseEvent.getClickCount();
 		         if (count == 1) {
 		        	 Color newColor = ColorPicker.showDialog(
-		        			 ModelViewerCharacter.this.parent, hairColor);
+		        			 Outfitter.this.parent, hairColor);
 		        	 hairColor = newColor;
 		        	 btnHairColor.setBackground(hairColor);
 		        	 renderer.setHairColor(hairColor.getColorComponents(null));
@@ -308,7 +311,7 @@ public class ModelViewerCharacter extends JPanel {
 		         int count = mouseEvent.getClickCount();
 		         if (count == 1) {
 		        	 Color newColor = ColorPicker.showDialog(
-		        		     ModelViewerCharacter.this.parent, highlightColor);
+		        		     Outfitter.this.parent, highlightColor);
 		        	 highlightColor = newColor;
 		        	 btnHighlightColor.setBackground(highlightColor);
 		        	 renderer.setHighlightColor(highlightColor.getColorComponents(null));
@@ -335,7 +338,7 @@ public class ModelViewerCharacter extends JPanel {
 		         int count = mouseEvent.getClickCount();
 		         if (count == 1) {
 		        	 Color newColor = ColorPicker.showDialog(
-		        		     ModelViewerCharacter.this.parent, eyeColor);
+		        		     Outfitter.this.parent, eyeColor);
 		        	 eyeColor = newColor;
 		        	 btnEyeColor.setBackground(eyeColor);
 		        	 renderer.setEyeColor(eyeColor.getColorComponents(null));

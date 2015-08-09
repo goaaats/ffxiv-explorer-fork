@@ -10,6 +10,7 @@ public class Strings {
 	public static final String DIALOG_TITLE_MUSICSWAPPER = "Music Swap Tool";
 	public static final String DIALOG_TITLE_SCDCONVERTER = "OGG to SCD Converter";
 	public static final String DIALOG_TITLE_MODELVIEWER = "Model Viewer";
+	public static final String DIALOG_TITLE_OUTFITTER = "Outfitter (Experimental)";
 	public static final String DIALOG_TITLE_SEARCH = "Search";
 	public static final String DIALOG_TITLE_SETTINGS = "Settings";
 	public static final String DIALOG_TITLE_ERROR = "Error";
@@ -66,6 +67,7 @@ public class Strings {
 	public static final String MENUITEM_SEARCH = "Search";
 	public static final String MENUITEM_SEARCHAGAIN = "Search Again";
 	public static final String MENUITEM_MODELVIEWER = "Model Viewer";
+	public static final String MENUITEM_OUTFITTER = "Outfitter (Experimental)";
 	public static final String MENUITEM_MUSICSWAPPER = "Music Swapper";
 	public static final String MENUITEM_HASHCALC = "Path -> Hash Calculator";
 	public static final String MENUITEM_MACROEDITOR = "Macro Editor";

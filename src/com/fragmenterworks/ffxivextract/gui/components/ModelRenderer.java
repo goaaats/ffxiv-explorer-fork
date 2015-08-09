@@ -26,6 +26,7 @@ import com.jogamp.common.nio.Buffers;
 public class ModelRenderer implements GLEventListener{
 
 	private ArrayList<Model> models;
+	private ArrayList<Model> modelsToUnload = new ArrayList<Model>();
 	private float zoom = -7;
 	private float panX = 0;
 	private float panY = 0;
@@ -73,12 +74,15 @@ public class ModelRenderer implements GLEventListener{
 
 	public void clear()
 	{
+		for (int i = 0; i < models.size(); i++)		
+			modelsToUnload.add(models.get(i));					
+		
 		models.clear();
 	}
 	
 	public void setModel(Model model)
 	{
-		models.clear();
+		clear();
 		models.add(model);
 		model.resetVRAM();
 	}
@@ -88,7 +92,7 @@ public class ModelRenderer implements GLEventListener{
 		for (Model m : modelList)
 			m.resetVRAM();
 		
-		models.clear();
+		clear();
 		models.addAll(modelList);
 		
 	}
@@ -142,8 +146,14 @@ public class ModelRenderer implements GLEventListener{
 		for (Model model : models)
 		{
 			if (!model.isVRAMLoaded())
-				model.loadToVRAM(gl);
+				model.loadToVRAM(gl);			
 		}
+		
+		for (Model model : modelsToUnload)
+		{
+				model.unload(gl);
+		}
+		modelsToUnload.clear();
 
 	    gl.glClearColor(0.3f,0.3f,0.3f,1.0f);
 	    gl.glClear(GL3.GL_COLOR_BUFFER_BIT | GL3.GL_DEPTH_BUFFER_BIT); 		  
