@@ -14,8 +14,9 @@ import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 
 import com.fragmenterworks.ffxivextract.storage.HashDatabase;
-
+import com.mysql.jdbc.Connection;
 import com.fragmenterworks.ffxivextract.gui.FileManagerWindow;
+import com.fragmenterworks.ffxivextract.gui.components.EXDF_View;
 import com.fragmenterworks.ffxivextract.gui.components.Update_Dialog;
 import com.fragmenterworks.ffxivextract.helpers.DatBuilder;
 import com.fragmenterworks.ffxivextract.helpers.HavokNative;
@@ -23,6 +24,8 @@ import com.fragmenterworks.ffxivextract.helpers.LERandomAccessFile;
 import com.fragmenterworks.ffxivextract.helpers.PathSearcher;
 import com.fragmenterworks.ffxivextract.helpers.VersionUpdater;
 import com.fragmenterworks.ffxivextract.helpers.VersionUpdater.VersionCheckObject;
+import com.fragmenterworks.ffxivextract.models.EXHF_File;
+import com.fragmenterworks.ffxivextract.models.SqPack_IndexFile;
 import com.fragmenterworks.ffxivextract.models.SqPack_IndexFile.SqPack_Folder;
 
 public class Main {
@@ -52,9 +55,57 @@ public class Main {
 		} catch (ClassNotFoundException e1) {
 			e1.printStackTrace();
 		}
+		/*
+		HashDatabase.beginConnection();
+		try {
+			HashDatabase.globalConnection.setAutoCommit(false);
+		} catch (SQLException e2) {
+			// TODO Auto-generated catch block
+			e2.printStackTrace();
+		}
+		for (int j = 180; j <= 180; j++){
+			
+			
+			if (j >= 120 && j <= 127)
+				continue;
+			if (j >= 150)
+				continue;						
+			
+			for (int i = 0; i <= 999; i++)
+			{
+				
+				HashDatabase.addPathToDB(String.format("ui/icon/%03d000/en/%03d%03d.tex", j, j, i), "060000", HashDatabase.globalConnection);
+				HashDatabase.addPathToDB(String.format("ui/icon/%03d000/de/%03d%03d.tex", j, j, i), "060000", HashDatabase.globalConnection);
+				HashDatabase.addPathToDB(String.format("ui/icon/%03d000/fr/%03d%03d.tex", j, j, i), "060000", HashDatabase.globalConnection);
+				HashDatabase.addPathToDB(String.format("ui/icon/%03d000/ja/%03d%03d.tex", j, j, i), "060000", HashDatabase.globalConnection);
+				System.out.println(String.format("ui/icon/%03d000/en/%03d%03d.tex", j, j, i));
+			}			
+			try {
+				HashDatabase.commit();
+			} catch (SQLException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+		}
+		HashDatabase.closeConnection();
+		
+		*/
+		HashDatabase.addPathToDB("ui/common/creditstaffdatav2502.ugd", "060000");
 		
 		
-		
+		/*
+		for (int i = 0; i < 180; i++)
+		{
+			String folderName = String.format("ui/icon/%03d000",i);
+	
+				if (HashDatabase.computeCRC(folderName.getBytes(), 0, folderName.getBytes().length) == 0x670d2d02)
+				{
+					System.out.println("FOUND: " + folderName);
+					break;
+				}
+			
+		}
+		*/
 		/*
 		String archive = "0a0000";
 		HashDatabase.beginConnection();try{
@@ -324,6 +375,38 @@ public class Main {
 				updateDialog.setVisible(true);
 			}
 		}
-
+			
 	}
+	
+	private static void getMapPaths()
+	{
+		try {
+			SqPack_IndexFile exdIndexFile = new SqPack_IndexFile(Constants.datPath + "\\game\\sqpack\\ffxiv\\0a0000.win32.index", true);
+			EXHF_File exhfFile = new EXHF_File(exdIndexFile.extractFile("exd/map.exh"));
+			EXDF_View itemView = new EXDF_View(exdIndexFile, "exd/map.exh", exhfFile);
+			
+			for (int i = 0; i < itemView.getTable().getRowCount(); i++)
+			{
+				String mapFolder =  "ui/map/" + itemView.getTable().getValueAt(i, 6);
+				
+				if (!((String)itemView.getTable().getValueAt(i, 6)).contains("/"))
+					continue;
+					
+				String[] split = ((String)itemView.getTable().getValueAt(i, 6)).split("/");
+				
+				HashDatabase.addPathToDB( mapFolder + "/" + split[0] + split[1] + "_m.tex", "060000");
+				HashDatabase.addPathToDB( mapFolder + "/" + split[0] + split[1] + "_s.tex", "060000");
+				HashDatabase.addPathToDB( mapFolder + "/" + split[0] + split[1] + "m_m.tex", "060000");
+				HashDatabase.addPathToDB( mapFolder + "/" + split[0] + split[1] + "m_s.tex", "060000");
+				HashDatabase.addPathToDB( mapFolder + "/" + split[0] + split[1] + "d.tex", "060000");
+				
+				System.out.println("Added maps for: " + mapFolder + "/" + split[0] + split[1]);
+			}
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+	}
+	
 }
