@@ -145,8 +145,8 @@ void main() {
 	
 	//specColor = mapSpecular.rgb * table_specular.rgb;      	
 	
-	float rimShading = (1.0 - max(dot(E, normal), 0.0));   		
-	vec3 finalRimShading = vec3(smoothstep(table_specular.a, 1.0, rimShading * vec3(1.0,1.0,1.0)));
+	//float rimShading = (1.0 - max(dot(E, normal), 0.0));   		
+	//vec3 finalRimShading = vec3(smoothstep(table_specular.a, 1.0, rimShading * vec3(1.0,1.0,1.0)));
 	
 
 	gl_FragColor = vec4(

@@ -175,12 +175,12 @@ public class ModelViewerMonsters extends JPanel {
 					
 					System.out.println("Loading Type: " + entries.get(selected).type + " with id: " + entries.get(selected).id);
 					
-					switch (entries.get(selected).type)
+					switch (filteredEntries.get(selected).type)
 					{
 					case 2:
 						EquipableRender demihuman = new EquipableRender();
 						
-						switch(entries.get(selected).id)
+						switch(filteredEntries.get(selected).id)
 						{
 						case 1: //Chocobo													
 							demihuman.setModel(EquipableRender.DWN, modelIndexFile, "chara/demihuman/d0001/obj/equipment/e0001/model/d0001e0001_dwn.mdl", 0);
@@ -234,9 +234,9 @@ public class ModelViewerMonsters extends JPanel {
 							demihuman.setModel(EquipableRender.TOP, modelIndexFile, "chara/demihuman/d1010/obj/equipment/e0001/model/d1010e0001_top.mdl", 0);							
 							break;
 						case 1011: //Horse													
-							demihuman.setModel(EquipableRender.DWN, modelIndexFile, "chara/demihuman/d1011/obj/equipment/e0001/model/d1011e0001_dwn.mdl", entries.get(selected).varient);
-							demihuman.setModel(EquipableRender.MET, modelIndexFile, "chara/demihuman/d1011/obj/equipment/e0001/model/d1011e0001_met.mdl", entries.get(selected).varient);							
-							demihuman.setModel(EquipableRender.TOP, modelIndexFile, "chara/demihuman/d1011/obj/equipment/e0001/model/d1011e0001_top.mdl", entries.get(selected).varient);							
+							demihuman.setModel(EquipableRender.DWN, modelIndexFile, "chara/demihuman/d1011/obj/equipment/e0001/model/d1011e0001_dwn.mdl", filteredEntries.get(selected).varient);
+							demihuman.setModel(EquipableRender.MET, modelIndexFile, "chara/demihuman/d1011/obj/equipment/e0001/model/d1011e0001_met.mdl", filteredEntries.get(selected).varient);							
+							demihuman.setModel(EquipableRender.TOP, modelIndexFile, "chara/demihuman/d1011/obj/equipment/e0001/model/d1011e0001_top.mdl", filteredEntries.get(selected).varient);							
 							break;
 						case 1012: //Quijrn													
 							demihuman.setModel(EquipableRender.TOP, modelIndexFile, "chara/demihuman/d1012/obj/equipment/e0001/model/d1012e0001_top.mdl", 0);							
@@ -293,19 +293,19 @@ public class ModelViewerMonsters extends JPanel {
 												
 						renderer.setModels(demihuman.getModels());
 						
-						txtPath.setText(String.format("chara/demihuman/d%04d/obj/equipment/e%04d/model/d%04de%04d_XXX.mdl", entries.get(selected).id, 1, entries.get(selected).id, 1));
-						txtModelInfo.setText(String.format("Type: %d, Id: %d, Model: %d, Variant: %d",  entries.get(selected).type, entries.get(selected).id, entries.get(selected).model, entries.get(selected).varient));
+						txtPath.setText(String.format("chara/demihuman/d%04d/obj/equipment/e%04d/model/d%04de%04d_XXX.mdl", filteredEntries.get(selected).id, 1, filteredEntries.get(selected).id, 1));
+						txtModelInfo.setText(String.format("Type: %d, Id: %d, Model: %d, Variant: %d",  filteredEntries.get(selected).type, filteredEntries.get(selected).id, filteredEntries.get(selected).model, filteredEntries.get(selected).varient));
 						
 						break;
 					case 3:
-						modelPath = String.format("chara/monster/m%04d/obj/body/b%04d/model/m%04db%04d.mdl", entries.get(selected).id, entries.get(selected).model, entries.get(selected).id, entries.get(selected).model);
+						modelPath = String.format("chara/monster/m%04d/obj/body/b%04d/model/m%04db%04d.mdl", filteredEntries.get(selected).id, filteredEntries.get(selected).model, filteredEntries.get(selected).id, filteredEntries.get(selected).model);
 						modelData = modelIndexFile.extractFile(modelPath);
 						if (modelData != null)
 						{
 							System.out.println("Adding Entry: " + modelPath);
 							HashDatabase.addPathToDB(modelPath, "040000");
 							Model model = new Model(modelPath,modelIndexFile,modelData);
-							model.loadMaterials(entries.get(selected).varient);
+							model.loadMaterials(filteredEntries.get(selected).varient);
 							renderer.setModel(model);
 						}
 						else
@@ -318,7 +318,7 @@ public class ModelViewerMonsters extends JPanel {
 						}
 						
 						txtPath.setText(modelPath);
-						txtModelInfo.setText(String.format("Type: %d, Id: %d, Model: %d, Variant: %d",  entries.get(selected).type, entries.get(selected).id, entries.get(selected).model, entries.get(selected).varient));
+						txtModelInfo.setText(String.format("Type: %d, Id: %d, Model: %d, Variant: %d",  filteredEntries.get(selected).type, filteredEntries.get(selected).id, filteredEntries.get(selected).model, filteredEntries.get(selected).varient));
 						
 						break;
 					default:

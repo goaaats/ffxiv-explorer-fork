@@ -262,10 +262,10 @@ public class ModelCharacterRenderer implements GLEventListener{
 	
 	@Override
 	public void reshape(GLAutoDrawable drawable, int x, int y, int width, int height){
-			GL3bc gl = drawable.getGL().getGL3bc();  // get the OpenGL 2 graphics context
+		  GL3bc gl = drawable.getGL().getGL3bc();  // get the OpenGL 2 graphics context
 		 
 
-			((Component)drawable).setMinimumSize(new Dimension(0,0));
+		  ((Component)drawable).setMinimumSize(new Dimension(0,0));
 			
 	      if (height == 0) height = 1;   // prevent divide by zero
 	      float aspect = (float)width / height;

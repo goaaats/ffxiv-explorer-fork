@@ -46,7 +46,7 @@ void main() {
 	//Specular
 	//float specular = pow( max(dot(R, E), 0.0), 1.0);
 
-    gl_FragColor = mapDiffuse;
+    gl_FragColor = vec4(mapDiffuse.xyz, 1.0);
 }
 
 

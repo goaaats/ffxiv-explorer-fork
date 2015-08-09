@@ -1,5 +1,4 @@
 #version 150
-precision highp float;
 
 varying vec4 vPosition;
 varying vec4 vNormal;
@@ -72,7 +71,8 @@ void main() {
 	float lambertian = max(dot(L,normal), 0.0);
 	float specular = 0.0;
  
-	if(lambertian > 0.0) { 
+	if(lambertian > 0.0) 
+	{ 
 		// this is blinn phong
 		float specAngle = max(dot(H, normal), 0.0);
 		specular = pow(specAngle, 128.0);
@@ -87,8 +87,7 @@ void main() {
     float rimShading = smoothstep(0.6, 1.0, (1.0 - max(dot(E, normal), 0.0)));    
 
 	gl_FragColor = vec4(ambientColor +
-                      lambertian * mapDiffuse.xyz +
-                      rimShading * mapDiffuse.xyz +
+                      lambertian * mapDiffuse.xyz +                     
                       specular * specColor, 1.0);
 }
 

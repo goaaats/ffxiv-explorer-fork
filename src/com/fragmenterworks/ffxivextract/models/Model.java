@@ -583,13 +583,16 @@ public class Model {
 	    	gl.glUseProgram(shader.getShaderProgramID());
 	    	
 	    	if (numBones != -1)
-	    		boneMatrixBuffer.position(0);	    	
+	    		boneMatrixBuffer.position(0);	    		    	
 	    	
-	    	for (int partNum = 0; partNum < mesh.partCount; partNum++)
+	    	for (int partNum = 0; partNum < (mesh.partCount == 0 ? 1 : mesh.partCount); partNum++)
 	    	{		  
-	    		int fullMask = 0;
-	    		for (int m = 0; m < numAtrStrings; m++)
-	    			fullMask |= (meshPartTable[mesh.partOffset+partNum].attributes << m);
+	    		if (mesh.partCount != 0)
+	    		{
+		    		int fullMask = 0;
+		    		for (int m = 0; m < numAtrStrings; m++)
+		    			fullMask |= (meshPartTable[mesh.partOffset+partNum].attributes << m);
+	    		}
 	    		
 		    	for (int e = 0; e < vertexElements[mesh.getVertexElementIndex()].length; e++)
 		    	{
@@ -650,11 +653,21 @@ public class Model {
 		    		shader.setBoneMatrix(gl, numBones, boneMatrixBuffer);	    		
 		    	}	    
 		    	
-		    	//Draw	    			    	
-		    	mesh.indexBuffer.position((meshPartTable[mesh.partOffset+partNum].indexOffset*2) - (mesh.indexBufferOffset*2));
-		    	shader.enableAttribs(gl);
-		    	gl.glDrawElements(GL3.GL_TRIANGLES, meshPartTable[mesh.partOffset+partNum].indexCount , GL3.GL_UNSIGNED_SHORT, mesh.indexBuffer);
-			    shader.disableAttribs(gl);		
+		    	//Draw	    		
+		    	if (mesh.partCount != 0)
+		    	{
+			    	mesh.indexBuffer.position((meshPartTable[mesh.partOffset+partNum].indexOffset*2) - (mesh.indexBufferOffset*2));
+			    	shader.enableAttribs(gl);
+			    	gl.glDrawElements(GL3.GL_TRIANGLES, meshPartTable[mesh.partOffset+partNum].indexCount , GL3.GL_UNSIGNED_SHORT, mesh.indexBuffer);
+				    shader.disableAttribs(gl);
+		    	}
+		    	else
+		    	{
+		    		mesh.indexBuffer.position(0);
+			    	shader.enableAttribs(gl);
+			    	gl.glDrawElements(GL3.GL_TRIANGLES, mesh.numIndex, GL3.GL_UNSIGNED_SHORT, mesh.indexBuffer);
+				    shader.disableAttribs(gl);
+		    	}
 	    	}
 		    //Draw Skeleton
 		    /*

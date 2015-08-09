@@ -842,7 +842,8 @@ public class MusicSwapperWindow extends JFrame {
 				if (i == fileIndex)
 				{
 					ref.skipBytes(8);
-					ref.writeInt((int)tooffset);					
+					ref.writeInt((int)tooffset);
+					break;
 				}
 				else
 					ref.skipBytes(16);									

@@ -207,7 +207,7 @@ public class Material {
 				shader = new IrisShader(gl);
 			else if (shaderName.equals("skin.shpk"))		
 				shader = new SkinShader(gl);
-			else if (shaderName.equals("bg.shpk"))		
+			else if (shaderName.equals("bg.shpk") || shaderName.equals("bgcolorchange.shpk"))		
 				shader = new BGShader(gl);
 			else 		
 				shader = new DefaultShader(gl);

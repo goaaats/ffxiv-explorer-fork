@@ -77,6 +77,7 @@ import com.fragmenterworks.ffxivextract.models.PAP_File;
 import com.fragmenterworks.ffxivextract.models.SCD_File;
 import com.fragmenterworks.ffxivextract.models.SHCD_File;
 import com.fragmenterworks.ffxivextract.models.SCD_File.SCD_Sound_Info;
+import com.fragmenterworks.ffxivextract.models.SGB_File;
 import com.fragmenterworks.ffxivextract.models.SHPK_File;
 import com.fragmenterworks.ffxivextract.models.SKLB_File;
 import com.fragmenterworks.ffxivextract.models.SqPack_IndexFile;
@@ -753,6 +754,15 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 			try {
 				Shader_View shaderView = new Shader_View(new SHPK_File(data));
 				tabs.addTab("Shader Pack", shaderView);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		else if (data.length >= 4 && data[0] == 'S' && data[1] == 'G' && data[2] == 'B' && data[3] == '1')
+		{
+			try {
+				SGB_File sgbFile = new SGB_File(data);
+				
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
