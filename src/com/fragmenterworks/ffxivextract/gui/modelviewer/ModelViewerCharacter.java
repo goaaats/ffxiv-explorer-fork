@@ -84,11 +84,11 @@ public class ModelViewerCharacter extends JPanel {
 	private int currentWeap2Item = -1;
 	private int currentHeadItem = -1;
 	private int currentBodyItem = -1;
-	private int currentBeltItem = -1;
 	private int currentHandsItem = -1;
 	private int currentPantsItem = -1;
 	private int currentFeetItem = -1;
 	private int currentNeckItem = -1;
+	private int currentEaringItem = -1;
 	private int currentBracletItem = -1;
 	private int currentRing1Item = -1;
 	private int currentRing2Item = -1;
@@ -215,6 +215,11 @@ public class ModelViewerCharacter extends JPanel {
 	        	  loadEquipModel(-1, 5, currentHandsItem);
 	        	  loadEquipModel(-1, 7, currentPantsItem);
 	        	  loadEquipModel(-1, 8, currentFeetItem);
+	        	  loadEquipModel(-1, 10, currentNeckItem);
+	        	  loadEquipModel(-1, 9, currentEaringItem);
+	        	  loadEquipModel(-1, 11, currentBracletItem);
+	        	  loadEquipModel(-1, 12, currentRing1Item);
+	        	  loadEquipModel(-1, 50, currentRing2Item);
 		        	
 				}
 			}
@@ -694,6 +699,9 @@ public class ModelViewerCharacter extends JPanel {
 			currentItem = new ModelItemEntry("SmallClothes", 0, 0, 0, slot);
 		}
 		
+		if (modelSlot == 50)
+			slot = 50;
+		
 		if (currentItem == null)
 			return;
 		
@@ -735,6 +743,9 @@ public class ModelViewerCharacter extends JPanel {
 				modelPath = String.format("chara/accessory/a%04d/model/c%04da%04d_wrs.mdl", currentItem.id, characterNumber, currentItem.id);
 				break;
 			case 12:
+				modelPath = String.format("chara/accessory/a%04d/model/c%04da%04d_ril.mdl", currentItem.id, characterNumber, currentItem.id);
+				break;
+			case 50:
 				modelPath = String.format("chara/accessory/a%04d/model/c%04da%04d_rir.mdl", currentItem.id, characterNumber, currentItem.id);
 				break;
 			case 15:
@@ -779,6 +790,9 @@ public class ModelViewerCharacter extends JPanel {
 			
 			return;			
 		}
+		
+		if (modelSlot == 50)
+			modelSlot = 13;
 		
 		if (modelData != null)
 		{
@@ -897,6 +911,66 @@ public class ModelViewerCharacter extends JPanel {
 						((JButton)e.getSource()).setToolTipText((String)itemView.getTable().getValueAt(currentFeetItem, INDEX_ITEM_NAME));
 				}			
 			}
+			else if (e.getActionCommand().equals("neck"))
+			{
+				int chosen = ItemChooserDialog.showDialog(parent, itemView, 10);				
+				if (chosen != currentNeckItem && chosen != -2){
+					currentNeckItem = chosen;
+					loadEquipModel(-1, 10, currentNeckItem);
+					if (currentNeckItem == -1)
+						((JButton)e.getSource()).setToolTipText("NONE");
+					else
+						((JButton)e.getSource()).setToolTipText((String)itemView.getTable().getValueAt(currentNeckItem, INDEX_ITEM_NAME));
+				}			
+			}
+			else if (e.getActionCommand().equals("ear"))
+			{
+				int chosen = ItemChooserDialog.showDialog(parent, itemView, 9);				
+				if (chosen != currentEaringItem && chosen != -2){
+					currentEaringItem = chosen;
+					loadEquipModel(-1, 9, currentEaringItem);
+					if (currentEaringItem == -1)
+						((JButton)e.getSource()).setToolTipText("NONE");
+					else
+						((JButton)e.getSource()).setToolTipText((String)itemView.getTable().getValueAt(currentEaringItem, INDEX_ITEM_NAME));
+				}			
+			}
+			else if (e.getActionCommand().equals("wrist"))
+			{
+				int chosen = ItemChooserDialog.showDialog(parent, itemView, 11);				
+				if (chosen !=  currentBracletItem && chosen != -2){
+					currentBracletItem = chosen;
+					loadEquipModel(-1, 11, currentBracletItem);
+					if (currentBracletItem == -1)
+						((JButton)e.getSource()).setToolTipText("NONE");
+					else
+						((JButton)e.getSource()).setToolTipText((String)itemView.getTable().getValueAt(currentBracletItem, INDEX_ITEM_NAME));
+				}			
+			}
+			else if (e.getActionCommand().equals("lring"))
+			{
+				int chosen = ItemChooserDialog.showDialog(parent, itemView, 12);				
+				if (chosen != currentRing1Item && chosen != -2){
+					currentRing1Item = chosen;
+					loadEquipModel(-1, 12, currentRing1Item);
+					if (currentRing1Item == -1)
+						((JButton)e.getSource()).setToolTipText("NONE");
+					else
+						((JButton)e.getSource()).setToolTipText((String)itemView.getTable().getValueAt(currentRing1Item, INDEX_ITEM_NAME));
+				}			
+			}	
+			else if (e.getActionCommand().equals("rring"))
+			{
+				int chosen = ItemChooserDialog.showDialog(parent, itemView, 12);				
+				if (chosen != currentRing2Item && chosen != -2){
+					currentRing2Item = chosen;
+					loadEquipModel(-1, 50, currentRing2Item);
+					if (currentRing2Item == -1)
+						((JButton)e.getSource()).setToolTipText("NONE");
+					else
+						((JButton)e.getSource()).setToolTipText((String)itemView.getTable().getValueAt(currentRing2Item, INDEX_ITEM_NAME));
+				}			
+			}	
 		}
 	};
 	

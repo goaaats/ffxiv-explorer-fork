@@ -36,7 +36,7 @@ public class GLHelper {
 	}
 
 	public static boolean isNormalized(int datatype) {		
-		return true;
+		return false;
 	}
 
 	

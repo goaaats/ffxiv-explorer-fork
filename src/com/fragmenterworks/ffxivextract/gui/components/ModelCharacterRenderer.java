@@ -24,7 +24,7 @@ import com.jogamp.common.nio.Buffers;
 
 public class ModelCharacterRenderer implements GLEventListener{
 
-	private Model models[] = new Model[3+12]; //0: Body, 1: Head, 2: Hair, 3+:Equip
+	private Model models[] = new Model[3+13]; //0: Body, 1: Head, 2: Hair, 3+:Equip
 	
 	private float zoom = -7;
 	private float panX = 0;
