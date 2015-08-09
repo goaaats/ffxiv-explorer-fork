@@ -45,6 +45,7 @@ import javax.swing.BoxLayout;
 import java.awt.FlowLayout;
 
 import javax.swing.border.TitledBorder;
+import javax.swing.JTextField;
 
 public class ModelViewerMonsters extends JPanel {
 
@@ -56,6 +57,7 @@ public class ModelViewerMonsters extends JPanel {
 	ModelViewerWindow parent;
 
 	ArrayList<ModelCharaEntry> entries = new ArrayList<ModelCharaEntry>();
+	ArrayList<ModelCharaEntry> filteredEntries = new ArrayList<ModelCharaEntry>();
 	
 	OpenGL_View view3D;
 	JList lstMonsters;	
@@ -65,6 +67,9 @@ public class ModelViewerMonsters extends JPanel {
 	JLabel txtModelInfo;
 	JButton btnColorSet;
 	JButton btnResetCamera;
+	
+	JTextField edtSearch;
+	JButton btnSearch;
 	
 	FPSAnimator animator;
 	
@@ -78,7 +83,7 @@ public class ModelViewerMonsters extends JPanel {
 	
 	SqPack_IndexFile modelIndexFile;	
 	
-	SparseArray<String> names = new SparseArray<String>();
+	SparseArray<String> names = new SparseArray<String>();	
 	
 	public ModelViewerMonsters(ModelViewerWindow parent, SqPack_IndexFile modelIndex) {
 		
@@ -152,95 +157,8 @@ public class ModelViewerMonsters extends JPanel {
 		lstMonsters = new JList();
 		
 		scrollPane.setViewportView(lstMonsters);
-
-		GLProfile glProfile = GLProfile.getDefault();
-		GLCapabilities glcapabilities = new GLCapabilities( glProfile );
-        final GLCanvas glcanvas = new GLCanvas( glcapabilities );
-        renderer = new ModelRenderer();
-        glcanvas.addGLEventListener(renderer);
-        animator = new FPSAnimator(glcanvas, 30);
-        animator.start();
-        glcanvas.addMouseMotionListener(new MouseMotionListener() {
-			
-			@Override
-			public void mouseMoved(MouseEvent e) {
-				
-			}
-			
-			@Override
-			public void mouseDragged(MouseEvent e) {
-				if (leftMouseDown)
-				{					
-					renderer.pan((e.getX() - lastX), (e.getY() - lastY));
-					lastX = e.getX();
-					lastY = e.getY();
-				}
-				if (rightMouseDown)
-				{
-					renderer.rotate(e.getX() - lastX, e.getY() - lastY);
-					lastX = e.getX();
-					lastY = e.getY();
-				}
-			}
-		});
-        glcanvas.addMouseListener(new MouseListener() {
-			
-			@Override
-			public void mouseReleased(MouseEvent e) {
-				if (e.getButton() == MouseEvent.BUTTON1)				
-					leftMouseDown = false;				
-				if (e.getButton() == MouseEvent.BUTTON3)
-					rightMouseDown = false;
-			}
-			
-			@Override
-			public void mousePressed(MouseEvent e) {
-				if (e.getButton() == MouseEvent.BUTTON1)	
-				{
-					leftMouseDown = true;
-					lastOriginX = e.getX();
-					lastOriginY = e.getY();
-					lastX = lastOriginX;
-					lastY = lastOriginY;
-				}
-				if (e.getButton() == MouseEvent.BUTTON3)
-				{
-					rightMouseDown = true;
-					lastOriginX = e.getX();
-					lastOriginY = e.getY();
-					lastX = lastOriginX;
-					lastY = lastOriginY;
-				}
-			}
-			
-			@Override
-			public void mouseExited(MouseEvent arg0) {
-				// TODO Auto-generated method stub
-				
-			}
-			
-			@Override
-			public void mouseEntered(MouseEvent arg0) {
-				// TODO Auto-generated method stub
-				
-			}
-			
-			@Override
-			public void mouseClicked(MouseEvent arg0) {
-				// TODO Auto-generated method stub
-				
-			}
-		});
-        addMouseWheelListener(new MouseWheelListener() {
-			
-			@Override
-			public void mouseWheelMoved(MouseWheelEvent e) {
-				int notches = e.getWheelRotation();		
-				renderer.zoom(-notches);				
-			}
-		});      
-        
-        lstMonsters.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+		
+		lstMonsters.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
 			
 			@Override
 			public void valueChanged(ListSelectionEvent event) {				
@@ -354,7 +272,7 @@ public class ModelViewerMonsters extends JPanel {
 							break;
 						case 1021: //											
 							demihuman.setModel(EquipableRender.MET, modelIndexFile, "chara/demihuman/d1021/obj/equipment/e0001/model/d1021e0001_met.mdl", 0);
-							demihuman.setModel(EquipableRender.TOP, modelIndexFile, "chara/demihuman/d1022/obj/equipment/e0001/model/d1021e0001_top.mdl", 0);							
+							demihuman.setModel(EquipableRender.TOP, modelIndexFile, "chara/demihuman/d1021/obj/equipment/e0001/model/d1021e0001_top.mdl", 0);							
 							break;
 						case 1022: //											
 							demihuman.setModel(EquipableRender.MET, modelIndexFile, "chara/demihuman/d1022/obj/equipment/e0001/model/d1022e0001_met.mdl", 0);
@@ -420,6 +338,123 @@ public class ModelViewerMonsters extends JPanel {
 				
 			}
 		});		
+		
+		JPanel panel_7 = new JPanel();
+		panel.add(panel_7, BorderLayout.SOUTH);
+		panel_7.setLayout(new BorderLayout(0, 0));
+		
+		ActionListener searchListener =	new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				String filter = edtSearch.getText();
+
+				filteredEntries.clear();
+
+				for (int i = 0; i < entries.size(); i++) {
+					if (names.get(entries.get(i).index, "Monster " + entries.get(i).index).toLowerCase().contains(filter.toLowerCase()))
+						filteredEntries.add(entries.get(i));
+				}
+
+				((MonsterListModel) lstMonsters.getModel()).refresh();
+			}
+		};
+		
+		edtSearch = new JTextField();
+		panel_7.add(edtSearch, BorderLayout.CENTER);
+		edtSearch.addActionListener(searchListener);
+		edtSearch.setColumns(10);
+		
+		btnSearch = new JButton("Search");
+		btnSearch.addActionListener(searchListener);
+		panel_7.add(btnSearch, BorderLayout.EAST);		
+		
+		GLProfile glProfile = GLProfile.getDefault();
+		GLCapabilities glcapabilities = new GLCapabilities( glProfile );
+        final GLCanvas glcanvas = new GLCanvas( glcapabilities );
+        renderer = new ModelRenderer();
+        glcanvas.addGLEventListener(renderer);
+        animator = new FPSAnimator(glcanvas, 30);
+        animator.start();
+        glcanvas.addMouseMotionListener(new MouseMotionListener() {
+			
+			@Override
+			public void mouseMoved(MouseEvent e) {
+				
+			}
+			
+			@Override
+			public void mouseDragged(MouseEvent e) {
+				if (leftMouseDown)
+				{					
+					renderer.pan((e.getX() - lastX), (e.getY() - lastY));
+					lastX = e.getX();
+					lastY = e.getY();
+				}
+				if (rightMouseDown)
+				{
+					renderer.rotate(e.getX() - lastX, e.getY() - lastY);
+					lastX = e.getX();
+					lastY = e.getY();
+				}
+			}
+		});
+        glcanvas.addMouseListener(new MouseListener() {
+			
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				if (e.getButton() == MouseEvent.BUTTON1)				
+					leftMouseDown = false;				
+				if (e.getButton() == MouseEvent.BUTTON3)
+					rightMouseDown = false;
+			}
+			
+			@Override
+			public void mousePressed(MouseEvent e) {
+				if (e.getButton() == MouseEvent.BUTTON1)	
+				{
+					leftMouseDown = true;
+					lastOriginX = e.getX();
+					lastOriginY = e.getY();
+					lastX = lastOriginX;
+					lastY = lastOriginY;
+				}
+				if (e.getButton() == MouseEvent.BUTTON3)
+				{
+					rightMouseDown = true;
+					lastOriginX = e.getX();
+					lastOriginY = e.getY();
+					lastX = lastOriginX;
+					lastY = lastOriginY;
+				}
+			}
+			
+			@Override
+			public void mouseExited(MouseEvent arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void mouseEntered(MouseEvent arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
+        addMouseWheelListener(new MouseWheelListener() {
+			
+			@Override
+			public void mouseWheelMoved(MouseWheelEvent e) {
+				int notches = e.getWheelRotation();		
+				renderer.zoom(-notches);				
+			}
+		});      
         
         loadAndParseNames("./monsters.lst");
         
@@ -475,15 +510,10 @@ public class ModelViewerMonsters extends JPanel {
 			return false;			
 		}
 		
-		lstMonsters.setModel(new AbstractListModel() {			
-			public int getSize() {
-				return entries.size();
-			}
-			public String getElementAt(int index) {				
-				return names.get(entries.get(index).index, "Monster " + entries.get(index).index);
-			}
-		});
+		lstMonsters.setModel(new MonsterListModel());
 				
+		filteredEntries.addAll(entries);
+		
 		return true;
 	}
 	
@@ -512,4 +542,15 @@ public class ModelViewerMonsters extends JPanel {
 		}
 	}
 	
+	private class MonsterListModel extends AbstractListModel{
+		public int getSize() {
+			return filteredEntries.size();
+		}
+		public String getElementAt(int index) {				
+			return names.get(filteredEntries.get(index).index, "Monster " + filteredEntries.get(index).index);
+		}
+		public void refresh() {
+			fireContentsChanged(this, 0, filteredEntries.size());
+		}
+	}
 }

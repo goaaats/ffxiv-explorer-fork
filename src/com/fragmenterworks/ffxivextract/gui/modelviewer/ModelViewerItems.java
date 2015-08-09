@@ -23,6 +23,7 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTextField;
 import javax.swing.event.ListDataListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -59,7 +60,9 @@ public class ModelViewerItems extends JPanel {
 	
 	ModelViewerWindow parent;
 	
-	ArrayList<ModelItemEntry> entries[] = new ArrayList[22];	
+	ArrayList<ModelItemEntry> entries[] = new ArrayList[22];
+	
+	ArrayList<ModelItemEntry> filteredEntries = new ArrayList<ModelItemEntry>();
 	
 	ModelItemEntry addedItems[] = new ModelItemEntry[22];
 	
@@ -81,6 +84,8 @@ public class ModelViewerItems extends JPanel {
 	JLabel txtModelInfo;
 	JButton btnColorSet;
 	JButton btnResetCamera;
+	JButton btnSearch;
+	JTextField edtSearch;
 	
 	ModelRenderer renderer;
 	
@@ -222,8 +227,9 @@ public class ModelViewerItems extends JPanel {
 		          int selected = cmbBodyStyle.getSelectedIndex();		          
 		          currentBody = charIds.keyAt(selected);
 		          
-		          if (currentCategory != -1 && lstItems.getSelectedIndex() != 0)
+		          if (currentCategory != -1 && lstItems.getSelectedIndex() != -1)
 		        	  loadModel(-1, lstItems.getSelectedIndex());
+		          
 				}
 			}
 		});
@@ -245,9 +251,10 @@ public class ModelViewerItems extends JPanel {
 		          int selected = cmbCategory.getSelectedIndex();
 		          
 		          currentCategory = slots.keyAt(selected);
-		          
+		          		          
+		          filteredEntries.clear();
+		          filteredEntries.addAll(entries[currentCategory]);
 		          ((ItemsListModel)lstItems.getModel()).refresh();
-		          lstItems.clearSelection();
 				}
 			}
 		});
@@ -264,6 +271,40 @@ public class ModelViewerItems extends JPanel {
 		
 		scrollPane.setViewportView(lstItems);
 
+		ActionListener searchListener =	new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (currentCategory == -1)
+					return;
+				
+				String filter = edtSearch.getText();
+
+				filteredEntries.clear();
+
+				for (int i = 0; i < entries[currentCategory].size(); i++) {
+					if (entries[currentCategory].get(i).name.toLowerCase().contains(filter.toLowerCase()))
+						filteredEntries.add(entries[currentCategory].get(i));
+				}
+
+				((ItemsListModel) lstItems.getModel()).refresh();
+			}
+		};
+		
+		edtSearch = new JTextField();
+		edtSearch.addActionListener(searchListener);
+		edtSearch.setColumns(10);
+		
+		btnSearch = new JButton("Search");
+		btnSearch.addActionListener(searchListener);	
+		
+		JPanel panel_8 = new JPanel();
+		panel.add(panel_8, BorderLayout.SOUTH);
+		panel_8.setLayout(new BorderLayout(0, 0));
+		
+		panel_8.add(edtSearch, BorderLayout.CENTER);
+		panel_8.add(btnSearch, BorderLayout.EAST);
+		
 		GLProfile glProfile = GLProfile.getDefault();
 		GLCapabilities glcapabilities = new GLCapabilities( glProfile );
         final GLCanvas glcanvas = new GLCanvas( glcapabilities );
@@ -393,6 +434,8 @@ public class ModelViewerItems extends JPanel {
         ((ItemsListModel)lstItems.getModel()).refresh();
         lstItems.clearSelection();
         
+        filteredEntries.addAll(entries[currentCategory]);
+        
 	}
 	
 	private void loadModel(int charNumberOverride, int selected)
@@ -403,7 +446,7 @@ public class ModelViewerItems extends JPanel {
 		
 		String modelPath = null;
 		byte[] modelData = null;
-		ModelItemEntry currentItem = entries[currentCategory].get(selected);
+		ModelItemEntry currentItem = filteredEntries.get(selected);
 		
 		int characterNumber = ((charNumberOverride == -1 ? currentBody * 100+ 01: charNumberOverride)); 
 		
@@ -549,17 +592,6 @@ public class ModelViewerItems extends JPanel {
 		return 101;
 	}
 	
-	private void searchAndSelect(String input)
-	{
-		for (int i = 0; i < entries[currentCategory].size(); i++)
-		{
-			if (entries[currentCategory].get(i).name.equalsIgnoreCase(input))
-			{
-				lstItems.setSelectedIndex(i);
-			}
-		}
-	}
-	
 	class ItemsListModel extends AbstractListModel
 	{			
 			public int getSize() {
@@ -567,14 +599,14 @@ public class ModelViewerItems extends JPanel {
 				if (currentCategory == -1)
 					return 0;
 				
-				return entries[currentCategory].size();
+				return filteredEntries.size();
 			}
 			public String getElementAt(int index) {
 				
 				if (currentCategory == -1)
 					return "";
 				
-				return entries[currentCategory].get(index).name;
+				return filteredEntries.get(index).name;
 			}
 			
 			public void refresh()
@@ -582,7 +614,7 @@ public class ModelViewerItems extends JPanel {
 				if (currentCategory == -1)
 					fireContentsChanged(this, 0, 0);
 				else
-					fireContentsChanged(this, 0, entries[currentCategory].size());
+					fireContentsChanged(this, 0, filteredEntries.size());
 			}
 	}
 	
