@@ -381,7 +381,7 @@ public class EXDF_View extends JScrollPane implements ItemListener{
 			if (column == 0)
 				return "Index";
 			else
-				return columnNames.get(column-1, (column-1) + " ["+String.format("0x%x",exhFile.getDatasetTable()[column-1].type)+"]" + "["+String.format("0x%x",exhFile.getDatasetTable()[column-1].offset)+"]");
+				return (column-1) + " " + columnNames.get(column-1, "["+String.format("0x%x",exhFile.getDatasetTable()[column-1].type)+"]" + "["+String.format("0x%x",exhFile.getDatasetTable()[column-1].offset)+"]");
 		}		
 		
 		@Override
@@ -759,7 +759,6 @@ public class EXDF_View extends JScrollPane implements ItemListener{
 		    br.close();
 		}
 		catch (IOException e){
-			
 		}
 	}
 

@@ -256,6 +256,7 @@ public class Outfitter extends JPanel {
 		
 		JButton btnFaceOptions = new JButton("Face Options");
 		panel_4.add(btnFaceOptions);
+		btnFaceOptions.setEnabled(false);
 		btnFaceOptions.setAlignmentX(Component.CENTER_ALIGNMENT);
 		
 		JPanel panel_7 = new JPanel();

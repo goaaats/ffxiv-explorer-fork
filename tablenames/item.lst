@@ -1,0 +1,97 @@
+0:Name Lower
+1:
+2:Name Plural
+3:
+4:Starts With Vowel
+5:
+6:
+7:
+8:Item Description
+9:Name Upper
+10:Icon Id
+11:Item Level
+12:Required Level
+13:PvP Rank
+14:Stack Size
+15:
+16:Stain Index
+17:ItemUICategory Index
+18:ItemSearchCategory Index
+19:Rarity
+20:Is HQ
+21:
+22:Is Dyeable
+23:Is Crest
+24:
+25:Materia Count
+26:
+27:EquipSlotCategory Index
+28:Model Primary
+29:Model Secondary
+30:
+31:BaseParam Index 1
+32:Param Value 1
+33:BaseParam Index 2
+34:Param Value 2
+35:BaseParam Index 3
+36:Param Value 3
+37:BaseParam Index 4
+38:Param Value 4
+39:BaseParam Index 5
+40:Param Value 5
+41:BaseParam Index 6
+42:Param Value 6
+43:ItemSpecialBonus Index
+44:BaseParam Prime HQ Index 1
+45:Prime HQ Addition 1
+46:BaseParam Prime HQ Index 2
+47:Prime HQ Addition 2
+48:BaseParam HQ Index 1
+49:Stat HQ Addition 1
+50:BaseParam HQ Index 2
+51:Stat HQ Addition 2
+52:BaseParam HQ Index 3
+53:Stat HQ Addition 3
+54:BaseParam HQ Index 4
+55:Stat HQ Addition 4
+
+56:ClassJob Index (Repairer Requirement)
+57:Item Index (Repair Item Requirement)
+58:ClassJob Index (Usage Requirement)
+59:
+60:Physical Damage
+61:Magical Damage
+62:Delay (Miliseconds)
+63:
+64:Block Rate
+65:Block
+66:Physical Defense
+67:Magical Defense
+69:Cooldown (Seconds)
+70:ItemAction Index
+71:Is Not Disposable
+72:Is Unique
+73:Is Untradeable
+74:
+75:Vendor Price A
+76:Vendor Price B
+77:Vendor Price C
+78:Can _ Equip
+79:Can _ Equip
+80:Can _ Equip
+81:Can _ Equip
+82:Can _ Equip
+83:Can _ Equip
+84:Can Males Equip
+85:Can Females Equip
+86:ClassJobCategory Index
+87:
+88:GrandCompany Index
+89:
+90:ItemSeries Index
+91:BaseparamModifier Index
+92:Is PvP
+93:Item Index (Glamoured Item)
+94:Desynthesize Index
+95:Is Collectable
+96:Atherial Reduction Index

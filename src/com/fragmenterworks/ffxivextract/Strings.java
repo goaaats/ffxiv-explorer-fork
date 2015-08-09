@@ -91,6 +91,8 @@ public class Strings {
 	//Misc
 	public static final String MSG_MUSICSWAPPER_TITLE = "Before Using Swapper";
 	public static final String MSG_MUSICSWAPPER = "This program modifies FFXIV ARR's files. I am not responsible in the case where swapping the music files leads to a ban or damaged game. Use at your own risk.\n\nRemember to restore before patching the game as the patcher may have issues with modified files.\n	\nThe index file is automatically backed up as \"0c0000.win32.index.bak\" in the same folder as \"0c0000.win32.index\".";
+	public static final String MSG_OUTFITTER_TITLE = "This is still experimental!";
+	public static final String MSG_OUTFITTER = "This feature is still being figured out and experimented with! Some races and items may not look correct. \nSome of the races and items do not load properly due to model reuse which is then scaled/translated. \nMost items should render properly for Hyur, male Roegadyn, and Lalafell models. Setting hair and face \nto 0 will clear them, which is useful for helmet items. \n\nAnyway, hope you have fun!";
 	
 	
 }

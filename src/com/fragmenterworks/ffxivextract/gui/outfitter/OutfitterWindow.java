@@ -57,6 +57,11 @@ public class OutfitterWindow extends JFrame {
 
 	public void beginLoad()
 	{
+		JOptionPane.showMessageDialog(this,
+				Strings.MSG_OUTFITTER,
+			    Strings.MSG_OUTFITTER_TITLE,
+			    JOptionPane.INFORMATION_MESSAGE);
+		
 		OpenIndexTask task = new OpenIndexTask();				 
 		dialog = new Loading_Dialog(OutfitterWindow.this, 3);		
 		task.execute();
