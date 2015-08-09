@@ -44,7 +44,6 @@ import com.fragmenterworks.ffxivextract.Strings;
 @SuppressWarnings("serial")
 public class SettingsWindow extends JDialog {
 	private JTextField txtDatPath;
-	private JTextField textField;
 
 	public SettingsWindow(JFrame parent) {
 		super(parent, ModalityType.APPLICATION_MODAL);
@@ -92,34 +91,6 @@ public class SettingsWindow extends JDialog {
 				setPath();
 			}
 		});
-		
-		JPanel panel_2 = new JPanel();
-		panel_2.setBorder(new TitledBorder(null, "Model Viewer", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		getContentPane().add(panel_2, BorderLayout.WEST);
-		GridBagLayout gbl_panel_2 = new GridBagLayout();
-		gbl_panel_2.columnWidths = new int[]{0, 0, 0};
-		gbl_panel_2.rowHeights = new int[]{23, 0};
-		gbl_panel_2.columnWeights = new double[]{0.0, 0.0, Double.MIN_VALUE};
-		gbl_panel_2.rowWeights = new double[]{0.0, Double.MIN_VALUE};
-		panel_2.setLayout(gbl_panel_2);
-		
-		textField = new JTextField();
-		textField.setText((String) null);
-		textField.setPreferredSize(new Dimension(200, 20));
-		GridBagConstraints gbc_textField = new GridBagConstraints();
-		gbc_textField.weightx = 1.0;
-		gbc_textField.fill = GridBagConstraints.HORIZONTAL;
-		gbc_textField.insets = new Insets(0, 0, 0, 5);
-		gbc_textField.gridx = 0;
-		gbc_textField.gridy = 0;
-		panel_2.add(textField, gbc_textField);
-		
-		JButton button = new JButton("Browse");
-		GridBagConstraints gbc_button = new GridBagConstraints();
-		gbc_button.anchor = GridBagConstraints.NORTHWEST;
-		gbc_button.gridx = 1;
-		gbc_button.gridy = 0;
-		panel_2.add(button, gbc_button);
 	
 		JPanel panel_1 = new JPanel();
 		getContentPane().add(panel_1, BorderLayout.SOUTH);

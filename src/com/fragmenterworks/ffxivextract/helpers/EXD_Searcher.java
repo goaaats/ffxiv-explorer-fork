@@ -153,10 +153,6 @@ public class EXD_Searcher {
 				in.replace("\n", "");
 				in.replace("\r", "");
 				writer.write("exd/"+in + ".exh\r\n");
-				writer.write("exd/"+in + "_0_en.exd\r\n");
-				writer.write("exd/"+in + "_0_ja.exd\r\n");
-				writer.write("exd/"+in + "_0_de.exd\r\n");
-				writer.write("exd/"+in + "_0_fr.exd\r\n");
 			}
 			reader.close();
 			writer.close();

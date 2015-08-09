@@ -19,6 +19,7 @@ import com.fragmenterworks.ffxivextract.gui.FileManagerWindow;
 import com.fragmenterworks.ffxivextract.gui.components.EXDF_View;
 import com.fragmenterworks.ffxivextract.gui.components.Update_Dialog;
 import com.fragmenterworks.ffxivextract.helpers.DatBuilder;
+import com.fragmenterworks.ffxivextract.helpers.EXD_Searcher;
 import com.fragmenterworks.ffxivextract.helpers.HavokNative;
 import com.fragmenterworks.ffxivextract.helpers.LERandomAccessFile;
 import com.fragmenterworks.ffxivextract.helpers.PathSearcher;
@@ -90,9 +91,9 @@ public class Main {
 		HashDatabase.closeConnection();
 		
 		*/
-		HashDatabase.addPathToDB("ui/common/creditstaffdatav2502.ugd", "060000");
 		
-		
+	
+		  
 		/*
 		for (int i = 0; i < 180; i++)
 		{
