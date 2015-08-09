@@ -56,19 +56,6 @@ public class MinifiedShaders {
 			+ "float k=.5,o=max(0,1-dot(w,m)),a=pow(o,5),T=k+(1-k)*a;" + "f*=T;" + "gl_FragColor=vec4(f*d+g*v.xyz,1.);"
 			+ "}";
 
-	protected static String blur_frag_glsl = "#version 150\n" + "precision highp float;\n" + "varying vec2 vTexCoord;"
-			+ "uniform sampler2D uInTex;" + "uniform vec2 uResolution;" + "uniform float uRadius;"
-			+ "uniform vec2 uDir;" + "void main()" + "{" + "vec2 u=vTexCoord;" + "vec4 v=vec4(0.);"
-			+ "float r=uRadius/uResolution.x,e=uRadius/uResolution.y,x=uDir.x,y=uDir.y;"
-			+ "v+=texture2D(uInTex,vec2(u.x-4.*r*x,u.y-4.*e*y))*.0162162;"
-			+ "v+=texture2D(uInTex,vec2(u.x-3.*r*x,u.y-3.*e*y))*.0540541;"
-			+ "v+=texture2D(uInTex,vec2(u.x-2.*r*x,u.y-2.*e*y))*.121622;"
-			+ "v+=texture2D(uInTex,vec2(u.x-r*x,u.y-e*y))*.194595;" + "v+=texture2D(uInTex,vec2(u.x,u.y))*.227027;"
-			+ "v+=texture2D(uInTex,vec2(u.x+r*x,u.y+e*y))*.194595;"
-			+ "v+=texture2D(uInTex,vec2(u.x+2.*r*x,u.y+2.*e*y))*.121622;"
-			+ "v+=texture2D(uInTex,vec2(u.x+3.*r*x,u.y+3.*e*y))*.0540541;"
-			+ "v+=texture2D(uInTex,vec2(u.x+4.*r*x,u.y+4.*e*y))*.0162162;" + "gl_FragColor=vec4(v.xyz,1.);" + "}";
-
 	protected static String default_frag_glsl = "#version 150\n" + "precision highp float;\n"
 			+ "varying vec4 vPosition,vNormal,vTexCoord,vColor,vBiTangent;" + "varying mat4 vTBNMatrix;"
 			+ "varying vec3 vLightDir,vEyeVec;" + "uniform sampler2D uDiffuseTex,uNormalTex,uSpecularTex,uColorSetTex;"
@@ -149,4 +136,33 @@ public class MinifiedShaders {
 
 	protected static String simple_frag_glsl = "#version 150\n" + "precision highp float;\n"
 			+ "void main(){gl_FragColor=vec4(1.,0.,0.,1.);}";
+
+	protected static String blend_frag_glsl = "#version 150\n" + "precision highp float;\n" + "varying vec2 vTexCoord;"
+			+ "uniform float uGlowIntensity;" + "uniform sampler2D uInTex1,uInTex2;" + "mediump vec4 u;" + "void main()"
+			+ "{" + "u=texture2D(uInTex1,vTexCoord),u+=uGlowIntensity*texture2D(uInTex2,vTexCoord),gl_FragColor=u;"
+			+ "}";
+
+	protected static String blur_frag_glsl = "#version 150\n" + "precision highp float;\n" + "varying vec2 vTexCoord;"
+			+ "uniform sampler2D uInTex;" + "uniform vec2 uTexelSize;" + "uniform int uBlurDirection,uBlurRadius;"
+			+ "void main()" + "{" + "vec4 x=vec4(0.);" + "if(uBlurDirection==0)" + "{"
+			+ "float u=uTexelSize.x*uBlurRadius;" + "x+=texture2D(uInTex,vec2(vTexCoord.x-4.*u,vTexCoord.y))*.05;"
+			+ "x+=texture2D(uInTex,vec2(vTexCoord.x-3.*u,vTexCoord.y))*.09;"
+			+ "x+=texture2D(uInTex,vec2(vTexCoord.x-2.*u,vTexCoord.y))*.12;"
+			+ "x+=texture2D(uInTex,vec2(vTexCoord.x-u,vTexCoord.y))*.15;"
+			+ "x+=texture2D(uInTex,vec2(vTexCoord.x,vTexCoord.y))*.16;"
+			+ "x+=texture2D(uInTex,vec2(vTexCoord.x+u,vTexCoord.y))*.15;"
+			+ "x+=texture2D(uInTex,vec2(vTexCoord.x+2.*u,vTexCoord.y))*.12;"
+			+ "x+=texture2D(uInTex,vec2(vTexCoord.x+3.*u,vTexCoord.y))*.09;"
+			+ "x+=texture2D(uInTex,vec2(vTexCoord.x+4.*u,vTexCoord.y))*.05;" + "}" + "else" + "{"
+			+ "float u=uTexelSize.y*uBlurRadius;" + "x+=texture2D(uInTex,vec2(vTexCoord.x,vTexCoord.y-4.*u))*.05;"
+			+ "x+=texture2D(uInTex,vec2(vTexCoord.x,vTexCoord.y-3.*u))*.09;"
+			+ "x+=texture2D(uInTex,vec2(vTexCoord.x,vTexCoord.y-2.*u))*.12;"
+			+ "x+=texture2D(uInTex,vec2(vTexCoord.x,vTexCoord.y-u))*.15;"
+			+ "x+=texture2D(uInTex,vec2(vTexCoord.x,vTexCoord.y))*.16;"
+			+ "x+=texture2D(uInTex,vec2(vTexCoord.x,vTexCoord.y+u))*.15;"
+			+ "x+=texture2D(uInTex,vec2(vTexCoord.x,vTexCoord.y+2.*u))*.12;"
+			+ "x+=texture2D(uInTex,vec2(vTexCoord.x,vTexCoord.y+3.*u))*.09;"
+			+ "x+=texture2D(uInTex,vec2(vTexCoord.x,vTexCoord.y+4.*u))*.05;" + "}" + "gl_FragColor=clamp(x,0.,1.);"
+			+ "}";
+
 }

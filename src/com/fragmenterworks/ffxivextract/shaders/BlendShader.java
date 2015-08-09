@@ -11,8 +11,8 @@ public class BlendShader extends Shader {
 	
 	public BlendShader(GL3 gl)
 			throws IOException {
-		super(gl, "/res/shaders/fbout_vert.glsl", "/res/shaders/blend_frag.glsl", true);	
-		//super(gl, MinifiedShaders.fbout_vert_glsl, MinifiedShaders.blur_frag_glsl, false);
+		//super(gl, "/res/shaders/fbout_vert.glsl", "/res/shaders/blend_frag.glsl", true);	
+		super(gl, MinifiedShaders.fbout_vert_glsl, MinifiedShaders.blend_frag_glsl, false);
 		
 		tex1Location = gl.glGetUniformLocation(shaderProgram, "uInTex1");
 		tex2Location = gl.glGetUniformLocation(shaderProgram, "uInTex2");
