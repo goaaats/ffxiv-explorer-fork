@@ -110,7 +110,7 @@ public class Path_to_Hash_Window extends JFrame {
 		String folder = path.substring(0, path.lastIndexOf('/'))
 				.toLowerCase();
 		String filename = path.substring(path.lastIndexOf('/') + 1,
-				path.length()).toLowerCase();
+				path.length());
 
 		int folderHash = HashDatabase.computeCRC(folder.getBytes(), 0,
 				folder.getBytes().length);
