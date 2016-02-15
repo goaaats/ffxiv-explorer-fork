@@ -20,7 +20,7 @@ import com.fragmenterworks.ffxivextract.models.SqPack_IndexFile;
 import com.fragmenterworks.ffxivextract.models.SqPack_IndexFile.SqPack_File;
 import com.fragmenterworks.ffxivextract.models.SqPack_IndexFile.SqPack_Folder;
 
-public class EXD_Searcher {
+public class HashFinding_Utils {
 
 	public static void findExhHashes()
 	{

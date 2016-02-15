@@ -72,6 +72,8 @@ public class Strings {
 	public static final String MENUITEM_HASHCALC = "Path -> Hash Calculator";
 	public static final String MENUITEM_MACROEDITOR = "Macro Editor";
 	public static final String MENUITEM_LOGVIEWER = "Log Viewer";
+	public static final String MENUITEM_FIND_EXH = "Find Exh Hashes";
+	public static final String MENUITEM_FIND_MUSIC = "Find Music Hashes";
 	public static final String MENUITEM_SETTINGS = "Settings";
 	public static final String MENUITEM_ENABLEUPDATE = "Check for Updates";
 	public static final String MENUITEM_QUIT = "Quit";

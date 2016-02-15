@@ -66,6 +66,7 @@ import com.fragmenterworks.ffxivextract.gui.components.Sound_View;
 import com.fragmenterworks.ffxivextract.gui.modelviewer.ModelViewerWindow;
 import com.fragmenterworks.ffxivextract.gui.outfitter.Outfitter;
 import com.fragmenterworks.ffxivextract.gui.outfitter.OutfitterWindow;
+import com.fragmenterworks.ffxivextract.helpers.HashFinding_Utils;
 import com.fragmenterworks.ffxivextract.helpers.HavokNative;
 import com.fragmenterworks.ffxivextract.helpers.LERandomAccessFile;
 import com.fragmenterworks.ffxivextract.helpers.LuaDec;
@@ -411,6 +412,14 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 				logViewer.setLocationRelativeTo(FileManagerWindow.this);
 				logViewer.setVisible(true);
 			}
+			else if (event.getActionCommand().equals("find_exh"))
+			{
+				HashFinding_Utils.findExhHashes();
+			}
+			else if (event.getActionCommand().equals("find_music"))
+			{
+				HashFinding_Utils.findMusicHashes();
+			}
 			else if  (event.getActionCommand().equals("settings"))
 			{
 				SettingsWindow settings = new SettingsWindow(FileManagerWindow.this);
@@ -501,6 +510,14 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 		tools_logViewer.setActionCommand("logviewer");
 		tools_logViewer.addActionListener(menuHandler);		
 
+		JMenuItem tools_findexhs = new JMenuItem(Strings.MENUITEM_FIND_EXH);		
+		tools_findexhs.setActionCommand("find_exh");
+		tools_logViewer.addActionListener(menuHandler);
+		
+		JMenuItem tools_findmusic = new JMenuItem(Strings.MENUITEM_FIND_MUSIC);		
+		tools_findmusic.setActionCommand("find_music");
+		tools_findmusic.addActionListener(menuHandler);
+		
 		JMenuItem options_settings =  new JMenuItem(Strings.MENUITEM_SETTINGS);		
 		options_settings.setActionCommand("settings");
 		options_settings.addActionListener(menuHandler);		
@@ -533,6 +550,9 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 		tools.add(tools_macroEditor);
 		tools.add(tools_logViewer);
 		tools.add(tools_hashcalculator);
+		tools.addSeparator();
+		tools.add(tools_findexhs);
+		tools.add(tools_findmusic);
 		
 		options.add(options_settings);
 		options.add(options_enableUpdate);
