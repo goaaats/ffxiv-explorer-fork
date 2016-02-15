@@ -51,6 +51,7 @@ import com.fragmenterworks.ffxivextract.Strings;
 import com.fragmenterworks.ffxivextract.storage.HashDatabase;
 
 import com.fragmenterworks.ffxivextract.gui.SearchWindow.ISearchComplete;
+import com.fragmenterworks.ffxivextract.gui.components.CMP_View;
 import com.fragmenterworks.ffxivextract.gui.components.EXDF_View;
 import com.fragmenterworks.ffxivextract.gui.components.ExplorerPanel_View;
 import com.fragmenterworks.ffxivextract.gui.components.Hex_View;
@@ -70,6 +71,7 @@ import com.fragmenterworks.ffxivextract.helpers.LERandomAccessFile;
 import com.fragmenterworks.ffxivextract.helpers.LuaDec;
 import com.fragmenterworks.ffxivextract.helpers.WavefrontObjectWriter;
 import com.fragmenterworks.ffxivextract.models.AVFX_File;
+import com.fragmenterworks.ffxivextract.models.CMP_File;
 import com.fragmenterworks.ffxivextract.models.EXDF_File;
 import com.fragmenterworks.ffxivextract.models.EXHF_File;
 import com.fragmenterworks.ffxivextract.models.Model;
@@ -763,6 +765,16 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 			try {
 				SGB_File sgbFile = new SGB_File(data);
 				
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		else if (file.getName().equals("human.cmp"))
+		{
+			try {
+				CMP_File cmpFile = new CMP_File(data);
+				CMP_View cmpView = new CMP_View(cmpFile);
+				tabs.addTab("CMP Viewer", cmpView);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}

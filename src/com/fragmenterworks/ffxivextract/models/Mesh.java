@@ -19,7 +19,7 @@ public class Mesh{
 	final public int indexBufferOffset;		
 	final public int numVerts, numIndex;
 	
-	final public int partOffset, partCount;
+	final public int partTableOffset, partTableCount;
 	
 	final public int boneListIndex;
 	
@@ -33,8 +33,8 @@ public class Mesh{
 		numIndex = bb.getInt();	    	        
     	
     	materialNumber = bb.getShort();
-    	partOffset = bb.getShort();
-    	partCount = bb.getShort();
+    	partTableOffset = bb.getShort();
+    	partTableCount = bb.getShort();
     	boneListIndex = bb.getShort();
     	
     	/*if (i == 0){
@@ -64,7 +64,7 @@ public class Mesh{
 			vertBuffers[i] = Buffers.newDirectByteBuffer(numVerts * vertexSizes[i]);
 		indexBuffer = Buffers.newDirectByteBuffer(numIndex * 2);
     	
-		System.out.println("Num Parts: " + partCount);
+		System.out.println("Num Parts: " + partTableCount);
 		
     	if (Constants.DEBUG)
     	{

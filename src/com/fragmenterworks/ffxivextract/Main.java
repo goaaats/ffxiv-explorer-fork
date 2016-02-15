@@ -1,6 +1,8 @@
 package com.fragmenterworks.ffxivextract;
 
+import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -55,7 +57,8 @@ public class Main {
 								"Hash DB Load Error", JOptionPane.ERROR_MESSAGE);
 		} catch (ClassNotFoundException e1) {
 			e1.printStackTrace();
-		}
+		}		
+		
 		/*
 		HashDatabase.beginConnection();
 		try {
@@ -91,8 +94,7 @@ public class Main {
 		HashDatabase.closeConnection();
 		
 		*/
-		
-	
+			
 		  
 		/*
 		for (int i = 0; i < 180; i++)

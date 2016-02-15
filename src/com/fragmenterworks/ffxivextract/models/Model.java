@@ -59,6 +59,9 @@ public class Model {
 	private ByteBuffer boneMatrixBuffer;
 	private int numBones = -1;
 	
+	private String[] atrStrings;
+	private long[] atrMasks;	
+	
 	private String[] boneStrings;
 	
 	//Skeleton/Animation
@@ -165,8 +168,15 @@ public class Model {
 
 		meshPartTable = new MeshPart[numParts];
 		boneLists = new BoneList[unknownCount4];
+		atrMasks = new long[numAtrStrings];
+		atrStrings = new String[numAtrStrings];
 		boneStrings = new String[numBoneStrings];
+		
+		System.arraycopy(stringArray, 0, atrStrings, 0, numAtrStrings);
 		System.arraycopy(stringArray, numAtrStrings, boneStrings, 0, numBoneStrings);
+		
+		for (int i = 0; i < atrStrings.length; i++)
+			atrMasks[i] = getMaskFromAtrName(atrStrings[i]);
 		
 		materials = new Material[numMaterialStrings];
 		
@@ -208,7 +218,8 @@ public class Model {
 				if (Constants.DEBUG)
 					System.out.println(String.format("Mesh %d:", j));				
 	        	meshList[j] = new Mesh(bb, vertElementNumber);	        	
-	        	vertElementNumber++;	        		        			       
+	        	vertElementNumber++;	
+	        	
 			}
 			lodModels[i].setMeshList(meshList);
 		}
@@ -221,6 +232,15 @@ public class Model {
 		
 		for (int i = 0; i < numParts; i++)
 			meshPartTable[i] = new MeshPart(bb);			
+		
+		for (int i = 0; i < meshPartTable.length; i++)
+		{
+			for (int j = 0; j < atrMasks.length; j++)
+			{
+				if (((meshPartTable[i].attributes >> j) & 1) == 1)				
+					meshPartTable[i].attributeMasks.add(atrMasks[j]);				
+			}
+		}
 		
 		bb.position(bb.position()+(unknownCount3 * 12));//Skip this data
 		
@@ -585,13 +605,16 @@ public class Model {
 	    	if (numBones != -1)
 	    		boneMatrixBuffer.position(0);	    		    	
 	    	
-	    	for (int partNum = 0; partNum < (mesh.partCount == 0 ? 1 : mesh.partCount); partNum++)
+	    	for (int partNum = 0; partNum < (mesh.partTableCount == 0 ? 1 : mesh.partTableCount); partNum++)
 	    	{		  
-	    		if (mesh.partCount != 0)
+	    		if (mesh.partTableCount != 0 && atrMasks.length != 0)
 	    		{
-		    		int fullMask = 0;
-		    		for (int m = 0; m < numAtrStrings; m++)
-		    			fullMask |= (meshPartTable[mesh.partOffset+partNum].attributes << m);
+		    		long fullMask = 0;
+		    		for (int m = 0; m < meshPartTable[partNum+mesh.partTableOffset].attributeMasks.size(); m++)
+		    			fullMask |= meshPartTable[partNum+mesh.partTableOffset].attributeMasks.get(m);//(meshPartTable[mesh.partOffset+partNum].attributes << m);
+		    		
+		    		if ((0x4f & fullMask) != fullMask)
+		    			continue;
 	    		}
 	    		
 		    	for (int e = 0; e < vertexElements[mesh.getVertexElementIndex()].length; e++)
@@ -654,11 +677,11 @@ public class Model {
 		    	}	    
 		    	
 		    	//Draw	    		
-		    	if (mesh.partCount != 0)
+		    	if (mesh.partTableCount != 0)
 		    	{
-			    	mesh.indexBuffer.position((meshPartTable[mesh.partOffset+partNum].indexOffset*2) - (mesh.indexBufferOffset*2));
+			    	mesh.indexBuffer.position((meshPartTable[mesh.partTableOffset+partNum].indexOffset*2) - (mesh.indexBufferOffset*2));
 			    	shader.enableAttribs(gl);
-			    	gl.glDrawElements(GL3.GL_TRIANGLES, meshPartTable[mesh.partOffset+partNum].indexCount , GL3.GL_UNSIGNED_SHORT, mesh.indexBuffer);
+			    	gl.glDrawElements(GL3.GL_TRIANGLES, meshPartTable[mesh.partTableOffset+partNum].indexCount , GL3.GL_UNSIGNED_SHORT, mesh.indexBuffer);
 				    shader.disableAttribs(gl);
 		    	}
 		    	else
@@ -668,6 +691,7 @@ public class Model {
 			    	gl.glDrawElements(GL3.GL_TRIANGLES, mesh.numIndex, GL3.GL_UNSIGNED_SHORT, mesh.indexBuffer);
 				    shader.disableAttribs(gl);
 		    	}
+		    	
 	    	}
 		    //Draw Skeleton
 		    /*
@@ -894,5 +918,86 @@ public class Model {
 		else
 			return -1;
 	}
+
+	private long getMaskFromAtrName(String attribute)
+	{
+		if 		("atr_tv_a".equals(attribute)) return 1 << 0;
+		else if ("atr_tv_b".equals(attribute)) return 1 << 1;
+		else if ("atr_tv_c".equals(attribute)) return 1 << 2;
+		else if ("atr_tv_d".equals(attribute)) return 1 << 3;
+		else if ("atr_tv_e".equals(attribute)) return 1 << 4;
+		else if ("atr_tv_f".equals(attribute)) return 1 << 5;
+		else if ("atr_tv_g".equals(attribute)) return 1 << 6;
+		else if ("atr_tv_h".equals(attribute)) return 1 << 7;
+		else if ("atr_tv_i".equals(attribute)) return 1 << 8;
+		else if ("atr_tv_j".equals(attribute)) return 1 << 9;
+		
+		else if ("atr_mv_a".equals(attribute)) return 1 << 0;
+		else if ("atr_mv_b".equals(attribute)) return 1 << 1;
+		else if ("atr_mv_c".equals(attribute)) return 1 << 2;
+		else if ("atr_mv_d".equals(attribute)) return 1 << 3;
+		else if ("atr_mv_e".equals(attribute)) return 1 << 4;
+		else if ("atr_mv_f".equals(attribute)) return 1 << 5;
+		else if ("atr_mv_g".equals(attribute)) return 1 << 6;
+		else if ("atr_mv_h".equals(attribute)) return 1 << 7;
+		else if ("atr_mv_i".equals(attribute)) return 1 << 8;
+		else if ("atr_mv_j".equals(attribute)) return 1 << 9;
+		
+		else if ("atr_bv_a".equals(attribute)) return 1 << 0;
+		else if ("atr_bv_b".equals(attribute)) return 1 << 1;
+		else if ("atr_bv_c".equals(attribute)) return 1 << 2;
+		else if ("atr_bv_d".equals(attribute)) return 1 << 3;
+		else if ("atr_bv_e".equals(attribute)) return 1 << 4;
+		else if ("atr_bv_f".equals(attribute)) return 1 << 5;
+		else if ("atr_bv_g".equals(attribute)) return 1 << 6;
+		else if ("atr_bv_h".equals(attribute)) return 1 << 7;
+		else if ("atr_bv_i".equals(attribute)) return 1 << 8;
+		else if ("atr_bv_j".equals(attribute)) return 1 << 9;
+		
+		else if ("atr_gv_a".equals(attribute)) return 1 << 0;
+		else if ("atr_gv_b".equals(attribute)) return 1 << 1;
+		else if ("atr_gv_c".equals(attribute)) return 1 << 2;
+		else if ("atr_gv_d".equals(attribute)) return 1 << 3;
+		else if ("atr_gv_e".equals(attribute)) return 1 << 4;
+		else if ("atr_gv_f".equals(attribute)) return 1 << 5;
+		else if ("atr_gv_g".equals(attribute)) return 1 << 6;
+		else if ("atr_gv_h".equals(attribute)) return 1 << 7;
+		else if ("atr_gv_i".equals(attribute)) return 1 << 8;
+		else if ("atr_gv_j".equals(attribute)) return 1 << 9;
+		
+		else if ("atr_dv_a".equals(attribute)) return 1 << 0;
+		else if ("atr_dv_b".equals(attribute)) return 1 << 1;
+		else if ("atr_dv_c".equals(attribute)) return 1 << 2;
+		else if ("atr_dv_d".equals(attribute)) return 1 << 3;
+		else if ("atr_dv_e".equals(attribute)) return 1 << 4;
+		else if ("atr_dv_f".equals(attribute)) return 1 << 5;
+		else if ("atr_dv_g".equals(attribute)) return 1 << 6;
+		else if ("atr_dv_h".equals(attribute)) return 1 << 7;
+		else if ("atr_dv_i".equals(attribute)) return 1 << 8;
+		else if ("atr_dv_j".equals(attribute)) return 1 << 9;
 	
+		else if ("atr_sv_a".equals(attribute)) return 1 << 0;
+		else if ("atr_sv_b".equals(attribute)) return 1 << 1;
+		else if ("atr_sv_c".equals(attribute)) return 1 << 2;
+		else if ("atr_sv_d".equals(attribute)) return 1 << 3;
+		else if ("atr_sv_e".equals(attribute)) return 1 << 4;
+		else if ("atr_sv_f".equals(attribute)) return 1 << 5;
+		else if ("atr_sv_g".equals(attribute)) return 1 << 6;
+		else if ("atr_sv_h".equals(attribute)) return 1 << 7;
+		else if ("atr_sv_i".equals(attribute)) return 1 << 8;
+		else if ("atr_sv_j".equals(attribute)) return 1 << 9;
+		
+		else if ("atr_fv_a".equals(attribute)) return 1 << 0;
+		else if ("atr_fv_b".equals(attribute)) return 1 << 1;
+		else if ("atr_fv_c".equals(attribute)) return 1 << 2;
+		else if ("atr_fv_d".equals(attribute)) return 1 << 3;
+		else if ("atr_fv_e".equals(attribute)) return 1 << 4;
+		else if ("atr_fv_f".equals(attribute)) return 1 << 5;
+		else if ("atr_fv_g".equals(attribute)) return 1 << 6;
+		else if ("atr_fv_h".equals(attribute)) return 1 << 7;
+		else if ("atr_fv_i".equals(attribute)) return 1 << 8;
+		else if ("atr_fv_j".equals(attribute)) return 1 << 9;
+		
+		else return 0;
+	}
 }
