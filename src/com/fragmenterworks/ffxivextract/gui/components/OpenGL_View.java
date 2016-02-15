@@ -58,6 +58,7 @@ public class OpenGL_View extends JPanel {
 		GLCapabilities glcapabilities = new GLCapabilities( glProfile );
         final GLCanvas glcanvas = new GLCanvas( glcapabilities );
         renderer = new ModelRenderer(model);
+        model.loadVariant(1);
         glcanvas.addGLEventListener(renderer);
         animator = new FPSAnimator(glcanvas, 30);
         animator.start();

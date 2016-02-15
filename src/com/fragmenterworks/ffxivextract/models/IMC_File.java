@@ -49,7 +49,7 @@ public class IMC_File {
 					first = bit;
 					gotFirst = true;
 				}
-				parts.put(bit, new ImcPart(bit, new VarianceInfo(bb.getShort(), bb.getShort(), bb.getShort())));
+				parts.put(i, new ImcPart(bit, new VarianceInfo(bb.getShort(), bb.getShort(), bb.getShort())));
 			}
 		}
 		
@@ -64,9 +64,14 @@ public class IMC_File {
 	public VarianceInfo getVarianceInfo(int i)
 	{			
 		if (i > numVariances || i == -1)
-			return parts.get(first).variants.get(0);
+			return parts.get(0).variants.get(0);
 		
-		return parts.get(first).variants.get(i);
+		return parts.get(0).variants.get(i);
+	}
+	
+	public ArrayList<VarianceInfo> getVariantsList(int key)
+	{
+		return parts.get(key).variants;
 	}
 	
 	public int getNumVariances()
@@ -95,6 +100,11 @@ public class IMC_File {
 			this.materialNumber = (short) (materialNumber == 0 ? 1 : materialNumber);
 			this.partVisibiltyMask = partVisiMask;
 			this.effectNumber = effectNumber;
+		}
+		
+		@Override
+		public String toString() {
+			return String.format("Mat#: %d, Parts:0x%x, Eff#: %d", materialNumber, partVisibiltyMask, effectNumber);
 		}
 	}
 }

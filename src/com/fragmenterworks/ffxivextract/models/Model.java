@@ -8,6 +8,7 @@ import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.ArrayList;
 
 import javax.media.opengl.GL3;
 import javax.media.opengl.GL3bc;
@@ -16,6 +17,7 @@ import com.fragmenterworks.ffxivextract.helpers.ImageDecoding.ImageDecodingExcep
 import com.fragmenterworks.ffxivextract.helpers.GLHelper;
 import com.fragmenterworks.ffxivextract.helpers.HavokNative;
 import com.fragmenterworks.ffxivextract.helpers.Utils;
+import com.fragmenterworks.ffxivextract.models.IMC_File.VarianceInfo;
 import com.fragmenterworks.ffxivextract.models.directx.DX9VertexElement;
 import com.fragmenterworks.ffxivextract.shaders.DefaultShader;
 import com.fragmenterworks.ffxivextract.shaders.HairShader;
@@ -76,6 +78,7 @@ public class Model {
 	//Incase a material in a different archive is needed
 	SqPack_IndexFile bgCommonIndex;
 	
+	private int imcPartsKey = 0;
 	private int currentVariant = 1;
 	
 	public Model(byte[] data)
@@ -190,7 +193,8 @@ public class Model {
 		
 		imcFile = loadImcFile();	
 		
-		loadVariant(1);
+		if (imcFile == null)
+			loadVariant(1);
 		
 		//Skip Stuff
 		bb.position(bb.position()+(32*unknownCount1));		
@@ -276,12 +280,40 @@ public class Model {
         	lodModels[i].loadMeshes(bb);
         }
         
+        if (modelPath != null)
+        {
+        	String modelPathSplit[] = modelPath.split("/");
+        	if (modelPathSplit[1].equals("monster"))        	
+        		imcPartsKey = 0;        	
+        	else if (modelPathSplit[1].equals("equipment"))
+        	{
+        		if (modelPath.endsWith("_top.mdl"))
+        			imcPartsKey = 1;        		
+        		else if (modelPath.endsWith("_glv.mdl"))
+        			imcPartsKey = 2;
+        		else if (modelPath.endsWith("_dwn.mdl"))
+        			imcPartsKey = 3;
+        		else if (modelPath.endsWith("_sho.mdl"))
+        			imcPartsKey = 4;
+        		else if (modelPath.endsWith("_ear.mdl"))
+        			imcPartsKey = 0;
+        		else if (modelPath.endsWith("_nek.mdl"))
+        			imcPartsKey = 1;
+        		else if (modelPath.endsWith("_wrs.mdl"))
+        			imcPartsKey = 2;
+        		else if (modelPath.endsWith("_rir.mdl"))
+        			imcPartsKey = 3;
+        		else if (modelPath.endsWith("_ril.mdl"))
+        			imcPartsKey = 4;
+        	}
+        }
+        
         //Skeletons and Animations
         if (!Constants.HAVOK_ENABLED)
         { 
         	numBones = -1;
         	return;
-        }
+        }               
         
         if (modelPath != null)
         {
@@ -415,8 +447,12 @@ public class Model {
 	
 	public void loadVariant(int variantNumber)
 	{		
-		currentVariant = variantNumber;
+		currentVariant = variantNumber-1;
 		
+		int materialNumber = -1;
+		if (imcFile != null)
+			materialNumber = imcFile.parts.get(imcPartsKey).variants.get(variantNumber).materialNumber;
+				
 		if (modelPath == null || modelPath.contains("null") || (!modelPath.contains("chara") && !modelPath.contains("bg")))
 			return;
 		
@@ -426,14 +462,12 @@ public class Model {
 		
 		if (!stringArray[numAtrStrings+numBoneStrings].startsWith("/") && !stringArray[numAtrStrings+numBoneStrings].contains("chara"))
 			materialFolderPath = stringArray[numAtrStrings+numBoneStrings].substring(0, stringArray[numAtrStrings+numBoneStrings].lastIndexOf("/"));
-		else if ((modelPath.contains("face") || modelPath.contains("hsair"))){
-			if (variantNumber == -1 || imcFile == null)
+		else if (modelPath.contains("face"))			
 				materialFolderPath = String.format("%smaterial", modelPath.substring(0, modelPath.indexOf("model")));
-			else
-				materialFolderPath = String.format("%smaterial/v%04d", modelPath.substring(0, modelPath.indexOf("model")), variantNumber);
-		}		
+		else if (modelPath.contains("hair"))
+				materialFolderPath = String.format("%smaterial/v%04d", modelPath.substring(0, modelPath.indexOf("model")), 1);		
 		else// if (imcFile != null && imcFile.getVarianceInfo(variantNumber-1) != null)
-			materialFolderPath = String.format("%smaterial/v%04d", modelPath.substring(0, modelPath.indexOf("model")), variantNumber);
+			materialFolderPath = String.format("%smaterial/v%04d", modelPath.substring(0, modelPath.indexOf("model")), materialNumber);
 		//else
 		//	materialFolderPath = String.format("%smaterial/v%04d", modelPath.substring(0, modelPath.indexOf("model")), 1);
 		
@@ -582,6 +616,14 @@ public class Model {
 		else
 			return imcFile.getNumVariances();
 	}
+	
+	public ArrayList<VarianceInfo> getVariantsList()
+	{
+		if (imcFile == null)
+			return null;
+		else
+			return imcFile.getVariantsList(imcPartsKey);
+	}
 
 	public void render(DefaultShader defaultShader, float[] viewMatrix, float[] modelMatrix,
 			float[] projMatrix, GL3bc gl, int currentLoD, boolean isGlow) {
@@ -618,8 +660,16 @@ public class Model {
 		    		for (int m = 0; m < meshPartTable[partNum+mesh.partTableOffset].attributeMasks.size(); m++)
 		    			fullMask |= meshPartTable[partNum+mesh.partTableOffset].attributeMasks.get(m);//(meshPartTable[mesh.partOffset+partNum].attributes << m);
 		    		
-		    		if ((imcFile.getVarianceInfo(currentVariant).partVisibiltyMask & fullMask) != fullMask)
-		    			continue;
+		    		if (imcFile == null)
+		    		{
+		    			if ((0x3FF & fullMask) != fullMask)
+			    			continue;
+		    		}
+		    		else
+		    		{
+			    		if ((imcFile.getVarianceInfo(currentVariant).partVisibiltyMask & fullMask) != fullMask)
+			    			continue;
+		    		}
 	    		}
 	    		
 		    	for (int e = 0; e < vertexElements[mesh.getVertexElementIndex()].length; e++)
