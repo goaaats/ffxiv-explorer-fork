@@ -171,8 +171,64 @@ public class HashFinding_Utils {
 		System.out.println("Done searching for music.");
 	}
 	
-	public static void findMapPaths() throws IOException
+	public static void findMapHashes()
 	{
+		try {
+			byte[] exhData = null;
+			SqPack_IndexFile index = null;
+			try {
+				index = new SqPack_IndexFile(Constants.datPath + "\\game\\sqpack\\ffxiv\\0a0000.win32.index", true);
+				exhData = index.extractFile("exd/map.exh");
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			
+			if (exhData == null)
+				return;
+			
+			EXHF_File exhfFile = new EXHF_File(exhData);
+			EXDF_View mapView = new EXDF_View(index, "exd/map.exh", exhfFile);
+			
+			HashDatabase.beginConnection();
+			try {
+				HashDatabase.setAutoCommit(false);
+			} catch (SQLException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+			for (int i = 0; i < mapView.getTable().getRowCount(); i++)
+			{
+				String map = ((String)mapView.getTable().getValueAt(i, 6));
+				
+				if (map == null || map.isEmpty())
+					continue;
+				
+				String mapFolder =  "ui/map/" + map;
+				
+				if (!((String)mapView.getTable().getValueAt(i, 6)).contains("/"))
+					continue;
+					
+				String[] split = ((String)mapView.getTable().getValueAt(i, 6)).split("/");
+				
+				HashDatabase.addPathToDB( mapFolder + "/" + split[0] + split[1] + "_m.tex", "060000", HashDatabase.globalConnection);
+				HashDatabase.addPathToDB( mapFolder + "/" + split[0] + split[1] + "_s.tex", "060000", HashDatabase.globalConnection);
+				HashDatabase.addPathToDB( mapFolder + "/" + split[0] + split[1] + "m_m.tex", "060000", HashDatabase.globalConnection);
+				HashDatabase.addPathToDB( mapFolder + "/" + split[0] + split[1] + "m_s.tex", "060000", HashDatabase.globalConnection);
+				HashDatabase.addPathToDB( mapFolder + "/" + split[0] + split[1] + "d.tex", "060000", HashDatabase.globalConnection);
+				
+				System.out.println("Added maps for: " + mapFolder + "/" + split[0] + split[1]);
+			}
+			try {
+				HashDatabase.commit();
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			HashDatabase.closeConnection();
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		
 	}
 	

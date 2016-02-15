@@ -175,35 +175,4 @@ public class Main {
 
 	}
 	
-	private static void getMapPaths()
-	{
-		try {
-			SqPack_IndexFile exdIndexFile = new SqPack_IndexFile(Constants.datPath + "\\game\\sqpack\\ffxiv\\0a0000.win32.index", true);
-			EXHF_File exhfFile = new EXHF_File(exdIndexFile.extractFile("exd/map.exh"));
-			EXDF_View itemView = new EXDF_View(exdIndexFile, "exd/map.exh", exhfFile);
-			
-			for (int i = 0; i < itemView.getTable().getRowCount(); i++)
-			{
-				String mapFolder =  "ui/map/" + itemView.getTable().getValueAt(i, 6);
-				
-				if (!((String)itemView.getTable().getValueAt(i, 6)).contains("/"))
-					continue;
-					
-				String[] split = ((String)itemView.getTable().getValueAt(i, 6)).split("/");
-				
-				HashDatabase.addPathToDB( mapFolder + "/" + split[0] + split[1] + "_m.tex", "060000");
-				HashDatabase.addPathToDB( mapFolder + "/" + split[0] + split[1] + "_s.tex", "060000");
-				HashDatabase.addPathToDB( mapFolder + "/" + split[0] + split[1] + "m_m.tex", "060000");
-				HashDatabase.addPathToDB( mapFolder + "/" + split[0] + split[1] + "m_s.tex", "060000");
-				HashDatabase.addPathToDB( mapFolder + "/" + split[0] + split[1] + "d.tex", "060000");
-				
-				System.out.println("Added maps for: " + mapFolder + "/" + split[0] + split[1]);
-			}
-			
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		
-	}
-	
 }
