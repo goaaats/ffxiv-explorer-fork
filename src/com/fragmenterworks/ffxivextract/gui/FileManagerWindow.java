@@ -414,11 +414,60 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 			}
 			else if (event.getActionCommand().equals("find_exh"))
 			{
+				if (Constants.datPath == null || Constants.datPath.isEmpty() || !new File(Constants.datPath).exists())
+				{
+					JOptionPane.showMessageDialog(
+			                FileManagerWindow.this,
+			                "You have not set a valid FFXIV path. Please set it first in Settings under the Options menu.",
+			                "FFXIV Path Not Set",
+			                JOptionPane.ERROR_MESSAGE);					
+					return;
+				}
 				HashFinding_Utils.findExhHashes();
+				
+				JOptionPane.showMessageDialog(
+		                FileManagerWindow.this,
+		                "Finished searching for hashes. Reopen the archive if you have it currently open.",
+		                "Done",
+		                JOptionPane.INFORMATION_MESSAGE);		
 			}
 			else if (event.getActionCommand().equals("find_music"))
 			{
+				if (Constants.datPath == null || Constants.datPath.isEmpty() || !new File(Constants.datPath).exists())
+				{
+					JOptionPane.showMessageDialog(
+			                FileManagerWindow.this,
+			                "You have not set a valid FFXIV path. Please set it first in Settings under the Options menu.",
+			                "FFXIV Path Not Set",
+			                JOptionPane.ERROR_MESSAGE);					
+					return;
+				}
 				HashFinding_Utils.findMusicHashes();
+				
+				JOptionPane.showMessageDialog(
+		                FileManagerWindow.this,
+		                "Finished searching for hashes. Reopen the archive if you have it currently open.",
+		                "Done",
+		                JOptionPane.INFORMATION_MESSAGE);	
+			}
+			else if (event.getActionCommand().equals("find_maps"))
+			{
+				if (Constants.datPath == null || Constants.datPath.isEmpty() || !new File(Constants.datPath).exists())
+				{
+					JOptionPane.showMessageDialog(
+			                FileManagerWindow.this,
+			                "You have not set a valid FFXIV path. Please set it first in Settings under the Options menu.",
+			                "FFXIV Path Not Set",
+			                JOptionPane.ERROR_MESSAGE);					
+					return;
+				}
+				HashFinding_Utils.findMapHashes();
+				
+				JOptionPane.showMessageDialog(
+		                FileManagerWindow.this,
+		                "Finished searching for hashes. Reopen the archive if you have it currently open.",
+		                "Done",
+		                JOptionPane.INFORMATION_MESSAGE);	
 			}
 			else if  (event.getActionCommand().equals("settings"))
 			{
@@ -512,11 +561,15 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 
 		JMenuItem tools_findexhs = new JMenuItem(Strings.MENUITEM_FIND_EXH);		
 		tools_findexhs.setActionCommand("find_exh");
-		tools_logViewer.addActionListener(menuHandler);
+		tools_findexhs.addActionListener(menuHandler);
 		
 		JMenuItem tools_findmusic = new JMenuItem(Strings.MENUITEM_FIND_MUSIC);		
 		tools_findmusic.setActionCommand("find_music");
 		tools_findmusic.addActionListener(menuHandler);
+		
+		JMenuItem tools_findmaps = new JMenuItem(Strings.MENUITEM_FIND_MAPS);		
+		tools_findmaps.setActionCommand("find_maps");
+		tools_findmaps.addActionListener(menuHandler);
 		
 		JMenuItem options_settings =  new JMenuItem(Strings.MENUITEM_SETTINGS);		
 		options_settings.setActionCommand("settings");
@@ -553,6 +606,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 		tools.addSeparator();
 		tools.add(tools_findexhs);
 		tools.add(tools_findmusic);
+		tools.add(tools_findmaps);
 		
 		options.add(options_settings);
 		options.add(options_enableUpdate);
