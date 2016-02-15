@@ -545,7 +545,7 @@ public class Outfitter extends JPanel {
 			HashDatabase.addPathToDB(modelPath, "040000");
 			
 			Model model = new Model(modelPath,modelIndexFile,modelData);
-			model.loadMaterials(-1);
+			model.loadVariant(-1);
 			renderer.setModel(0, model);
 		}
 		else
@@ -582,7 +582,7 @@ public class Outfitter extends JPanel {
 			HashDatabase.addPathToDB(modelPath, "040000");
 			
 			Model model = new Model(modelPath,modelIndexFile,modelData);
-			model.loadMaterials(-1);
+			model.loadVariant(-1);
 			renderer.setModel(2, model);
 		}
 		else
@@ -618,7 +618,7 @@ public class Outfitter extends JPanel {
 			HashDatabase.addPathToDB(modelPath, "040000");
 			
 			Model model = new Model(modelPath,modelIndexFile,modelData);
-			model.loadMaterials(-1);
+			model.loadVariant(-1);
 			renderer.setModel(1, model);
 		}
 		else
@@ -652,7 +652,7 @@ public class Outfitter extends JPanel {
 			HashDatabase.addPathToDB(modelPath, "040000");
 			
 			Model model = new Model(modelPath,modelIndexFile,modelData);
-			model.loadMaterials(-1);
+			model.loadVariant(-1);
 			renderer.setModel(0, model);
 		}
 		else
@@ -804,7 +804,7 @@ public class Outfitter extends JPanel {
 			HashDatabase.addPathToDB(modelPath, "040000");
 			
 			Model model = new Model(modelPath,modelIndexFile,modelData);
-			model.loadMaterials(currentItem.varient == 0 ? 1 : currentItem.varient);
+			model.loadVariant(currentItem.varient == 0 ? 1 : currentItem.varient);
 			renderer.setModel(2+modelSlot, model);
 		}
 		else

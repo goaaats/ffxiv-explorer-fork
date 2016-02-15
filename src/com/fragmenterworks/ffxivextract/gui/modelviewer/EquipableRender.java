@@ -45,7 +45,7 @@ public class EquipableRender {
 		HashDatabase.addPathToDB(modelPath, "040000");
 		
 		Model model = new Model(modelPath,modelIndexFile,modelData);
-		model.loadMaterials(varient);
+		model.loadVariant(varient);
 		
 		switch (type)
 		{

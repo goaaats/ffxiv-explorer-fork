@@ -5,14 +5,16 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 public class IMC_File {
 
 	private int numVariances;
-	private int numParts = 0;
 	private int partMask;	
+	private int first;
 	
-	VarianceInfo[] varianceInfoList;
+	HashMap<Integer, ImcPart> parts = new HashMap<Integer, ImcPart>();
 
 	public IMC_File(String path) throws IOException{
 		File file = new File(path);
@@ -34,8 +36,7 @@ public class IMC_File {
 		
 		numVariances = bb.getShort();
 		partMask = bb.getShort();
-		
-		varianceInfoList = new VarianceInfo[numVariances];
+		boolean gotFirst = false;
 		
 		//This is weird variants sitting here. SaintCoinach reads it based on the part mask.
 		for (int i = 0; i < 8; i++)
@@ -43,38 +44,45 @@ public class IMC_File {
 			int bit = (byte) (1 << i);
 			if ((partMask & bit) == bit)
 			{
-				bb.getShort();
-				bb.getShort();
-				bb.getShort();
-				numParts++;
+				if (!gotFirst)
+				{
+					first = bit;
+					gotFirst = true;
+				}
+				parts.put(bit, new ImcPart(bit, new VarianceInfo(bb.getShort(), bb.getShort(), bb.getShort())));
 			}
 		}
 		
 		//Get the variances
-		for (int p = 0; p < numParts; p++)
-		{
-			for (int i = 0; i < numVariances; i++)
-			{
-				short materialNumber = bb.getShort();
-				short partMask = bb.getShort();
-				short effectNumber = bb.getShort();
-				if (i == p)
-					varianceInfoList[i] = new VarianceInfo(materialNumber, partMask, effectNumber);
-			}
+		int remaining = numVariances;
+		while (--remaining >= 0){
+			for (ImcPart imcPart : parts.values())			
+				imcPart.variants.add(new VarianceInfo(bb.getShort(), bb.getShort(), bb.getShort()));			
 		}
 	}
 	
 	public VarianceInfo getVarianceInfo(int i)
 	{			
-		if (i >= numVariances || i == -1)
-			return varianceInfoList[0];
+		if (i > numVariances || i == -1)
+			return parts.get(first).variants.get(0);
 		
-		return varianceInfoList[i];
+		return parts.get(first).variants.get(i);
 	}
 	
 	public int getNumVariances()
 	{
 		return numVariances;
+	}
+	
+	public static class ImcPart{
+		public final int bit;
+		public final ArrayList<VarianceInfo> variants = new ArrayList<VarianceInfo>();
+		
+		public ImcPart(int bit, VarianceInfo variance)
+		{
+			this.bit = bit;
+			this.variants.add(variance);
+		}
 	}
 	
 	public static class VarianceInfo{

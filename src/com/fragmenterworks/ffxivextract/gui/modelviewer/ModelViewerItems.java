@@ -533,7 +533,7 @@ public class ModelViewerItems extends JPanel {
 			HashDatabase.addPathToDB(modelPath, "040000");
 			
 			Model model = new Model(modelPath,modelIndexFile,modelData);
-			model.loadMaterials(currentItem.varient == 0 ? 1 : currentItem.varient);
+			model.loadVariant(currentItem.varient == 0 ? 1 : currentItem.varient);
 			renderer.setModel(model);
 		}
 		

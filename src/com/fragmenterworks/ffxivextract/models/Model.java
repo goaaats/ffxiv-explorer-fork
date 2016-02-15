@@ -76,6 +76,8 @@ public class Model {
 	//Incase a material in a different archive is needed
 	SqPack_IndexFile bgCommonIndex;
 	
+	private int currentVariant = 1;
+	
 	public Model(byte[] data)
 	{
 		this(null, null, data);
@@ -186,8 +188,9 @@ public class Model {
 			System.out.println("Anim Things: " + numBoneStrings);
 		}
 		
-		imcFile = loadImcFile();		
-		loadMaterials(1);
+		imcFile = loadImcFile();	
+		
+		loadVariant(1);
 		
 		//Skip Stuff
 		bb.position(bb.position()+(32*unknownCount1));		
@@ -410,8 +413,10 @@ public class Model {
 					
 	}
 	
-	public void loadMaterials(int variantNumber)
+	public void loadVariant(int variantNumber)
 	{		
+		currentVariant = variantNumber;
+		
 		if (modelPath == null || modelPath.contains("null") || (!modelPath.contains("chara") && !modelPath.contains("bg")))
 			return;
 		
@@ -613,7 +618,7 @@ public class Model {
 		    		for (int m = 0; m < meshPartTable[partNum+mesh.partTableOffset].attributeMasks.size(); m++)
 		    			fullMask |= meshPartTable[partNum+mesh.partTableOffset].attributeMasks.get(m);//(meshPartTable[mesh.partOffset+partNum].attributes << m);
 		    		
-		    		if ((0x4f & fullMask) != fullMask)
+		    		if ((imcFile.getVarianceInfo(currentVariant).partVisibiltyMask & fullMask) != fullMask)
 		    			continue;
 	    		}
 	    		

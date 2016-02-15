@@ -212,7 +212,7 @@ public class OpenGL_View extends JPanel {
 				@Override
 				public void itemStateChanged(ItemEvent e) {
 					if (e.getStateChange() == ItemEvent.SELECTED) {
-				          model.loadMaterials(Integer.parseInt((String)e.getItem()));
+				          model.loadVariant(Integer.parseInt((String)e.getItem()));
 				          renderer.resetMaterial();
 				    }
 				}

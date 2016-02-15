@@ -368,7 +368,7 @@ public class EXD_Searcher {
 							System.out.println("->Getting model " + folder.getFiles()[j].getName());
 							Model m = new Model(folder.getName() + "/" + folder.getFiles()[j].getName(), currentIndex, currentIndex.extractFile(folder.getFiles()[j].dataoffset, null));
 							for (int x = 0; x < m.getNumVariants(); x++)
-								m.loadMaterials(x);
+								m.loadVariant(x);
 						}
 					}
 			}
