@@ -235,8 +235,7 @@ public class OpenGL_View extends JPanel {
 	        
 	        panel_4.add(cmbVariantChooser);
         }
-               
-        
+                       
         JPanel panel_5 = new JPanel();
         panel.add(panel_5, BorderLayout.CENTER);
         panel_5.setLayout(new BoxLayout(panel_5, BoxLayout.X_AXIS));

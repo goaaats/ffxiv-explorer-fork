@@ -293,6 +293,8 @@ public class ModelViewerItems extends JPanel {
 				if (currentCategory == -1)
 					return;
 				
+				lstItems.clearSelection();
+				
 				String filter = edtSearch.getText();
 
 				filteredEntries.clear();
@@ -432,12 +434,14 @@ public class ModelViewerItems extends JPanel {
 			
 			@Override
 			public void valueChanged(ListSelectionEvent event) {				
-								
-				
+												
 				if (event.getValueIsAdjusting() || lstItems.getModel().getSize() == 0 || currentCategory == -1)
 					return;				
 				
 				int selected = lstItems.getSelectedIndex();
+				
+				if (selected == -1)
+					return;
 				
 				loadModel(-1, selected);
 			}

@@ -255,6 +255,9 @@ public class ModelViewerFurniture extends JPanel {
 				
 				int selected = lstFurniture.getSelectedIndex();
 				
+				if (selected == -1)
+					return;
+				
 				String modelPath = null;
 				byte[] modelData = null;
 				try {

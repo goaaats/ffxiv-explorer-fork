@@ -184,6 +184,9 @@ public class ModelViewerMonsters extends JPanel {
 				
 				int selected = lstMonsters.getSelectedIndex();
 				
+				if (selected == -1)
+					return;
+				
 				String modelPath = null;
 				byte[] modelData = null;
 				try {
@@ -364,13 +367,25 @@ public class ModelViewerMonsters extends JPanel {
 			public void actionPerformed(ActionEvent e) {
 				String filter = edtSearch.getText();
 
+				lstMonsters.clearSelection();
+				
 				filteredEntries.clear();
 
-				for (int i = 0; i < entries.size(); i++) {
-					if (names.get(entries.get(i).index, "Monster " + entries.get(i).index).toLowerCase().contains(filter.toLowerCase()))
-						filteredEntries.add(entries.get(i));
+				int number = -1;
+				
+				try{
+				number = Integer.parseUnsignedInt(filter);
 				}
-
+				catch (NumberFormatException e2){}							
+				
+				for (int i = 0; i < entries.size(); i++) {										
+					if (number != -1 && entries.get(i).index == number)
+						filteredEntries.add(entries.get(i));
+					
+					if (number == -1 && names.get(entries.get(i).index, "Monster " + entries.get(i).index).toLowerCase().contains(filter.toLowerCase()))
+						filteredEntries.add(entries.get(i));
+				}								
+				
 				((MonsterListModel) lstMonsters.getModel()).refresh();
 			}
 		};
