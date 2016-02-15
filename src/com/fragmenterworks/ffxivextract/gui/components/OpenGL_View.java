@@ -14,6 +14,7 @@ import javax.media.opengl.GLCapabilities;
 import javax.media.opengl.GLProfile;
 import javax.media.opengl.awt.GLCanvas;
 import javax.swing.BoxLayout;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -41,6 +42,7 @@ public class OpenGL_View extends JPanel {
 	JComboBox cmbLodChooser, cmbVariantChooser, cmbAnimation;
 	JSpinner spnSpeed;
 	JSlider sldFrame;
+	JCheckBox chkGlowToggle;
 	
 	FPSAnimator animator;
 	ModelRenderer renderer;
@@ -197,8 +199,20 @@ public class OpenGL_View extends JPanel {
         flowLayout.setAlignment(FlowLayout.RIGHT);
         panel_1.add(panel_4);
         
+        chkGlowToggle = new JCheckBox("Glow Shader", true);
+        panel_4.add(chkGlowToggle);
+			
+		chkGlowToggle.addChangeListener(new ChangeListener() {
+			
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				renderer.toggleGlow(chkGlowToggle.isSelected());
+			}
+		});
+        
         JLabel lblVariant = new JLabel("Variant:");
         panel_4.add(lblVariant);
+                
         
         if (model.getNumVariants() > -1){
 	        cmbVariantChooser = new JComboBox();
@@ -221,6 +235,7 @@ public class OpenGL_View extends JPanel {
 	        
 	        panel_4.add(cmbVariantChooser);
         }
+               
         
         JPanel panel_5 = new JPanel();
         panel.add(panel_5, BorderLayout.CENTER);

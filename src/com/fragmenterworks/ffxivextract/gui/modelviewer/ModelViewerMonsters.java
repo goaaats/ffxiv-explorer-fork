@@ -20,11 +20,14 @@ import javax.media.opengl.GLProfile;
 import javax.media.opengl.awt.GLCanvas;
 import javax.swing.AbstractListModel;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
@@ -67,6 +70,7 @@ public class ModelViewerMonsters extends JPanel {
 	JLabel txtModelInfo;
 	JButton btnColorSet;
 	JButton btnResetCamera;
+	JCheckBox chkGlowToggle;
 	
 	JTextField edtSearch;
 	JButton btnSearch;
@@ -136,11 +140,22 @@ public class ModelViewerMonsters extends JPanel {
 		btnResetCamera = new JButton("Reset Camera");
 		panel_6.add(btnResetCamera);
 		
+		chkGlowToggle = new JCheckBox("Glow Shader", true);
+		panel_6.add(chkGlowToggle);
+		
 		btnResetCamera.addActionListener(new ActionListener() {
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				renderer.resetCamera();
+			}
+		});
+		
+		chkGlowToggle.addChangeListener(new ChangeListener() {
+			
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				renderer.toggleGlow(chkGlowToggle.isSelected());
 			}
 		});
 		
