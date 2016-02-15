@@ -2,15 +2,19 @@ package com.fragmenterworks.ffxivextract.helpers;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.sql.SQLException;
 
 import com.fragmenterworks.ffxivextract.storage.HashDatabase;
-
+import com.fragmenterworks.ffxivextract.Constants;
+import com.fragmenterworks.ffxivextract.gui.components.EXDF_View;
+import com.fragmenterworks.ffxivextract.models.EXHF_File;
 import com.fragmenterworks.ffxivextract.models.Model;
 import com.fragmenterworks.ffxivextract.models.SqPack_IndexFile;
 import com.fragmenterworks.ffxivextract.models.SqPack_IndexFile.SqPack_File;
@@ -18,151 +22,158 @@ import com.fragmenterworks.ffxivextract.models.SqPack_IndexFile.SqPack_Folder;
 
 public class EXD_Searcher {
 
-	public static void saveEXL()
+	public static void findExhHashes()
 	{
-		InputStream in;
-		BufferedWriter writer = null;
+		System.out.println("Opening Root.exl");
 		
-		boolean readingName = true;
+		byte[] rootData = null;
+		SqPack_IndexFile index = null;
+		try {
+			index = new SqPack_IndexFile(Constants.datPath + "\\game\\sqpack\\ffxiv\\0a0000.win32.index", true);
+			rootData = index.extractFile("exd/root.exl");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		if (rootData == null)
+			return;
+		
+		System.out.println("Root.exl file loaded, starting search.");
 		
 		try {
-			in  = new FileInputStream("C:\\Users\\Filip\\Desktop\\exd\\root.exl");
-			writer = new BufferedWriter(new FileWriter("./exddump2.txt"));
+			InputStream in  = new ByteArrayInputStream(rootData);
+			StringBuilder sBuilder = new StringBuilder();
 			
+			HashDatabase.beginConnection();
+			try {
+				HashDatabase.setAutoCommit(false);
+			} catch (SQLException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+			boolean pastHeader = false;
+			boolean readingString = false;
 			while(true)
 			{
 				int b = in.read();
 				
+				//Get Past Header
+				if (!pastHeader && b == 0x0D)
+				{
+					int b2 = in.read();
+					if (b2 == 0x0A)
+					{
+						pastHeader = true;
+						readingString = true;
+						continue;
+					}
+					continue;
+				}
+				else if (!pastHeader)
+					continue;
+				
 				if (b == -1)
 					break;
-				
-				if (b == ',' || b == 0x0D)
+											
+				if (readingString && b == ',')
 				{
-					if (b == 0x0D)
-						in.read();
-					if (readingName)
-						writer.append("");
-					readingName = !readingName;
+					readingString = false;
+					String exhName = String.format("exd/%s.exh", sBuilder.toString());
+					HashDatabase.addPathToDB(exhName, "0a0000", HashDatabase.globalConnection);
+					System.out.println("Found: " + exhName);
+					sBuilder.setLength(0);
+					continue;
 				}
-	
-				System.out.println((char)b);
-				
-				if (readingName)
-					writer.append((char)b);
+				else if (!readingString && b == 0x0A)
+				{
+					readingString = true;
+					continue;
+				}
+				else if (readingString)				
+					sBuilder.append((char)b);				
+								
 			}
+			try {
+				HashDatabase.commit();
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			HashDatabase.closeConnection();
 			in.close();
-			writer.close();
+			
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
 		
+		System.out.println("Done searching for exhs");
 	}
 	
-	public static void saveEXDNames(SqPack_IndexFile currentIndexFile)
+	public static void findMusicHashes()
 	{
-		BufferedWriter writer = null;
-		try {writer = new BufferedWriter(new FileWriter("./exddump.txt"));
-		} catch (IOException e1) {
+		System.out.println("Opening bgm.exh");
+		
+		byte[] exhData = null;
+		SqPack_IndexFile index = null;
+		try {
+			index = new SqPack_IndexFile(Constants.datPath + "\\game\\sqpack\\ffxiv\\0a0000.win32.index", true);
+			exhData = index.extractFile("exd/bgm.exh");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		if (exhData == null)
+			return;
+		
+		EXDF_View viewer = null;
+		try {
+			viewer = new EXDF_View(index, "exd/bgm.exh", new EXHF_File(exhData));
+		} catch (IOException e2) {
+			// TODO Auto-generated catch block
+			e2.printStackTrace();
+		}
+		
+		if (viewer == null)
+			return;
+		
+		System.out.println("bgm.exh file loaded, filling db.");
+		
+		HashDatabase.beginConnection();
+		try {
+			HashDatabase.setAutoCommit(false);
+		} catch (SQLException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-		int numSaved = 0;
-		String string = "TEXT_";
-			for (int i = 0; i < currentIndexFile.getPackFolders().length; i++) {			
-				SqPack_Folder f = currentIndexFile.getPackFolders()[i];
-				for (int j = 0; j < f.getFiles().length; j++) {
-					SqPack_File fi = f.getFiles()[j];
-					byte[] data;
-					try {
-						data = currentIndexFile.extractFile(fi.dataoffset, null);
-						if (data == null)
-							continue;
-						
-						for (int i2 = 0; i2 < data.length - string.length(); i2++) {
-							boolean exitFile = false;
-							for (int j2 = 0; j2 < string.length(); j2++) {
-								if (data[i2 + j2] == string.charAt(j2)) {
-									if (j2 == string.length() - 1) {																								
-										
-										//Look for end
-										int endString = 0;
-										int underScoreCount = 0;
-										for (int endSearch = i2; endSearch < data.length - string.length(); endSearch++)
-										{																					
-											if (data[endSearch] == '_')											
-												underScoreCount++;
-											
-											if (underScoreCount >= 3)
-											{
-												endString = endSearch;
-												break;
-											}
-										}										
-	
-										//Hack for last file
-										if (endString == 0)
-											endString = data.length-1;
-										
-										//Get full path
-										String fullpath = new String(data, i2, endString-i2);
-										fullpath = HashDatabase.getFolder(f.getId()) + "/" + fullpath.toLowerCase();
-																				
-										writer.write(fullpath + ".exh\r\n");
-										writer.write(fullpath + "_0_en.exd\r\n");
-										writer.write(fullpath + "_0_ja.exd\r\n");
-										writer.write(fullpath + "_0_de.exd\r\n");
-										writer.write(fullpath + "_0_fr.exd\r\n");
-										System.out.println("=> "+ fullpath);
-										exitFile = true;							
-										numSaved++;
-																										
-									} else
-										continue;
-								} else
-									break;
-							}	
-							if (exitFile)
-								break;
-						}
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-	
-				}								
-			}
-			System.out.println("Saved " + numSaved +"names.");
-			try {
-				writer.close();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-	
-	public static void createEXDFiles(String path)
-	{
-		try {
-			BufferedReader reader = new BufferedReader(new FileReader(path));
-			BufferedWriter writer = new BufferedWriter(new FileWriter(path+"out.txt"));
+		for (int i = 1; i < viewer.getTable().getRowCount(); i++)
+		{
+			String path = String.format("%s",(String) viewer.getTable().getValueAt(i, 1));
 			
-			while(true){
-				String in = reader.readLine();
-				if (in == null)
-					break;
-				in.replace("\n", "");
-				in.replace("\r", "");
-				writer.write("exd/"+in + ".exh\r\n");
-			}
-			reader.close();
-			writer.close();
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
+			if (path == null || path.isEmpty())
+				continue;
+			
+			String archive = path.contains("ex1") ? "0c0100" : "0c0000";
+			
+			HashDatabase.addPathToDB(path, archive, HashDatabase.globalConnection);
+			System.out.println("Found: " + path);
+		}
+		
+		try {
+			HashDatabase.commit();
+		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		HashDatabase.closeConnection();
+	
+		
+		System.out.println("Done searching for music.");
+	}
+	
+	public static void findMapPaths() throws IOException
+	{
+		
 	}
 	
 	public static void getModelsFromModelChara(String path)
@@ -315,42 +326,6 @@ public class EXD_Searcher {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	}
-	
-	public static void generateMaps(String path) throws IOException
-	{
-		//String regions[] = {"f", "s", "w", "r", "l"};
-		//String types[] = {"f", "t", "h", "r", "d"};		
-		BufferedWriter writer = new BufferedWriter(new FileWriter(path+"out.txt"));
-		/*
-		for (int i = 0; i < regions.length; i++)
-		{
-			for (int i2 = 0; i2 < 5; i2++)
-			{
-				for (int i3 = 0; i3 < types.length; i3++)
-				{
-					for (int i4 = 0; i4 < 10; i4++)
-					{
-						for (int floor = 0; floor < 8; floor++)
-						{
-							String spath = String.format("ui/map/%s%d%s%d/%02d/", regions[i], i2, types[i3], i4, floor);
-							writer.write(spath + String.format("%s%d%s%d%02dd.tex\r\n", regions[i], i2, types[i3], i4, floor));
-							writer.write(spath + String.format("%s%d%s%d%02d_s.tex\r\n", regions[i], i2, types[i3], i4, floor));
-							writer.write(spath + String.format("%s%d%s%d%02ds_s.tex\r\n", regions[i], i2, types[i3], i4, floor));
-							writer.write(spath + String.format("%s%d%s%d%02d_m.tex\r\n", regions[i], i2, types[i3], i4, floor));
-							writer.write(spath + String.format("%s%d%s%d%02dm_m.tex\r\n", regions[i], i2, types[i3], i4, floor));
-							System.out.println("Creating: " + spath + String.format("%s%d%s%d%02dd.tex\r\n", regions[i], i2, types[i3], i4, floor));
-						}
-					}
-				}
-			}
-		}*/
-		
-		writer.write("ui/map/default/00/default00m_m.tex\r\n");
-		writer.write("ui/map/default/00/default00s_s.tex\r\n");
-		writer.write("ui/map/default/00/default00_m.tex\r\n");
-		
-		writer.close();
 	}
 	
 	public static void openEveryModel()
