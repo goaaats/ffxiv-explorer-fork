@@ -407,7 +407,7 @@ public class MusicSwapperWindow extends JFrame {
 				String lastLoaded = "";						
 				try {
 					//Generate DAT
-					customDatPath = edittingIndexFile.getParent() + "\\" + originalMusicFile.getName().replace(".index", ".dat") + currentDatIndex;
+					customDatPath = String.format("%s\\%s.win32.dat%d", edittingIndexFile.getParent(), originalMusicFile.getName(), currentDatIndex);
 					File datlstfile = new File(customDatPath + ".lst");
 					datlstfile.delete();
 					
@@ -539,82 +539,59 @@ public class MusicSwapperWindow extends JFrame {
 		backup = new File(file.getParentFile().getAbsoluteFile(),
 				file.getName()+".bak");
 		if (backup.exists()) {
-			System.out.println("Backup found, checking file.");
-			// Should hash here, but for now just check file counts
-			originalMusicFile = new SqPack_IndexFile(backup.getCanonicalPath(), true);
-			editMusicFile = new SqPack_IndexFile(file.getCanonicalPath(), true);
-			
-			Arrays.sort(editMusicFile.getPackFolders()[0].getFiles(), new Comparator<SqPack_File>() {
-
-				@Override
-				public int compare(SqPack_File o1, SqPack_File o2) {
-					return o1.getName2().compareTo(o2.getName2());
-				}
-			});
-											
-			SqPack_File[] files = originalMusicFile.getPackFolders()[0].getFiles();
-			for (int i = 0; i < files.length; i ++)
-				originalPositionTable.put(files[i].id, i);
-			
-			Arrays.sort(originalMusicFile.getPackFolders()[0].getFiles(), new Comparator<SqPack_File>() {
-
-				@Override
-				public int compare(SqPack_File o1, SqPack_File o2) {
-					return o1.getName2().compareTo(o2.getName2());
-				}
-			});
-			
-			originalFiles = originalMusicFile.getPackFolders()[0].getFiles();
-			editedFiles = editMusicFile.getPackFolders()[0].getFiles();
-
-			// Throw and remake backup
-			if (originalFiles.length != editedFiles.length) {
-				System.out
-						.println("File mismatch, there was an update... remaking backup");
-				backup.delete();
-				copyFile(file, backup);
-				originalMusicFile = new SqPack_IndexFile(
-						backup.getCanonicalPath(), true);
-				originalFiles = originalMusicFile.getPackFolders()[0]
-						.getFiles();
-			}
-			System.out.println("File is good.");
-			lblBackup.setText("Backup exists. Remember to restore before patching.");
-			btnBackup.setEnabled(false);
+			System.out.println("Backup found, checking file.");			
 			btnRestore.setEnabled(true);
+			lblBackup.setText("Backup exists. Remember to restore before patching.");
 		} else {
 			// Create backup
-			copyFile(file, backup);
-			editMusicFile = new SqPack_IndexFile(file.getCanonicalPath(), true);
-			originalMusicFile = new SqPack_IndexFile(backup.getCanonicalPath(), true);
+			copyFile(file, backup);			
 			
-			Arrays.sort(editMusicFile.getPackFolders()[0].getFiles(), new Comparator<SqPack_File>() {
-
-				@Override
-				public int compare(SqPack_File o1, SqPack_File o2) {
-					return o1.getName2().compareTo(o2.getName2());
-				}
-			});
-			
-			Arrays.sort(originalMusicFile.getPackFolders()[0].getFiles(), new Comparator<SqPack_File>() {
-
-				@Override
-				public int compare(SqPack_File o1, SqPack_File o2) {
-					return o1.getName2().compareTo(o2.getName2());
-				}
-			});
-			
-			originalFiles = originalMusicFile.getPackFolders()[0].getFiles();
-			editedFiles = editMusicFile.getPackFolders()[0].getFiles();
-			
-			for (int i = 0; i < originalFiles.length; i ++)
-				originalPositionTable.put(originalFiles[i].id, i);
-			
-			lblBackup.setText("Backup was auto generated. Remember to restore before patching.");
-			btnBackup.setEnabled(false);
-			btnRestore.setEnabled(true);			
+			lblBackup.setText("Backup was auto generated. Remember to restore before patching.");				
 		}
 
+		// Should hash here, but for now just check file counts
+		originalMusicFile = new SqPack_IndexFile(backup.getCanonicalPath(), true);
+		editMusicFile = new SqPack_IndexFile(file.getCanonicalPath(), true);
+		
+		Arrays.sort(editMusicFile.getPackFolders()[0].getFiles(), new Comparator<SqPack_File>() {
+
+			@Override
+			public int compare(SqPack_File o1, SqPack_File o2) {
+				return o1.getName2().compareTo(o2.getName2());
+			}
+		});
+										
+		SqPack_File[] files = originalMusicFile.getPackFolders()[0].getFiles();
+		for (int i = 0; i < files.length; i ++)
+			originalPositionTable.put(files[i].id, i);
+		
+		Arrays.sort(originalMusicFile.getPackFolders()[0].getFiles(), new Comparator<SqPack_File>() {
+
+			@Override
+			public int compare(SqPack_File o1, SqPack_File o2) {
+				return o1.getName2().compareTo(o2.getName2());
+			}
+		});
+		
+		originalFiles = originalMusicFile.getPackFolders()[0].getFiles();
+		editedFiles = editMusicFile.getPackFolders()[0].getFiles();
+
+		// Throw and remake backup
+		if (originalFiles.length != editedFiles.length) {
+			System.out
+					.println("File mismatch, there was an update... remaking backup");
+			backup.delete();
+			copyFile(file, backup);
+			originalMusicFile = new SqPack_IndexFile(
+					backup.getCanonicalPath(), true);
+			originalFiles = originalMusicFile.getPackFolders()[0]
+					.getFiles();
+		}
+		
+		System.out.println("File is good.");
+		btnBackup.setEnabled(false);
+		btnRestore.setEnabled(true);
+		
 		// Set Current Index
 		LERandomAccessFile input = new LERandomAccessFile(backup, "r");
 		input.seek(0x450);		
