@@ -81,12 +81,13 @@ public class IMC_File {
 	
 	public static class ImcPart{
 		public final int bit;
+		public final VarianceInfo partsVarient;
 		public final ArrayList<VarianceInfo> variants = new ArrayList<VarianceInfo>();
 		
 		public ImcPart(int bit, VarianceInfo variance)
 		{
 			this.bit = bit;
-			this.variants.add(variance);
+			partsVarient = variance;
 		}
 	}
 	

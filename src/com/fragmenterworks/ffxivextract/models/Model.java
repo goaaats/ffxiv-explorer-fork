@@ -451,7 +451,7 @@ public class Model {
 		
 		int materialNumber = -1;
 		if (imcFile != null)
-			materialNumber = imcFile.parts.get(imcPartsKey).variants.get(variantNumber).materialNumber;
+			materialNumber = imcFile.parts.get(imcPartsKey).variants.get(currentVariant).materialNumber;
 				
 		if (modelPath == null || modelPath.contains("null") || (!modelPath.contains("chara") && !modelPath.contains("bg")))
 			return;
