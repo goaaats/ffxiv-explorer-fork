@@ -1,4 +1,4 @@
-package com.fragmenterworks.ffxivextract.helpers;
+package ca.fraggergames.ffxivextract.helpers;
 
 public class LuaDec {
 
