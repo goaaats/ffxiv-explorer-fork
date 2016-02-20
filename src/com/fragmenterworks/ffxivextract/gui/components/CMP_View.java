@@ -46,13 +46,7 @@ public class CMP_View extends JPanel {
 		    	}
 		    }
 		}
-		
-		try {
-		    File outputfile = new File("saved.png");
-		    ImageIO.write(image, "png", outputfile);
-		} catch (IOException e) {
-		}
-		
+				
 		Image scaled = image.getScaledInstance(100, 500, Image.SCALE_DEFAULT);
 		
 		canvas.setIcon(new ImageIcon(image));
