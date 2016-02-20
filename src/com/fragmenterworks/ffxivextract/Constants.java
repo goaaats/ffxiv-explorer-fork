@@ -8,7 +8,7 @@ import javax.swing.UIManager;
 public class Constants {
 
 	public static final String APPNAME = "FFXIV Data Explorer";
-	public static final String VERSION = "v1.7a";
+	public static final String VERSION = "v1.7";
 	public static final int APP_VERSION_CODE = 9;
 	public static final int DB_VERSION_CODE = 8;	
 	
