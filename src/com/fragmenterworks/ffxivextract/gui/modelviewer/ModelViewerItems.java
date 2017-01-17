@@ -57,9 +57,9 @@ import java.awt.Component;
 public class ModelViewerItems extends JPanel {
 	
 	public static final int INDEX_ITEM_NAME = 10;
-	public static final int INDEX_ITEM_MODEL1 = 29;
-	public static final int INDEX_ITEM_MODEL2 = 30;
-	public static final int INDEX_ITEM_SLOT = 28;
+	public static final int INDEX_ITEM_MODEL1 = 54;
+	public static final int INDEX_ITEM_MODEL2 = 55;
+	public static final int INDEX_ITEM_SLOT = 18;
 	
 	ModelViewerWindow parent;
 	
@@ -565,11 +565,10 @@ public class ModelViewerItems extends JPanel {
 	{		
 		EXDF_View view = itemView;
 		view.setLangOverride(1);
-		
 		try{
 			for (int i = 0; i < view.getTable().getRowCount(); i++){
 				if (view.getTable().getValueAt(i, 0) instanceof Integer && !((String)view.getTable().getValueAt(i, INDEX_ITEM_MODEL1)).equals("0, 0, 0, 0"))
-				{				
+				{									
 					String model1Split[] = ((String)view.getTable().getValueAt(i, INDEX_ITEM_MODEL1)).split(",");
 					String model2Split[] = ((String)view.getTable().getValueAt(i, INDEX_ITEM_MODEL1)).split(",");										
 					
@@ -585,8 +584,7 @@ public class ModelViewerItems extends JPanel {
 					int model = !isWeap ? Integer.parseInt(model1Split[2].trim()) : Integer.parseInt(model1Split[1].trim());
 					int varient = !isWeap ? Integer.parseInt(model1Split[1].trim()) : Integer.parseInt(model1Split[2].trim());
 					
-					int type = slot;
-					
+					int type = slot;				
 					entries[slot].add(new ModelItemEntry(name, id, model, varient, type));			
 				}
 			}		
