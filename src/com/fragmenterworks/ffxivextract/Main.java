@@ -16,7 +16,6 @@ import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 
 import com.fragmenterworks.ffxivextract.storage.HashDatabase;
-import com.mysql.jdbc.Connection;
 import com.fragmenterworks.ffxivextract.gui.FileManagerWindow;
 import com.fragmenterworks.ffxivextract.gui.components.EXDF_View;
 import com.fragmenterworks.ffxivextract.gui.components.Update_Dialog;

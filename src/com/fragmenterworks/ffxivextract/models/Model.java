@@ -10,9 +10,6 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
 
-import javax.media.opengl.GL3;
-import javax.media.opengl.GL3bc;
-
 import com.fragmenterworks.ffxivextract.helpers.ImageDecoding.ImageDecodingException;
 import com.fragmenterworks.ffxivextract.helpers.GLHelper;
 import com.fragmenterworks.ffxivextract.helpers.HavokNative;
@@ -28,6 +25,8 @@ import com.fragmenterworks.ffxivextract.shaders.SimpleShader;
 import com.fragmenterworks.ffxivextract.Constants;
 import com.fragmenterworks.ffxivextract.storage.HashDatabase;
 import com.jogamp.common.nio.Buffers;
+import com.jogamp.opengl.GL3;
+import com.jogamp.opengl.GL3bc;
 
 public class Model {
 			
@@ -626,7 +625,7 @@ public class Model {
 	}
 
 	public void render(DefaultShader defaultShader, float[] viewMatrix, float[] modelMatrix,
-			float[] projMatrix, GL3bc gl, int currentLoD, boolean isGlow) {
+					   float[] projMatrix, GL3bc gl, int currentLoD, boolean isGlow) {
 		
 		if (simpleShader == null)
 			try {

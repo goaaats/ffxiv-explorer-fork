@@ -20,9 +20,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import javax.media.opengl.GLCapabilities;
-import javax.media.opengl.GLProfile;
-import javax.media.opengl.awt.GLCanvas;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -51,7 +48,10 @@ import com.fragmenterworks.ffxivextract.models.EXHF_File;
 import com.fragmenterworks.ffxivextract.models.Model;
 import com.fragmenterworks.ffxivextract.models.SqPack_IndexFile;
 import com.fragmenterworks.ffxivextract.storage.HashDatabase;
+import com.jogamp.opengl.GLCapabilities;
+import com.jogamp.opengl.GLProfile;
 import com.jogamp.opengl.util.FPSAnimator;
+import com.jogamp.opengl.awt.GLCanvas;
 
 import javax.swing.border.BevelBorder;
 
@@ -418,7 +418,6 @@ public class Outfitter extends JPanel {
 		panel_6.add(btnRRing);
 		btnRRing.setActionCommand("rring");
 		btnRRing.addActionListener(equipListener);
-		
 
 		GLProfile glProfile = GLProfile.getDefault();
 		GLCapabilities glcapabilities = new GLCapabilities( glProfile );

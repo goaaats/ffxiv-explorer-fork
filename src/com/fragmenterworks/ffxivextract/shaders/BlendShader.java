@@ -1,9 +1,9 @@
 package com.fragmenterworks.ffxivextract.shaders;
 
-import java.io.IOException;
+import com.jogamp.opengl.GL3;
+import com.jogamp.opengl.GL3bc;
 
-import javax.media.opengl.GL3;
-import javax.media.opengl.GL3bc;
+import java.io.IOException;
 
 public class BlendShader extends Shader {
 	

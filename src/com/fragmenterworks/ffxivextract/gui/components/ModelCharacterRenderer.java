@@ -6,12 +6,6 @@ import java.io.IOException;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
 
-import javax.media.opengl.GL3;
-import javax.media.opengl.GL3bc;
-import javax.media.opengl.GLAutoDrawable;
-import javax.media.opengl.GLEventListener;
-import javax.media.opengl.glu.GLU;
-
 import com.fragmenterworks.ffxivextract.Constants;
 import com.fragmenterworks.ffxivextract.helpers.Matrix;
 import com.fragmenterworks.ffxivextract.models.Model;
@@ -21,8 +15,12 @@ import com.fragmenterworks.ffxivextract.shaders.DefaultShader;
 import com.fragmenterworks.ffxivextract.shaders.FXAAShader;
 import com.fragmenterworks.ffxivextract.shaders.HairShader;
 import com.jogamp.common.nio.Buffers;
+import com.jogamp.opengl.GL3;
+import com.jogamp.opengl.GL3bc;
+import com.jogamp.opengl.GLAutoDrawable;
+import com.jogamp.opengl.GLEventListener;
 
-public class ModelCharacterRenderer implements GLEventListener{
+public class ModelCharacterRenderer implements GLEventListener {
 
 	private Model models[] = new Model[3+13]; //0: Body, 1: Head, 2: Hair, 3+:Equip
 	private ArrayList<Model> modelsToUnload = new ArrayList<Model>();	
@@ -239,8 +237,8 @@ public class ModelCharacterRenderer implements GLEventListener{
 	}
 
 	@Override
-	public void init(GLAutoDrawable drawable) {
-		GL3 gl = drawable.getGL().getGL3();      // get the OpenGL graphics context
+	public void init(GLAutoDrawable glAutoDrawable) {
+		GL3 gl = glAutoDrawable.getGL().getGL3();      // get the OpenGL graphics context
 	      gl.glClearColor(0.3f, 0.3f, 0.3f, 1.0f); // set background (clear) color
 	      gl.glClearDepth(1.0f);      // set clear depth value to farthest
 	      gl.glEnable(GL3.GL_DEPTH_TEST); // enables depth testing
@@ -351,5 +349,5 @@ public class ModelCharacterRenderer implements GLEventListener{
 		Constants.defaultEyeColor[1] = colorComponents[1];
 		Constants.defaultEyeColor[2] = colorComponents[2];
 	}
-	
+
 }

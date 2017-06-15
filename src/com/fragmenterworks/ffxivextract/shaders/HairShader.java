@@ -1,8 +1,8 @@
 package com.fragmenterworks.ffxivextract.shaders;
 
-import java.io.IOException;
+import com.jogamp.opengl.GL3;
 
-import javax.media.opengl.GL3;
+import java.io.IOException;
 
 public class HairShader extends Shader {
 	

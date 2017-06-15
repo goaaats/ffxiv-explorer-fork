@@ -8,8 +8,6 @@ import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
-import com.mysql.jdbc.util.Base64Decoder;
-
 public class SCD_File {
 		
 	final static int[] XORTABLE = { 0x003A, 0x0032, 0x0032, 0x0032, 0x0003, 0x007E, 0x0012,

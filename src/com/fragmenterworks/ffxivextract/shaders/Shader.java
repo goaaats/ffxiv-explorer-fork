@@ -7,13 +7,10 @@ import java.nio.FloatBuffer;
 import java.util.Hashtable;
 import java.util.Scanner;
 
-import javax.media.opengl.GL3;
-import javax.media.opengl.GL3bc;
-import javax.media.opengl.GLAutoDrawable;
-
 import com.fragmenterworks.ffxivextract.gui.components.OpenGL_View;
 import com.fragmenterworks.ffxivextract.helpers.Matrix;
 import com.fragmenterworks.ffxivextract.models.Material;
+import com.jogamp.opengl.GL3;
 
 
 public class Shader {

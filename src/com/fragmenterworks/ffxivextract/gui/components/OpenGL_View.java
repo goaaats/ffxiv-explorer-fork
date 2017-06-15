@@ -10,9 +10,6 @@ import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 
-import javax.media.opengl.GLCapabilities;
-import javax.media.opengl.GLProfile;
-import javax.media.opengl.awt.GLCanvas;
 import javax.swing.BoxLayout;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -30,6 +27,9 @@ import com.fragmenterworks.ffxivextract.models.Mesh;
 import com.fragmenterworks.ffxivextract.models.Model;
 
 import com.fragmenterworks.ffxivextract.Constants;
+import com.jogamp.opengl.GLCapabilities;
+import com.jogamp.opengl.GLProfile;
+import com.jogamp.opengl.awt.GLCanvas;
 import com.jogamp.opengl.util.FPSAnimator;
 import java.awt.Dimension;
 import javax.swing.JSeparator;
@@ -372,7 +372,7 @@ public class OpenGL_View extends JPanel {
         lblIndices.setText("Indices: " + indicesList);
         lblMeshes.setText("Num Meshes: " + (model.getMeshes(currentLoD) == null ? "NONE" : model.getMeshes(currentLoD).length));
         
-        add( glcanvas, BorderLayout.CENTER);
+        add(glcanvas, BorderLayout.CENTER);
 	}
 		
 }

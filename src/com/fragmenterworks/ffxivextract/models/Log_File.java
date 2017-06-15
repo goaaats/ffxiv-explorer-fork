@@ -8,7 +8,6 @@ import java.util.Date;
 import java.util.TimeZone;
 
 import com.fragmenterworks.ffxivextract.Constants;
-import com.mysql.jdbc.log.Log;
 
 import com.fragmenterworks.ffxivextract.helpers.FFXIV_String;
 import com.fragmenterworks.ffxivextract.helpers.LERandomAccessFile;

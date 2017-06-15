@@ -1,7 +1,6 @@
 package com.fragmenterworks.ffxivextract.helpers;
 
-import javax.media.opengl.GL3;
-import javax.media.opengl.GL3bc;
+import com.jogamp.opengl.GL3;
 
 public class GLHelper2 {
 

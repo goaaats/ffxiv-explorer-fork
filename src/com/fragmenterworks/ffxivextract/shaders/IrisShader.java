@@ -2,9 +2,8 @@ package com.fragmenterworks.ffxivextract.shaders;
 
 import java.io.IOException;
 
-import javax.media.opengl.GL3;
-
 import com.fragmenterworks.ffxivextract.models.Material;
+import com.jogamp.opengl.GL3;
 
 public class IrisShader extends Shader {
 	

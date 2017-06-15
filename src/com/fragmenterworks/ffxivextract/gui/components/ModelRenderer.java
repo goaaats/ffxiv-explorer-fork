@@ -6,12 +6,6 @@ import java.io.IOException;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
 
-import javax.media.opengl.GL3;
-import javax.media.opengl.GL3bc;
-import javax.media.opengl.GLAutoDrawable;
-import javax.media.opengl.GLEventListener;
-import javax.media.opengl.glu.GLU;
-
 import com.fragmenterworks.ffxivextract.Constants;
 import com.fragmenterworks.ffxivextract.helpers.HavokNative;
 import com.fragmenterworks.ffxivextract.helpers.Matrix;
@@ -22,8 +16,12 @@ import com.fragmenterworks.ffxivextract.shaders.DefaultShader;
 import com.fragmenterworks.ffxivextract.shaders.FXAAShader;
 
 import com.jogamp.common.nio.Buffers;
+import com.jogamp.opengl.GL3;
+import com.jogamp.opengl.GL3bc;
+import com.jogamp.opengl.GLAutoDrawable;
+import com.jogamp.opengl.GLEventListener;
 
-public class ModelRenderer implements GLEventListener{
+public class ModelRenderer implements GLEventListener {
 
 	private ArrayList<Model> models;
 	private ArrayList<Model> modelsToUnload = new ArrayList<Model>();
@@ -162,7 +160,7 @@ public class ModelRenderer implements GLEventListener{
 		modelsToUnload.clear();
 
 	    gl.glClearColor(0.3f,0.3f,0.3f,1.0f);
-	    gl.glClear(GL3.GL_COLOR_BUFFER_BIT | GL3.GL_DEPTH_BUFFER_BIT); 		  
+	    gl.glClear(GL3.GL_COLOR_BUFFER_BIT | GL3.GL_DEPTH_BUFFER_BIT);
 	    
 	    Matrix.setIdentityM(viewMatrix, 0);
 	    Matrix.setIdentityM(modelMatrix, 0);

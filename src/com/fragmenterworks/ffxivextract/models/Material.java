@@ -5,8 +5,6 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
-import javax.media.opengl.GL3;
-
 import com.fragmenterworks.ffxivextract.helpers.ShaderIdHelper;
 import com.fragmenterworks.ffxivextract.shaders.BGShader;
 import com.fragmenterworks.ffxivextract.shaders.CharacterShader;
@@ -16,6 +14,7 @@ import com.fragmenterworks.ffxivextract.shaders.IrisShader;
 import com.fragmenterworks.ffxivextract.shaders.Shader;
 import com.fragmenterworks.ffxivextract.shaders.SkinShader;
 import com.fragmenterworks.ffxivextract.storage.HashDatabase;
+import com.jogamp.opengl.GL3;
 
 
 public class Material {
