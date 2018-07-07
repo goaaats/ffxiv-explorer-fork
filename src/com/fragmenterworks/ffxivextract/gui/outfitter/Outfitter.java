@@ -43,6 +43,7 @@ import com.fragmenterworks.ffxivextract.gui.components.OpenGL_View;
 import com.fragmenterworks.ffxivextract.gui.modelviewer.ItemChooserDialog;
 import com.fragmenterworks.ffxivextract.gui.modelviewer.ModelItemEntry;
 import com.fragmenterworks.ffxivextract.gui.modelviewer.ModelViewerWindow;
+import com.fragmenterworks.ffxivextract.helpers.EXDDef;
 import com.fragmenterworks.ffxivextract.helpers.SparseArray;
 import com.fragmenterworks.ffxivextract.models.EXHF_File;
 import com.fragmenterworks.ffxivextract.models.Model;
@@ -56,12 +57,7 @@ import com.jogamp.opengl.awt.GLCanvas;
 import javax.swing.border.BevelBorder;
 
 public class Outfitter extends JPanel {
-	
-	public static final int INDEX_ITEM_NAME = 10;
-	public static final int INDEX_ITEM_MODEL1 = 29;
-	public static final int INDEX_ITEM_MODEL2 = 30;
-	public static final int INDEX_ITEM_SLOT = 28;
-	
+
 	ModelViewerWindow parent;
 	
 	ArrayList<ModelItemEntry> entries[] = new ArrayList[22];
@@ -671,12 +667,12 @@ public class Outfitter extends JPanel {
 		{
 			try{
 				int i = selected;		
-				String model1Split[] = ((String)itemView.getTable().getValueAt(i, INDEX_ITEM_MODEL1)).split(",");
-				String model2Split[] = ((String)itemView.getTable().getValueAt(i, INDEX_ITEM_MODEL1)).split(",");										
+				String model1Split[] = ((String)itemView.getTable().getValueAt(i, EXDDef.INDEX_ITEM_MODEL1)).split(",");
+				String model2Split[] = ((String)itemView.getTable().getValueAt(i, EXDDef.INDEX_ITEM_MODEL1)).split(",");
 				
-				slot = (Integer) itemView.getTable().getValueAt(i, INDEX_ITEM_SLOT);
+				slot = (Integer) itemView.getTable().getValueAt(i, EXDDef.INDEX_ITEM_SLOT);
 				
-				String name = (String)itemView.getTable().getValueAt(i, INDEX_ITEM_NAME);
+				String name = (String)itemView.getTable().getValueAt(i, EXDDef.INDEX_ITEM_NAME);
 				int id = Integer.parseInt(model1Split[0].trim());
 					
 				boolean isWeap = false;
@@ -839,7 +835,7 @@ public class Outfitter extends JPanel {
 					if (currentWeap1Item == -1)
 						((JButton)e.getSource()).setToolTipText("NONE");
 					else
-						((JButton)e.getSource()).setToolTipText((String)itemView.getTable().getValueAt(currentWeap1Item, INDEX_ITEM_NAME));
+						((JButton)e.getSource()).setToolTipText((String)itemView.getTable().getValueAt(currentWeap1Item, EXDDef.INDEX_ITEM_NAME));
 				}
 			}
 			else if (e.getActionCommand().equals("offhand"))
@@ -851,7 +847,7 @@ public class Outfitter extends JPanel {
 					if (currentWeap2Item == -1)
 						((JButton)e.getSource()).setToolTipText("NONE");
 					else
-						((JButton)e.getSource()).setToolTipText((String)itemView.getTable().getValueAt(currentWeap2Item, INDEX_ITEM_NAME));
+						((JButton)e.getSource()).setToolTipText((String)itemView.getTable().getValueAt(currentWeap2Item, EXDDef.INDEX_ITEM_NAME));
 				}
 			}
 			else if (e.getActionCommand().equals("head"))
@@ -863,7 +859,7 @@ public class Outfitter extends JPanel {
 					if (currentHeadItem == -1)
 						((JButton)e.getSource()).setToolTipText("NONE");
 					else
-						((JButton)e.getSource()).setToolTipText((String)itemView.getTable().getValueAt(currentHeadItem, INDEX_ITEM_NAME));
+						((JButton)e.getSource()).setToolTipText((String)itemView.getTable().getValueAt(currentHeadItem, EXDDef.INDEX_ITEM_NAME));
 				}				
 			}
 			else if (e.getActionCommand().equals("body"))
@@ -875,7 +871,7 @@ public class Outfitter extends JPanel {
 					if (currentBodyItem == -1)
 						((JButton)e.getSource()).setToolTipText("NONE");
 					else
-						((JButton)e.getSource()).setToolTipText((String)itemView.getTable().getValueAt(currentBodyItem, INDEX_ITEM_NAME));
+						((JButton)e.getSource()).setToolTipText((String)itemView.getTable().getValueAt(currentBodyItem, EXDDef.INDEX_ITEM_NAME));
 				}					
 			}
 			else if (e.getActionCommand().equals("gloves"))
@@ -887,7 +883,7 @@ public class Outfitter extends JPanel {
 					if (currentHandsItem == -1)
 						((JButton)e.getSource()).setToolTipText("NONE");
 					else
-						((JButton)e.getSource()).setToolTipText((String)itemView.getTable().getValueAt(currentHandsItem, INDEX_ITEM_NAME));
+						((JButton)e.getSource()).setToolTipText((String)itemView.getTable().getValueAt(currentHandsItem, EXDDef.INDEX_ITEM_NAME));
 				}				
 			}
 			else if (e.getActionCommand().equals("pants"))
@@ -899,7 +895,7 @@ public class Outfitter extends JPanel {
 					if (currentPantsItem == -1)
 						((JButton)e.getSource()).setToolTipText("NONE");
 					else
-						((JButton)e.getSource()).setToolTipText((String)itemView.getTable().getValueAt(currentPantsItem, INDEX_ITEM_NAME));
+						((JButton)e.getSource()).setToolTipText((String)itemView.getTable().getValueAt(currentPantsItem, EXDDef.INDEX_ITEM_NAME));
 				}				
 			}
 			else if (e.getActionCommand().equals("shoes"))
@@ -911,7 +907,7 @@ public class Outfitter extends JPanel {
 					if (currentFeetItem == -1)
 						((JButton)e.getSource()).setToolTipText("NONE");
 					else
-						((JButton)e.getSource()).setToolTipText((String)itemView.getTable().getValueAt(currentFeetItem, INDEX_ITEM_NAME));
+						((JButton)e.getSource()).setToolTipText((String)itemView.getTable().getValueAt(currentFeetItem, EXDDef.INDEX_ITEM_NAME));
 				}			
 			}
 			else if (e.getActionCommand().equals("neck"))
@@ -923,7 +919,7 @@ public class Outfitter extends JPanel {
 					if (currentNeckItem == -1)
 						((JButton)e.getSource()).setToolTipText("NONE");
 					else
-						((JButton)e.getSource()).setToolTipText((String)itemView.getTable().getValueAt(currentNeckItem, INDEX_ITEM_NAME));
+						((JButton)e.getSource()).setToolTipText((String)itemView.getTable().getValueAt(currentNeckItem, EXDDef.INDEX_ITEM_NAME));
 				}			
 			}
 			else if (e.getActionCommand().equals("ear"))
@@ -935,7 +931,7 @@ public class Outfitter extends JPanel {
 					if (currentEaringItem == -1)
 						((JButton)e.getSource()).setToolTipText("NONE");
 					else
-						((JButton)e.getSource()).setToolTipText((String)itemView.getTable().getValueAt(currentEaringItem, INDEX_ITEM_NAME));
+						((JButton)e.getSource()).setToolTipText((String)itemView.getTable().getValueAt(currentEaringItem, EXDDef.INDEX_ITEM_NAME));
 				}			
 			}
 			else if (e.getActionCommand().equals("wrist"))
@@ -947,7 +943,7 @@ public class Outfitter extends JPanel {
 					if (currentBracletItem == -1)
 						((JButton)e.getSource()).setToolTipText("NONE");
 					else
-						((JButton)e.getSource()).setToolTipText((String)itemView.getTable().getValueAt(currentBracletItem, INDEX_ITEM_NAME));
+						((JButton)e.getSource()).setToolTipText((String)itemView.getTable().getValueAt(currentBracletItem, EXDDef.INDEX_ITEM_NAME));
 				}			
 			}
 			else if (e.getActionCommand().equals("lring"))
@@ -959,7 +955,7 @@ public class Outfitter extends JPanel {
 					if (currentRing1Item == -1)
 						((JButton)e.getSource()).setToolTipText("NONE");
 					else
-						((JButton)e.getSource()).setToolTipText((String)itemView.getTable().getValueAt(currentRing1Item, INDEX_ITEM_NAME));
+						((JButton)e.getSource()).setToolTipText((String)itemView.getTable().getValueAt(currentRing1Item, EXDDef.INDEX_ITEM_NAME));
 				}			
 			}	
 			else if (e.getActionCommand().equals("rring"))
@@ -971,7 +967,7 @@ public class Outfitter extends JPanel {
 					if (currentRing2Item == -1)
 						((JButton)e.getSource()).setToolTipText("NONE");
 					else
-						((JButton)e.getSource()).setToolTipText((String)itemView.getTable().getValueAt(currentRing2Item, INDEX_ITEM_NAME));
+						((JButton)e.getSource()).setToolTipText((String)itemView.getTable().getValueAt(currentRing2Item, EXDDef.INDEX_ITEM_NAME));
 				}			
 			}	
 		}

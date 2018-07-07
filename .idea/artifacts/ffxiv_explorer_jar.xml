@@ -1,0 +1,26 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="ffxiv-explorer:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/ffxiv_explorer_jar</output-path>
+    <root id="archive" name="ffxiv-explorer.jar">
+      <element id="module-output" name="ffxiv-explorer" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/jogamp-all-platforms/jar/gluegen.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/jogamp-all-platforms/jar/gluegen-rt.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/jogamp-all-platforms/jar/jogl-all.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/jogamp-all-platforms/jar/jocl.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/jogamp-all-platforms/jar/joal.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/jogamp-all-platforms/jar/jogl-all-natives-windows-i586.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/jogamp-all-platforms/jar/jogl-all-natives-windows-amd64.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/jogamp-all-platforms/jar/jocl-natives-windows-i586.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/jogamp-all-platforms/jar/jocl-natives-windows-amd64.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/jogamp-all-platforms/jar/joal-natives-windows-i586.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/jogamp-all-platforms/jar/joal-natives-windows-amd64.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/jogamp-all-platforms/jar/gluegen-rt-natives-windows-i586.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/jogamp-all-platforms/jar/gluegen-rt-natives-windows-amd64.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/jogamp-all-platforms/jar/gluegen-rt-android-natives-windows-i586.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/jogamp-all-platforms/jar/gluegen-rt-android-natives-windows-amd64.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/sqlite-jdbc-3.21.0.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/gson-2.6.2.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/unluac_2015_06_13.jar" path-in-jar="/" />
+    </root>
+  </artifact>
+</component>

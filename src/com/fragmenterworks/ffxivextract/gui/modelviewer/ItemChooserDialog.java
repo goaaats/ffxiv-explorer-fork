@@ -27,10 +27,10 @@ import javax.swing.border.EmptyBorder;
 
 public class ItemChooserDialog extends JDialog {
 
-	public static final int INDEX_ITEM_NAME = 10;
-	public static final int INDEX_ITEM_MODEL1 = 29;
-	public static final int INDEX_ITEM_MODEL2 = 30;
-	public static final int INDEX_ITEM_SLOT = 28;
+	public static final int INDEX_ITEM_NAME = 1;
+	public static final int INDEX_ITEM_MODEL1 = 45;
+	public static final int INDEX_ITEM_MODEL2 = 46;
+	public static final int INDEX_ITEM_SLOT = 18;
 
 	private JTextField edtSearch;
 	private JList lstItems;

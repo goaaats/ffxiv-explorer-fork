@@ -1,0 +1,23 @@
+<component name="libraryTable">
+  <library name="gluegen">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/jogamp-all-platforms/jar/gluegen.jar!/" />
+      <root url="jar://$PROJECT_DIR$/jogamp-all-platforms/jar/gluegen-rt.jar!/" />
+      <root url="jar://$PROJECT_DIR$/jogamp-all-platforms/jar/jogl-all.jar!/" />
+      <root url="jar://$PROJECT_DIR$/jogamp-all-platforms/jar/jocl.jar!/" />
+      <root url="jar://$PROJECT_DIR$/jogamp-all-platforms/jar/joal.jar!/" />
+      <root url="jar://$PROJECT_DIR$/jogamp-all-platforms/jar/jogl-all-natives-windows-i586.jar!/" />
+      <root url="jar://$PROJECT_DIR$/jogamp-all-platforms/jar/jogl-all-natives-windows-amd64.jar!/" />
+      <root url="jar://$PROJECT_DIR$/jogamp-all-platforms/jar/jocl-natives-windows-i586.jar!/" />
+      <root url="jar://$PROJECT_DIR$/jogamp-all-platforms/jar/jocl-natives-windows-amd64.jar!/" />
+      <root url="jar://$PROJECT_DIR$/jogamp-all-platforms/jar/joal-natives-windows-i586.jar!/" />
+      <root url="jar://$PROJECT_DIR$/jogamp-all-platforms/jar/joal-natives-windows-amd64.jar!/" />
+      <root url="jar://$PROJECT_DIR$/jogamp-all-platforms/jar/gluegen-rt-natives-windows-i586.jar!/" />
+      <root url="jar://$PROJECT_DIR$/jogamp-all-platforms/jar/gluegen-rt-natives-windows-amd64.jar!/" />
+      <root url="jar://$PROJECT_DIR$/jogamp-all-platforms/jar/gluegen-rt-android-natives-windows-i586.jar!/" />
+      <root url="jar://$PROJECT_DIR$/jogamp-all-platforms/jar/gluegen-rt-android-natives-windows-amd64.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

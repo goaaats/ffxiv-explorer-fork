@@ -3,7 +3,7 @@ package com.fragmenterworks.ffxivextract.models;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.Calendar;
+import java.util.*;
 
 import javax.swing.JLabel;
 import javax.swing.JProgressBar;
@@ -21,6 +21,31 @@ public class SqPack_IndexFile {
 	private boolean noFolder = false;	
 
 	private boolean isFastloaded = false;
+
+	private static Map<String, SqPack_IndexFile> cachedIndexes = new HashMap<String, SqPack_IndexFile>();
+
+	/**
+	 *
+	 * @param pathToIndex
+	 * @param fastLoad
+	 * @return
+	 */
+	public static SqPack_IndexFile createIndexFileForPath(String pathToIndex, boolean fastLoad){
+		//Fast load will blindly load all files regardless of folder
+		String cacheKey = pathToIndex + ( fastLoad ? ":fast" : "" );
+		if(cachedIndexes.containsKey(cacheKey)){
+			return cachedIndexes.get(cacheKey);
+		}else{
+			try {
+				SqPack_IndexFile indexFile = new SqPack_IndexFile(pathToIndex, fastLoad);
+				cachedIndexes.put(cacheKey, indexFile);
+				return indexFile;
+			} catch ( IOException e ) {
+				e.printStackTrace();
+			}
+		}
+		return null;
+	}
 	
 	/**
 	  * Constructor. Primarily used by the FileManagerWindow to handle gui stuff. Loads all file info + structure info and names.

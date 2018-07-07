@@ -3,6 +3,9 @@ package com.fragmenterworks.ffxivextract.gui.components;
 import java.awt.BorderLayout;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
@@ -21,6 +24,7 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.AbstractTableModel;
 
+import com.fragmenterworks.ffxivextract.helpers.JOrbisPlayer;
 import com.fragmenterworks.ffxivextract.helpers.MSADPCM_Decode;
 import com.fragmenterworks.ffxivextract.models.SCD_File;
 import com.fragmenterworks.ffxivextract.models.SCD_File.SCD_Sound_Info;
@@ -29,7 +33,7 @@ public class Sound_View extends JPanel {
 	private JTable tblSoundEntyList;
 	SCD_File file;
 	
-	//OggVorbisPlayer currentlyPlayingSong;
+	JOrbisPlayer oggPlayer = new JOrbisPlayer();
 	
 	public Sound_View(SCD_File scdFile) {		
 		
@@ -63,6 +67,8 @@ public class Sound_View extends JPanel {
 					SCD_Sound_Info info = file.getSoundInfo(tblSoundEntyList.getSelectedRow());
 					if (info != null)
 					{
+						oggPlayer.stop();
+
 						if (info.dataType == 0x0C){
 							final byte[] header = file.getADPCMHeader(tblSoundEntyList.getSelectedRow());
 							final byte[] body = file.getADPCMData(tblSoundEntyList.getSelectedRow());
@@ -70,9 +76,19 @@ public class Sound_View extends JPanel {
 								
 								@Override
 								public void run() {
-									play(header, body);
+									playMsAdpcm(header, body);
 								}
 							}.start();						
+						}
+						else if (info.dataType == 0x06){
+							final byte[] body = file.getConverted(tblSoundEntyList.getSelectedRow());
+							new Thread() {
+
+								@Override
+								public void run() {
+									playOgg(body);
+								}
+							}.start();
 						}
 						else
 						{
@@ -84,7 +100,7 @@ public class Sound_View extends JPanel {
 		});
 		
 		this.addComponentListener(new ComponentListener() {
-			
+
 			@Override
 			public void componentShown(ComponentEvent arg0) {
 				// TODO Auto-generated method stub
@@ -105,6 +121,7 @@ public class Sound_View extends JPanel {
 			
 			@Override
 			public void componentHidden(ComponentEvent arg0) {
+				oggPlayer.stop();
 			}
 		});
 	}
@@ -173,9 +190,21 @@ public class Sound_View extends JPanel {
 			return "";
 		}
 
-	}	
+	}
 
-	public void play(byte[] header, byte[] body)
+	public void stopPlayback()
+	{
+		oggPlayer.stop();
+	}
+
+	public void playOgg(byte[] body)
+	{
+		System.out.println("Trying to play " + body.length + " bytes...");
+
+		oggPlayer.play(new ByteArrayInputStream(body));
+	}
+
+	public void playMsAdpcm(byte[] header, byte[] body)
 	{		
 		if (header == null || body == null)
 			return;

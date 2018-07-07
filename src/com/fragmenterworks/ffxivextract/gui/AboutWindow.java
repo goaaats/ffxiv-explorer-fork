@@ -38,7 +38,7 @@ public class AboutWindow extends JFrame {
 	JLabel version = new FancyJLabel(Strings.ABOUTDIALOG_VERSION + " " + Constants.VERSION);
 	JLabel gitcommit = new FancyJLabel(Strings.ABOUTDIALOG_GITVERSION + " " + Constants.COMMIT.substring(0, 10));
 	JLabel website = new FancyJLabel("<html><a href=\"\">"+Constants.URL_WEBSITE+"</a></html>");
-	JLabel specialThanks = new FancyJLabel("<html>Special Thanks to: Anwyll, Hezkezl, Clorifex, <br>and all those who donated to my tipjar!</html>");
+	JLabel specialThanks = new FancyJLabel("<html>Special Thanks to: Anwyll, Hezkezl, Clorifex, <br>and all those who donated to my tipjar!<br>ULD Renderer by Roze</html>");
 	
 	JLabel meImage = new JLabel();
 	
