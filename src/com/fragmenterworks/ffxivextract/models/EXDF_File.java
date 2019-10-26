@@ -8,17 +8,20 @@ import java.io.UnsupportedEncodingException;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 
-public class EXDF_File {
+public class EXDF_File extends Game_File {
 
 	private byte data[];
 	private EXDF_Offset entryOffsets[];
 	
 	public EXDF_File(byte[] data) throws IOException {
+		super(ByteOrder.BIG_ENDIAN);
 		loadEXDF(data);
 	}
 
 	public EXDF_File(String path) throws IOException, FileNotFoundException {
+		super(ByteOrder.BIG_ENDIAN);
 		File file = new File(path);
 		FileInputStream fis = new FileInputStream(file);
 		byte[] data = new byte[(int) file.length()];

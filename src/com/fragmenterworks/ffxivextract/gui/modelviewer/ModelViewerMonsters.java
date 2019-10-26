@@ -330,7 +330,7 @@ public class ModelViewerMonsters extends JPanel {
 						{
 							System.out.println("Adding Entry: " + modelPath);
 							HashDatabase.addPathToDB(modelPath, "040000");
-							Model model = new Model(modelPath,modelIndexFile,modelData);
+							Model model = new Model(modelPath,modelIndexFile,modelData, modelIndex.getEndian());
 							model.loadVariant(filteredEntries.get(selected).varient);
 							renderer.setModel(model);
 						}

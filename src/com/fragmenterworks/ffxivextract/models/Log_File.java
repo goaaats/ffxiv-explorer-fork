@@ -2,6 +2,7 @@ package com.fragmenterworks.ffxivextract.models;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.ByteOrder;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -10,7 +11,7 @@ import java.util.TimeZone;
 import com.fragmenterworks.ffxivextract.Constants;
 
 import com.fragmenterworks.ffxivextract.helpers.FFXIV_String;
-import com.fragmenterworks.ffxivextract.helpers.LERandomAccessFile;
+import com.fragmenterworks.ffxivextract.helpers.EARandomAccessFile;
 
 public class Log_File {
 	
@@ -37,7 +38,7 @@ public class Log_File {
 	private Log_Entry[] entries;
 	
 	public Log_File(String path) throws IOException, FileNotFoundException {
-		LERandomAccessFile file = new LERandomAccessFile(path, "r");
+		EARandomAccessFile file = new EARandomAccessFile(path, "r", ByteOrder.LITTLE_ENDIAN);
 		
 		//Read in sizes
 		int bodySize = file.readInt();

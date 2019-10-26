@@ -39,7 +39,7 @@ import com.fragmenterworks.ffxivextract.gui.modelviewer.ModelViewerWindow;
 import com.fragmenterworks.ffxivextract.gui.outfitter.OutfitterWindow;
 import com.fragmenterworks.ffxivextract.helpers.HashFinding_Utils;
 import com.fragmenterworks.ffxivextract.helpers.HavokNative;
-import com.fragmenterworks.ffxivextract.helpers.LERandomAccessFile;
+import com.fragmenterworks.ffxivextract.helpers.EARandomAccessFile;
 import ca.fraggergames.ffxivextract.helpers.LuaDec;
 import com.fragmenterworks.ffxivextract.helpers.WavefrontObjectWriter;
 import com.fragmenterworks.ffxivextract.models.SCD_File.SCD_Sound_Info;
@@ -713,15 +713,15 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 		}
 		else
 		{
-			int datNum = (int) ((fileTree.getSelectedFiles().get(0).getOffset() & 0x000F) / 2);
+			int datNum = currentIndexFile.getDatNum(fileTree.getSelectedFiles().get(0).getOffset());
+			long realOffset = currentIndexFile.getOffsetInBytes(fileTree.getSelectedFiles().get(0).getOffset());
 
-			lblOffsetValue.setText(String.format("0x%08X",fileTree.getSelectedFiles().get(0).getOffset()*0x8) + " (Dat: " + datNum +")");
-			lblHashValue.setText(String.format("0x%08X",fileTree.getSelectedFiles().get(0).getId()));
-			try{
+			lblOffsetValue.setText(String.format("0x%08X", realOffset) + " (Dat: " + datNum +")");
+			lblHashValue.setText(String.format("0x%08X", fileTree.getSelectedFiles().get(0).getId()));
+
+			try {
 				lblContentTypeValue.setText(""+currentIndexFile.getContentType(fileTree.getSelectedFiles().get(0).getOffset()));
-			}
-			catch (IOException ioe)
-			{
+			} catch (IOException ioe) {
 				lblContentTypeValue.setText("Content Type Error");
 			}
 		}
@@ -746,7 +746,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 
 		JTabbedPane tabs = new JTabbedPane();
 
-		byte data[] = null;
+		byte[] data = null;
 		int contentType = -1;
 		try {
 			 contentType = currentIndexFile.getContentType(file.getOffset());
@@ -782,18 +782,15 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 			return;
 		}
 
-		if (contentType == 3)
-		{
-
+		if (contentType == 3) {
 			OpenGL_View view = null;
 
-			try{
+			try {
 				if (HashDatabase.getFolder(file.getId2()) == null)
-					view = new OpenGL_View(new Model(null, currentIndexFile, data));
+					view = new OpenGL_View(new Model(null, currentIndexFile, data, currentIndexFile.getEndian()));
 				else
-					view = new OpenGL_View(new Model(HashDatabase.getFolder(file.getId2()) + "/" + file.getName(), currentIndexFile, data));
-			}catch(Exception modelException)
-			{
+					view = new OpenGL_View(new Model(HashDatabase.getFolder(file.getId2()) + "/" + file.getName(), currentIndexFile, data, currentIndexFile.getEndian()));
+			} catch(Exception modelException) {
 				modelException.printStackTrace();
 				JLabel lblLoadError = new JLabel("Error loading Model.");
 				tabs.addTab("Error", lblLoadError);
@@ -806,8 +803,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 			tabs.addTab("3D Model", view);
 		}
 
-		if (data == null)
-		{
+		if (data == null) {
 			JLabel lblLoadError = new JLabel("Something went terribly wrong extracting this file.");
 			tabs.addTab("Extract Error", lblLoadError);
 			hexView.setBytes(null);
@@ -815,8 +811,8 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 			return;
 		}
 
-		if (data.length >= 3 && data[0] == 'E' && data[1] == 'X' && data[2] == 'H' && data[3] == 'F')
-		{
+		//TOOD: refactor this to use byte magic
+		if (data.length >= 3 && checkMagic(data, "EXHF")) {
 			try {
 				if (exhfComponent == null || !exhfComponent.isSame(file.getName()))
 					exhfComponent = new EXDF_View(currentIndexFile, HashDatabase.getFolder(file.getId2()) + "/" + file.getName(), new EXDF_File(data), options_showAsHex.getState());
@@ -826,7 +822,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 				e.printStackTrace();
 			}
 		}
-		else if (data.length >= 3 && data[0] == 'E' && data[1] == 'X' && data[2] == 'D' && data[3] == 'F')
+		else if (data.length >= 3 && checkMagic(data, "EXDF"))
 		{
 			try {
 				if (exhfComponent == null || !exhfComponent.isSame(file.getName()))
@@ -838,36 +834,35 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 				e.printStackTrace();
 			}
 		}
-		else if (data.length >= 8 && data[0] == 'S' && data[1] == 'E' && data[2] == 'D' && data[3] == 'B' && data[4] == 'S' && data[5] == 'S' && data[6] == 'C' && data[7] == 'F')
+		else if (data.length >= 8 && checkMagic(data, "SEDBSSCF"))
 		{
 			Sound_View scdComponent;
 			try {
-				scdComponent = new Sound_View(new SCD_File(data));
+				scdComponent = new Sound_View(new SCD_File(data, currentIndexFile.getEndian()));
 				tabs.addTab("SCD File", scdComponent);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		}
-		else if (data.length >= 4 && data[0] == 'X' && data[1] == 'F' && data[2] == 'V' && data[3] == 'A')
+		else if (data.length >= 4 && checkMagic(data, "XFVA"))
 		{
 			AVFX_File avfxFile = new AVFX_File(data);
 			avfxFile.printOut();
 		}
 		else if (contentType == 4 || file.getName().endsWith("atex"))
 		{
-			Image_View imageComponent = new Image_View(new Texture_File(data));
+			Image_View imageComponent = new Image_View(new Texture_File(data, currentIndexFile.getEndian()));
 			tabs.addTab("TEX File", imageComponent);
 		}
-		else if (data.length >= 5 && data[0] == 0x1B && data[1] == 'L' && data[2] == 'u' && data[3] == 'a' && data[4] == 'Q'){
-
-			if (luadec != null)
-			{
+		else if (data.length >= 5 && checkMagic(data, "LuaQ", 1)) { //TODO: double-check this if you ever feel like working on SDAT
+			if (luadec != null)	{
 				try{
 					Lua_View luaView;
 
 					if (options_useUnluac.getState())
 					{
 						ByteBuffer buffer = ByteBuffer.wrap(data);
+
 						buffer.order(ByteOrder.LITTLE_ENDIAN);
 
 						buffer.rewind();
@@ -916,7 +911,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 				splitPane.setRightComponent(tabs);
 			}
 		}
-		else if (data.length >= 4 && data[0] == 'p' && data[1] == 'a' && data[2] == 'p' && data[3] == ' ')
+		else if (data.length >= 4 && checkMagic(data, "pap "))
 		{
 			try {
 				PAP_View papView = new PAP_View(new PAP_File(data));
@@ -925,7 +920,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 				e.printStackTrace();
 			}
 		}
-		else if (data.length >= 4 && data[0] == 'S' && data[1] == 'h' && data[2] == 'C' && data[3] == 'd')
+		else if (data.length >= 4 && checkMagic(data, "ShCd"))
 		{
 			try {
 				Shader_View shaderView = new Shader_View(new SHCD_File(data));
@@ -934,7 +929,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 				e.printStackTrace();
 			}
 		}
-		else if (data.length >= 4 && data[0] == 'S' && data[1] == 'h' && data[2] == 'P' && data[3] == 'k')
+		else if (data.length >= 4 && checkMagic(data, "ShPk"))
 		{
 			try {
 				Shader_View shaderView = new Shader_View(new SHPK_File(data));
@@ -943,7 +938,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 				e.printStackTrace();
 			}
 		}
-		else if (data.length >= 4 && data[0] == 'S' && data[1] == 'G' && data[2] == 'B' && data[3] == '1')
+		else if (data.length >= 4 && checkMagic(data, "SGB1"))
 		{
 			try {
 				SGB_File sgbFile = new SGB_File(data);
@@ -952,11 +947,11 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 				e.printStackTrace();
 			}
 		}
-		else if (data.length >= 4 && data[0] == 'u' && data[1] == 'l' && data[2] == 'd' && data[3] == 'h')
+		else if (data.length >= 4 && checkMagic(data, "uldh"))
 		{
 			try
 			{
-				ULD_View uldView = new ULD_View(new ULD_File(data));
+				ULD_View uldView = new ULD_View(new ULD_File(data, currentIndexFile.getEndian()));
 				tabs.addTab("ULD Renderer", uldView);
 			}catch (IOException e)
 			{
@@ -977,6 +972,39 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 		//if (contentType != 3)
 			tabs.addTab("Raw Hex", hexView);
 		splitPane.setRightComponent(tabs);
+	}
+
+	private boolean checkMagic(byte[] data, String magic) {
+		return checkMagic(data, magic, 0);
+	}
+
+	private boolean checkMagic(byte[] data, String magic, int startOffset) {
+		byte[] littleBuf = new byte[magic.length()];
+		byte[] bigBuf = new byte[magic.length()];
+
+		System.arraycopy(data, startOffset, littleBuf, 0, magic.length());
+		System.arraycopy(data, startOffset, bigBuf, 0, magic.length());
+
+		// Didn't want to take the chance that an alternating pattern, i.e. big, little, big, little
+		// would somehow happen to match a magic
+		boolean matchesLittle = true;
+		boolean matchesBig = true;
+
+		for (int i = 0; i < magic.length(); i++) {
+			if (littleBuf[i] != magic.charAt(i)) {
+				matchesLittle = false;
+				break;
+			}
+		}
+
+		for (int i = 0; i < magic.length(); i++) {
+			if (bigBuf[i] != magic.charAt(i)) {
+				matchesBig = false;
+				break;
+			}
+		}
+
+		return matchesLittle || matchesBig;
 	}
 
 	private void extract(boolean doConvert) {
@@ -1202,7 +1230,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 					}
 					else if (extension.equals(".obj") && doConvert)
 					{
-						Model model = new Model(folderName + "/" + fileName, currentIndexFile, data);
+						Model model = new Model(folderName + "/" + fileName, currentIndexFile, data, currentIndexFile.getEndian());
 
 						String path = lastSaveLocation.getCanonicalPath();
 
@@ -1217,7 +1245,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 						File mkDirPath = new File(path);
 						mkDirPath.getParentFile().mkdirs();
 
-						WavefrontObjectWriter.writeObj(path, model);
+						WavefrontObjectWriter.writeObj(path, model, currentIndexFile.getEndian());
 
 						continue;
 					}
@@ -1264,7 +1292,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 								File mkDirPath = new File(path);
 								mkDirPath.getParentFile().mkdirs();
 
-								LERandomAccessFile out = new LERandomAccessFile(path + j + extension, "rw");
+								EARandomAccessFile out = new EARandomAccessFile(path + j + extension, "rw", ByteOrder.LITTLE_ENDIAN);
 								out.write(dataToSave, 0, dataToSave.length);
 								out.close();
 							}
@@ -1285,7 +1313,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 								File mkDirPath = new File(path);
 								mkDirPath.getParentFile().mkdirs();
 
-								LERandomAccessFile out = new LERandomAccessFile(path + j + extension, "rw");
+								EARandomAccessFile out = new EARandomAccessFile(path + j + extension, "rw", ByteOrder.LITTLE_ENDIAN);
 								out.write(dataToSave, 0, dataToSave.length);
 								out.close();
 							}
@@ -1297,13 +1325,13 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 					}
 					else if (extension.equals(".png") && doConvert)
 					{
-						Texture_File tex = new Texture_File(data);
+						Texture_File tex = new Texture_File(data, currentIndexFile.getEndian());
 						dataToSave = tex.getImage("png");
 						extension = ".png";
 					}
 					else if (extension.equals(".scd") && doConvert)
 					{
-						SCD_File file = new SCD_File(data);
+						SCD_File file = new SCD_File(data, currentIndexFile.getEndian());
 
 						for (int s = 0; s < file.getNumEntries(); s++)
 						{
@@ -1336,7 +1364,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 							File mkDirPath = new File(path);
 							mkDirPath.getParentFile().mkdirs();
 
-							LERandomAccessFile out = new LERandomAccessFile(path + (file.getNumEntries()==1 ? "" : "_" + s) + extension, "rw");
+							EARandomAccessFile out = new EARandomAccessFile(path + (file.getNumEntries()==1 ? "" : "_" + s) + extension, "rw", ByteOrder.LITTLE_ENDIAN);
 							out.write(dataToSave, 0, dataToSave.length);
 							out.close();
 						}
@@ -1374,7 +1402,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 					File mkDirPath = new File(path);
 					mkDirPath.getParentFile().mkdirs();
 
-					LERandomAccessFile out = new LERandomAccessFile(path + extension, "rw");
+					EARandomAccessFile out = new EARandomAccessFile(path + extension, "rw", ByteOrder.LITTLE_ENDIAN);
 					out.write(dataToSave, 0, dataToSave.length);
 					out.close();
 				} catch (FileNotFoundException e) {

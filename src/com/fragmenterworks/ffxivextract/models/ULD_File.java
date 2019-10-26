@@ -30,7 +30,7 @@ import java.util.Arrays;
  *
  * @author Roze
  */
-public class ULD_File {
+public class ULD_File extends Game_File {
 
 	/**
 	 * List of parsers for graphical nodes
@@ -69,9 +69,10 @@ public class ULD_File {
 	 * @param data The data pool to use
 	 * @throws IOException
 	 */
-	public ULD_File(final byte[] data) throws IOException {
+	public ULD_File(final byte[] data, ByteOrder endian) throws IOException {
+		super(endian);
 		ByteBuffer bb = ByteBuffer.wrap(data);
-		bb.order(ByteOrder.LITTLE_ENDIAN);
+		bb.order(endian);
 		uldHeader = new ULDH(bb);
 	}
 
@@ -153,7 +154,7 @@ public class ULD_File {
 		}*/
 
 		try {
-			ULD_File uld = new ULD_File(data);
+			ULD_File uld = new ULD_File(data, ByteOrder.LITTLE_ENDIAN);
 			System.out.println(uld);
 		} catch ( IOException e ) {
 			e.printStackTrace();

@@ -22,7 +22,7 @@ import com.fragmenterworks.ffxivextract.gui.components.Update_Dialog;
 import com.fragmenterworks.ffxivextract.helpers.DatBuilder;
 import com.fragmenterworks.ffxivextract.helpers.HashFinding_Utils;
 import com.fragmenterworks.ffxivextract.helpers.HavokNative;
-import com.fragmenterworks.ffxivextract.helpers.LERandomAccessFile;
+import com.fragmenterworks.ffxivextract.helpers.EARandomAccessFile;
 import com.fragmenterworks.ffxivextract.helpers.PathSearcher;
 import com.fragmenterworks.ffxivextract.helpers.VersionUpdater;
 import com.fragmenterworks.ffxivextract.helpers.VersionUpdater.VersionCheckObject;

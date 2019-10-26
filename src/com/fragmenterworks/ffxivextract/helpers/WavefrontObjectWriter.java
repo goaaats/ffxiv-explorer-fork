@@ -13,9 +13,13 @@ import com.fragmenterworks.ffxivextract.models.Model;
 import com.fragmenterworks.ffxivextract.models.directx.DX9VertexElement;
 
 public class WavefrontObjectWriter {
-	
-	public static void writeObj(String path, Model model) throws IOException
-	{		
+
+	private static ByteOrder endian;
+
+	public static void writeObj(String path, Model model, ByteOrder eEndian) throws IOException
+	{
+		endian = eEndian;
+
 		if (path.contains(".mdl"))
 			path=path.replace(".mdl", ".obj");
 		else if (!path.contains(".obj"))
@@ -92,7 +96,7 @@ public class WavefrontObjectWriter {
 		out.write("#Verts\r\n");
 		
 		ByteBuffer vertBuffer = mesh.vertBuffers[vertElement.stream];
-		vertBuffer.order(ByteOrder.LITTLE_ENDIAN);
+		vertBuffer.order(endian);
 		
 		for (int i = 0; i < mesh.numVerts; i++)
 		{			
@@ -111,7 +115,7 @@ public class WavefrontObjectWriter {
 		out.write("#Normals\r\n");
 		
 		ByteBuffer vertBuffer = mesh.vertBuffers[normalElement.stream];
-		vertBuffer.order(ByteOrder.LITTLE_ENDIAN);
+		vertBuffer.order(endian);
 		
 		for (int i = 0; i < mesh.numVerts; i++)
 		{
@@ -126,7 +130,7 @@ public class WavefrontObjectWriter {
 		out.write("#Tex Coords\r\n");
 		
 		ByteBuffer vertBuffer = mesh.vertBuffers[texCoordElement.stream];
-		vertBuffer.order(ByteOrder.LITTLE_ENDIAN);
+		vertBuffer.order(endian);
 		
 		for (int i = 0; i < mesh.numVerts; i++)
 		{
@@ -142,7 +146,7 @@ public class WavefrontObjectWriter {
 		
 		ByteBuffer indexBuffer = mesh.indexBuffer;
 		indexBuffer.position(0);
-		indexBuffer.order(ByteOrder.LITTLE_ENDIAN);
+		indexBuffer.order(endian);
 		
 		for (int i = 0; i < mesh.numIndex; i+=3)
 		{

@@ -47,6 +47,8 @@ public class GraphicsNode {
 		last = data.getInt();
 		data.position(offset + 0x14);
 		type = data.getInt();
+		if (type < 1001 && type != 1 && type != 2 && type != 3 && type != 4 && type != 8)
+			System.out.println("GraphicsNode type " + type + " @ " + (data.position() - 4));
 		data.position(offset + 0x18);
 		size = data.getInt();
 		data.position(offset + 0x2c);

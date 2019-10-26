@@ -7,7 +7,7 @@ import java.nio.ByteOrder;
 import java.util.Calendar;
 
 import com.fragmenterworks.ffxivextract.gui.components.Loading_Dialog;
-import com.fragmenterworks.ffxivextract.helpers.LERandomAccessFile;
+import com.fragmenterworks.ffxivextract.helpers.EARandomAccessFile;
 
 import com.fragmenterworks.ffxivextract.Constants;
 import com.jcraft.jzlib.Inflater;
@@ -20,10 +20,12 @@ public class SqPack_DatFile {
 	public final static int TYPE_BINARY = 2;
 	public final static int TYPE_PLACEHOLDER = 1;
 	
-	private LERandomAccessFile currentFilePointer;
+	private EARandomAccessFile currentFilePointer;
+	private ByteOrder endian;
 
-	protected SqPack_DatFile(String path) throws FileNotFoundException {
-		currentFilePointer = new LERandomAccessFile(path, "r");
+	protected SqPack_DatFile(String path, ByteOrder endian) throws FileNotFoundException {
+		this.endian = endian;
+		currentFilePointer = new EARandomAccessFile(path, "r", endian);
 	}
 	
 	@SuppressWarnings("unused")
@@ -130,7 +132,8 @@ public class SqPack_DatFile {
 			int pos = 0x44;
 			byte[] mdlData = new byte[fileSize];
 			ByteBuffer bb = ByteBuffer.wrap(mdlData);
-			bb.order(ByteOrder.LITTLE_ENDIAN);
+
+			bb.order(endian);
 			bb.putShort(container.numMeshes);
 			bb.putShort(container.numMaterials);
 			currentFilePointer.seek(fileOffset + headerLength + container.chunkOffsets[0]);			
@@ -271,7 +274,7 @@ public class SqPack_DatFile {
 		if (extraHeader != null && contentType == TYPE_TEXTURE)
 		{
 			ByteBuffer bb = ByteBuffer.wrap(extraHeader);
-			bb.order(ByteOrder.LITTLE_ENDIAN);
+			bb.order(endian);
 			
 			bb.position(0x0E);			
 			int numMipmaps = bb.getShort();
@@ -312,9 +315,15 @@ public class SqPack_DatFile {
 				}
 				else //Gotta decompress
 					decompressedBlock = decompressBlock(compressedBlockSize, decompressedBlockSize);
-				
-				System.arraycopy(decompressedBlock, 0, decompressedFile, currentFileOffset, decompressedBlockSize);
-				currentFileOffset+=decompressedBlockSize;
+
+				try {
+					System.arraycopy(decompressedBlock, 0, decompressedFile, currentFileOffset, decompressedBlockSize);
+				} catch (ArrayIndexOutOfBoundsException e) {
+					// Couldn't tell you
+//					e.printStackTrace();
+				}
+
+				currentFileOffset += decompressedBlockSize;
 				
 				if (loadingDialog != null)			
 					loadingDialog.nextBlock(i+1);			

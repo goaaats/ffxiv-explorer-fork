@@ -7,14 +7,9 @@ import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.net.URL;
+import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -43,6 +38,7 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.filechooser.FileFilter;
 
 import com.fragmenterworks.ffxivextract.helpers.DatBuilder;
+import com.fragmenterworks.ffxivextract.helpers.EARandomAccessFile;
 import com.fragmenterworks.ffxivextract.helpers.LERandomAccessFile;
 import com.fragmenterworks.ffxivextract.models.SqPack_IndexFile;
 import com.fragmenterworks.ffxivextract.models.SqPack_IndexFile.SqPack_File;
@@ -59,6 +55,7 @@ public class MusicSwapperWindow extends JFrame {
 	private SqPack_IndexFile editMusicFile, originalMusicFile;
 	private SqPack_File[] editedFiles;	
 	private Hashtable<Integer, Integer> originalPositionTable = new Hashtable<Integer, Integer>(); //Fucking hack, but this is my fix if we want alphabetical sort
+	private ByteOrder workingEndian;
 	
 	//CUSTOM MUSIC STUFF
 	private int currentDatIndex;
@@ -411,7 +408,7 @@ public class MusicSwapperWindow extends JFrame {
 					File datlstfile = new File(customDatPath + ".lst");
 					datlstfile.delete();
 					
-					DatBuilder builder = new DatBuilder(currentDatIndex, customDatPath);					
+					DatBuilder builder = new DatBuilder(currentDatIndex, customDatPath, workingEndian);
 					for (int i = 0; i < lstCustomMusic.getModel().getSize(); i++)
 					{
 						lastLoaded = (String) lstCustomMusic.getModel().getElementAt(i);
@@ -435,7 +432,7 @@ public class MusicSwapperWindow extends JFrame {
 				}	
 				try{
 					//Edit Index
-					LERandomAccessFile output = new LERandomAccessFile(edittingIndexFile, "rw");					
+					EARandomAccessFile output = new EARandomAccessFile(edittingIndexFile, "rw", workingEndian);
 					output.seek(0x450);					
 					output.writeInt(currentDatIndex+1);
 					output.close();
@@ -593,7 +590,7 @@ public class MusicSwapperWindow extends JFrame {
 		btnRestore.setEnabled(true);
 		
 		// Set Current Index
-		LERandomAccessFile input = new LERandomAccessFile(backup, "r");
+		EARandomAccessFile input = new EARandomAccessFile(backup, "r", workingEndian);
 		input.seek(0x450);		
 		currentDatIndex = input.readInt();
 		input.close();
@@ -798,34 +795,57 @@ public class MusicSwapperWindow extends JFrame {
 			}
 		}
 		
-		try {			
-			
-			LERandomAccessFile ref = new LERandomAccessFile(
-					edittingIndexFile.getCanonicalPath(), "rw");
+		try {
+			// This segment copied from SqPack_IndexFile
+			LERandomAccessFile lref = new LERandomAccessFile(edittingIndexFile.getCanonicalPath(), "rw");
+			RandomAccessFile bref = new RandomAccessFile(edittingIndexFile.getCanonicalPath(), "rw");
 
-			ref.seek(SqPack_IndexFile.checkSqPackHeader(ref));
-			
-			int segHeaderLengthres = ref.readInt();				
-			
+			byte[] buffer = new byte[6];
+			byte[] bigBuffer = new byte[6];
+
+			lref.readFully(buffer, 0, 6);
+			bref.readFully(bigBuffer, 0, 6);
+
+			if (buffer[0] == 'S' && buffer[1] == 'q' && buffer[2] == 'P'
+					&& buffer[3] == 'a' && buffer[4] == 'c' && buffer[5] == 'k') {
+				workingEndian = ByteOrder.LITTLE_ENDIAN;
+			} else if (bigBuffer[0] == 'S' && bigBuffer[1] == 'q' && bigBuffer[2] == 'P'
+					&& bigBuffer[3] == 'a' && bigBuffer[4] == 'c' && bigBuffer[5] == 'k') {
+				workingEndian = ByteOrder.BIG_ENDIAN;
+			} else {
+				lref.close();
+				bref.close();
+				throw new IOException("Not a SqPack file");
+			}
+
+			lref.seek(0x0c);
+			bref.seek(0x0c);
+
+			int headerLength;
+			if (workingEndian == ByteOrder.LITTLE_ENDIAN)
+				headerLength = lref.readInt();
+			else
+				headerLength = bref.readInt();
+
+			EARandomAccessFile ref = new EARandomAccessFile(edittingIndexFile.getCanonicalPath(), "rw", workingEndian);
+			ref.seek(headerLength);
+			int segHeaderLengthres = ref.readInt();
+
 			//Read it in
-			int firstVal = ref.readInt();			
+			int firstVal = ref.readInt();
 			int offset = ref.readInt();
 			int size = ref.readInt();
-			
+
 			ref.seek(offset);
-			for (int i = 0; i < size; i++)
-			{	
-				
-				if (i == fileIndex)
-				{
+			for (int i = 0; i < size; i++) {
+				if (i == fileIndex) {
 					ref.skipBytes(8);
-					ref.writeInt((int)tooffset);
+					ref.writeInt((int) tooffset);
 					break;
-				}
-				else
-					ref.skipBytes(16);									
+				} else
+					ref.skipBytes(16);
 			}
-						
+
 			ref.close();
 			
 			txtSetTo.setText(String.format(Strings.MUSICSWAPPER_CURRENTOFFSET, tooffset & 0xFFFFFFFF));

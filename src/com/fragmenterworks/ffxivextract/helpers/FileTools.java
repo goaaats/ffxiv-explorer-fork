@@ -8,6 +8,7 @@ import com.fragmenterworks.ffxivextract.models.Texture_File;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.nio.ByteOrder;
 import java.util.HashMap;
 import java.util.prefs.Preferences;
 
@@ -158,7 +159,8 @@ public class FileTools {
 		}
 		byte[] data = getRaw(sqPakPath, path);
 
-		Texture_File tf = new Texture_File(data);
+		//TODO: Random ULD stuff can be little-endian, no?
+		Texture_File tf = new Texture_File(data, ByteOrder.LITTLE_ENDIAN);
 		try {
 			BufferedImage bf = tf.decode(0, new HashMap<>());
 			return bf;

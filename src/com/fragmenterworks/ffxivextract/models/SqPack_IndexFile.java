@@ -3,18 +3,22 @@ package com.fragmenterworks.ffxivextract.models;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.RandomAccessFile;
+import java.nio.ByteOrder;
 import java.util.*;
 
 import javax.swing.JLabel;
 import javax.swing.JProgressBar;
 
+import com.fragmenterworks.ffxivextract.helpers.LERandomAccessFile;
 import com.fragmenterworks.ffxivextract.storage.HashDatabase;
 import com.fragmenterworks.ffxivextract.gui.components.Loading_Dialog;
-import com.fragmenterworks.ffxivextract.helpers.LERandomAccessFile;
+import com.fragmenterworks.ffxivextract.helpers.EARandomAccessFile;
 
 public class SqPack_IndexFile {
 
 	private String path;
+	private ByteOrder endian;
 	
 	private SqPack_DataSegment segments[] = new SqPack_DataSegment[4];
 	private SqPack_Folder packFolders[];
@@ -58,9 +62,12 @@ public class SqPack_IndexFile {
 
 		path = pathToIndex;
 		
-		LERandomAccessFile ref = new LERandomAccessFile(pathToIndex, "r");
+		LERandomAccessFile lref = new LERandomAccessFile(pathToIndex, "r");
+		RandomAccessFile bref = new RandomAccessFile(pathToIndex, "r");
 
-		int sqpackHeaderLength = checkSqPackHeader(ref);			
+		int sqpackHeaderLength = checkSqPackHeader(lref, bref);
+
+		EARandomAccessFile ref = new EARandomAccessFile(pathToIndex, "r", endian);
 		
 		getSegments(ref, sqpackHeaderLength);
 
@@ -88,9 +95,7 @@ public class SqPack_IndexFile {
 				int numFiles = folderSize / 0x10;
 				ref.readInt(); // Skip
 
-				packFolders[i] = new SqPack_Folder(id, numFiles,
-						fileIndexOffset);
-
+				packFolders[i] = new SqPack_Folder(id, numFiles, fileIndexOffset);
 				packFolders[i].readFiles(ref, prgLoadingBar, lblLoadingBarString, false);				
 			}
 		} else {
@@ -120,10 +125,13 @@ public class SqPack_IndexFile {
 	public SqPack_IndexFile(String pathToIndex, boolean fastLoad) throws IOException {
 
 		path = pathToIndex;
-		
-		LERandomAccessFile ref = new LERandomAccessFile(pathToIndex, "r");
 
-		int sqpackHeaderLength = checkSqPackHeader(ref);	
+		LERandomAccessFile lref = new LERandomAccessFile(pathToIndex, "r");
+		RandomAccessFile bref = new RandomAccessFile(pathToIndex, "r");
+
+		int sqpackHeaderLength = checkSqPackHeader(lref, bref);
+
+		EARandomAccessFile ref = new EARandomAccessFile(pathToIndex, "r", endian);
 		getSegments(ref, sqpackHeaderLength);
 
 		//Fast load will blindly load all files regardless of folder
@@ -194,10 +202,14 @@ public class SqPack_IndexFile {
 	}
 	
 	/** Checks the sqpack header, will also advance the file pointer by it's size.  */
-	public static int checkSqPackHeader(LERandomAccessFile ref) throws IOException{
+	public int checkSqPackHeader(LERandomAccessFile ref, RandomAccessFile bref) throws IOException{
 		// Check SqPack Header
 		byte[] buffer = new byte[6];
+		byte[] bigBuffer = new byte[6];
+
 		ref.readFully(buffer, 0, 6);
+		bref.readFully(bigBuffer, 0, 6);
+
 		if (buffer[0] != 'S' || buffer[1] != 'q' || buffer[2] != 'P'
 				|| buffer[3] != 'a' || buffer[4] != 'c' || buffer[5] != 'k') {
 			ref.close();
@@ -206,20 +218,29 @@ public class SqPack_IndexFile {
 
 		// Get Header Length
 		ref.seek(0x0c);
+		bref.seek(0x0c);
 		int headerLength = ref.readInt();
+		int bHeaderLength = bref.readInt();
 
 		ref.readInt(); // Unknown
+		bref.readInt();
 
 		// Get Header Type, has to be 2 for index
 		int type = ref.readInt();
-		if (type != 2)
+		int bType = bref.readInt();
+
+		if (type != 2 && bType != 2)
 			throw new IOException("Not a index");
-		
-		return headerLength;
+
+		if (type == 2) {
+			endian = ByteOrder.LITTLE_ENDIAN;
+			return headerLength;
+		}
+		endian = ByteOrder.BIG_ENDIAN;
+		return bHeaderLength;
 	}
 
-	private int getSegments(LERandomAccessFile ref, int segmentHeaderStart)
-			throws IOException {
+	private int getSegments(EARandomAccessFile ref, int segmentHeaderStart) throws IOException {
 
 		ref.seek(segmentHeaderStart);
 		
@@ -319,14 +340,23 @@ public class SqPack_IndexFile {
 				//HashDatabase.flagFolderNameAsUsed(id);
 		}
 		
-		protected void readFiles(LERandomAccessFile ref, JProgressBar prgLoadingBar, JLabel lblLoadingBarString, boolean isIndex2) throws IOException{
+		protected void readFiles(EARandomAccessFile ref, JProgressBar prgLoadingBar, JLabel lblLoadingBarString, boolean isIndex2) throws IOException{
 			ref.seek(fileIndexOffset);
 			
 			for (int i = 0; i < files.length; i++)
 			{			
 				if (!isIndex2){
-					int id = ref.readInt();
-					int id2 = ref.readInt();
+					int id, id2;
+
+					// This should be done with shifting as the hash(es) are actually a long
+					if (ref.isBigEndian()) {
+						id2 = ref.readInt();
+						id = ref.readInt();
+					} else {
+						id = ref.readInt();
+						id2 = ref.readInt();
+					}
+
 					long dataoffset = ref.readInt();
 					ref.readInt();
 				
@@ -354,7 +384,7 @@ public class SqPack_IndexFile {
 			}
 		}
 		
-		protected void readFiles(LERandomAccessFile ref, boolean isIndex2) throws IOException{
+		protected void readFiles(EARandomAccessFile ref, boolean isIndex2) throws IOException{
 			ref.seek(fileIndexOffset);
 			
 			for (int i = 0; i < files.length; i++)
@@ -420,7 +450,6 @@ public class SqPack_IndexFile {
 					this.name = HashDatabase.getFileName(id);
 				if (this.name == null)
 					this.name = String.format("~%x", id);
-				
 			}
 			//else
 				//HashDatabase.flagFileNameAsUsed(id);
@@ -460,17 +489,17 @@ public class SqPack_IndexFile {
 	}
 
 	/** Gets the content type of the file at the given offset.  */
-	public int getContentType(long dataoffset) throws IOException, FileNotFoundException {
+	public int getContentType(long dataOffset) throws IOException, FileNotFoundException {
 		String pathToOpen = path;
-		
-		//Get the correct data number
-		int datNum = (int) ((dataoffset & 0x000F) / 2);
-		dataoffset -= dataoffset & 0x000F;		
+
+		int datNum = getDatNum(dataOffset);
+		long realOffset = getOffsetInBytes(dataOffset);
+
 		pathToOpen = pathToOpen.replace("index2", "dat" + datNum);
 		pathToOpen = pathToOpen.replace("index", "dat" + datNum);
 		
-		SqPack_DatFile datFile = new SqPack_DatFile(pathToOpen);
-		int contentType = datFile.getContentType(dataoffset * 0x8);
+		SqPack_DatFile datFile = new SqPack_DatFile(pathToOpen, endian);
+		int contentType = datFile.getContentType(realOffset);
 		datFile.close();
 		return contentType;
 	}
@@ -544,21 +573,34 @@ public class SqPack_IndexFile {
     }
     
     /** Extracts the file at the specified offset... loading bar info also given.  */
-	public byte[] extractFile(long dataoffset, Loading_Dialog loadingDialog) throws IOException, FileNotFoundException {
+	public byte[] extractFile(long dataOffset, Loading_Dialog loadingDialog) throws IOException, FileNotFoundException {
 		
 		String pathToOpen = path;
-		
-		//Get the correct data number
-		int datNum = (int) ((dataoffset & 0x000F) / 2);
 
-		dataoffset -= dataoffset & 0x000F;		
+		int datNum = getDatNum(dataOffset);
+		long realOffset = getOffsetInBytes(dataOffset);
+
 		pathToOpen = pathToOpen.replace("index2", "dat" + datNum);
 		pathToOpen = pathToOpen.replace("index", "dat" + datNum);
 		
-		SqPack_DatFile datFile = new SqPack_DatFile(pathToOpen);
-		byte[] data = datFile.extractFile(dataoffset * 0x8, loadingDialog);
+		SqPack_DatFile datFile = new SqPack_DatFile(pathToOpen, endian);
+		byte[] data = datFile.extractFile(realOffset, loadingDialog);
 		datFile.close();
 		return data;
+	}
+
+	public int getDatNum(long dataOffset) {
+		if (endian == ByteOrder.BIG_ENDIAN)
+			return 0;
+		return (int) ((dataOffset & 0x000F) / 2);
+	}
+
+	public long getOffsetInBytes(long dataOffset) {
+		if (endian == ByteOrder.BIG_ENDIAN)
+			return dataOffset * 128;	//128 byte alignment
+
+		dataOffset -= dataOffset & 0x000F;
+		return dataOffset * 8;			//8 byte alignment
 	}
 
 	/** Returns the index file's name.  */
@@ -586,10 +628,17 @@ public class SqPack_IndexFile {
 		pathToOpen = pathToOpen.replace("index2", "dat" + datNum);
 		pathToOpen = pathToOpen.replace("index", "dat" + datNum);
 		
-		SqPack_DatFile datFile = new SqPack_DatFile(pathToOpen);
+		SqPack_DatFile datFile = new SqPack_DatFile(pathToOpen, endian);
 		Calendar timestamp = datFile.getTimeStamp();
 		datFile.close();
 		return timestamp;
 	}
-	
+
+	public boolean isBigEndian() {
+		return endian == ByteOrder.BIG_ENDIAN;
+	}
+
+	public ByteOrder getEndian() {
+		return endian;
+	}
 }

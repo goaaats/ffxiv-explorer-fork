@@ -17,19 +17,21 @@ import com.jcraft.jzlib.GZIPOutputStream;
 
 public class DatBuilder {
 	
-	private LERandomAccessFile fileOut = null;
+	private EARandomAccessFile fileOut = null;
 	private long currentOffset = 0x800;
 	private int index;
+	private ByteOrder endian;
 	
-	public DatBuilder(int index, String outPath) throws FileNotFoundException
+	public DatBuilder(int index, String outPath, ByteOrder endian) throws FileNotFoundException
 	{
+		this.endian = endian;
 		this.index = index + 1;
 		
 		File f = new File(outPath);
 		if (f.exists())
 			f.delete();
 	
-		fileOut = new LERandomAccessFile(new File(outPath), "rw");
+		fileOut = new EARandomAccessFile(new File(outPath), "rw", endian);
 	}
 	
 	public long addFile(String path) throws IOException, FileNotFoundException

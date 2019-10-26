@@ -2,6 +2,7 @@ package com.fragmenterworks.ffxivextract.gui;
 
 import com.fragmenterworks.ffxivextract.Strings;
 import com.fragmenterworks.ffxivextract.helpers.DatBuilder;
+import com.fragmenterworks.ffxivextract.helpers.EARandomAccessFile;
 import com.fragmenterworks.ffxivextract.helpers.LERandomAccessFile;
 import com.fragmenterworks.ffxivextract.models.SqPack_IndexFile;
 import com.fragmenterworks.ffxivextract.models.SqPack_IndexFile.SqPack_File;
@@ -18,6 +19,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.*;
 import java.net.URL;
+import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -33,6 +35,7 @@ public class FileInjectorWindow extends JFrame {
     private SqPack_IndexFile editMusicFile, originalMusicFile;
     private SqPack_File[] editedFiles;
     private Hashtable<Integer, Integer> originalPositionTable = new Hashtable<Integer, Integer>(); //Fucking hack, but this is my fix if we want alphabetical sort
+    private ByteOrder workingEndian;
 
     //CUSTOM MUSIC STUFF
     private int currentDatIndex;
@@ -198,13 +201,12 @@ public class FileInjectorWindow extends JFrame {
             @Override
             public void valueChanged(ListSelectionEvent event) {
 
-                if (lstOriginal.getSelectedIndex() == -1)
-                {
+                if (lstOriginal.getSelectedIndex() == -1) {
                     lstSet.clearSelection();
                     return;
                 }
 
-                if (event.getValueIsAdjusting() ||lstSet.getModel().getSize() == 0)
+                if (event.getValueIsAdjusting() || lstSet.getModel().getSize() == 0)
                     return;
                 txtSetTo.setText(String.format(Strings.MUSICSWAPPER_CURRENTOFFSET, editedFiles[lstOriginal.getSelectedIndex()].getOffset() & 0xFFFFFFFF));
                 if (editedFiles[lstOriginal.getSelectedIndex()].getOffset() != originalMusicFile.getPackFolders()[0].getFiles()[lstOriginal.getSelectedIndex()].dataoffset)
@@ -272,7 +274,7 @@ public class FileInjectorWindow extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
 
-                if (((DefaultListModel)lstSet.getModel()).getElementAt(lstSet.getSelectedIndex()).equals("-----------"))
+                if (((DefaultListModel) lstSet.getModel()).getElementAt(lstSet.getSelectedIndex()).equals("-----------"))
                     return;
 
                 swapMusic(lstOriginal.getSelectedIndex(),
@@ -328,7 +330,7 @@ public class FileInjectorWindow extends JFrame {
                 if (retunval == JFileChooser.APPROVE_OPTION) {
 
                     for (int i = 0; i < fileChooser.getSelectedFiles().length; i++)
-                        ((DefaultListModel)lstCustomMusic.getModel()).addElement(fileChooser.getSelectedFiles()[i].getAbsolutePath());
+                        ((DefaultListModel) lstCustomMusic.getModel()).addElement(fileChooser.getSelectedFiles()[i].getAbsolutePath());
                 }
 
                 btnGenerateDat.setEnabled(true);
@@ -341,7 +343,7 @@ public class FileInjectorWindow extends JFrame {
             public void actionPerformed(ActionEvent arg0) {
                 int selected = lstCustomMusic.getSelectedIndex();
                 if (selected >= 0)
-                    ((DefaultListModel)lstCustomMusic.getModel()).remove(selected);
+                    ((DefaultListModel) lstCustomMusic.getModel()).remove(selected);
 
                 btnGenerateDat.setEnabled(true);
             }
@@ -352,14 +354,13 @@ public class FileInjectorWindow extends JFrame {
             @Override
             public void actionPerformed(ActionEvent arg0) {
 
-                if (customIndexes.size() != 0)
-                {
+                if (customIndexes.size() != 0) {
                     for (int i = 0; i < customIndexes.size(); i++)
-                        ((DefaultListModel)lstSet.getModel()).removeElementAt(0);
+                        ((DefaultListModel) lstSet.getModel()).removeElementAt(0);
                 }
 
-                if (((DefaultListModel)lstSet.getModel()).get(0).equals("-----------"))
-                    ((DefaultListModel)lstSet.getModel()).removeElementAt(0);
+                if (((DefaultListModel) lstSet.getModel()).get(0).equals("-----------"))
+                    ((DefaultListModel) lstSet.getModel()).removeElementAt(0);
 
                 customPaths.clear();
                 customIndexes.clear();
@@ -371,12 +372,11 @@ public class FileInjectorWindow extends JFrame {
                     File datlstfile = new File(customDatPath + ".lst");
                     datlstfile.delete();
 
-                    DatBuilder builder = new DatBuilder(currentDatIndex, customDatPath);
-                    for (int i = 0; i < lstCustomMusic.getModel().getSize(); i++)
-                    {
+                    DatBuilder builder = new DatBuilder(currentDatIndex, customDatPath, workingEndian);
+                    for (int i = 0; i < lstCustomMusic.getModel().getSize(); i++) {
                         lastLoaded = (String) lstCustomMusic.getModel().getElementAt(i);
-                        customPaths.add((String)lstCustomMusic.getModel().getElementAt(i));
-                        customIndexes.add(builder.addFile((String)lstCustomMusic.getModel().getElementAt(i)));
+                        customPaths.add((String) lstCustomMusic.getModel().getElementAt(i));
+                        customIndexes.add(builder.addFile((String) lstCustomMusic.getModel().getElementAt(i)));
                     }
                     builder.finish();
                 } catch (FileNotFoundException e) {
@@ -393,11 +393,11 @@ public class FileInjectorWindow extends JFrame {
                     e.printStackTrace();
                     return;
                 }
-                try{
+                try {
                     //Edit Index
-                    LERandomAccessFile output = new LERandomAccessFile(edittingIndexFile, "rw");
+                    EARandomAccessFile output = new EARandomAccessFile(edittingIndexFile, "rw", workingEndian);
                     output.seek(0x450);
-                    output.writeInt(currentDatIndex+1);
+                    output.writeInt(currentDatIndex + 1);
                     output.close();
                 } catch (FileNotFoundException e) {
                     JOptionPane.showMessageDialog(FileInjectorWindow.this,
@@ -418,9 +418,9 @@ public class FileInjectorWindow extends JFrame {
                 saveCustomDatIndexList();
 
                 //Put new songs into list
-                ((DefaultListModel)lstSet.getModel()).add(0,"-----------");
+                ((DefaultListModel) lstSet.getModel()).add(0, "-----------");
                 for (int i = lstCustomMusic.getModel().getSize() - 1; i >= 0; i--)
-                    ((DefaultListModel)lstSet.getModel()).add(0, ((DefaultListModel)lstCustomMusic.getModel()).elementAt(i));
+                    ((DefaultListModel) lstSet.getModel()).add(0, ((DefaultListModel) lstCustomMusic.getModel()).elementAt(i));
 
                 btnGenerateDat.setEnabled(false);
                 datWasGenerated = true;
@@ -437,10 +437,8 @@ public class FileInjectorWindow extends JFrame {
 
                 int startIndex = lstOriginal.getSelectedIndex() + 1;
 
-                for(int i = startIndex; i < lstOriginal.getModel().getSize(); i++)
-                {
-                    if(((String)lstOriginal.getModel().getElementAt(i)).toLowerCase().contains(name.toLowerCase()))
-                    {
+                for (int i = startIndex; i < lstOriginal.getModel().getSize(); i++) {
+                    if (((String) lstOriginal.getModel().getElementAt(i)).toLowerCase().contains(name.toLowerCase())) {
                         lstOriginal.setSelectedIndex(i);
                         break;
                     }
@@ -461,7 +459,7 @@ public class FileInjectorWindow extends JFrame {
     }
 
     public void setPath() {
-        JFileChooser fileChooser = new JFileChooser("D:\\Steam\\SteamApps\\common\\FINAL FANTASY XIV - A Realm Reborn\\game\\sqpack\\ffxiv");
+        JFileChooser fileChooser = new JFileChooser("C:\\Program Files (x86)\\SquareEnix\\FINAL FANTASY XIV - A Realm Reborn\\game\\sqpack\\ffxiv");
 
         fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
 
@@ -505,11 +503,11 @@ public class FileInjectorWindow extends JFrame {
         setSwapperEnabled(true);
         SqPack_File[] originalFiles;
 
-        ((DefaultListModel)lstOriginal.getModel()).clear();
-        ((DefaultListModel)lstSet.getModel()).clear();
+        ((DefaultListModel) lstOriginal.getModel()).clear();
+        ((DefaultListModel) lstSet.getModel()).clear();
 
         datWasGenerated = false;
-        ((DefaultListModel)lstCustomMusic.getModel()).clear();
+        ((DefaultListModel) lstCustomMusic.getModel()).clear();
         customPaths.clear();
         customIndexes.clear();
 
@@ -518,7 +516,7 @@ public class FileInjectorWindow extends JFrame {
 
         // Check if we got a backup
         backup = new File(file.getParentFile().getAbsoluteFile(),
-                file.getName()+".bak");
+                file.getName() + ".bak");
         if (backup.exists()) {
             System.out.println("Backup found, checking file.");
             btnRestore.setEnabled(true);
@@ -538,42 +536,33 @@ public class FileInjectorWindow extends JFrame {
         int reply = JOptionPane.showConfirmDialog(null, "Do you want to sort the lists? This could take a while for big dats.", "", JOptionPane.YES_NO_OPTION);
         if (reply == JOptionPane.YES_OPTION) {
             sort = true;
-        }
-        else {
+        } else {
             sort = false;
         }
 
-
-        if(sort)
-        {
+        if (sort) {
             Arrays.sort(editMusicFile.getPackFolders()[0].getFiles(), new Comparator<SqPack_File>() {
-
                 @Override
                 public int compare(SqPack_File o1, SqPack_File o2) {
+//                    return String.format("%08X (%08X)", o1.getId() & 0xFFFFFFFF, o1.getOffset() & 0xFFFFFFFF).compareTo(
+//                            String.format("%08X (%08X)", o2.getId() & 0xFFFFFFFF, o2.getOffset() & 0xFFFFFFFF)
                     return o1.getName2().compareTo(o2.getName2());
                 }
             });
         }
-
-
 
         SqPack_File[] files = originalMusicFile.getPackFolders()[0].getFiles();
-        for (int i = 0; i < files.length; i ++)
+        for (int i = 0; i < files.length; i++)
             originalPositionTable.put(files[i].id, i);
 
-
-        if(sort)
-        {
+        if (sort) {
             Arrays.sort(originalMusicFile.getPackFolders()[0].getFiles(), new Comparator<SqPack_File>() {
-
                 @Override
                 public int compare(SqPack_File o1, SqPack_File o2) {
                     return o1.getName2().compareTo(o2.getName2());
                 }
             });
         }
-
-
 
         originalFiles = originalMusicFile.getPackFolders()[0].getFiles();
         editedFiles = editMusicFile.getPackFolders()[0].getFiles();
@@ -597,7 +586,7 @@ public class FileInjectorWindow extends JFrame {
         btnRestore.setEnabled(true);
 
         // Set Current Index
-        LERandomAccessFile input = new LERandomAccessFile(backup, "r");
+        EARandomAccessFile input = new EARandomAccessFile(backup, "r", workingEndian);
         input.seek(0x450);
         currentDatIndex = input.readInt();
         input.close();
@@ -620,13 +609,12 @@ public class FileInjectorWindow extends JFrame {
 
     private void loadDropDown(JList list, SqPack_File[] files,
                               int selectedSpot) {
-        DefaultListModel listModel = (DefaultListModel)list.getModel();
+        DefaultListModel listModel = (DefaultListModel) list.getModel();
 
-        for (int i = 0; i < files.length; i++)
-        {
+        for (int i = 0; i < files.length; i++) {
             String fileName = files[i].getName2();
 
-            if (fileName !=null)
+            if (fileName != null)
                 listModel.addElement(String.format("%s (%08X)", fileName, files[i].getOffset() & 0xFFFFFFFF));
             else
                 listModel.addElement(String.format("%08X (%08X)", files[i].id & 0xFFFFFFFF, files[i].getOffset() & 0xFFFFFFFF));
@@ -635,8 +623,7 @@ public class FileInjectorWindow extends JFrame {
         list.setSelectedIndex(0);
     }
 
-    private void createBackup() throws IOException
-    {
+    private void createBackup() throws IOException {
         // Create backup
         System.out.println("Creating backup.");
         copyFile(edittingIndexFile, backup);
@@ -678,20 +665,18 @@ public class FileInjectorWindow extends JFrame {
             txtSetTo.setForeground(Color.decode("#006400"));
     }
 
-    private void restoreFromBackup() throws IOException
-    {
+    private void restoreFromBackup() throws IOException {
         // Create backup
         System.out.println("Restoring...");
 
-        if (!edittingIndexFile.delete())
-        {
+        if (!edittingIndexFile.delete()) {
             JOptionPane.showMessageDialog(FileInjectorWindow.this,
                     Strings.ERROR_CANNOT_OPEN_INDEX,
                     Strings.DIALOG_TITLE_ERROR,
                     JOptionPane.ERROR_MESSAGE);
             return;
         }
-        if (customDatPath != null){
+        if (customDatPath != null) {
             File generatedDatFile = new File(customDatPath);
             if (generatedDatFile.exists())
                 generatedDatFile.delete();
@@ -708,7 +693,7 @@ public class FileInjectorWindow extends JFrame {
         setSwapperEnabled(false);
 
         datWasGenerated = false;
-        ((DefaultListModel)lstCustomMusic.getModel()).clear();
+        ((DefaultListModel) lstCustomMusic.getModel()).clear();
         customPaths.clear();
         customIndexes.clear();
     }
@@ -718,9 +703,9 @@ public class FileInjectorWindow extends JFrame {
         lstOriginal.clearSelection();
         lstSet.clearSelection();
 
-        if (!isEnabled){
-            ((DefaultListModel)lstOriginal.getModel()).clear();
-            ((DefaultListModel)lstSet.getModel()).clear();
+        if (!isEnabled) {
+            ((DefaultListModel) lstOriginal.getModel()).clear();
+            ((DefaultListModel) lstSet.getModel()).clear();
             txtSetTo.setText(Strings.MUSICSWAPPER_CURRENTSETTO);
             txtSetTo.setForeground(Color.decode("#000000"));
         }
@@ -778,24 +763,18 @@ public class FileInjectorWindow extends JFrame {
         //This is the index of the file, not the alphaed
         int fileIndex = originalPositionTable.get(toBeChanged.id);
 
-        if (lstCustomMusic.getModel().getSize() == 0)
-        {
+        if (lstCustomMusic.getModel().getSize() == 0) {
             SqPack_File toThisFile = originalMusicFile.getPackFolders()[0].getFiles()[to - lstCustomMusic.getModel().getSize()];
             editedFiles[which] = new SqPack_File(toBeChanged.getId(), toBeChanged.getId2(),
                     toThisFile.getOffset(), true);
             tooffset = toThisFile.getOffset();
-        }
-        else
-        {
-            if (to >= lstCustomMusic.getModel().getSize() + 1)
-            {
-                SqPack_File toThisFile = originalMusicFile.getPackFolders()[0].getFiles()[to-(lstCustomMusic.getModel().getSize() + 1)];
+        } else {
+            if (to >= lstCustomMusic.getModel().getSize() + 1) {
+                SqPack_File toThisFile = originalMusicFile.getPackFolders()[0].getFiles()[to - (lstCustomMusic.getModel().getSize() + 1)];
                 editedFiles[which] = new SqPack_File(toBeChanged.getId(), toBeChanged.getId2(),
                         toThisFile.getOffset(), true);
                 tooffset = toThisFile.getOffset();
-            }
-            else
-            {
+            } else {
                 editedFiles[which] = new SqPack_File(toBeChanged.getId(), toBeChanged.getId2(),
                         customIndexes.get(to), true);
                 tooffset = customIndexes.get(to);
@@ -803,12 +782,39 @@ public class FileInjectorWindow extends JFrame {
         }
 
         try {
+            // This segment copied from SqPack_IndexFile
+            LERandomAccessFile lref = new LERandomAccessFile(edittingIndexFile.getCanonicalPath(), "rw");
+            RandomAccessFile bref = new RandomAccessFile(edittingIndexFile.getCanonicalPath(), "rw");
 
-            LERandomAccessFile ref = new LERandomAccessFile(
-                    edittingIndexFile.getCanonicalPath(), "rw");
+            byte[] buffer = new byte[6];
+            byte[] bigBuffer = new byte[6];
 
-            ref.seek(SqPack_IndexFile.checkSqPackHeader(ref));
+            lref.readFully(buffer, 0, 6);
+            bref.readFully(bigBuffer, 0, 6);
 
+            if (buffer[0] == 'S' && buffer[1] == 'q' && buffer[2] == 'P'
+                    && buffer[3] == 'a' && buffer[4] == 'c' && buffer[5] == 'k') {
+                workingEndian = ByteOrder.LITTLE_ENDIAN;
+            } else if (bigBuffer[0] == 'S' && bigBuffer[1] == 'q' && bigBuffer[2] == 'P'
+                    && bigBuffer[3] == 'a' && bigBuffer[4] == 'c' && bigBuffer[5] == 'k') {
+                workingEndian = ByteOrder.BIG_ENDIAN;
+            } else {
+                lref.close();
+                bref.close();
+                throw new IOException("Not a SqPack file");
+            }
+
+            lref.seek(0x0c);
+            bref.seek(0x0c);
+
+            int headerLength;
+            if (workingEndian == ByteOrder.LITTLE_ENDIAN)
+                headerLength = lref.readInt();
+            else
+                headerLength = bref.readInt();
+
+            EARandomAccessFile ref = new EARandomAccessFile(edittingIndexFile.getCanonicalPath(), "rw", workingEndian);
+            ref.seek(headerLength);
             int segHeaderLengthres = ref.readInt();
 
             //Read it in
@@ -817,16 +823,12 @@ public class FileInjectorWindow extends JFrame {
             int size = ref.readInt();
 
             ref.seek(offset);
-            for (int i = 0; i < size; i++)
-            {
-
-                if (i == fileIndex)
-                {
+            for (int i = 0; i < size; i++) {
+                if (i == fileIndex) {
                     ref.skipBytes(8);
-                    ref.writeInt((int)tooffset);
+                    ref.writeInt((int) tooffset);
                     break;
-                }
-                else
+                } else
                     ref.skipBytes(16);
             }
 
@@ -854,11 +856,11 @@ public class FileInjectorWindow extends JFrame {
         }
     }
 
-    private void loadCustomDatIndexList(){
+    private void loadCustomDatIndexList() {
         CustomDatPOJO toLoad = null;
         Gson gson = new Gson();
 
-        try{
+        try {
 
             String json = null;
             BufferedReader br = new BufferedReader(new FileReader(edittingIndexFile.getParent() + "\\" + originalMusicFile.getName().replace(".index", ".dat") + currentDatIndex + ".lst"));
@@ -876,13 +878,9 @@ public class FileInjectorWindow extends JFrame {
                 br.close();
             }
             toLoad = gson.fromJson(json, CustomDatPOJO.class);
-        }
-        catch(FileNotFoundException e)
-        {
+        } catch (FileNotFoundException e) {
             return;
-        }
-        catch(IOException e)
-        {
+        } catch (IOException e) {
             e.printStackTrace();
         }
 
@@ -891,12 +889,12 @@ public class FileInjectorWindow extends JFrame {
         customIndexes = toLoad.musicOffsets;
 
         for (int i = 0; i < customPaths.size(); i++)
-            ((DefaultListModel)lstCustomMusic.getModel()).addElement(customPaths.get(i));
+            ((DefaultListModel) lstCustomMusic.getModel()).addElement(customPaths.get(i));
 
         //Put new songs into list
-        ((DefaultListModel)lstSet.getModel()).add(0,"-----------");
+        ((DefaultListModel) lstSet.getModel()).add(0, "-----------");
         for (int i = lstCustomMusic.getModel().getSize() - 1; i >= 0; i--)
-            ((DefaultListModel)lstSet.getModel()).add(0, ((DefaultListModel)lstCustomMusic.getModel()).elementAt(i));
+            ((DefaultListModel) lstSet.getModel()).add(0, ((DefaultListModel) lstCustomMusic.getModel()).elementAt(i));
 
         btnGenerateDat.setEnabled(false);
         datWasGenerated = true;
@@ -904,21 +902,21 @@ public class FileInjectorWindow extends JFrame {
         lstOriginal.repaint();
     }
 
-    private void saveCustomDatIndexList(){
+    private void saveCustomDatIndexList() {
         CustomDatPOJO toSave = new CustomDatPOJO();
         toSave.datPath = customDatPath;
         toSave.musicPaths = customPaths;
         toSave.musicOffsets = customIndexes;
         Gson gson = new Gson();
         String json = gson.toJson(toSave);
-        try{
+        try {
             FileOutputStream fileOut =
                     new FileOutputStream(customDatPath + ".lst");
             fileOut.write(json.getBytes());
             fileOut.close();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        catch(IOException e)
-        {e.printStackTrace();}
     }
 
     class SwapperCellRenderer extends DefaultListCellRenderer {
@@ -939,36 +937,30 @@ public class FileInjectorWindow extends JFrame {
             int lastVal = (int) ((editedFiles[index].dataoffset) & 0xF);
 
             boolean flagAsInvalid = false;
-            if (!customIndexes.contains(editedFiles[index].dataoffset) && lastVal == (currentDatIndex+1))
+            if (!customIndexes.contains(editedFiles[index].dataoffset) && lastVal == (currentDatIndex + 1))
                 flagAsInvalid = true;
 
             if (isSelected) {
-                if (flagAsInvalid)
-                {
+                if (flagAsInvalid) {
                     Component defaultComponent = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
                     setForeground(Color.RED);
                     setBackground(defaultComponent.getBackground());
-                }
-                else
+                } else
                     return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
             } else {
-                if (flagAsInvalid)
-                {
+                if (flagAsInvalid) {
                     setBackground(Color.RED);
                     setForeground(Color.WHITE);
-                }
-                else
-                {
+                } else {
                     return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
                 }
-            };
+            }
 
             return this;
         }
     }
 
-    private void createSCDfromOGG()
-    {
+    private void createSCDfromOGG() {
         //Generate Basic Info
 
         //Read Ogg, set num channels + sample rate
@@ -979,8 +971,7 @@ public class FileInjectorWindow extends JFrame {
 
     }
 
-    private class CustomDatPOJO
-    {
+    private class CustomDatPOJO {
         public String datPath;
         public ArrayList musicPaths;
         public ArrayList<Long> musicOffsets;

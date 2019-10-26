@@ -28,7 +28,7 @@ import com.jogamp.common.nio.Buffers;
 import com.jogamp.opengl.GL3;
 import com.jogamp.opengl.GL3bc;
 
-public class Model {
+public class Model extends Game_File {
 			
 	//Used to find other files
 	String modelPath;
@@ -80,19 +80,20 @@ public class Model {
 	private int imcPartsKey = 0;
 	private int currentVariant = 1;
 	
-	public Model(byte[] data)
+	public Model(byte[] data, ByteOrder endian)
 	{
-		this(null, null, data);
+		this(null, null, data, endian);
 	}
 	
-	public Model(String modelPath, SqPack_IndexFile index, byte[] data) throws BufferOverflowException, BufferUnderflowException
-	{						
+	public Model(String modelPath, SqPack_IndexFile index, byte[] data, ByteOrder endian) throws BufferOverflowException, BufferUnderflowException {
+		super(endian);
+
 		this.modelPath = modelPath;
 		this.currentIndex = index; 
 		
 		ByteBuffer bb = ByteBuffer.wrap(data);
-		bb.order(ByteOrder.LITTLE_ENDIAN);
-		
+		bb.order(endian);
+
 		int numTotalMeshes = bb.getShort();				
 		
 		//Count DirectX Vertex Elements
@@ -542,7 +543,7 @@ public class Model {
 					
 					if (materialData != null)
 					{					
-						materials[i] = new Material(materialFolderPath, indexToUse, materialData);
+						materials[i] = new Material(materialFolderPath, indexToUse, materialData, endian);
 						
 						System.out.println("Adding Entry: " + materialFolderPath +"/"+ fileString);
 						HashDatabase.addPathToDB(materialFolderPath +"/"+ fileString, indexToUse.getName());
@@ -571,7 +572,7 @@ public class Model {
 			HashDatabase.addPathToDB(materialFolderPath, "040000");
 			
 			try {
-				materials[bodyMaterialSpot] = new Material(materialFolderPath, currentIndex, currentIndex.extractFile(materialFolderPath, s));
+				materials[bodyMaterialSpot] = new Material(materialFolderPath, currentIndex, currentIndex.extractFile(materialFolderPath, s), getEndian());
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
 			} catch (IOException e) {
@@ -850,14 +851,14 @@ public class Model {
 				{
 					ByteBuffer colorTable = Buffers.newDirectByteBuffer(byteData);
 					colorTable.position(0);
-					colorTable.order(ByteOrder.LITTLE_ENDIAN);
+					colorTable.order(endian);
 					gl.glTexImage2D(GL3.GL_TEXTURE_2D, 0, GL3.GL_RGBA, 4, 16, 0, GL3.GL_RGBA, GL3.GL_HALF_FLOAT, colorTable);
 				}
 				else
 				{
 					ByteBuffer dxtBB = Buffers.newDirectByteBuffer(tex.data);
 					dxtBB.position(tex.mipmapOffsets[0]);
-					dxtBB.order(ByteOrder.LITTLE_ENDIAN);
+					dxtBB.order(endian);
 					
 					switch(tex.compressionType){
 					case 0x3420: 

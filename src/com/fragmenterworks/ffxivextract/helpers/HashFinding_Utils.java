@@ -78,9 +78,14 @@ public class HashFinding_Utils {
 				if (readingString && b == ',')
 				{
 					readingString = false;
+					for (String code : EXHF_File.languageCodes) {
+						String exdName = String.format("exd/%s_0%s.exd", sBuilder.toString(), code);
+						System.out.println("Adding: " + exdName);
+						HashDatabase.addPathToDB(exdName, "0a0000", HashDatabase.globalConnection);
+					}
 					String exhName = String.format("exd/%s.exh", sBuilder.toString());
 					HashDatabase.addPathToDB(exhName, "0a0000", HashDatabase.globalConnection);
-					System.out.println("Found: " + exhName);
+//					System.out.println("Found: " + exhName);
 					sBuilder.setLength(0);
 					continue;
 				}
@@ -384,8 +389,7 @@ public class HashFinding_Utils {
 		}
 	}
 	
-	public static void openEveryModel()
-	{
+	public static void openEveryModel()	{
 		try {
 			SqPack_IndexFile currentIndex = new SqPack_IndexFile("c:\\Program Files (x86)\\SquareEnix\\FINAL FANTASY XIV - A Realm Reborn\\game\\sqpack\\ffxiv\\040000.win32.index", true);
 			
@@ -397,7 +401,7 @@ public class HashFinding_Utils {
 						if (folder.getFiles()[j].getName().contains(".mdl"))
 						{
 							System.out.println("->Getting model " + folder.getFiles()[j].getName());
-							Model m = new Model(folder.getName() + "/" + folder.getFiles()[j].getName(), currentIndex, currentIndex.extractFile(folder.getFiles()[j].dataoffset, null));
+							Model m = new Model(folder.getName() + "/" + folder.getFiles()[j].getName(), currentIndex, currentIndex.extractFile(folder.getFiles()[j].dataoffset, null), currentIndex.getEndian());
 							for (int x = 0; x < m.getNumVariants(); x++)
 								m.loadVariant(x);
 						}

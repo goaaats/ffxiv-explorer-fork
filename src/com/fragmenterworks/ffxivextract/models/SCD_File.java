@@ -8,7 +8,7 @@ import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
-public class SCD_File {
+public class SCD_File extends Game_File{
 		
 	final static int[] XORTABLE = { 0x003A, 0x0032, 0x0032, 0x0032, 0x0003, 0x007E, 0x0012,
 		0x00F7, 0x00B2, 0x00E2, 0x00A2, 0x0067, 0x0032, 0x0032, 0x0022, 0x0032, 0x0032, 0x0052,
@@ -39,7 +39,9 @@ public class SCD_File {
 	private int soundEntryOffsets[];
 	private byte[] scdFile;
 	
-	public SCD_File(String path) throws IOException{
+	public SCD_File(String path, ByteOrder endian) throws IOException{
+		super(endian);
+
 		File file = new File(path);
 		FileInputStream fis = new FileInputStream(file);
 		byte[] data = new byte[(int) file.length()];
@@ -48,7 +50,8 @@ public class SCD_File {
 		loadSCD(data);
 	}
 
-	public SCD_File(byte[] data) throws IOException {
+	public SCD_File(byte[] data, ByteOrder endian) throws IOException {
+		super(endian);
 		loadSCD(data);
 	}
 	
@@ -57,17 +60,16 @@ public class SCD_File {
 		scdFile = data;
 		
 		ByteBuffer buffer = ByteBuffer.allocateDirect(data.length);
-		buffer.order(ByteOrder.LITTLE_ENDIAN);
+		buffer.order(endian);
 		
 		buffer.put(data);
 		buffer.rewind();
 
 		try {
-			
 			//Check Signature
-			int sig1 = buffer.getInt();
-			int sig2 = buffer.getInt();			
-			if (sig1 != 0x42444553 && sig2 != 0x46435353) //SEDBSSCF in hex
+			byte[] sigBuf = new byte[8];
+			buffer.get(sigBuf, 0, 8);
+			if (!(new String(sigBuf)).equals("SEDBSSCF")) //SEDBSSCF in hex
 				throw new IOException("Not a valid SCD file");
 			
 			//Check Version
@@ -136,7 +138,7 @@ public class SCD_File {
 		
 		//Get to Sound Entry Header	
 		ByteBuffer buffer = ByteBuffer.wrap(scdFile);
-		buffer.order(ByteOrder.LITTLE_ENDIAN);		
+		buffer.order(endian);
 		buffer.position(soundEntryOffsets[index]);
 		
 		//Read in Entry header
@@ -167,7 +169,7 @@ public class SCD_File {
 		
 		//Get to Sound Entry Header	
 		ByteBuffer buffer = ByteBuffer.wrap(scdFile);
-		buffer.order(ByteOrder.LITTLE_ENDIAN);		
+		buffer.order(endian);
 		buffer.position(soundEntryOffsets[index]);
 		
 		//Read in Entry header
@@ -243,7 +245,7 @@ public class SCD_File {
 			
 			byte waveFile[] = new byte[8+36+data.length];
 			ByteBuffer out = ByteBuffer.wrap(waveFile);
-			out.order(ByteOrder.LITTLE_ENDIAN);
+			out.order(endian);
 			out.putInt(0x46464952); //"RIFF"
 			out.putInt(36 + data.length);
 			out.putInt(0x45564157); //"WAVE"
@@ -289,7 +291,7 @@ public class SCD_File {
 	public byte[] getADPCMData(int index) {
 		//Get to Sound Entry Header	
 		ByteBuffer buffer = ByteBuffer.wrap(scdFile);
-		buffer.order(ByteOrder.LITTLE_ENDIAN);		
+		buffer.order(endian);
 		buffer.position(soundEntryOffsets[index]);
 		
 		//Read in Entry header
@@ -327,7 +329,7 @@ public class SCD_File {
 	public byte[] getADPCMHeader(int index) {
 		//Get to Sound Entry Header	
 		ByteBuffer buffer = ByteBuffer.wrap(scdFile);
-		buffer.order(ByteOrder.LITTLE_ENDIAN);		
+		buffer.order(endian);
 		buffer.position(soundEntryOffsets[index]);
 		
 		//Read in Entry header

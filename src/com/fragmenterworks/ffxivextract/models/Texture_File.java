@@ -12,7 +12,7 @@ import javax.imageio.ImageIO;
 import com.fragmenterworks.ffxivextract.helpers.ImageDecoding;
 import com.fragmenterworks.ffxivextract.helpers.ImageDecoding.ImageDecodingException;
 
-public class Texture_File {
+public class Texture_File extends Game_File {
 
 	final public int compressionType;
 
@@ -26,12 +26,13 @@ public class Texture_File {
 	final public byte data[];
 
 	
-	public Texture_File(byte data[]) {
+	public Texture_File(byte data[], ByteOrder endian) {
+		super(endian);
 
 		this.data = data;
 
 		ByteBuffer bb = ByteBuffer.wrap(data);
-		bb.order(ByteOrder.LITTLE_ENDIAN);
+		bb.order(endian);
 		bb.getInt(); // Uknown
 		compressionType = bb.getShort();
 		bb.get();		

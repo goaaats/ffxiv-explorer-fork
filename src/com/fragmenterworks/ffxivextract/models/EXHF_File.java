@@ -12,7 +12,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 
-public class EXHF_File {	
+public class EXHF_File extends Game_File {
 
 	public final static String languageCodes[] = {"", "_ja", "_en", "_de", "_fr", "_chs", "_cht", "_ko"};
 	public final static String languageNames[] = {"", "Japanese", "English", "German", "French", "Chinese - Singapore", "Chinese - Traditional", "Korean"};
@@ -25,10 +25,12 @@ public class EXHF_File {
 	private int trueNumEntries = 0;
 	
 	public EXHF_File(byte[] data) throws IOException {
+		super(ByteOrder.BIG_ENDIAN);
 		loadEXHF(data);
 	}
 
 	public EXHF_File(String path) throws IOException, FileNotFoundException {
+		super(ByteOrder.BIG_ENDIAN);
 		File file = new File(path);
 		FileInputStream fis = new FileInputStream(file);
 		byte[] data = new byte[(int) file.length()];
@@ -40,7 +42,7 @@ public class EXHF_File {
 
 	private void loadEXHF(byte[] data) throws IOException {
 		ByteBuffer buffer = ByteBuffer.wrap(data);
-		buffer.order(ByteOrder.BIG_ENDIAN);
+		buffer.order(endian);
 
 		try {
 			

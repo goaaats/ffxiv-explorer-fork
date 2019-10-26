@@ -539,7 +539,7 @@ public class Outfitter extends JPanel {
 			System.out.println("Adding Entry: " + modelPath);
 			HashDatabase.addPathToDB(modelPath, "040000");
 			
-			Model model = new Model(modelPath,modelIndexFile,modelData);
+			Model model = new Model(modelPath,modelIndexFile,modelData, modelIndexFile.getEndian());
 			model.loadVariant(-1);
 			renderer.setModel(0, model);
 		}
@@ -576,7 +576,7 @@ public class Outfitter extends JPanel {
 			System.out.println("Adding Entry: " + modelPath);
 			HashDatabase.addPathToDB(modelPath, "040000");
 			
-			Model model = new Model(modelPath,modelIndexFile,modelData);
+			Model model = new Model(modelPath,modelIndexFile,modelData, modelIndexFile.getEndian());
 			model.loadVariant(-1);
 			renderer.setModel(2, model);
 		}
@@ -612,7 +612,7 @@ public class Outfitter extends JPanel {
 			System.out.println("Adding Entry: " + modelPath);
 			HashDatabase.addPathToDB(modelPath, "040000");
 			
-			Model model = new Model(modelPath,modelIndexFile,modelData);
+			Model model = new Model(modelPath,modelIndexFile,modelData, modelIndexFile.getEndian());
 			model.loadVariant(-1);
 			renderer.setModel(1, model);
 		}
@@ -646,7 +646,7 @@ public class Outfitter extends JPanel {
 			System.out.println("Adding Entry: " + modelPath);
 			HashDatabase.addPathToDB(modelPath, "040000");
 			
-			Model model = new Model(modelPath,modelIndexFile,modelData);
+			Model model = new Model(modelPath,modelIndexFile,modelData, modelIndexFile.getEndian());
 			model.loadVariant(-1);
 			renderer.setModel(0, model);
 		}
@@ -798,7 +798,7 @@ public class Outfitter extends JPanel {
 			System.out.println("Adding Entry: " + modelPath);
 			HashDatabase.addPathToDB(modelPath, "040000");
 			
-			Model model = new Model(modelPath,modelIndexFile,modelData);
+			Model model = new Model(modelPath,modelIndexFile,modelData, modelIndexFile.getEndian());
 			model.loadVariant(currentItem.varient == 0 ? 1 : currentItem.varient);
 			renderer.setModel(2+modelSlot, model);
 		}

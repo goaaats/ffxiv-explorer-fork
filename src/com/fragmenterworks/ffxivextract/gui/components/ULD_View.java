@@ -95,8 +95,6 @@ public class ULD_View extends JPanel {
         //pnlFileList.add(scrollPane);
 
         try {
-
-            System.out.println(uldFile);
             ULD_File_Renderer renderer = new ULD_File_Renderer(Constants.datPath + "\\game\\sqpack\\ffxiv", uldFile);
 
             JLabel lblPic = new JLabel();

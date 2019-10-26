@@ -16,8 +16,7 @@ import com.fragmenterworks.ffxivextract.shaders.SkinShader;
 import com.fragmenterworks.ffxivextract.storage.HashDatabase;
 import com.jogamp.opengl.GL3;
 
-
-public class Material {
+public class Material extends Game_File {
 	
 	String materialPath;	
 	
@@ -51,18 +50,19 @@ public class Material {
 	int textureIds[] = new int[5];
 	
 	//Constructor grabs info about material
-	public Material(byte[] data) {
-		this(null, null, data);
+	public Material(byte[] data, ByteOrder endian) {
+		this(null, null, data, endian);
 	}		
 	
 	//Constructor grabs info and texture files
-	public Material(String folderPath, SqPack_IndexFile currentIndex, byte[] data) {
-			
+	public Material(String folderPath, SqPack_IndexFile currentIndex, byte[] data, ByteOrder endian) {
+		super(endian);
+
 		if (data == null)
 			return;
 		
 		ByteBuffer bb = ByteBuffer.wrap(data);
-		bb.order(ByteOrder.LITTLE_ENDIAN);
+		bb.order(endian);
 		bb.getInt();
 		fileSize = bb.getShort();
 		colorTableSize = bb.getShort();
@@ -119,15 +119,15 @@ public class Material {
 						continue;
 					
 					if ((fileString.endsWith("_d.tex") || fileString.contains("catchlight")) && diffuse == null)
-						diffuse = new Texture_File(extracted);
+						diffuse = new Texture_File(extracted, endian);
 					else if (fileString.endsWith("_n.tex") && normal == null)
-						normal = new Texture_File(extracted);
+						normal = new Texture_File(extracted, endian);
 					else if (fileString.endsWith("_s.tex") && specular == null)
-						specular = new Texture_File(extracted);
+						specular = new Texture_File(extracted, endian);
 					else if (fileString.endsWith("_m.tex"))
-						mask = new Texture_File(extracted);
+						mask = new Texture_File(extracted, endian);
 					else
-						colorSet = new Texture_File(extracted);
+						colorSet = new Texture_File(extracted, endian);
 					
 				} catch (FileNotFoundException e) {
 					e.printStackTrace();

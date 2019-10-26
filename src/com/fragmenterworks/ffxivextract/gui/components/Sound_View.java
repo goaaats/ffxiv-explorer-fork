@@ -210,7 +210,7 @@ public class Sound_View extends JPanel {
 			return;
 		
 		ByteBuffer bb = ByteBuffer.wrap(header);
-		bb.order(ByteOrder.LITTLE_ENDIAN);
+		bb.order(file.getEndian());
 		bb.getShort();		
 		int channels = bb.getShort();
 		int rate = bb.getInt();

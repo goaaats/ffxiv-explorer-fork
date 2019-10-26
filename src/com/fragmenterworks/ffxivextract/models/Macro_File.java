@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
-import com.fragmenterworks.ffxivextract.helpers.LERandomAccessFile;
+import com.fragmenterworks.ffxivextract.helpers.EARandomAccessFile;
 
 public class Macro_File {
 
@@ -21,7 +21,7 @@ public class Macro_File {
 	
 	public Macro_File(String path) throws FileNotFoundException, IOException{
 		macroPath = path;
-		LERandomAccessFile ref = new LERandomAccessFile(macroPath, "rw");
+		EARandomAccessFile ref = new EARandomAccessFile(macroPath, "rw", ByteOrder.LITTLE_ENDIAN);
 		
 		ref.skipBytes(0x08);		
 		int macroBookSize = ref.readInt();		

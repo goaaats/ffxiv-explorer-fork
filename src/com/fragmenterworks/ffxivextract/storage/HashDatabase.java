@@ -12,15 +12,405 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.HashMap;
 
 import com.fragmenterworks.ffxivextract.Constants;
 
-import com.fragmenterworks.ffxivextract.helpers.LERandomAccessFile;
+import com.fragmenterworks.ffxivextract.helpers.EARandomAccessFile;
 
 public class HashDatabase {
 
-	public static Connection globalConnection = null;	
-	
+	public static Connection globalConnection = null;
+
+	private static HashMap<Long, String> files;
+	private static HashMap<Long, String> folders;
+
+	public static void init() throws ClassNotFoundException {
+		Class.forName("org.sqlite.JDBC");
+
+		Connection connection = null;
+		try {
+			// create a database connection
+			connection = DriverManager.getConnection("jdbc:sqlite:./hashlist.db");
+
+			files = new HashMap<>();
+			folders = new HashMap<>();
+
+			PreparedStatement fileq = connection.prepareStatement("select hash, name from filenames");
+			PreparedStatement folderq = connection.prepareStatement("select hash, path from folders");
+
+			ResultSet rs = fileq.executeQuery();
+			while (rs.next())
+				files.put(rs.getLong(1), rs.getString(2));
+
+			ResultSet rs2 = folderq.executeQuery();
+			while (rs2.next())
+				folders.put(rs2.getLong(1), rs2.getString(2));
+
+			rs.close();
+			rs2.close();
+
+		} catch (SQLException e) {
+			// if the error message is "out of memory",
+			// it probably means no database file is found
+			System.err.println(e.getMessage());
+		} finally {
+			try {
+				if (connection != null)
+					connection.close();
+			} catch (SQLException e) {
+				// connection close failed.
+				e.printStackTrace();
+			}
+		}
+	}
+
+	public static int getHashDBVersion()
+	{
+		String version = "-1";
+		Connection connection = null;
+		try {
+			connection = DriverManager.getConnection("jdbc:sqlite:./hashlist.db");
+			Statement statement = connection.createStatement();
+			ResultSet rs = statement.executeQuery("select * from dbinfo where type = 'version'");
+
+			while (rs.next())
+				version = rs.getString("value");
+
+			rs.close();
+			statement.close();
+		} catch (SQLException e) {
+			System.err.println(e.getMessage());
+			return -1;
+		} finally {
+			try {
+				if (connection != null)
+					connection.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+
+		return Integer.parseInt(version);
+	}
+
+	public static boolean addFolderToDB(String folderName, String archive) {
+		if (folderName.endsWith("/"))
+			folderName = folderName.substring(0, folderName.length()-1);
+
+		int folderHash = computeCRC(folderName.getBytes(), 0,
+				folderName.getBytes().length);
+
+		//if (Constants.DEBUG)
+		System.out.println("Adding Folder Entry: " + folderName);
+
+		Connection connection = null;
+		try{
+			connection = DriverManager
+					.getConnection("jdbc:sqlite:./hashlist.db");
+			Statement statement = connection.createStatement();
+			statement.setQueryTimeout(30); // set timeout to 30 sec.
+			statement.executeUpdate(String.format("insert or ignore into folders values(%d, '%s', '0', '%s', %d)", folderHash, folderName, archive, Constants.DB_VERSION_CODE));
+			statement.close();
+
+			folders.put((long) folderHash, folderName);
+		} catch (SQLException e) {
+			System.err.println(e.getMessage());
+			return false;
+		} finally {
+			try {
+				if (connection != null)
+					connection.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+		return true;
+	}
+
+	// Used to add a string to the db. Automatically hashes and splits it.
+	public static boolean addPathToDB(String fullPath, String archive) {
+		Connection conn;
+		try {
+			conn = DriverManager.getConnection("jdbc:sqlite:./hashlist.db");
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+		return addPathToDB(fullPath, archive, conn);
+	}
+
+	public static boolean addPathToDB(String fullPath, String archive, Connection conn) {
+
+		String folder = fullPath.substring(0, fullPath.lastIndexOf('/')).toLowerCase();
+		String filename = fullPath.substring(fullPath.lastIndexOf('/') + 1).toLowerCase();
+
+		int folderHash = computeCRC(folder.getBytes(), 0, folder.getBytes().length);
+		int fileHash = computeCRC(filename.getBytes(), 0, filename.getBytes().length);
+
+		if (Constants.DEBUG)
+			System.out.println("Adding Entry: " + fullPath);
+
+		try {
+			Statement statement = conn.createStatement();
+			statement.setQueryTimeout(30); // set timeout to 30 sec.
+			statement.executeUpdate(String.format("insert or ignore into folders values(%d, '%s', 0, '%s', '%s')", folderHash, folder, archive, Constants.DB_VERSION_CODE));
+			statement.executeUpdate(String.format("UPDATE  folders set path='%s' where hash=%d", folder, folderHash));
+			statement.executeUpdate(String.format("insert or ignore into filenames values(%d, '%s', 0, '%s', '%s')", fileHash, filename, archive, Constants.DB_VERSION_CODE));
+			statement.executeUpdate(String.format("UPDATE  filenames set name='%s' where hash=%d", filename, fileHash));
+
+			statement.close();
+
+			folders.put((long) folderHash, folder);
+			files.put((long) fileHash, filename);
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return false;
+		}
+		return true;
+	}
+
+	// This is used to read a list of paths from a string (IE: extracted from
+	// the exe or memory)
+	public static void loadPathsFromTXT(String path) throws SQLException {
+		int numAdded = 0;
+		try {
+			BufferedReader br = new BufferedReader(new FileReader(path));
+			String line;
+
+			Connection connection = DriverManager
+					.getConnection("jdbc:sqlite:./hashlist.db");
+			connection.setAutoCommit(false);
+
+			while ((line = br.readLine()) != null) {
+
+				if (line.equals(""))
+					continue;
+
+				String folder = line.substring(0, line.lastIndexOf('/'))
+						.toLowerCase();
+				String filename = line.substring(line.lastIndexOf('/') + 1,
+						line.length()).toLowerCase();
+
+				// Read
+				long fileHash = computeCRC(filename.getBytes(), 0,
+						filename.getBytes().length);
+				long folderHash = computeCRC(folder.getBytes(), 0,
+						folder.getBytes().length);
+
+				if (Constants.DEBUG)
+					System.out.println("Adding Entry: " + line);
+
+				try {
+					Statement statement = connection.createStatement();
+					statement.setQueryTimeout(30); // set timeout to 30 sec.
+
+					statement.executeUpdate(String.format("insert or ignore into folders values(%d, '%s', 0, '%s', '%s')", folderHash, folder, "0a0000", Constants.DB_VERSION_CODE));
+					statement.executeUpdate(String.format("UPDATE  folders set path='%s' where hash=%d", folder, folderHash));
+					statement.executeUpdate(String.format("insert or ignore into filenames values(%d, '%s', 0, '%s', '%s')", fileHash, filename, "0a0000", Constants.DB_VERSION_CODE));
+					statement.executeUpdate(String.format("UPDATE  filenames set name='%s' where hash=%d", filename, fileHash));
+
+				} catch (SQLException e) {
+					System.err.println(e.getMessage());
+				}
+				numAdded++;
+			}
+			connection.commit();
+			try {
+				if (connection != null)
+					connection.close();
+			} catch (SQLException e) {
+				System.err.println(e);
+			}
+			br.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		System.out.println("Added " + numAdded +" new entries.");
+	}
+
+	// This is a quick n dirty SQDB reader. Skip 0x800 bytes of header, the
+	// other header data in each entry, read in hashes + path. Skip 0x108 bytes
+	// per entry.
+	// Entry header is: 4 bytes of nothing, some val, content type, 4 bytes of
+	// nothing. Then good stuff starts.
+	@SuppressWarnings("unused")
+	public static void loadPathsFromSQDB(String path) throws SQLException {
+		try {
+			//TODO: if sqdb fails to load, change the endian here thanks
+			EARandomAccessFile file = new EARandomAccessFile(path, "r", ByteOrder.LITTLE_ENDIAN);
+
+			file.skipBytes(0x800); // Headers
+
+			long folderHash;
+			long fileHash;
+			String fullPath = null;
+			String folder = null;
+			String filename = null;
+
+			// Skip header
+			file.readInt();
+			file.readInt();
+			file.readInt();
+			file.readInt();
+			long lastStartPosition = 0;
+
+			Connection connection = null;
+			try{
+				connection = DriverManager
+						.getConnection("jdbc:sqlite:./hashlist.db");
+				connection.setAutoCommit(false);
+			}
+			catch (Exception e){}
+
+			// Read until we hit EOF
+			while (true) {
+				lastStartPosition = file.getFilePointer();
+
+				// Read
+				fileHash = file.readInt();
+				folderHash = file.readInt();
+
+				fullPath = "";
+				while (true) {
+					byte c = file.readByte();
+					if (c == 0)
+						break;
+					else
+						fullPath += (char) c;
+				}
+
+				folder = fullPath.substring(0, fullPath.lastIndexOf('/'));
+				filename = fullPath.substring(fullPath.lastIndexOf('/') + 1,
+						fullPath.length());
+
+				if (Constants.DEBUG)
+					System.out.println("Adding Entry: " + fullPath);
+
+
+				try{
+					Statement statement = connection.createStatement();
+					statement.setQueryTimeout(30); // set timeout to 30 sec.
+					statement.executeUpdate("insert or ignore into folders values("+ folderHash + ", '" + folder + "',0)");
+					statement.executeUpdate("insert or ignore into filenames values("+ fileHash + ", '" + fullPath + "',0)");
+				} catch (SQLException e) {
+					System.err.println(e.getMessage());
+				}
+
+				// Reset
+				file.seek(lastStartPosition);
+
+				// Check EOF
+				if (file.getFilePointer() + 0x108 >= file.length())
+					break;
+
+				file.skipBytes(0x108);
+			}
+			try {
+				connection.commit();
+				connection.close();
+			} catch (SQLException e) {
+				System.err.println(e);
+			}
+			file.close();
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	public static void beginConnection() {
+		try {
+			globalConnection = DriverManager
+					.getConnection("jdbc:sqlite:./hashlist.db");
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public static void closeConnection() {
+		try {
+			globalConnection.close();
+			globalConnection = null;
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public static String getFolder(long hash){
+		return folders.getOrDefault(hash, null);
+	}
+
+	public static String getFileName(long hash) {
+		String fullPath = getFileFullPathName(hash);
+		if (fullPath == null)
+			return null;
+		return fullPath.substring(fullPath.lastIndexOf('/') + 1,
+				fullPath.length()).toLowerCase();
+	}
+
+	public static String getFileFullPathName(long hash) {
+		return files.getOrDefault(hash, null);
+	}
+
+	//Created from MSDN's CRC tables and code as well as RozeDoyanawa's Java implementation
+	public static int computeCRC(byte[] bytes, int offset, int length) {
+		ByteBuffer pbBuffer = ByteBuffer.wrap(bytes, offset, length);
+		pbBuffer.order(ByteOrder.LITTLE_ENDIAN);
+		int dwCRC = -1;
+		int cbRunningLength = ((length < 4) ? 0 : ((length) / 4) * 4);
+		int cbEndUnalignedBytes = length - cbRunningLength;
+		for (int i = 0; i < cbRunningLength / 4; ++i) {
+			dwCRC ^= pbBuffer.getInt();
+			dwCRC = crc_table_0f091d0[dwCRC & 0x000000FF] ^
+					crc_table_0f08dd0[(dwCRC >>> 8) & 0x000000FF] ^
+					crc_table_0f089d0[(dwCRC >>> 16) & 0x000000FF] ^
+					crc_table_0f085d0[(dwCRC >>> 24) & 0x000000FF];
+		}
+
+		for (int i = 0; i < cbEndUnalignedBytes; ++i) {
+			dwCRC = crc_table_0f085d0[(dwCRC ^ pbBuffer.get()) & 0x000000FF] ^ (dwCRC >>> 8);
+			//System.out.println(String.format("%d\n",dwCRC));
+		}
+
+		return dwCRC;
+	}
+
+	public static void flagFileNameAsUsed(int id) {
+		try{
+			Statement statement = globalConnection.createStatement();
+			statement.setQueryTimeout(30); // set timeout to 30 sec.
+			statement.executeUpdate("update 'filenames' set used = 1 where hash = " + id);
+		} catch (SQLException e) {
+			System.err.println(e.getMessage());
+		}
+	}
+
+	public static void flagFolderNameAsUsed(int id) {
+		try{
+			Statement statement = globalConnection.createStatement();
+			statement.setQueryTimeout(30); // set timeout to 30 sec.
+			statement.executeUpdate("update 'folders' set used = 1 where hash = " + id);
+		} catch (SQLException e) {
+			System.err.println(e.getMessage());
+		}
+	}
+
+	public static void setAutoCommit(boolean flag) throws SQLException {
+		if (globalConnection != null)
+			globalConnection.setAutoCommit(flag);
+	}
+
+	public static void commit() throws SQLException {
+		if (globalConnection != null)
+			globalConnection.commit();
+	}
+
 	// Hashing
 	static int[] crc_table_0f085d0 = new int[] { 0x00000000, 0x77073096,
 			0xEE0E612C, 0x990951BA, 0x076DC419, 0x706AF48F, 0xE963A535,
@@ -232,466 +622,4 @@ public class HashDatabase {
 			0x1BB12E1E, 0x43D23E48, 0xFB6E592D, 0xE9DBF6C3, 0x516791A6,
 			0xCCB0A91F, 0x740CCE7A, 0x66B96194, 0xDE0506F1 };
 
-	public static void init() throws ClassNotFoundException {
-		Class.forName("org.sqlite.JDBC");
-
-		Connection connection = null;
-		try {
-			// create a database connection
-			connection = DriverManager
-					.getConnection("jdbc:sqlite:./hashlist.db");
-	
-		} catch (SQLException e) {
-			// if the error message is "out of memory",
-			// it probably means no database file is found
-			System.err.println(e.getMessage());
-		} finally {
-			try {
-				if (connection != null)
-					connection.close();
-			} catch (SQLException e) {
-				// connection close failed.
-				System.err.println(e);
-			}
-		}
-
-	}
-
-	public static int getHashDBVersion()
-	{
-		String version = "-1";
-		Connection connection = null;		
-		try{
-			connection = DriverManager
-					.getConnection("jdbc:sqlite:./hashlist.db");
-			Statement statement = connection.createStatement();
-			ResultSet rs = statement
-					.executeQuery("select * from dbinfo where type = 'version'");
-						
-			while (rs.next())
-				version = rs.getString("value");
-			
-			rs.close();
-			statement.close();
-		} catch (SQLException e) {
-			System.err.println(e.getMessage());
-			return -1;
-		} finally {
-			try {
-				if (connection != null)
-					connection.close();
-			} catch (SQLException e) {
-				System.err.println(e);
-			}
-		}		 
-		
-		return Integer.parseInt(version);
-	}
-	
-	public static boolean addFolderToDB(String folderName, String archive)
-	{
-		if (folderName.endsWith("/"))
-			folderName = folderName.substring(0, folderName.length()-1);
-		
-		int folderHash = computeCRC(folderName.getBytes(), 0,
-				folderName.getBytes().length);
-		
-		//if (Constants.DEBUG)
-			System.out.println("Adding Folder Entry: " + folderName);
-
-		Connection connection = null;
-		try{
-			connection = DriverManager
-					.getConnection("jdbc:sqlite:./hashlist.db");
-			Statement statement = connection.createStatement();
-			statement.setQueryTimeout(30); // set timeout to 30 sec.
-			statement.executeUpdate(String.format("insert or ignore into folders values(%d, '%s', '0', '%s', %d)", folderHash, folderName, archive, Constants.DB_VERSION_CODE));			
-			statement.close();
-		} catch (SQLException e) {
-			System.err.println(e.getMessage());
-			return false;
-		} finally {
-			try {
-				if (connection != null)
-					connection.close();
-			} catch (SQLException e) {
-				System.err.println(e);
-			}
-		}
-		return true;
-	}
-	
-	// Used to add a string to the db. Automatically hashes and splits it.
-	public static boolean addPathToDB(String fullPath, String archive) {
-
-		String folder = fullPath.substring(0, fullPath.lastIndexOf('/'))
-				.toLowerCase();
-		String filename = fullPath.substring(fullPath.lastIndexOf('/') + 1,
-				fullPath.length()).toLowerCase();
-
-		int folderHash = computeCRC(folder.getBytes(), 0,
-				folder.getBytes().length);
-		int fileHash = computeCRC(filename.getBytes(), 0,
-				filename.getBytes().length);		
-				
-		if (Constants.DEBUG)
-			System.out.println("Adding Entry: " + fullPath);
-
-		Connection connection = null;
-		try{
-			connection = DriverManager
-					.getConnection("jdbc:sqlite:./hashlist.db");
-			Statement statement = connection.createStatement();
-			statement.setQueryTimeout(30); // set timeout to 30 sec.
-			statement.executeUpdate(String.format("insert or ignore into folders values(%d, '%s', 0, '%s', '%s')", folderHash, folder, archive, Constants.DB_VERSION_CODE));
-			statement.executeUpdate(String.format("UPDATE  folders set path='%s' where hash=%d", folder, folderHash));
-			statement.executeUpdate(String.format("insert or ignore into filenames values(%d, '%s', 0, '%s', '%s')", fileHash, filename, archive, Constants.DB_VERSION_CODE));
-			statement.executeUpdate(String.format("UPDATE  filenames set name='%s' where hash=%d", filename, fileHash));
-			statement.close();
-		} catch (SQLException e) {
-			System.err.println(e.getMessage());
-			return false;
-		} finally {
-			try {
-				if (connection != null)
-					connection.close();
-			} catch (SQLException e) {
-				System.err.println(e);
-			}
-		}
-		return true;
-	}
-	
-	public static boolean addPathToDB(String fullPath, String archive, Connection conn) {
-		
-		String folder = fullPath.substring(0, fullPath.lastIndexOf('/'))
-				.toLowerCase();
-		String filename = fullPath.substring(fullPath.lastIndexOf('/') + 1,
-				fullPath.length()).toLowerCase();
-
-		int folderHash = computeCRC(folder.getBytes(), 0,
-				folder.getBytes().length);
-		int fileHash = computeCRC(filename.getBytes(), 0,
-				filename.getBytes().length);		
-				
-		if (Constants.DEBUG)
-			System.out.println("Adding Entry: " + fullPath);
-
-		try{		
-			Statement statement = conn.createStatement();
-			statement.setQueryTimeout(30); // set timeout to 30 sec.
-			statement.executeUpdate(String.format("insert or ignore into folders values(%d, '%s', 0, '%s', '%s')", folderHash, folder, archive, Constants.DB_VERSION_CODE));
-			statement.executeUpdate(String.format("UPDATE  folders set path='%s' where hash=%d", folder, folderHash));
-			statement.executeUpdate(String.format("insert or ignore into filenames values(%d, '%s', 0, '%s', '%s')", fileHash, filename, archive, Constants.DB_VERSION_CODE));
-			statement.executeUpdate(String.format("UPDATE  filenames set name='%s' where hash=%d", filename, fileHash));
-			statement.close();
-		} catch (SQLException e) {
-			System.err.println(e.getMessage());
-			return false;
-		}
-		return true;
-		
-	}
-
-	// This is used to read a list of paths from a string (IE: extracted from
-	// the exe or memory)
-	public static void loadPathsFromTXT(String path) throws SQLException {
-		int numAdded = 0;
-		try {
-			BufferedReader br = new BufferedReader(new FileReader(path));
-			String line;
-			
-			Connection connection = DriverManager
-					.getConnection("jdbc:sqlite:./hashlist.db");
-			connection.setAutoCommit(false);
-			
-			while ((line = br.readLine()) != null) {
-
-				if (line.equals(""))
-					continue;
-				
-				String folder = line.substring(0, line.lastIndexOf('/'))
-						.toLowerCase();
-				String filename = line.substring(line.lastIndexOf('/') + 1,
-						line.length()).toLowerCase();
-
-				// Read
-				long fileHash = computeCRC(filename.getBytes(), 0,
-						filename.getBytes().length);
-				long folderHash = computeCRC(folder.getBytes(), 0,
-						folder.getBytes().length);
-				
-				
-				if (Constants.DEBUG)
-					System.out.println("Adding Entry: " + line);
-
-				
-				try{					
-					Statement statement = connection.createStatement();
-					statement.setQueryTimeout(30); // set timeout to 30 sec.
-					
-					statement.executeUpdate(String.format("insert or ignore into folders values(%d, '%s', 0, '%s', '%s')", folderHash, folder, "0a0000", Constants.DB_VERSION_CODE));
-					statement.executeUpdate(String.format("UPDATE  folders set path='%s' where hash=%d", folder, folderHash));
-					statement.executeUpdate(String.format("insert or ignore into filenames values(%d, '%s', 0, '%s', '%s')", fileHash, filename, "0a0000", Constants.DB_VERSION_CODE));
-					statement.executeUpdate(String.format("UPDATE  filenames set name='%s' where hash=%d", filename, fileHash));
-					
-				} catch (SQLException e) {
-					System.err.println(e.getMessage());
-				}
-				numAdded++;
-			}
-			connection.commit();
-			try {
-				if (connection != null)
-					connection.close();
-			} catch (SQLException e) {
-				System.err.println(e);
-			}
-			br.close();			
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		
-		System.out.println("Added " + numAdded +" new entries.");
-	}
-
-	// This is a quick n dirty SQDB reader. Skip 0x800 bytes of header, the
-	// other header data in each entry, read in hashes + path. Skip 0x108 bytes
-	// per entry.
-	// Entry header is: 4 bytes of nothing, some val, content type, 4 bytes of
-	// nothing. Then good stuff starts.
-	@SuppressWarnings("unused")
-	public static void loadPathsFromSQDB(String path) throws SQLException {
-		try {
-			LERandomAccessFile file = new LERandomAccessFile(path, "r");
-
-			file.skipBytes(0x800); // Headers
-
-			long folderHash;
-			long fileHash;
-			String fullPath = null;
-			String folder = null;
-			String filename = null;
-
-			// Skip header
-			file.readInt();
-			file.readInt();
-			file.readInt();
-			file.readInt();
-			long lastStartPosition = 0;
-
-			Connection connection = null;
-			try{
-				connection = DriverManager
-						.getConnection("jdbc:sqlite:./hashlist.db");
-				connection.setAutoCommit(false);
-			}
-			catch (Exception e){}
-			
-			// Read until we hit EOF
-			while (true) {
-				lastStartPosition = file.getFilePointer();
-
-				// Read
-				fileHash = file.readInt();
-				folderHash = file.readInt();
-
-				fullPath = "";
-				while (true) {
-					byte c = file.readByte();
-					if (c == 0)
-						break;
-					else
-						fullPath += (char) c;
-				}
-
-				folder = fullPath.substring(0, fullPath.lastIndexOf('/'));
-				filename = fullPath.substring(fullPath.lastIndexOf('/') + 1,
-						fullPath.length());
-
-				if (Constants.DEBUG)
-					System.out.println("Adding Entry: " + fullPath);
-
-				
-				try{
-					Statement statement = connection.createStatement();
-					statement.setQueryTimeout(30); // set timeout to 30 sec.
-					statement.executeUpdate("insert or ignore into folders values("+ folderHash + ", '" + folder + "',0)");
-					statement.executeUpdate("insert or ignore into filenames values("+ fileHash + ", '" + fullPath + "',0)");
-				} catch (SQLException e) {
-					System.err.println(e.getMessage());
-				} 
-				
-				// Reset
-				file.seek(lastStartPosition);
-
-				// Check EOF
-				if (file.getFilePointer() + 0x108 >= file.length())
-					break;
-
-				file.skipBytes(0x108);
-			}
-			try {
-				connection.commit();
-					connection.close();
-			} catch (SQLException e) {
-				System.err.println(e);
-			}
-			file.close();
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
-
-	public static void beginConnection() {		
-			try {
-				globalConnection = DriverManager
-						.getConnection("jdbc:sqlite:./hashlist.db");
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}				
-	}
-	
-	public static void closeConnection() {		
-		try {
-			globalConnection.close();
-			globalConnection = null;
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-	}
-
-	public static String getFolder(long hash){
-		Connection connection = null;
-		String path = null;
-		try{
-			if (globalConnection == null)
-				connection = DriverManager
-						.getConnection("jdbc:sqlite:./hashlist.db");
-			else
-				connection = globalConnection;
-			Statement statement = connection.createStatement();
-			//statement.executeUpdate("UPDATE `folders` SET `used`= 1 WHERE hash="+hash+";");
-			ResultSet rs = statement
-					.executeQuery("select * from folders where hash = " + hash);
-						
-			while (rs.next())
-				path = rs.getString("path");
-			
-			
-			connection.clearWarnings();
-			statement.close();
-			rs.close();
-		} catch (SQLException e) {
-			System.err.println(e.getMessage());
-			return null;
-		} finally {
-			try {
-				if (globalConnection == null && connection != null)
-					connection.close();
-			} catch (SQLException e) {
-				System.err.println(e);
-			}
-		}		
-		return path;
-	}
-
-	public static String getFileName(long hash) {
-		String fullPath = getFileFullPathName(hash);
-		if (fullPath == null)
-			return null;
-		return fullPath.substring(fullPath.lastIndexOf('/') + 1,
-				fullPath.length()).toLowerCase();
-	}
-
-	public static String getFileFullPathName(long hash) {
-		
-		Connection connection = null;
-		String path = null;
-		try{
-			if (globalConnection == null)
-				connection = DriverManager
-						.getConnection("jdbc:sqlite:./hashlist.db");
-			else
-				connection = globalConnection;
-			Statement statement = connection.createStatement();
-			//statement.executeUpdate("UPDATE `filenames` SET `used`= 1 WHERE hash="+hash+";");
-			ResultSet rs = statement
-					.executeQuery("select * from filenames where hash = " + hash);						
-			while (rs.next())
-				path = rs.getString("name");
-			statement.close();
-			rs.close();
-			
-		} catch (SQLException e) {
-			System.err.println(e.getMessage());
-			return null;
-		} finally {
-			try {
-				if (globalConnection == null && connection != null)
-					connection.close();
-			} catch (SQLException e) {
-				System.err.println(e);
-			}
-		}		
-		
-		return path;
-	}
-
-	//Created from MSDN's CRC tables and code as well as RozeDoyanawa's Java implementation
-		public static int computeCRC(byte[] bytes, int offset, int length) {
-			ByteBuffer pbBuffer = ByteBuffer.wrap(bytes, offset, length);
-			pbBuffer.order(ByteOrder.LITTLE_ENDIAN);
-			int dwCRC = -1;
-			int cbRunningLength = ((length < 4) ? 0 : ((length) / 4) * 4);
-			int cbEndUnalignedBytes = length - cbRunningLength;
-			for (int i = 0; i < cbRunningLength / 4; ++i) {
-				dwCRC ^= pbBuffer.getInt();
-				dwCRC = crc_table_0f091d0[dwCRC & 0x000000FF] ^
-						crc_table_0f08dd0[(dwCRC >>> 8) & 0x000000FF] ^
-						crc_table_0f089d0[(dwCRC >>> 16) & 0x000000FF] ^
-						crc_table_0f085d0[(dwCRC >>> 24) & 0x000000FF];
-			}
-
-			for (int i = 0; i < cbEndUnalignedBytes; ++i) {				
-				dwCRC = crc_table_0f085d0[(dwCRC ^ pbBuffer.get()) & 0x000000FF] ^ (dwCRC >>> 8);
-				//System.out.println(String.format("%d\n",dwCRC));
-			}
-
-			return dwCRC;
-		}
-		
-		public static void flagFileNameAsUsed(int id) {
-			try{
-				Statement statement = globalConnection.createStatement();
-				statement.setQueryTimeout(30); // set timeout to 30 sec.
-				statement.executeUpdate("update 'filenames' set used = 1 where hash = " + id);				
-			} catch (SQLException e) {
-				System.err.println(e.getMessage());
-			} 
-		}
-		
-		public static void flagFolderNameAsUsed(int id) {
-			try{
-				Statement statement = globalConnection.createStatement();
-				statement.setQueryTimeout(30); // set timeout to 30 sec.
-				statement.executeUpdate("update 'folders' set used = 1 where hash = " + id);				
-			} catch (SQLException e) {
-				System.err.println(e.getMessage());
-			} 
-		}
-
-		public static void setAutoCommit(boolean flag) throws SQLException {
-			if (globalConnection != null)
-				globalConnection.setAutoCommit(flag);
-		}
-		
-		public static void commit() throws SQLException {
-			if (globalConnection != null)
-				globalConnection.commit();
-		}
 }

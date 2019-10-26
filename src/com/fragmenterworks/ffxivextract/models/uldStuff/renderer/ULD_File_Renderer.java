@@ -2,10 +2,7 @@ package com.fragmenterworks.ffxivextract.models.uldStuff.renderer;
 
 import com.fragmenterworks.ffxivextract.helpers.FileTools;
 import com.fragmenterworks.ffxivextract.helpers.SparseArray;
-import com.fragmenterworks.ffxivextract.models.IGraphicsElement;
-import com.fragmenterworks.ffxivextract.models.TextureRegion;
-import com.fragmenterworks.ffxivextract.models.TextureSet;
-import com.fragmenterworks.ffxivextract.models.ULD_File;
+import com.fragmenterworks.ffxivextract.models.*;
 import com.fragmenterworks.ffxivextract.models.uldStuff.COHDEntry;
 import com.fragmenterworks.ffxivextract.models.uldStuff.COHDEntryType;
 import com.fragmenterworks.ffxivextract.models.uldStuff.COHDEntryType_Frame;
@@ -64,7 +61,7 @@ import java.util.Set;
  *
  * @author Roze
  */
-public class ULD_File_Renderer implements MouseListener, MouseMotionListener{
+public class ULD_File_Renderer implements MouseListener, MouseMotionListener {
 
 	private final static Map<Integer, Class<? extends GraphicsElement>> graphicsTypes    = new HashMap<>();
 	private final static Map<Integer, Class<? extends UIComponent>>     uiComponentTypes = new HashMap<>();
@@ -106,6 +103,7 @@ public class ULD_File_Renderer implements MouseListener, MouseMotionListener{
 
 	private int width;
 	private int height;
+	private ULD_File file;
 	public static boolean PAINT_DEBUG = false;
 
 	/**
@@ -115,6 +113,9 @@ public class ULD_File_Renderer implements MouseListener, MouseMotionListener{
 	 * @param uld_file  The previously parsed ULD file
 	 */
 	public ULD_File_Renderer(String sqDatPath, ULD_File uld_file) {
+
+		this.file = uld_file;
+
 		this.width = uld_file.uldHeader.atkhs[1].wdhd.getEntries().get(1).width;
 		this.height = uld_file.uldHeader.atkhs[1].wdhd.getEntries().get(1).height;
 
@@ -139,7 +140,7 @@ public class ULD_File_Renderer implements MouseListener, MouseMotionListener{
 				Constructor<? extends GraphicsElement> constructor = aClass.getDeclaredConstructor();
 				return constructor.newInstance();
 			} catch ( NoSuchMethodException | IllegalAccessException | InstantiationException | InvocationTargetException e ) {
-				e.printStackTrace();
+//				e.printStackTrace();
 				return null;
 			}
 		}
@@ -148,7 +149,7 @@ public class ULD_File_Renderer implements MouseListener, MouseMotionListener{
 			constructor = GraphicsContainer.class.getDeclaredConstructor();
 			return constructor.newInstance();
 		} catch ( NoSuchMethodException | InvocationTargetException | IllegalAccessException | InstantiationException e ) {
-			e.printStackTrace();
+//			e.printStackTrace();
 		}
 		return null;
 	}
@@ -166,7 +167,7 @@ public class ULD_File_Renderer implements MouseListener, MouseMotionListener{
 		//byte[] data      = FileTools.getRaw(sqPakPath, "ui/uld/botanistgame.uld");
 
 		try {
-			ULD_File uld = new ULD_File(data);
+			ULD_File uld = new ULD_File(data, ByteOrder.LITTLE_ENDIAN);
 
 			System.out.println(uld);
 			ULD_File_Renderer renderer = new ULD_File_Renderer(sqPakPath, uld);
@@ -208,7 +209,7 @@ public class ULD_File_Renderer implements MouseListener, MouseMotionListener{
 			}, 1000/2, 100/2);*/
 
 		} catch ( IOException e ) {
-			e.printStackTrace();
+//			e.printStackTrace();
 		}
 	}
 
@@ -219,7 +220,7 @@ public class ULD_File_Renderer implements MouseListener, MouseMotionListener{
 				Constructor<? extends UIComponent> constructor = aClass.getDeclaredConstructor(int.class);
 				return constructor.newInstance(index);
 			} catch ( NoSuchMethodException | IllegalAccessException | InstantiationException | InvocationTargetException e ) {
-				e.printStackTrace();
+//				e.printStackTrace();
 			}
 		}
 		return null;
@@ -302,7 +303,7 @@ public class ULD_File_Renderer implements MouseListener, MouseMotionListener{
 			String path = paths.valueAt(i);
 			if ( path.length() == 2 ) {
 				ByteBuffer bb = ByteBuffer.wrap(path.getBytes());
-				bb.order(ByteOrder.LITTLE_ENDIAN);
+				bb.order();
 				BufferedImage img = FileTools.getIcon(sqDatPath, (int)bb.getShort() & 0xFFFF);
 				if ( img != null ) {
 					images.put(key, img);
@@ -465,7 +466,7 @@ public class ULD_File_Renderer implements MouseListener, MouseMotionListener{
 				try {
 					l.mouseClicked(e);
 				} catch ( Throwable t ) {
-					t.printStackTrace();
+//					t.printStackTrace();
 				}
 			}
 		}
@@ -475,7 +476,7 @@ public class ULD_File_Renderer implements MouseListener, MouseMotionListener{
 				try {
 					l.mouseDragged(e);
 				} catch ( Throwable t ) {
-					t.printStackTrace();
+//					t.printStackTrace();
 				}
 			}
 		}
@@ -1169,7 +1170,7 @@ public class ULD_File_Renderer implements MouseListener, MouseMotionListener{
 
 		public void setComponent(final UIComponent component) {
 			this.component = component;
-			if ( parent != null ) {
+			if ( parent != null && component != null) {
 				component.parent = parent;
 			}
 		}
@@ -1436,7 +1437,8 @@ public class ULD_File_Renderer implements MouseListener, MouseMotionListener{
 			int originalHeight = graphics.height;
 
 			graphics.height = all.height - ( originalHeight - graphics.top );
-			btnDown.top = all.height - ( originalHeight - btnDown.top );
+			if (btnDown != null)
+				btnDown.top = all.height - ( originalHeight - btnDown.top );
 			elemKnob.height = all.height - ( originalHeight - elemKnob.top );
 		}
 

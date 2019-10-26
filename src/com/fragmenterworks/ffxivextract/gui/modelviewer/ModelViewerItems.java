@@ -547,7 +547,7 @@ public class ModelViewerItems extends JPanel {
 			System.out.println("Adding Entry: " + modelPath);
 			HashDatabase.addPathToDB(modelPath, "040000");
 			
-			Model model = new Model(modelPath,modelIndexFile,modelData);
+			Model model = new Model(modelPath, modelIndexFile, modelData, modelIndexFile.getEndian());
 			model.loadVariant(currentItem.varient == 0 ? 1 : currentItem.varient);
 			renderer.setModel(model);
 		}
