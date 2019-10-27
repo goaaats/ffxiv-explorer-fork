@@ -17,7 +17,7 @@ public class EARandomAccessFile {
      * @param rw     like {@link java.io.RandomAccessFile} where "r" for read "rw" for read and write, "rws" for
      *               read-write sync, and "rwd" for read-write dsync. Sync ensures the physical I/O has completed befor
      *               the method returns.
-     * @param endian the endian style to use. true = bigEndian
+     * @param endian the endian style to use.
      * @throws java.io.FileNotFoundException if open fails.
      */
     public EARandomAccessFile(File file, String rw, ByteOrder endian) throws FileNotFoundException {
@@ -141,11 +141,10 @@ public class EARandomAccessFile {
      * @throws IOException if read fails.
      */
     public final char readChar() throws IOException {
+        raf.readFully(work, 0, 2);
 
         if (endian == ByteOrder.BIG_ENDIAN)
-            return raf.readChar();
-
-        raf.readFully(work, 0, 2);
+            return (char) ((work[0] & 0xff) << 8 | (work[1] & 0xff));
         return (char) ((work[1] & 0xff) << 8 | (work[0] & 0xff));
     }
 
@@ -156,9 +155,6 @@ public class EARandomAccessFile {
      * @throws IOException if read fails.
      */
     public final double readDouble() throws IOException {
-        if (endian == ByteOrder.BIG_ENDIAN)
-            return raf.readDouble();
-
         return Double.longBitsToDouble(readLong());
     }
 
@@ -169,9 +165,6 @@ public class EARandomAccessFile {
      * @throws IOException if read fails.
      */
     public final float readFloat() throws IOException {
-        if (endian == ByteOrder.BIG_ENDIAN)
-            return raf.readFloat();
-
         return Float.intBitsToFloat(readInt());
     }
 
@@ -193,10 +186,14 @@ public class EARandomAccessFile {
      * @see java.io.RandomAccessFile#readInt except little endian.
      */
     public final int readInt() throws IOException {
-        if (endian == ByteOrder.BIG_ENDIAN)
-            return raf.readInt();
-
         raf.readFully(work, 0, 4);
+
+        if (endian == ByteOrder.BIG_ENDIAN)
+            return (work[0]) << 24
+                    | (work[1] & 0xff) << 16
+                    | (work[2] & 0xff) << 8
+                    | (work[3] & 0xff);
+
         return (work[3]) << 24
                 | (work[2] & 0xff) << 16
                 | (work[1] & 0xff) << 8
@@ -232,14 +229,20 @@ public class EARandomAccessFile {
      * @throws IOException if read fails.
      */
     private long readLong() throws IOException {
-        if (endian == ByteOrder.BIG_ENDIAN)
-            return raf.readLong();
-
         raf.readFully(work, 0, 8);
+
+        if (endian == ByteOrder.BIG_ENDIAN)
+            return (long) (work[0]) << 56
+                    | (long) (work[1] & 0xff) << 48
+                    | (long) (work[2] & 0xff) << 40
+                    | (long) (work[3] & 0xff) << 32
+                    | (long) (work[4] & 0xff) << 24
+                    | (long) (work[5] & 0xff) << 16
+                    | (long) (work[6] & 0xff) << 8
+                    | (long) (work[7] & 0xff);
+
         return (long) (work[7]) << 56
-                |
-                /* long cast necessary or shift done modulo 32 */
-                (long) (work[6] & 0xff) << 48
+                | (long) (work[6] & 0xff) << 48
                 | (long) (work[5] & 0xff) << 40
                 | (long) (work[4] & 0xff) << 32
                 | (long) (work[3] & 0xff) << 24
@@ -255,10 +258,10 @@ public class EARandomAccessFile {
      * @throws IOException if read fails.
      */
     public final short readShort() throws IOException {
-        if (endian == ByteOrder.BIG_ENDIAN)
-            return raf.readShort();
-
         raf.readFully(work, 0, 2);
+
+        if (endian == ByteOrder.BIG_ENDIAN)
+            return (short) ((work[0] & 0xff) << 8 | (work[1] & 0xff));
         return (short) ((work[1] & 0xff) << 8 | (work[0] & 0xff));
     }
 
@@ -290,10 +293,12 @@ public class EARandomAccessFile {
      * @throws IOException if read fails.
      */
     public final int readUnsignedShort() throws IOException {
-        if (endian == ByteOrder.BIG_ENDIAN)
-            return raf.readUnsignedShort();
+
 
         raf.readFully(work, 0, 2);
+
+        if (endian == ByteOrder.BIG_ENDIAN)
+            return ((work[0] & 0xff) << 8 | (work[1] & 0xff));
         return ((work[1] & 0xff) << 8 | (work[0] & 0xff));
     }
 
@@ -389,16 +394,17 @@ public class EARandomAccessFile {
     /**
      * Write a char.  note param is an int though writes a char.
      *
-     * @param v char to write. like RandomAcessFile.writeChar. Note the parm is an int even though this as a writeChar
+     * @param v char to write. like RandomAcessFile.writeChar. Note the param is an int even though this as a writeChar
      * @throws IOException if read fails.
      */
     private void writeChar(int v) throws IOException {
         if (endian == ByteOrder.BIG_ENDIAN) {
-            raf.writeChar(v);
+            work[1] = (byte) v;
+            work[0] = (byte) (v >> 8);
+            raf.write(work, 0, 2);
             return;
         }
 
-        // same code as writeShort
         work[0] = (byte) v;
         work[1] = (byte) (v >> 8);
         raf.write(work, 0, 2);
@@ -424,11 +430,6 @@ public class EARandomAccessFile {
      * @throws IOException if read fails.
      */
     public final void writeDouble(double v) throws IOException {
-        if (endian == ByteOrder.BIG_ENDIAN) {
-            raf.writeDouble(v);
-            return;
-        }
-
         writeLong(Double.doubleToLongBits(v));
     }
 
@@ -439,11 +440,6 @@ public class EARandomAccessFile {
      * @throws java.io.IOException if read fails.
      */
     public final void writeFloat(float v) throws IOException {
-        if (endian == ByteOrder.BIG_ENDIAN) {
-            raf.writeFloat(v);
-            return;
-        }
-
         writeInt(Float.floatToIntBits(v));
     }
 
@@ -455,7 +451,11 @@ public class EARandomAccessFile {
      */
     public final void writeInt(int v) throws IOException {
         if (endian == ByteOrder.BIG_ENDIAN) {
-            raf.writeInt(v);
+            work[3] = (byte) v;
+            work[2] = (byte) (v >> 8);
+            work[1] = (byte) (v >> 16);
+            work[0] = (byte) (v >> 24);
+            raf.write(work, 0, 4);
             return;
         }
 
@@ -475,7 +475,15 @@ public class EARandomAccessFile {
      */
     private void writeLong(long v) throws IOException {
         if (endian == ByteOrder.BIG_ENDIAN) {
-            raf.writeLong(v);
+            work[7] = (byte) v;
+            work[6] = (byte) (v >> 8);
+            work[5] = (byte) (v >> 16);
+            work[4] = (byte) (v >> 24);
+            work[3] = (byte) (v >> 32);
+            work[2] = (byte) (v >> 40);
+            work[1] = (byte) (v >> 48);
+            work[0] = (byte) (v >> 56);
+            raf.write(work, 0, 8);
             return;
         }
 
@@ -499,7 +507,9 @@ public class EARandomAccessFile {
      */
     public final void writeShort(int v) throws IOException {
         if (endian == ByteOrder.BIG_ENDIAN) {
-            raf.writeShort(v);
+            work[1] = (byte) v;
+            work[0] = (byte) (v >> 8);
+            raf.write(work, 0, 2);
             return;
         }
 

@@ -54,6 +54,7 @@
                                 implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                             <manifestEntries>
                                 <Main-Class>com.fragmenterworks.ffxivextract.Main</Main-Class>
+                                <Multi-Release>true</Multi-Release>
                             </manifestEntries>
                         </transformer>
                     </transformers>
@@ -64,6 +65,43 @@
                         <goals>
                             <goal>shade</goal>
                         </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>com.akathist.maven.plugins.launch4j</groupId>
+                <artifactId>launch4j-maven-plugin</artifactId>
+                <version>1.7.25</version>
+                <executions>
+                    <execution>
+                        <id>l4j-gui</id>
+                        <phase>package</phase>
+                        <goals><goal>launch4j</goal></goals>
+                        <configuration>
+                            <headerType>gui</headerType>
+                            <outfile>target/FFXIV_Explorer.exe</outfile>
+                            <jar>target/ffxiv-explorer.jar</jar>
+                            <errTitle>FFXIV Explorer Error</errTitle>
+                            <classPath>
+                                <mainClass>com.fragmenterworks.ffxivextract.Main</mainClass>
+                                <addDependencies>false</addDependencies>
+                            </classPath>
+                            <icon>src/main/resources/explorer.ico</icon>
+                            <jre>
+                                <minVersion>1.8.0</minVersion>
+                            </jre>
+                            <versionInfo>
+                                <copyright>_</copyright>
+                                <fileVersion>1.8.0.0</fileVersion>
+                                <productVersion>1.8.0.0</productVersion>
+                                <productName>FFXIV Explorer</productName>
+                                <internalName>FFXIV Explorer</internalName>
+                                <originalFilename>FFXIV_Explorer.exe</originalFilename>
+                                <txtFileVersion>1.8.0-FORK</txtFileVersion>
+                                <fileDescription>FFXIV File Explorer</fileDescription>
+                                <txtProductVersion>1.8.0-FORK</txtProductVersion>
+                            </versionInfo>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
