@@ -9,20 +9,20 @@ import java.nio.ByteBuffer;
  */
 public class COHDEntryType_List extends COHDEntryType {
 
-	public final int refItemTemplate;
-	public final int refScrollbar;
+    public final int refItemTemplate;
+    public final int refScrollbar;
 
-	public COHDEntryType_List(final ByteBuffer data) {
-		super(data);
-		this.refItemTemplate = data.getInt();
-		this.refScrollbar = data.getInt();
-	}
+    public COHDEntryType_List(final ByteBuffer data) {
+        super(data);
+        this.refItemTemplate = data.getInt();
+        this.refScrollbar = data.getInt();
+    }
 
-	@Override
-	public String toString() {
-		return "COHDType_List{" +
-			   "itemTemplateRef=" + refItemTemplate +
-			   ", scrollbarObject=" + refScrollbar +
-			   "} " + super.toString();
-	}
+    @Override
+    public String toString() {
+        return "COHDType_List{" +
+                "itemTemplateRef=" + refItemTemplate +
+                ", scrollbarObject=" + refScrollbar +
+                "} " + super.toString();
+    }
 }

@@ -10,36 +10,36 @@ import java.util.Arrays;
  */
 public class TLHDSetTypeB {
 
-	public int startFrame;
-	public int endFrame;
-	public int size;
-	public int count;
+    private final int startFrame;
+    private final int endFrame;
+    private final int size;
+    private final int count;
 
-	public TLHDSetTypeB_Entry[] entries;
+    private final TLHDSetTypeB_Entry[] entries;
 
-	public TLHDSetTypeB(ByteBuffer data) {
-		int offset = data.position();
-		this.startFrame = data.getInt();
-		this.endFrame = data.getInt();
-		this.size = data.getInt();
-		this.count = data.getInt();
+    public TLHDSetTypeB(ByteBuffer data) {
+        int offset = data.position();
+        this.startFrame = data.getInt();
+        this.endFrame = data.getInt();
+        this.size = data.getInt();
+        this.count = data.getInt();
 
-		entries = new TLHDSetTypeB_Entry[count];
+        entries = new TLHDSetTypeB_Entry[count];
 
-		for(int i = 0; i < count; i++){
-			entries[i] = new TLHDSetTypeB_Entry(data);
-		}
-		data.position(offset + size);
-	}
+        for (int i = 0; i < count; i++) {
+            entries[i] = new TLHDSetTypeB_Entry(data);
+        }
+        data.position(offset + size);
+    }
 
-	@Override
-	public String toString() {
-		return "TLHDSetTypeB{" +
-			   "startFrame=" + startFrame +
-			   ", endFrame=" + endFrame +
-			   ", size=" + size +
-			   ", count=" + count +
-			   ", entries=" + Arrays.toString(entries) +
-			   "}\n";
-	}
+    @Override
+    public String toString() {
+        return "TLHDSetTypeB{" +
+                "startFrame=" + startFrame +
+                ", endFrame=" + endFrame +
+                ", size=" + size +
+                ", count=" + count +
+                ", entries=" + Arrays.toString(entries) +
+                "}\n";
+    }
 }

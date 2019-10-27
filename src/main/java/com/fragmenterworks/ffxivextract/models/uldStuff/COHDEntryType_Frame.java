@@ -9,35 +9,35 @@ import java.nio.ByteBuffer;
  */
 public class COHDEntryType_Frame extends COHDEntryType {
 
-	public int refTitleTextBox;
-	public int refSubtitleTextBox;
-	public int refCloseButton;
-	public int refSettingButton;
-	public int refHelpButton;
-	public int refMagnifyButton;
-	public int refTitleBar;
+    public final int refTitleTextBox;
+    public final int refSubtitleTextBox;
+    public final int refCloseButton;
+    public final int refSettingButton;
+    public final int refHelpButton;
+    public final int refMagnifyButton;
+    public final int refTitleBar;
 
-	public COHDEntryType_Frame(final ByteBuffer data) {
-		super(data);
-		this.refTitleTextBox = data.getInt();
-		this.refSubtitleTextBox = data.getInt();
-		this.refCloseButton = data.getInt();
-		this.refSettingButton = data.getInt();
-		this.refHelpButton = data.getInt();
-		this.refMagnifyButton = data.getInt();
-		this.refTitleBar = data.getInt();
-	}
+    public COHDEntryType_Frame(final ByteBuffer data) {
+        super(data);
+        this.refTitleTextBox = data.getInt();
+        this.refSubtitleTextBox = data.getInt();
+        this.refCloseButton = data.getInt();
+        this.refSettingButton = data.getInt();
+        this.refHelpButton = data.getInt();
+        this.refMagnifyButton = data.getInt();
+        this.refTitleBar = data.getInt();
+    }
 
-	@Override
-	public String toString() {
-		return "COHDEntryType_Frame{" +
-			   "refTitleTextBox=" + refTitleTextBox +
-			   ", refSubtitleTextBox=" + refSubtitleTextBox +
-			   ", refCloseButton=" + refCloseButton +
-			   ", refSettingButton=" + refSettingButton +
-			   ", refHelpButton=" + refHelpButton +
-			   ", refMagnifyButton=" + refMagnifyButton +
-			   ", getRefTitleBar=" + refTitleBar +
-			   "} " + super.toString();
-	}
+    @Override
+    public String toString() {
+        return "COHDEntryType_Frame{" +
+                "refTitleTextBox=" + refTitleTextBox +
+                ", refSubtitleTextBox=" + refSubtitleTextBox +
+                ", refCloseButton=" + refCloseButton +
+                ", refSettingButton=" + refSettingButton +
+                ", refHelpButton=" + refHelpButton +
+                ", refMagnifyButton=" + refMagnifyButton +
+                ", getRefTitleBar=" + refTitleBar +
+                "} " + super.toString();
+    }
 }

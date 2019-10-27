@@ -17,13 +17,7 @@
  */
 package com.fragmenterworks.ffxivextract.helpers;
 
-import java.io.DataInput;
-import java.io.DataOutput;
-import java.io.File;
-import java.io.FileDescriptor;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.RandomAccessFile;
+import java.io.*;
 
 /**
  * Little-endian version of RandomAccessFile.
@@ -61,7 +55,7 @@ public final class LERandomAccessFile implements DataInput, DataOutput {
      *
      * @noinspection WeakerAccess
      */
-    protected byte work[];
+    protected byte[] work;
 
     // -------------------------- PUBLIC INSTANCE  METHODS --------------------------
 
@@ -150,7 +144,7 @@ public final class LERandomAccessFile implements DataInput, DataOutput {
      * @return how many bytes actually read.
      * @throws IOException if read fails.
      */
-    public final int read(byte ba[]) throws IOException {
+    public final int read(byte[] ba) throws IOException {
         return raf.read(ba);
     }
 
@@ -163,7 +157,7 @@ public final class LERandomAccessFile implements DataInput, DataOutput {
      * @return how many bytes actually read.
      * @throws IOException if read fails.
      */
-    public final int read(byte ba[], int off, int len) throws IOException {
+    public final int read(byte[] ba, int off, int len) throws IOException {
         return raf.read(ba, off, len);
     }
 
@@ -224,7 +218,7 @@ public final class LERandomAccessFile implements DataInput, DataOutput {
      * @param ba the array to hold the results.
      * @throws IOException if read fails.
      */
-    public final void readFully(byte ba[]) throws IOException {
+    public final void readFully(byte[] ba) throws IOException {
         raf.readFully(ba, 0, ba.length);
     }
 
@@ -236,7 +230,7 @@ public final class LERandomAccessFile implements DataInput, DataOutput {
      * @param len count of bytes to read.
      * @throws IOException if read fails.
      */
-    public final void readFully(byte ba[],
+    public final void readFully(byte[] ba,
                                 int off,
                                 int len) throws IOException {
         raf.readFully(ba, off, len);
@@ -369,7 +363,7 @@ public final class LERandomAccessFile implements DataInput, DataOutput {
      * @throws IOException if read fails.
      * @see java.io.DataOutput#write(byte[])
      */
-    public final void write(byte ba[]) throws IOException {
+    public final void write(byte[] ba) throws IOException {
         raf.write(ba, 0, ba.length);
     }
 
@@ -382,7 +376,7 @@ public final class LERandomAccessFile implements DataInput, DataOutput {
      * @throws IOException if read fails.
      * @see java.io.DataOutput#write(byte[], int, int)
      */
-    public final synchronized void write(byte ba[],
+    public final synchronized void write(byte[] ba,
                                          int off,
                                          int len) throws IOException {
         raf.write(ba, off, len);

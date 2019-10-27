@@ -1,7 +1,6 @@
 package com.fragmenterworks.ffxivextract.models;
 
-import java.awt.Graphics;
-import java.awt.Graphics2D;
+import java.awt.*;
 
 /**
  * Created by Roze on 2017-06-23.
@@ -10,7 +9,7 @@ import java.awt.Graphics2D;
  */
 public interface IGraphicsElement {
 
-	void paint(Graphics2D g, final int width, final int height);
+    void paint(Graphics2D g, final int width, final int height);
 
 
 	/*int getX();

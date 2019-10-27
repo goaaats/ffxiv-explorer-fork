@@ -9,12 +9,12 @@ import java.nio.ByteBuffer;
  */
 public abstract class COHDEntryType {
 
-	public COHDEntryType(ByteBuffer data) {
+    COHDEntryType(ByteBuffer data) {
 
-	}
+    }
 
-	@Override
-	public String toString() {
-		return "";
-	}
+    @Override
+    public String toString() {
+        return "";
+    }
 }

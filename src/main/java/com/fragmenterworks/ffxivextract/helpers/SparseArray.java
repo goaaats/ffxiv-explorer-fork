@@ -53,9 +53,9 @@ public class SparseArray<E> implements Cloneable {
     private int mSize;
 
     static final boolean[] EMPTY_BOOLEANS = new boolean[0];
-    static final int[] EMPTY_INTS = new int[0];
+    private static final int[] EMPTY_INTS = new int[0];
     static final long[] EMPTY_LONGS = new long[0];
-    static final Object[] EMPTY_OBJECTS = new Object[0];
+    private static final Object[] EMPTY_OBJECTS = new Object[0];
 
     /**
      * Creates a new SparseArray containing no mappings.
@@ -71,7 +71,7 @@ public class SparseArray<E> implements Cloneable {
      * sparse array will be initialized with a light-weight representation
      * not requiring any additional array allocations.
      */
-    public SparseArray(int initialCapacity) {
+    private SparseArray(int initialCapacity) {
         if (initialCapacity == 0) {
             mKeys = EMPTY_INTS;
             mValues = EMPTY_OBJECTS;
@@ -123,7 +123,7 @@ public class SparseArray<E> implements Cloneable {
     /**
      * Removes the mapping from the specified key, if there was any.
      */
-    public void delete(int key) {
+    private void delete(int key) {
         int i = binarySearch(mKeys, mSize, key);
 
         if (i >= 0) {
@@ -144,7 +144,7 @@ public class SparseArray<E> implements Cloneable {
     /**
      * Removes the mapping at the specified index.
      */
-    public void removeAt(int index) {
+    private void removeAt(int index) {
         if (mValues[index] != DELETED) {
             mValues[index] = DELETED;
             mGarbage = true;
@@ -155,7 +155,7 @@ public class SparseArray<E> implements Cloneable {
      * Remove a range of mappings as a batch.
      *
      * @param index Index to begin at
-     * @param size Number of mappings to remove
+     * @param size  Number of mappings to remove
      */
     public void removeAtRange(int index, int size) {
         final int end = Math.min(mSize, index + size);
@@ -406,7 +406,7 @@ public class SparseArray<E> implements Cloneable {
 
         StringBuilder buffer = new StringBuilder(mSize * 28);
         buffer.append('{');
-        for (int i=0; i<mSize; i++) {
+        for (int i = 0; i < mSize; i++) {
             if (i > 0) {
                 buffer.append(", ");
             }
@@ -424,7 +424,7 @@ public class SparseArray<E> implements Cloneable {
         return buffer.toString();
     }
 
-    public static int idealByteArraySize(int need) {
+    private static int idealByteArraySize(int need) {
         for (int i = 4; i < 32; i++)
             if (need <= (1 << i) - 12)
                 return (1 << i) - 12;
@@ -432,12 +432,12 @@ public class SparseArray<E> implements Cloneable {
         return need;
     }
 
-    public static int idealIntArraySize(int need) {
+    private static int idealIntArraySize(int need) {
         return idealByteArraySize(need * 4) / 4;
     }
 
     // This is Arrays.binarySearch(), but doesn't do any argument validation.
-    static int binarySearch(int[] array, int size, int value) {
+    private static int binarySearch(int[] array, int size, int value) {
         int lo = 0;
         int hi = size - 1;
 

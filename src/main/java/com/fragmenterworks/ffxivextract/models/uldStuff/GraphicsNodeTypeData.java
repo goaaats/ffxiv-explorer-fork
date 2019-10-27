@@ -9,6 +9,6 @@ import java.nio.ByteBuffer;
  */
 public abstract class GraphicsNodeTypeData {
 
-	public GraphicsNodeTypeData(ByteBuffer data) {
-	}
+    GraphicsNodeTypeData(ByteBuffer data) {
+    }
 }

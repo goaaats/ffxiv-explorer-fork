@@ -9,12 +9,12 @@ import java.nio.ByteBuffer;
  */
 public class GraphicsNodeTypeData_1 extends GraphicsNodeTypeData {
 
-	public GraphicsNodeTypeData_1(final ByteBuffer data) {
-		super(data);
-	}
+    public GraphicsNodeTypeData_1(final ByteBuffer data) {
+        super(data);
+    }
 
-	@Override
-	public String toString() {
-		return "GraphicsNodeTypeData_1{} " + super.toString();
-	}
+    @Override
+    public String toString() {
+        return "GraphicsNodeTypeData_1{} " + super.toString();
+    }
 }

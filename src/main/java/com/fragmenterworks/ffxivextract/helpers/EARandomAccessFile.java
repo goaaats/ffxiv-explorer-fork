@@ -1,7 +1,6 @@
 package com.fragmenterworks.ffxivextract.helpers;
 
 import java.io.*;
-import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
 /**
@@ -11,13 +10,13 @@ public class EARandomAccessFile {
 
     private RandomAccessFile raf;
     private byte[] work;
-    private ByteOrder endian;
+    private final ByteOrder endian;
 
     /**
-     * @param file file to read/write.
-     * @param rw   like {@link java.io.RandomAccessFile} where "r" for read "rw" for read and write, "rws" for
-     *             read-write sync, and "rwd" for read-write dsync. Sync ensures the physical I/O has completed befor
-     *             the method returns.
+     * @param file   file to read/write.
+     * @param rw     like {@link java.io.RandomAccessFile} where "r" for read "rw" for read and write, "rws" for
+     *               read-write sync, and "rwd" for read-write dsync. Sync ensures the physical I/O has completed befor
+     *               the method returns.
      * @param endian the endian style to use. true = bigEndian
      * @throws java.io.FileNotFoundException if open fails.
      */
@@ -30,8 +29,8 @@ public class EARandomAccessFile {
     /**
      * constructors.
      *
-     * @param file name of file.
-     * @param rw   string "r" or "rw" depending on read or read/write
+     * @param file   name of file.
+     * @param rw     string "r" or "rw" depending on read or read/write
      * @param endian the endian style to use. true = bigEndian
      * @throws java.io.FileNotFoundException if open fails.
      * @noinspection SameParameterValue
@@ -98,7 +97,7 @@ public class EARandomAccessFile {
      * @return how many bytes actually read.
      * @throws IOException if read fails.
      */
-    public final int read(byte ba[]) throws IOException {
+    public final int read(byte[] ba) throws IOException {
         return raf.read(ba);
     }
 
@@ -111,7 +110,7 @@ public class EARandomAccessFile {
      * @return how many bytes actually read.
      * @throws IOException if read fails.
      */
-    public final int read(byte ba[], int off, int len) throws IOException {
+    public final int read(byte[] ba, int off, int len) throws IOException {
         return raf.read(ba, off, len);
     }
 
@@ -182,7 +181,7 @@ public class EARandomAccessFile {
      * @param ba the array to hold the results.
      * @throws IOException if read fails.
      */
-    public final void readFully(byte ba[]) throws IOException {
+    public final void readFully(byte[] ba) throws IOException {
         raf.readFully(ba, 0, ba.length);
     }
 
@@ -212,7 +211,7 @@ public class EARandomAccessFile {
      * @param len count of bytes to read.
      * @throws IOException if read fails.
      */
-    public final void readFully(byte ba[], int off, int len) throws IOException {
+    public final void readFully(byte[] ba, int off, int len) throws IOException {
         raf.readFully(ba, off, len);
     }
 
@@ -232,7 +231,7 @@ public class EARandomAccessFile {
      * @return long read. like RandomAcessFile.readLong except little endian.
      * @throws IOException if read fails.
      */
-    public final long readLong() throws IOException {
+    private long readLong() throws IOException {
         if (endian == ByteOrder.BIG_ENDIAN)
             return raf.readLong();
 
@@ -337,7 +336,7 @@ public class EARandomAccessFile {
      * @throws IOException if read fails.
      * @see java.io.DataOutput#write(byte[])
      */
-    public final void write(byte ba[]) throws IOException {
+    public final void write(byte[] ba) throws IOException {
         raf.write(ba, 0, ba.length);
     }
 
@@ -350,7 +349,7 @@ public class EARandomAccessFile {
      * @throws IOException if read fails.
      * @see java.io.DataOutput#write(byte[], int, int)
      */
-    public final synchronized void write(byte ba[], int off, int len) throws IOException {
+    public final synchronized void write(byte[] ba, int off, int len) throws IOException {
         raf.write(ba, off, len);
     }
 
@@ -393,7 +392,7 @@ public class EARandomAccessFile {
      * @param v char to write. like RandomAcessFile.writeChar. Note the parm is an int even though this as a writeChar
      * @throws IOException if read fails.
      */
-    public final void writeChar(int v) throws IOException {
+    private void writeChar(int v) throws IOException {
         if (endian == ByteOrder.BIG_ENDIAN) {
             raf.writeChar(v);
             return;
@@ -474,7 +473,7 @@ public class EARandomAccessFile {
      * @throws IOException if read fails.
      * @see java.io.RandomAccessFile#writeLong
      */
-    public final void writeLong(long v) throws IOException {
+    private void writeLong(long v) throws IOException {
         if (endian == ByteOrder.BIG_ENDIAN) {
             raf.writeLong(v);
             return;

@@ -1,10 +1,10 @@
 package com.fragmenterworks.ffxivextract.gui;
 
 import com.fragmenterworks.ffxivextract.Strings;
-import com.fragmenterworks.ffxivextract.helpers.Utils;
 import com.fragmenterworks.ffxivextract.helpers.DatBuilder;
 import com.fragmenterworks.ffxivextract.helpers.EARandomAccessFile;
 import com.fragmenterworks.ffxivextract.helpers.LERandomAccessFile;
+import com.fragmenterworks.ffxivextract.helpers.Utils;
 import com.fragmenterworks.ffxivextract.models.SqPack_IndexFile;
 import com.fragmenterworks.ffxivextract.models.SqPack_IndexFile.SqPack_File;
 import com.google.gson.Gson;
@@ -27,7 +27,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Hashtable;
 
-public class FileInjectorWindow extends JFrame {
+class FileInjectorWindow extends JFrame {
 
     //FILE I/O
     private File lastOpenedFile;
@@ -35,7 +35,7 @@ public class FileInjectorWindow extends JFrame {
     private File edittingIndexFile = null;
     private SqPack_IndexFile editMusicFile, originalMusicFile;
     private SqPack_File[] editedFiles;
-    private Hashtable<Integer, Integer> originalPositionTable = new Hashtable<Integer, Integer>(); //Fucking hack, but this is my fix if we want alphabetical sort
+    private final Hashtable<Integer, Integer> originalPositionTable = new Hashtable<Integer, Integer>(); //Fucking hack, but this is my fix if we want alphabetical sort
     private ByteOrder workingEndian;
 
     //CUSTOM MUSIC STUFF
@@ -46,28 +46,25 @@ public class FileInjectorWindow extends JFrame {
     private boolean datWasGenerated = false;
 
     //GUI
-    private JPanel pnlBackup;
-    private JPanel pnlSwapper;
-    private JPanel contentPane;
-    private JTextField txtDatPath;
-    private JLabel lblBackup;
-    private JButton btnBackup, btnRestore;
+    private final JPanel pnlBackup;
+    private final JPanel pnlSwapper;
+    private final JTextField txtDatPath;
+    private final JLabel lblBackup;
+    private final JButton btnBackup;
+    private final JButton btnRestore;
     private JLabel txtSetTo;
-    private JLabel lblOriginal, lblSetId;
-    private JList lstOriginal = new JList();
-    private JList lstSet = new JList();
-    private JButton btnSwap, btnRevert, btnGoto;
-    private JPanel pnlCustomMusic;
-    private JPanel panel_1;
-    private JList lstCustomMusic;
-    private JScrollPane scrollPane_2;
-    private JPanel panel_2;
-    private JButton btnAdd;
-    private JButton btnGenerateDat;
-    private JButton btnRemove;
-    private JLabel lblGenerateMessage;
-    private JPanel panel_7;
-    private JButton btnOgg2Scd;
+    private final JLabel lblOriginal;
+    private final JLabel lblSetId;
+    private final JList lstOriginal = new JList();
+    private final JList lstSet = new JList();
+    private final JButton btnSwap;
+    private final JButton btnRevert;
+    private final JPanel pnlCustomMusic;
+    private final JList lstCustomMusic;
+    private final JButton btnAdd;
+    private final JButton btnGenerateDat;
+    private final JButton btnRemove;
+    private final JLabel lblGenerateMessage;
 
     public FileInjectorWindow() {
         this.setTitle(Strings.DIALOG_TITLE_FILEINJECT);
@@ -75,7 +72,7 @@ public class FileInjectorWindow extends JFrame {
         ImageIcon image = new ImageIcon(imageURL);
         this.setIconImage(image.getImage());
 
-        contentPane = new JPanel();
+        JPanel contentPane = new JPanel();
         contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
         setContentPane(contentPane);
         contentPane.setLayout(new BorderLayout(0, 0));
@@ -126,11 +123,11 @@ public class FileInjectorWindow extends JFrame {
         panel.add(pnlCustomMusic);
         pnlCustomMusic.setLayout(new BorderLayout(0, 0));
 
-        panel_1 = new JPanel();
+        JPanel panel_1 = new JPanel();
         pnlCustomMusic.add(panel_1, BorderLayout.NORTH);
         panel_1.setLayout(new BoxLayout(panel_1, BoxLayout.X_AXIS));
 
-        scrollPane_2 = new JScrollPane();
+        JScrollPane scrollPane_2 = new JScrollPane();
         panel_1.add(scrollPane_2);
 
         lstCustomMusic = new JList();
@@ -138,7 +135,7 @@ public class FileInjectorWindow extends JFrame {
         lstCustomMusic.setModel(new DefaultListModel());
         scrollPane_2.setViewportView(lstCustomMusic);
 
-        panel_7 = new JPanel();
+        JPanel panel_7 = new JPanel();
         panel_7.setBorder(new EmptyBorder(5, 5, 5, 5));
         pnlCustomMusic.add(panel_7, BorderLayout.WEST);
         panel_7.setLayout(new BorderLayout(0, 0));
@@ -147,7 +144,7 @@ public class FileInjectorWindow extends JFrame {
         lblGenerateMessage.setHorizontalAlignment(SwingConstants.CENTER);
         panel_7.add(lblGenerateMessage);
 
-        panel_2 = new JPanel();
+        JPanel panel_2 = new JPanel();
         FlowLayout flowLayout_1 = (FlowLayout) panel_2.getLayout();
         flowLayout_1.setAlignment(FlowLayout.RIGHT);
         pnlCustomMusic.add(panel_2, BorderLayout.SOUTH);
@@ -161,7 +158,7 @@ public class FileInjectorWindow extends JFrame {
         btnGenerateDat = new JButton("Generate Dat");
         panel_2.add(btnGenerateDat);
 
-        btnOgg2Scd = new JButton("Ogg2Scd Converter");
+        JButton btnOgg2Scd = new JButton("Ogg2Scd Converter");
         panel_2.add(btnOgg2Scd);
 
         btnOgg2Scd.addActionListener(new ActionListener() {
@@ -209,7 +206,7 @@ public class FileInjectorWindow extends JFrame {
 
                 if (event.getValueIsAdjusting() || lstSet.getModel().getSize() == 0)
                     return;
-                txtSetTo.setText(String.format(Strings.MUSICSWAPPER_CURRENTOFFSET, editedFiles[lstOriginal.getSelectedIndex()].getOffset() & 0xFFFFFFFF));
+                txtSetTo.setText(String.format(Strings.MUSICSWAPPER_CURRENTOFFSET, editedFiles[lstOriginal.getSelectedIndex()].getOffset()));
                 if (editedFiles[lstOriginal.getSelectedIndex()].getOffset() != originalMusicFile.getPackFolders()[0].getFiles()[lstOriginal.getSelectedIndex()].dataoffset)
                     txtSetTo.setForeground(Color.RED);
                 else
@@ -250,7 +247,7 @@ public class FileInjectorWindow extends JFrame {
         panel_9.setAlignmentX(Component.LEFT_ALIGNMENT);
         panel_8.add(panel_9);
 
-        btnGoto = new JButton(Strings.BUTTONNAMES_GOTOFILE);
+        JButton btnGoto = new JButton(Strings.BUTTONNAMES_GOTOFILE);
         btnSwap = new JButton(Strings.BUTTONNAMES_SET);
         btnRevert = new JButton(Strings.BUTTONNAMES_REVERT);
         btnSwap.setHorizontalAlignment(SwingConstants.LEFT);
@@ -275,7 +272,7 @@ public class FileInjectorWindow extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
 
-                if (((DefaultListModel) lstSet.getModel()).getElementAt(lstSet.getSelectedIndex()).equals("-----------"))
+                if (lstSet.getModel().getElementAt(lstSet.getSelectedIndex()).equals("-----------"))
                     return;
 
                 swapMusic(lstOriginal.getSelectedIndex(),
@@ -307,11 +304,7 @@ public class FileInjectorWindow extends JFrame {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                try {
-                    restoreFromBackup();
-                } catch (IOException e1) {
-                    Utils.getGlobalLogger().error(e1);
-                }
+                restoreFromBackup();
             }
         });
 
@@ -457,7 +450,7 @@ public class FileInjectorWindow extends JFrame {
                 JOptionPane.INFORMATION_MESSAGE);
     }
 
-    public void setPath() {
+    private void setPath() {
         JFileChooser fileChooser = new JFileChooser("C:\\Program Files (x86)\\SquareEnix\\FINAL FANTASY XIV - A Realm Reborn\\game\\sqpack\\ffxiv");
 
         fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
@@ -496,7 +489,7 @@ public class FileInjectorWindow extends JFrame {
         }
     }
 
-    public void loadFile(File file) throws Exception {
+    private void loadFile(File file) throws Exception {
         setSwapperEnabled(true);
         SqPack_File[] originalFiles;
 
@@ -531,11 +524,7 @@ public class FileInjectorWindow extends JFrame {
 
         boolean sort = false;
         int reply = JOptionPane.showConfirmDialog(null, "Do you want to sort the lists? This could take a while for big dats.", "", JOptionPane.YES_NO_OPTION);
-        if (reply == JOptionPane.YES_OPTION) {
-            sort = true;
-        } else {
-            sort = false;
-        }
+        sort = reply == JOptionPane.YES_OPTION;
 
         if (sort) {
             Arrays.sort(editMusicFile.getPackFolders()[0].getFiles(), new Comparator<SqPack_File>() {
@@ -577,7 +566,7 @@ public class FileInjectorWindow extends JFrame {
 		}
 		*/
 
-		Utils.getGlobalLogger().info("File is good.");
+        Utils.getGlobalLogger().info("File is good.");
         btnBackup.setEnabled(false);
         btnRestore.setEnabled(true);
 
@@ -596,7 +585,7 @@ public class FileInjectorWindow extends JFrame {
         loadCustomDatIndexList();
 
         //Init this since the list listener doesn't fire
-        txtSetTo.setText(String.format(Strings.MUSICSWAPPER_CURRENTOFFSET, editedFiles[lstOriginal.getSelectedIndex()].getOffset() & 0xFFFFFFFF));
+        txtSetTo.setText(String.format(Strings.MUSICSWAPPER_CURRENTOFFSET, editedFiles[lstOriginal.getSelectedIndex()].getOffset()));
         if (editedFiles[lstOriginal.getSelectedIndex()].getOffset() != originalMusicFile.getPackFolders()[0].getFiles()[lstOriginal.getSelectedIndex()].dataoffset)
             txtSetTo.setForeground(Color.RED);
         else
@@ -611,9 +600,9 @@ public class FileInjectorWindow extends JFrame {
             String fileName = files[i].getName2();
 
             if (fileName != null)
-                listModel.addElement(String.format("%s (%08X)", fileName, files[i].getOffset() & 0xFFFFFFFF));
+                listModel.addElement(String.format("%s (%08X)", fileName, files[i].getOffset()));
             else
-                listModel.addElement(String.format("%08X (%08X)", files[i].id & 0xFFFFFFFF, files[i].getOffset() & 0xFFFFFFFF));
+                listModel.addElement(String.format("%08X (%08X)", files[i].id, files[i].getOffset()));
         }
 
         list.setSelectedIndex(0);
@@ -625,7 +614,7 @@ public class FileInjectorWindow extends JFrame {
         copyFile(edittingIndexFile, backup);
         editMusicFile = new SqPack_IndexFile(edittingIndexFile.getCanonicalPath(), true);
         originalMusicFile = new SqPack_IndexFile(backup.getCanonicalPath(), true);
-        SqPack_File originalFiles[] = originalMusicFile.getPackFolders()[0].getFiles();
+        SqPack_File[] originalFiles = originalMusicFile.getPackFolders()[0].getFiles();
         editedFiles = editMusicFile.getPackFolders()[0].getFiles();
 
         Arrays.sort(editMusicFile.getPackFolders()[0].getFiles(), new Comparator<SqPack_File>() {
@@ -654,14 +643,14 @@ public class FileInjectorWindow extends JFrame {
         setSwapperEnabled(true);
 
         //Init this since the list listener doesn't fire
-        txtSetTo.setText(String.format(Strings.MUSICSWAPPER_CURRENTOFFSET, editedFiles[0].getOffset() & 0xFFFFFFFF));
+        txtSetTo.setText(String.format(Strings.MUSICSWAPPER_CURRENTOFFSET, editedFiles[0].getOffset()));
         if (editedFiles[0].getOffset() != originalMusicFile.getPackFolders()[0].getFiles()[0].dataoffset)
             txtSetTo.setForeground(Color.RED);
         else
             txtSetTo.setForeground(Color.decode("#006400"));
     }
 
-    private void restoreFromBackup() throws IOException {
+    private void restoreFromBackup() {
         // Create backup
         Utils.getGlobalLogger().info("Restoring...");
 
@@ -724,7 +713,7 @@ public class FileInjectorWindow extends JFrame {
 
     }
 
-    public static void copyFile(File sourceFile, File destFile)
+    private static void copyFile(File sourceFile, File destFile)
             throws IOException {
         if (!destFile.exists()) {
             destFile.createNewFile();
@@ -830,7 +819,7 @@ public class FileInjectorWindow extends JFrame {
 
             ref.close();
 
-            txtSetTo.setText(String.format(Strings.MUSICSWAPPER_CURRENTOFFSET, tooffset & 0xFFFFFFFF));
+            txtSetTo.setText(String.format(Strings.MUSICSWAPPER_CURRENTOFFSET, tooffset));
             if (toBeChanged.getOffset() != tooffset)
                 txtSetTo.setForeground(Color.RED);
             else
@@ -917,7 +906,7 @@ public class FileInjectorWindow extends JFrame {
 
     class SwapperCellRenderer extends DefaultListCellRenderer {
 
-        public SwapperCellRenderer() {
+        SwapperCellRenderer() {
             setOpaque(true);
         }
 
@@ -956,20 +945,9 @@ public class FileInjectorWindow extends JFrame {
         }
     }
 
-    private void createSCDfromOGG() {
-        //Generate Basic Info
-
-        //Read Ogg, set num channels + sample rate
-
-        //Read 3 Oggs, get header size set locations
-
-        //Copy over Ogg
-
-    }
-
     private class CustomDatPOJO {
-        public String datPath;
-        public ArrayList musicPaths;
-        public ArrayList<Long> musicOffsets;
+        String datPath;
+        ArrayList musicPaths;
+        ArrayList<Long> musicOffsets;
     }
 }

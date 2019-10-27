@@ -1,17 +1,27 @@
 package com.fragmenterworks.ffxivextract.gui;
 
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Rectangle;
-import java.awt.TexturePaint;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
+import com.fragmenterworks.ffxivextract.Constants;
+import com.fragmenterworks.ffxivextract.Strings;
+import com.fragmenterworks.ffxivextract.gui.SearchWindow.ISearchComplete;
+import com.fragmenterworks.ffxivextract.gui.components.*;
+import com.fragmenterworks.ffxivextract.gui.modelviewer.ModelViewerWindow;
+import com.fragmenterworks.ffxivextract.gui.outfitter.OutfitterWindow;
+import com.fragmenterworks.ffxivextract.helpers.*;
+import com.fragmenterworks.ffxivextract.models.*;
+import com.fragmenterworks.ffxivextract.models.SCD_File.SCD_Sound_Info;
+import com.fragmenterworks.ffxivextract.models.SqPack_IndexFile.SqPack_File;
+import com.fragmenterworks.ffxivextract.storage.HashDatabase;
+import unluac.decompile.Decompiler;
+import unluac.decompile.OutputProvider;
+import unluac.parse.BHeader;
+
+import javax.imageio.ImageIO;
+import javax.swing.*;
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.event.TreeSelectionListener;
+import javax.swing.filechooser.FileFilter;
+import java.awt.*;
+import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.URL;
@@ -21,65 +31,39 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.prefs.Preferences;
 
-import javax.imageio.ImageIO;
-import javax.swing.*;
-import javax.swing.event.TreeSelectionEvent;
-import javax.swing.event.TreeSelectionListener;
-import javax.swing.filechooser.FileFilter;
-
-import com.fragmenterworks.ffxivextract.Constants;
-import com.fragmenterworks.ffxivextract.Strings;
-import com.fragmenterworks.ffxivextract.helpers.Utils;
-import com.fragmenterworks.ffxivextract.gui.components.*;
-import com.fragmenterworks.ffxivextract.models.*;
-import com.fragmenterworks.ffxivextract.storage.HashDatabase;
-
-import com.fragmenterworks.ffxivextract.gui.SearchWindow.ISearchComplete;
-import com.fragmenterworks.ffxivextract.gui.modelviewer.ModelViewerWindow;
-import com.fragmenterworks.ffxivextract.gui.outfitter.OutfitterWindow;
-import com.fragmenterworks.ffxivextract.helpers.HashFinding_Utils;
-import com.fragmenterworks.ffxivextract.helpers.HavokNative;
-import com.fragmenterworks.ffxivextract.helpers.EARandomAccessFile;
-import com.fragmenterworks.ffxivextract.helpers.WavefrontObjectWriter;
-import com.fragmenterworks.ffxivextract.models.SCD_File.SCD_Sound_Info;
-import com.fragmenterworks.ffxivextract.models.SqPack_IndexFile.SqPack_File;
-
-import unluac.decompile.*;
-import unluac.parse.BHeader;
-
 @SuppressWarnings("serial")
 public class FileManagerWindow extends JFrame implements TreeSelectionListener, ISearchComplete, WindowListener {
 
-    JMenuBar menu = new JMenuBar();
+    private final JMenuBar menu = new JMenuBar();
 
     //FILE IO
-    File lastOpenedIndexFile = null;
-    File lastSaveLocation = null;
-    SqPack_IndexFile currentIndexFile;
+    private File lastOpenedIndexFile = null;
+    private File lastSaveLocation = null;
+    private SqPack_IndexFile currentIndexFile;
 
     //UI
-    SearchWindow searchWindow;
-    ExplorerPanel_View fileTree = new ExplorerPanel_View();
-    JSplitPane splitPane;
-    JLabel lblOffsetValue;
-    JLabel lblHashValue;
-    JLabel lblContentTypeValue;
-    Hex_View hexView = new Hex_View(16);
-    EXDF_View exhfComponent;
-    JProgressBar prgLoadingBar;
-    JLabel lblLoadingBarString;
-    TexturePaint paint;
-    JScrollPane defaultScrollPane;
-    JViewport defaultViewPort;
+    private SearchWindow searchWindow;
+    private final ExplorerPanel_View fileTree = new ExplorerPanel_View();
+    private final JSplitPane splitPane;
+    private final JLabel lblOffsetValue;
+    private final JLabel lblHashValue;
+    private final JLabel lblContentTypeValue;
+    private final Hex_View hexView = new Hex_View(16);
+    private EXDF_View exhfComponent;
+    private final JProgressBar prgLoadingBar;
+    private final JLabel lblLoadingBarString;
+    private TexturePaint paint;
+    private final JScrollPane defaultScrollPane;
+    private final JViewport defaultViewPort;
 
     //MENU
-    JMenuItem file_Extract;
-    JMenuItem file_ExtractRaw;
-    JMenuItem file_Close;
-    JMenuItem search_search;
-    JMenuItem search_searchAgain;
-    JCheckBoxMenuItem options_enableUpdate;
-    JCheckBoxMenuItem options_showAsHex;
+    private JMenuItem file_Extract;
+    private JMenuItem file_ExtractRaw;
+    private JMenuItem file_Close;
+    private JMenuItem search_search;
+    private JMenuItem search_searchAgain;
+    private JCheckBoxMenuItem options_enableUpdate;
+    private JCheckBoxMenuItem options_showAsHex;
 
     public FileManagerWindow(String title) {
         addWindowListener(this);
@@ -200,7 +184,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
         HavokNative.initHavokNativ();
     }
 
-    protected void openFile(File selectedFile) {
+    private void openFile(File selectedFile) {
 
         if (currentIndexFile != null) {
             if (splitPane.getRightComponent() instanceof JTabbedPane) {
@@ -219,7 +203,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
         openTask.execute();
     }
 
-    protected void closeFile() {
+    private void closeFile() {
 
         if (currentIndexFile == null)
             return;
@@ -239,7 +223,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
         lblContentTypeValue.setText("*");
     }
 
-    ActionListener menuHandler = new ActionListener() {
+    private final ActionListener menuHandler = new ActionListener() {
 
         @Override
         public void actionPerformed(ActionEvent event) {
@@ -803,20 +787,12 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
                 Utils.getGlobalLogger().error(e);
             }
         } else if (data.length >= 4 && checkMagic(data, "uldh")) {
-            try {
-                ULD_View uldView = new ULD_View(new ULD_File(data, currentIndexFile.getEndian()));
-                tabs.addTab("ULD Renderer", uldView);
-            } catch (IOException e) {
-                Utils.getGlobalLogger().error(e);
-            }
+            ULD_View uldView = new ULD_View(new ULD_File(data, currentIndexFile.getEndian()));
+            tabs.addTab("ULD Renderer", uldView);
         } else if (file.getName().equals("human.cmp")) {
-            try {
-                CMP_File cmpFile = new CMP_File(data);
-                CMP_View cmpView = new CMP_View(cmpFile);
-                tabs.addTab("CMP Viewer", cmpView);
-            } catch (IOException e) {
-                Utils.getGlobalLogger().error(e);
-            }
+            CMP_File cmpFile = new CMP_File(data);
+            CMP_View cmpView = new CMP_View(cmpFile);
+            tabs.addTab("CMP Viewer", cmpView);
         }
 
         hexView.setBytes(data);
@@ -926,9 +902,9 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 
     class OpenIndexTask extends SwingWorker<Void, Void> {
 
-        File selectedFile;
+        final File selectedFile;
 
-        public OpenIndexTask(File selectedFile) {
+        OpenIndexTask(File selectedFile) {
             this.selectedFile = selectedFile;
             menu.setEnabled(false);
             prgLoadingBar.setVisible(true);
@@ -939,7 +915,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
         }
 
         @Override
-        protected Void doInBackground() throws Exception {
+        protected Void doInBackground() {
             try {
                 HashDatabase.beginConnection();
                 currentIndexFile = new SqPack_IndexFile(selectedFile.getAbsolutePath(), prgLoadingBar, lblLoadingBarString);
@@ -974,11 +950,11 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 
     class ExtractTask extends SwingWorker<Void, Void> {
 
-        ArrayList<SqPack_File> files;
-        Loading_Dialog loadingDialog;
-        boolean doConvert;
+        final ArrayList<SqPack_File> files;
+        final Loading_Dialog loadingDialog;
+        final boolean doConvert;
 
-        public ExtractTask(ArrayList<SqPack_File> files, Loading_Dialog loadingDialog, boolean doConvert) {
+        ExtractTask(ArrayList<SqPack_File> files, Loading_Dialog loadingDialog, boolean doConvert) {
             this.files = files;
             this.loadingDialog = loadingDialog;
             this.doConvert = doConvert;
@@ -993,9 +969,9 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
                     String folderName = HashDatabase.getFolder(files.get(i).getId2());
                     String fileName = files.get(i).getName();
                     if (fileName == null)
-                        fileName = String.format("%X", files.get(i).getId() & 0xFFFFFFFF);
+                        fileName = String.format("%X", files.get(i).getId());
                     if (folderName == null)
-                        folderName = String.format("%X", files.get(i).getId2() & 0xFFFFFFFF);
+                        folderName = String.format("%X", files.get(i).getId2());
 
                     loadingDialog.nextFile(i, folderName + "/" + fileName);
 
@@ -1019,10 +995,10 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
                             String path = lastSaveLocation.getCanonicalPath();
 
                             if (fileName == null)
-                                fileName = String.format("%X", files.get(i).getId() & 0xFFFFFFFF);
+                                fileName = String.format("%X", files.get(i).getId());
 
                             if (folderName == null)
-                                folderName = String.format("%X", files.get(i).getId2() & 0xFFFFFFFF);
+                                folderName = String.format("%X", files.get(i).getId2());
 
                             path = lastSaveLocation.getCanonicalPath() + "\\" + folderName + "\\" + fileName;
 
@@ -1054,7 +1030,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
                             fileName = exhName;
 
                             if (folderName == null)
-                                folderName = String.format("%X", files.get(i).getId2() & 0xFFFFFFFF);
+                                folderName = String.format("%X", files.get(i).getId2());
 
                             path = lastSaveLocation.getCanonicalPath() + "\\" + folderName + "\\" + fileName;
 
@@ -1071,10 +1047,10 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
                         String path = lastSaveLocation.getCanonicalPath();
 
                         if (fileName == null)
-                            fileName = String.format("%X", files.get(i).getId() & 0xFFFFFFFF);
+                            fileName = String.format("%X", files.get(i).getId());
 
                         if (folderName == null)
-                            folderName = String.format("%X", files.get(i).getId2() & 0xFFFFFFFF);
+                            folderName = String.format("%X", files.get(i).getId2());
 
                         path = lastSaveLocation.getCanonicalPath() + "\\" + folderName + "\\" + fileName;
 
@@ -1108,10 +1084,10 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
                                 String path = lastSaveLocation.getCanonicalPath();
 
                                 if (fileName == null)
-                                    fileName = String.format("%X", files.get(i).getId() & 0xFFFFFFFF);
+                                    fileName = String.format("%X", files.get(i).getId());
 
                                 if (folderName == null)
-                                    folderName = String.format("%X", files.get(i).getId2() & 0xFFFFFFFF);
+                                    folderName = String.format("%X", files.get(i).getId2());
 
                                 path = lastSaveLocation.getCanonicalPath() + "\\" + folderName + "\\" + fileName;
 
@@ -1128,10 +1104,10 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
                                 String path = lastSaveLocation.getCanonicalPath();
 
                                 if (fileName == null)
-                                    fileName = String.format("%X", files.get(i).getId() & 0xFFFFFFFF);
+                                    fileName = String.format("%X", files.get(i).getId());
 
                                 if (folderName == null)
-                                    folderName = String.format("%X", files.get(i).getId2() & 0xFFFFFFFF);
+                                    folderName = String.format("%X", files.get(i).getId2());
 
                                 path = lastSaveLocation.getCanonicalPath() + "\\" + folderName + "\\" + fileName;
 
@@ -1170,10 +1146,10 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
                             String path = lastSaveLocation.getCanonicalPath();
 
                             if (fileName == null)
-                                fileName = String.format("%X", files.get(i).getId() & 0xFFFFFFFF);
+                                fileName = String.format("%X", files.get(i).getId());
 
                             if (folderName == null)
-                                folderName = String.format("%X", files.get(i).getId2() & 0xFFFFFFFF);
+                                folderName = String.format("%X", files.get(i).getId2());
 
                             path = lastSaveLocation.getCanonicalPath() + "\\" + folderName + "\\" + fileName;
 
@@ -1191,7 +1167,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 
                     if (dataToSave == null) {
                         JOptionPane.showMessageDialog(FileManagerWindow.this,
-                                String.format("%X", files.get(i).getId() & 0xFFFFFFFF) + " could not be converted to " + extension.substring(1).toUpperCase() + ".",
+                                String.format("%X", files.get(i).getId()) + " could not be converted to " + extension.substring(1).toUpperCase() + ".",
                                 "Export Error",
                                 JOptionPane.ERROR_MESSAGE);
                         continue;
@@ -1200,14 +1176,14 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
                     String path = lastSaveLocation.getCanonicalPath();
 
                     if (fileName == null) {
-                        fileName = String.format("%X", files.get(i).getId() & 0xFFFFFFFF);
+                        fileName = String.format("%X", files.get(i).getId());
                         if (!doConvert)
                             extension = "";
                     } else if (!doConvert)
                         extension = "";
 
                     if (folderName == null)
-                        folderName = String.format("%X", files.get(i).getId2() & 0xFFFFFFFF);
+                        folderName = String.format("%X", files.get(i).getId2());
 
                     path = lastSaveLocation.getCanonicalPath() + "\\" + folderName + "\\" + fileName;
 
@@ -1263,7 +1239,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 
     @Override
     public void windowActivated(WindowEvent arg0) {
-        }
+    }
 
     @Override
     public void windowClosed(WindowEvent arg0) {
@@ -1276,19 +1252,19 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 
     @Override
     public void windowDeactivated(WindowEvent arg0) {
-        }
+    }
 
     @Override
     public void windowDeiconified(WindowEvent arg0) {
-        }
+    }
 
     @Override
     public void windowIconified(WindowEvent arg0) {
-        }
+    }
 
     @Override
     public void windowOpened(WindowEvent arg0) {
-        }
+    }
 
 
 }
