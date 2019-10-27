@@ -1,5 +1,7 @@
 package com.fragmenterworks.ffxivextract.gui.components;
 
+import com.fragmenterworks.ffxivextract.helpers.Utils;
+
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
@@ -262,8 +264,7 @@ public class NavigableImagePanel extends JPanel {
 		try {
 			bg = ImageIO.read(getClass().getResource("/bg.png"));
 		} catch (IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+			Utils.getGlobalLogger().error(e1);
 		}
 		
 		setOpaque(false);

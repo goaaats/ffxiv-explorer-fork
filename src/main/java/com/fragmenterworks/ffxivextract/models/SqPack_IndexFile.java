@@ -10,6 +10,7 @@ import java.util.*;
 import javax.swing.JLabel;
 import javax.swing.JProgressBar;
 
+import com.fragmenterworks.ffxivextract.helpers.Utils;
 import com.fragmenterworks.ffxivextract.helpers.LERandomAccessFile;
 import com.fragmenterworks.ffxivextract.storage.HashDatabase;
 import com.fragmenterworks.ffxivextract.gui.components.Loading_Dialog;
@@ -45,7 +46,7 @@ public class SqPack_IndexFile {
 				cachedIndexes.put(cacheKey, indexFile);
 				return indexFile;
 			} catch ( IOException e ) {
-				e.printStackTrace();
+				Utils.getGlobalLogger().error(e);
 			}
 		}
 		return null;
@@ -66,6 +67,8 @@ public class SqPack_IndexFile {
 		RandomAccessFile bref = new RandomAccessFile(pathToIndex, "r");
 
 		int sqpackHeaderLength = checkSqPackHeader(lref, bref);
+		if (sqpackHeaderLength < 0)
+			return;
 
 		EARandomAccessFile ref = new EARandomAccessFile(pathToIndex, "r", endian);
 		
@@ -130,6 +133,8 @@ public class SqPack_IndexFile {
 		RandomAccessFile bref = new RandomAccessFile(pathToIndex, "r");
 
 		int sqpackHeaderLength = checkSqPackHeader(lref, bref);
+		if (sqpackHeaderLength < 0)
+			return;
 
 		EARandomAccessFile ref = new EARandomAccessFile(pathToIndex, "r", endian);
 		getSegments(ref, sqpackHeaderLength);
@@ -213,7 +218,15 @@ public class SqPack_IndexFile {
 		if (buffer[0] != 'S' || buffer[1] != 'q' || buffer[2] != 'P'
 				|| buffer[3] != 'a' || buffer[4] != 'c' || buffer[5] != 'k') {
 			ref.close();
-			throw new IOException("Not a SqPack file");
+
+			Utils.getGlobalLogger().error("SqPack magic was incorrect.");
+
+			StringBuilder s = new StringBuilder();
+			for (int i = 0; i < 6; i++)
+				s.append(String.format("%X", buffer[i]));
+			String strMagic = new String(buffer);
+			Utils.getGlobalLogger().debug("Magic was 0x{} // {}", s.toString(), strMagic);
+			return -1;
 		}
 
 		// Get Header Length
@@ -229,8 +242,11 @@ public class SqPack_IndexFile {
 		int type = ref.readInt();
 		int bType = bref.readInt();
 
-		if (type != 2 && bType != 2)
-			throw new IOException("Not a index");
+		if (type != 2 && bType != 2) {
+			Utils.getGlobalLogger().error("SqPack type was incorrect.");
+			Utils.getGlobalLogger().debug("Type was LE: {}, BE: {}", type, bType);
+			return -1;
+		}
 
 		if (type == 2) {
 			endian = ByteOrder.LITTLE_ENDIAN;
@@ -272,25 +288,36 @@ public class SqPack_IndexFile {
 	{
 		return noFolder;
 	}
-	
-	/** Debug  */
-	public void displayIndexInfo() {
+
+	@Override
+	public String toString() {
+		StringBuilder b = new StringBuilder();
+
 		for (int i = 0; i < getPackFolders().length; i++) {
-			System.out.println("Folder: "
-					+ String.format("%X",
-							getPackFolders()[i].getId() & 0xFFFFFFFF));
-			System.out.println("Num files: "
-					+ getPackFolders()[i].getFiles().length);
-			System.out.println("Files: ");
+			b.append("Folder: ");
+//			b.append(String.format("%X", getPackFolders()[i].getId()));
+			b.append(getPackFolders()[i].getName());
+			b.append("\n");
+
+			b.append("Num files: ");
+			b.append(getPackFolders()[i].getFiles().length);
+			b.append("\n");
+
+			b.append("Files:\n");
+
 			for (int j = 0; j < getPackFolders()[i].getFiles().length; j++) {
-				System.out.println("\t"
-						+ String.format("%X",
-								getPackFolders()[i].getFiles()[j].id)
-						+ " @offset "
-						+ String.format("%X",
-								getPackFolders()[i].getFiles()[j].dataoffset));
+				b.append("\t");
+//				b.append(String.format("%X", getPackFolders()[i].getFiles()[j].id));
+				b.append(getPackFolders()[i].getFiles()[j].getName());
+
+				b.append(" @ offset ");
+
+				b.append(String.format("%X", getPackFolders()[i].getFiles()[j].dataoffset));
+				b.append("\n");
 			}
 		}
+
+		return b.toString();
 	}
 
 	public class SqPack_DataSegment {

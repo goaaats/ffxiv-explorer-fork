@@ -8,8 +8,7 @@ public class BlurShader extends Shader {
 
 	int texLocation, texelSizeLocation, dirLocation, radiusLocation;
 	
-	public BlurShader(GL3 gl)
-			throws IOException {
+	public BlurShader(GL3 gl) throws IOException {
 		//super(gl, "/res/shaders/fbout_vert.glsl", "/res/shaders/blur_frag.glsl", true);	
 		super(gl, MinifiedShaders.fbout_vert_glsl, MinifiedShaders.blur_frag_glsl, false);
 		

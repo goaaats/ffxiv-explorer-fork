@@ -1,5 +1,6 @@
 package com.fragmenterworks.ffxivextract.models;
 
+import com.fragmenterworks.ffxivextract.helpers.Utils;
 import com.fragmenterworks.ffxivextract.helpers.FileTools;
 import com.fragmenterworks.ffxivextract.helpers.SparseArray;
 import com.fragmenterworks.ffxivextract.models.uldStuff.COHDEntry;
@@ -111,7 +112,7 @@ public class ULD_File extends Game_File {
 				Constructor c = aClass.getDeclaredConstructor(ByteBuffer.class);
 				return (GraphicsNodeTypeData)c.newInstance(data);
 			} catch ( NoSuchMethodException | InvocationTargetException | IllegalAccessException | InstantiationException e ) {
-				e.printStackTrace();
+				Utils.getGlobalLogger().error(e);
 			}
 		}
 		return null;
@@ -132,7 +133,7 @@ public class ULD_File extends Game_File {
 				Constructor c = aClass.getDeclaredConstructor(ByteBuffer.class);
 				return (COHDEntryType)c.newInstance(data);
 			} catch ( NoSuchMethodException | InvocationTargetException | IllegalAccessException | InstantiationException e ) {
-				e.printStackTrace();
+				Utils.getGlobalLogger().error(e);
 			}
 		}
 		return null;
@@ -145,19 +146,11 @@ public class ULD_File extends Game_File {
 	 */
 	public static void main(String[] args) {
 		byte[] data = FileTools.getRaw("D:\\games\\SquareEnix\\FINAL FANTASY XIV - A Realm Reborn\\game\\sqpack\\ffxiv", "ui/uld/botanistgame.uld");
-		/*File   f    = new File("D:\\svn\\ui\\uld\\botanistgame.uld");
-		try {
-			OutputStream os = new FileOutputStream(f);
-			os.write(data);
-		} catch ( IOException e ) {
-			e.printStackTrace();
-		}*/
 
 		try {
 			ULD_File uld = new ULD_File(data, ByteOrder.LITTLE_ENDIAN);
-			System.out.println(uld);
 		} catch ( IOException e ) {
-			e.printStackTrace();
+			Utils.getGlobalLogger().error(e);
 		}
 	}
 

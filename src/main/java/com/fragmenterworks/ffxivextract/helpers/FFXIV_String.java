@@ -1,5 +1,7 @@
 package com.fragmenterworks.ffxivextract.helpers;
 
+import com.fragmenterworks.ffxivextract.helpers.Utils;
+
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -83,40 +85,38 @@ public class FFXIV_String {
 	public static String parseFFXIVString(byte[] stringBytes) {
 
 		try{
-		byte[] newStringBytes = new byte[stringBytes.length*4];
+			byte[] newStringBytes = new byte[stringBytes.length*4];
 
-		ByteBuffer buffIn = ByteBuffer.wrap(stringBytes);
-		buffIn.order(ByteOrder.LITTLE_ENDIAN);
-		ByteBuffer buffOut = ByteBuffer.wrap(newStringBytes);
-		buffIn.order(ByteOrder.LITTLE_ENDIAN);
+			ByteBuffer buffIn = ByteBuffer.wrap(stringBytes);
+			buffIn.order(ByteOrder.LITTLE_ENDIAN);
+			ByteBuffer buffOut = ByteBuffer.wrap(newStringBytes);
+			buffIn.order(ByteOrder.LITTLE_ENDIAN);
 
-		while (buffIn.hasRemaining())
-		{
-			byte b = buffIn.get();
+			while (buffIn.hasRemaining())
+			{
+				byte b = buffIn.get();
 
-			if (b == START_BYTE)
-				try {
-					processPacket(buffIn, buffOut);
-				} catch (UnsupportedEncodingException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			else
-				buffOut.put(b);
-		}
+				if (b == START_BYTE)
+					try {
+						processPacket(buffIn, buffOut);
+					} catch (UnsupportedEncodingException e) {
+						Utils.getGlobalLogger().error(e);
+					}
+				else
+					buffOut.put(b);
+			}
 
-		try {
-			return new String(newStringBytes, 0, buffOut.position(), "UTF-8");
-		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
-		}
+			try {
+				return new String(newStringBytes, 0, buffOut.position(), "UTF-8");
+			} catch (UnsupportedEncodingException e) {
+				Utils.getGlobalLogger().error(e);
+			}
 		}
 		catch (Exception e)
 		{try {
 			return "<ERROR Parsing: "+ new String(stringBytes, "UTF-8")+">";
 		} catch (UnsupportedEncodingException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+			Utils.getGlobalLogger().error(e1);
 		}}
 		return "ERROR";
 	}

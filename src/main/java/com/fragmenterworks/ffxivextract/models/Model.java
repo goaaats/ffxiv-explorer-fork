@@ -10,6 +10,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
 
+import com.fragmenterworks.ffxivextract.helpers.Utils;
 import com.fragmenterworks.ffxivextract.helpers.ImageDecoding.ImageDecodingException;
 import com.fragmenterworks.ffxivextract.helpers.GLHelper;
 import com.fragmenterworks.ffxivextract.helpers.HavokNative;
@@ -145,12 +146,7 @@ public class Model extends Game_File {
 			end++;
 		}
 
-		if (Constants.DEBUG)
-		{
-			System.out.println("-----Strings-----");
-			for(String s : stringArray)
-				System.out.println(s);
-		}
+
 		
 		//Counts
 		bb.getInt();
@@ -184,13 +180,17 @@ public class Model extends Game_File {
 			atrMasks[i] = getMaskFromAtrName(atrStrings[i]);
 		
 		materials = new Material[numMaterialStrings];
-		
-		if (Constants.DEBUG){
-			System.out.println("Atr Strings: " + numAtrStrings);
-			System.out.println("Material Strings: " + numMaterialStrings);
-			System.out.println("Anim Things: " + numBoneStrings);
+
+		// I hate strings
+		StringBuilder s = new StringBuilder();
+		for (String str : stringArray) {
+			s.append(str);
+			s.append("\n");
 		}
-		
+
+		Utils.getGlobalLogger().trace("Attr strings: {}\nMaterial strings: {}\nBone strings: {}\nStrings:\n{}",
+										numAtrStrings, numMaterialStrings, numBoneStrings, s.toString());
+
 		imcFile = loadImcFile();	
 		
 		if (imcFile == null)
@@ -199,31 +199,26 @@ public class Model extends Game_File {
 		//Skip Stuff
 		bb.position(bb.position()+(32*unknownCount1));		
 		
-		//LOD Headers		
-		if (Constants.DEBUG)
-			System.out.println("-----LoD Header Info-----");
+		//LOD Headers
+		Utils.getGlobalLogger().trace("-----LoD Header Info-----");
 		for (int i = 0; i < lodModels.length; i++)
 		{
-			if (Constants.DEBUG)
-				System.out.println(String.format("LoD Level %d:", i));
+			Utils.getGlobalLogger().trace(String.format("LoD Level %d:", i));
 			lodModels[i] = LoDSubModel.loadInfo(bb);
 		}
 		
         //Load Mesh Info
-		if (Constants.DEBUG)
-			System.out.println("-----LoD Mesh Info-----");
+		Utils.getGlobalLogger().trace("-----LoD Mesh Info-----");
 		
 		int vertElementNumber = 0;
 		for (int i = 0; i < lodModels.length; i++)
 		{
-			if (Constants.DEBUG)
-				System.out.println(String.format("LoD %d:", i));
+			Utils.getGlobalLogger().trace(String.format("LoD %d:", i));
 			
 			Mesh meshList[] = new Mesh[lodModels[i].numMeshes];
 			for (int j = 0; j < lodModels[i].numMeshes; j++)
-			{		
-				if (Constants.DEBUG)
-					System.out.println(String.format("Mesh %d:", j));				
+			{
+				Utils.getGlobalLogger().trace(String.format("Mesh %d:", j));
 	        	meshList[j] = new Mesh(bb, vertElementNumber);	        	
 	        	vertElementNumber++;	
 	        	
@@ -232,10 +227,8 @@ public class Model extends Game_File {
 		}
         
 		//New stuff added from SaintCoinach
-		
 		bb.position(bb.position()+(numAtrStrings*4));
-		
-		bb.position(bb.position()+(unknownCount2 * 20));//Skip this data
+		bb.position(bb.position()+(unknownCount2 * 20)); //Skip this data
 		
 		for (int i = 0; i < numParts; i++)
 			meshPartTable[i] = new MeshPart(bb);			
@@ -346,25 +339,22 @@ public class Model extends Game_File {
         	
 	        skelFile = null;
 			try {				
-				byte sklbData[] = currentIndex.extractFile(skeletonPath);
+				byte[] sklbData = currentIndex.extractFile(skeletonPath);
 				if (sklbData != null)
-					skelFile = new SKLB_File(sklbData);
-			} catch (FileNotFoundException e) {
-				System.out.println("Skel Not Found");
+					skelFile = new SKLB_File(sklbData, endian);
 			} catch (IOException e) {
-				System.out.println("Skel Not Found");
+				Utils.getGlobalLogger().error("Couldn't find skeleton @ {}", skeletonPath, e);
 			}
+
 	        animFile = null;
 			try {
-				byte animData[] = currentIndex.extractFile(animationPath);
+				byte[] animData = currentIndex.extractFile(animationPath);
 				if (animData != null)
-					animFile = new PAP_File(animData);
-			} catch (FileNotFoundException e) {
-				System.out.println("Anim Not Found");
+					animFile = new PAP_File(animData, endian);
 			} catch (IOException e) {
-				System.out.println("Anim Not Found");
-			}		
-			
+				Utils.getGlobalLogger().error("Couldn't find animation @ {}", animationPath, e);
+			}
+
 			if (animFile != null && skelFile != null){
 		        ByteBuffer skelBuffer = ByteBuffer.allocateDirect(skelFile.getHavokData().length);
 		        skelBuffer.order(ByteOrder.nativeOrder());
@@ -382,7 +372,7 @@ public class Model extends Game_File {
 		        catch (UnsatisfiedLinkError e)
 		        { 
 		        	numBones = -1;
-		        	e.printStackTrace();
+		        	Utils.getGlobalLogger().error(e);
 		        	return;
 		        }
 		        
@@ -391,10 +381,10 @@ public class Model extends Game_File {
 					if (HavokNative.setAnimation(0) == -1)
 					{
 						HavokNative.setAnimation(0);
-						System.out.println("Invalid Animation");
+						Utils.getGlobalLogger().info("Animation 0 was invalid");
 					}
 					numBones = boneStrings.length;		
-					System.out.println("There are:" + numBones + " bones.");
+					Utils.getGlobalLogger().info("Found {} bones", numBones);
 					boneMatrixBuffer = ByteBuffer.allocateDirect(4 * 16 * numBones);
 					boneMatrixBuffer.order(ByteOrder.nativeOrder());						
 				}
@@ -430,17 +420,14 @@ public class Model extends Game_File {
 			
 			if (data == null)
 				return null;
-			
-			System.out.println("Adding Entry: " + imcPath);
+
 			HashDatabase.addPathToDB(imcPath, currentIndex.getName());			
 
-			return new IMC_File(data);
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
+			return new IMC_File(data, endian);
 		} catch (IOException e) {
-			e.printStackTrace();
+			Utils.getGlobalLogger().error("Couldn't create IMC file {}", imcPath, e);
 		}
-		
+
 		return null;										
 					
 	}
@@ -494,7 +481,8 @@ public class Model extends Game_File {
 				}
 				catch (ArrayIndexOutOfBoundsException e)
 				{
-					System.out.println("Num Materials was a LIE!");
+					//Ion pls
+					Utils.getGlobalLogger().error("Num materials was a LIE!", e);
 					break;
 				}
 				
@@ -544,15 +532,13 @@ public class Model extends Game_File {
 					if (materialData != null)
 					{					
 						materials[i] = new Material(materialFolderPath, indexToUse, materialData, endian);
-						
-						System.out.println("Adding Entry: " + materialFolderPath +"/"+ fileString);
+
 						HashDatabase.addPathToDB(materialFolderPath +"/"+ fileString, indexToUse.getName());
-						
 					}
 				} catch (FileNotFoundException e) {
-					e.printStackTrace();
+					Utils.getGlobalLogger().error(e);
 				} catch (IOException e) {
-					e.printStackTrace();
+					Utils.getGlobalLogger().error(e);
 				}
 				
 			}
@@ -567,16 +553,15 @@ public class Model extends Game_File {
 			int chara = Integer.parseInt(s1.substring(0, 4));
 			int body = Integer.parseInt(s1.substring(5, 9));
 			materialFolderPath = String.format("chara/human/c%04d/obj/body/b%04d/material",chara,body);
-			
-			System.out.println("Adding Entry: " + materialFolderPath);
+
 			HashDatabase.addPathToDB(materialFolderPath, "040000");
 			
 			try {
 				materials[bodyMaterialSpot] = new Material(materialFolderPath, currentIndex, currentIndex.extractFile(materialFolderPath, s), getEndian());
 			} catch (FileNotFoundException e) {
-				e.printStackTrace();
+				Utils.getGlobalLogger().error(e);
 			} catch (IOException e) {
-				e.printStackTrace();
+				Utils.getGlobalLogger().error(e);
 			}
 			
 		}
@@ -632,7 +617,7 @@ public class Model extends Game_File {
 			try {
 				simpleShader = new SimpleShader(gl);
 			} catch (IOException e1) {
-				e1.printStackTrace();
+				Utils.getGlobalLogger().error(e1);
 			}
 				
 		
@@ -684,8 +669,7 @@ public class Model extends Game_File {
 		    		ByteBuffer origin = mesh.vertBuffers[element.stream].duplicate();		    			
 					origin.position(element.offset);
 					int size = mesh.vertexSizes[element.stream];
-					
-		    			    		
+
 		    		//Set Pointer
 		    		switch (element.usage)
 		    		{
@@ -711,7 +695,6 @@ public class Model extends Game_File {
 		    			gl.glVertexAttribPointer(shader.getAttribColor(), components, datatype, isNormalized, size, origin);
 		    			break;
 		    		}
-				    		
 		    	}
 		    	
 		    	shader.setTextures(gl, material);
@@ -748,6 +731,7 @@ public class Model extends Game_File {
 		    	}
 		    	
 	    	}
+
 		    //Draw Skeleton
 		    /*
 		    gl.glDisable(GL3.GL_DEPTH_TEST);
@@ -763,8 +747,6 @@ public class Model extends Game_File {
 		    }
 		    gl.glEnable(GL3.GL_DEPTH_TEST);
 		    */
-		    
-		   
 		}
 		
 		 //Advance Animation		
@@ -878,8 +860,7 @@ public class Model extends Game_File {
 						try {
 							img = tex.decode(0, null);
 						} catch (ImageDecodingException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
+							Utils.getGlobalLogger().error("Couldn't decode texture!", e);
 						}								
 						
 						int[] pixels = new int[img.getWidth() * img.getHeight()];
@@ -942,7 +923,7 @@ public class Model extends Game_File {
 		if (HavokNative.setAnimation(selectedIndex) == -1)
 		{
 			HavokNative.setAnimation(0);
-			System.out.println("Invalid Animation");
+			Utils.getGlobalLogger().info("Animation {] was invalid", selectedIndex);
 		}		
 				
 	}

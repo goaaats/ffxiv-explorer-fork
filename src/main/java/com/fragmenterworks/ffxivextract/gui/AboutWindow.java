@@ -28,6 +28,7 @@ import javax.swing.plaf.FontUIResource;
 
 import com.fragmenterworks.ffxivextract.Constants;
 import com.fragmenterworks.ffxivextract.Strings;
+import com.fragmenterworks.ffxivextract.helpers.Utils;
 
 public class AboutWindow extends JFrame {
 
@@ -106,27 +107,19 @@ public class AboutWindow extends JFrame {
 			
 			@Override
 			public void mouseReleased(MouseEvent arg0) {
-				// TODO Auto-generated method stub
-				
-			}
+				}
 			
 			@Override
 			public void mousePressed(MouseEvent arg0) {
-				// TODO Auto-generated method stub
-				
-			}
+				}
 			
 			@Override
 			public void mouseExited(MouseEvent arg0) {
-				// TODO Auto-generated method stub
-				
-			}
+				}
 			
 			@Override
 			public void mouseEntered(MouseEvent arg0) {
-				// TODO Auto-generated method stub
-				
-			}
+				}
 			
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
@@ -166,8 +159,7 @@ public class AboutWindow extends JFrame {
                 } catch (IOException ex) {
                     //It looks like there's a problem
                 } catch (URISyntaxException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
+					Utils.getGlobalLogger().error(e1);
 				}
             }
         });

@@ -10,6 +10,7 @@ import java.util.TimeZone;
 
 import com.fragmenterworks.ffxivextract.Constants;
 
+import com.fragmenterworks.ffxivextract.helpers.Utils;
 import com.fragmenterworks.ffxivextract.helpers.FFXIV_String;
 import com.fragmenterworks.ffxivextract.helpers.EARandomAccessFile;
 
@@ -94,15 +95,9 @@ public class Log_File {
 			int channel = Integer.parseInt(info.substring(10, 12), 16);			
 			
 			entries[i] = new Log_Entry(time, filter, channel, sender, message);
-			
-			if (Constants.DEBUG)
-			{
-				if (!entries[i].sender.toString().isEmpty())
-					System.out.print(entries[i].sender.toString() + ": ");
-				System.out.println(entries[i].message.toString());
-			}
+
+			Utils.getGlobalLogger().debug("{} : {}", entries[i].sender.isEmpty() ? "" : entries[i].sender, entries[i].message);
 		}
-		
 		file.close();
 	}
 	

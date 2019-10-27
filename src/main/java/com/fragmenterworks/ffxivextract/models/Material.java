@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
+import com.fragmenterworks.ffxivextract.helpers.Utils;
 import com.fragmenterworks.ffxivextract.helpers.ShaderIdHelper;
 import com.fragmenterworks.ffxivextract.shaders.BGShader;
 import com.fragmenterworks.ffxivextract.shaders.CharacterShader;
@@ -103,14 +104,13 @@ public class Material extends Game_File {
 								
 				if (!s.contains("/"))
 				{
-					System.out.println("Can't load: " + s);
+					Utils.getGlobalLogger().debug("Couldn't load {}", s);
 					continue;
 				}
 				
 				String folderName = s.substring(0, s.lastIndexOf("/"));										
-				String fileString = s.substring(s.lastIndexOf("/")+1, s.length());
-			
-				System.out.println("Adding Entry: " + s);
+				String fileString = s.substring(s.lastIndexOf("/")+1);
+
 				HashDatabase.addPathToDB(s, currentIndex.getName());																			
 				
 				try {
@@ -130,9 +130,9 @@ public class Material extends Game_File {
 						colorSet = new Texture_File(extracted, endian);
 					
 				} catch (FileNotFoundException e) {
-					e.printStackTrace();
+					Utils.getGlobalLogger().error(e);
 				} catch (IOException e) {
-					e.printStackTrace();				
+					Utils.getGlobalLogger().error(e);
 				}
 				
 			}
@@ -211,7 +211,7 @@ public class Material extends Game_File {
 			else 		
 				shader = new DefaultShader(gl);
 		} catch (IOException e) {				
-			e.printStackTrace();
+			Utils.getGlobalLogger().error(e);
 		}
 		
 		shaderReady = true;
@@ -290,8 +290,8 @@ public class Material extends Game_File {
 			this.unknown1 = unknown1;
 			this.unknown2 = unknown2;
 			this.index = index;
-			
-			System.out.println(ShaderIdHelper.getName(id));
+
+			Utils.getGlobalLogger().debug("Shader name: {}", ShaderIdHelper.getName(id));
 		}
 	}
 }

@@ -16,6 +16,7 @@ import javax.swing.JDialog;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
+import com.fragmenterworks.ffxivextract.helpers.Utils;
 import com.fragmenterworks.ffxivextract.helpers.VersionUpdater.VersionCheckObject;
 
 import javax.swing.JTextArea;
@@ -41,8 +42,7 @@ public class Update_Dialog extends JDialog {
                 } catch (IOException ex) {
                     //It looks like there's a problem
                 } catch (URISyntaxException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
+					Utils.getGlobalLogger().error(e1);
 				}
 			}
 			else if (e.getActionCommand().equals("close"))

@@ -11,6 +11,7 @@ import javax.swing.JTabbedPane;
 import javax.swing.SwingWorker;
 
 import com.fragmenterworks.ffxivextract.Strings;
+import com.fragmenterworks.ffxivextract.helpers.Utils;
 import com.fragmenterworks.ffxivextract.gui.components.EXDF_View;
 import com.fragmenterworks.ffxivextract.models.EXHF_File;
 import com.fragmenterworks.ffxivextract.models.SqPack_IndexFile;
@@ -93,7 +94,7 @@ public class ModelViewerWindow extends JFrame {
 					tabbedPane.add("Items", new ModelViewerItems(ModelViewerWindow.this, modelIndexFile, itemView));
 					tabbedPane.add("Furniture", new ModelViewerFurniture(ModelViewerWindow.this, buildingIndexFile));
 				} catch (IOException e1) {
-					e1.printStackTrace();
+					Utils.getGlobalLogger().error(e1);
 					getContentPane().removeAll();
 					getContentPane().add(new JLabel("Error: Could not find game files. Is DAT path correct?"));
 					return null;

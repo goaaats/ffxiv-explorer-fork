@@ -15,25 +15,25 @@ import java.util.prefs.Preferences;
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 
+import com.fragmenterworks.ffxivextract.helpers.*;
 import com.fragmenterworks.ffxivextract.storage.HashDatabase;
 import com.fragmenterworks.ffxivextract.gui.FileManagerWindow;
 import com.fragmenterworks.ffxivextract.gui.components.EXDF_View;
 import com.fragmenterworks.ffxivextract.gui.components.Update_Dialog;
-import com.fragmenterworks.ffxivextract.helpers.DatBuilder;
-import com.fragmenterworks.ffxivextract.helpers.HashFinding_Utils;
-import com.fragmenterworks.ffxivextract.helpers.HavokNative;
-import com.fragmenterworks.ffxivextract.helpers.EARandomAccessFile;
-import com.fragmenterworks.ffxivextract.helpers.PathSearcher;
-import com.fragmenterworks.ffxivextract.helpers.VersionUpdater;
 import com.fragmenterworks.ffxivextract.helpers.VersionUpdater.VersionCheckObject;
 import com.fragmenterworks.ffxivextract.models.EXHF_File;
 import com.fragmenterworks.ffxivextract.models.SqPack_IndexFile;
 import com.fragmenterworks.ffxivextract.models.SqPack_IndexFile.SqPack_Folder;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.config.Configurator;
 
 public class Main {
 
 	public static void main(String[] args) {
-		
+
+		Utils.getGlobalLogger().info("Starting FFXIV Explorer...");
+
 		// Set to windows UI
 		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
@@ -47,52 +47,15 @@ public class Main {
 			if (dbFile.exists())
 				HashDatabase.init();
 			else
-				JOptionPane
-						.showMessageDialog(
-								null,
-								Constants.DBFILE_NAME
-										+ " is missing. No file or folder names will be shown... instead the file's hashes will be displayed.",
+				JOptionPane.showMessageDialog(null,
+								Constants.DBFILE_NAME + " is missing. No file or folder names will be shown... instead the file's hashes will be displayed.",
 								"Hash DB Load Error", JOptionPane.ERROR_MESSAGE);
 		} catch (ClassNotFoundException e1) {
-			e1.printStackTrace();
-		}		
+			Utils.getGlobalLogger().error(e1);
+		}
 
-		/*
-		HashDatabase.beginConnection();
-		try {
-			HashDatabase.globalConnection.setAutoCommit(false);
-		} catch (SQLException e2) {
-			// TODO Auto-generated catch block
-			e2.printStackTrace();
-		}
-		for (int j = 180; j <= 180; j++){
-			
-			
-			if (j >= 120 && j <= 127)
-				continue;
-			if (j >= 150)
-				continue;						
-			
-			for (int i = 0; i <= 999; i++)
-			{
-				
-				HashDatabase.addPathToDB(String.format("ui/icon/%03d000/en/%03d%03d.tex", j, j, i), "060000", HashDatabase.globalConnection);
-				HashDatabase.addPathToDB(String.format("ui/icon/%03d000/de/%03d%03d.tex", j, j, i), "060000", HashDatabase.globalConnection);
-				HashDatabase.addPathToDB(String.format("ui/icon/%03d000/fr/%03d%03d.tex", j, j, i), "060000", HashDatabase.globalConnection);
-				HashDatabase.addPathToDB(String.format("ui/icon/%03d000/ja/%03d%03d.tex", j, j, i), "060000", HashDatabase.globalConnection);
-				System.out.println(String.format("ui/icon/%03d000/en/%03d%03d.tex", j, j, i));
-			}			
-			try {
-				HashDatabase.commit();
-			} catch (SQLException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
-		}
-		HashDatabase.closeConnection();
-		
-		*/
-		
+		Level currentLevel = LogManager.getRootLogger().getLevel();
+
 		// Arguments
 		if (args.length > 0) {
 			
@@ -104,36 +67,29 @@ public class Main {
 				else if (args[0].equals("-pathsearch"))
 					System.out.println("Searches an archive for strings that start with <str>\n-pathsearch <path to index> <str>");
 			}
-			
-			// DEBUG ON
-			if (args[0].equals("-debug")) {
-				Constants.DEBUG = true;
-				System.out.println("Debug Mode ON");
-			}
+
+			if (args[0].equals("-debug") && currentLevel.intLevel() < Level.DEBUG.intLevel())
+				Configurator.setAllLevels(LogManager.getRootLogger().getName(), Level.DEBUG);
 
 			// PATHSEARCH
 			if (args[0].equals("-pathsearch")) {
 				if (args.length < 3) {
-					System.out
-							.println("Not enough args.");
+					Utils.getGlobalLogger().info("Too few args for pathsearch!");
 					return;
 				}
 
-				System.out
-						.println("Starting Path Searcher (this will take a while)");
+				Utils.getGlobalLogger().info("Starting Path Searcher (this will take a while)");
 
-				
 				try {
 					PathSearcher.doPathSearch(args[1], args[2]);
 				} catch (IOException e) {
-					System.out
-							.println("There was an error searching. Stacktrace: ");
-					e.printStackTrace();
-				}				
-
+					Utils.getGlobalLogger().error("Encountered an error while path searching.", e);
+				}
 				return;
 			}
 		}
+
+		Utils.getGlobalLogger().info("Logging set to {}", LogManager.getRootLogger().getLevel());
 
 		// Open up the main window
 		FileManagerWindow fileMan = new FileManagerWindow(Constants.APPNAME);

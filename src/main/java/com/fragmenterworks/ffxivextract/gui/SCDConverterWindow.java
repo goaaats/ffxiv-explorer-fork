@@ -32,6 +32,7 @@ import javax.swing.filechooser.FileFilter;
 import com.fragmenterworks.ffxivextract.Strings;
 
 import com.fragmenterworks.ffxivextract.helpers.Utils;
+import com.fragmenterworks.ffxivextract.helpers.Utils;
 
 public class SCDConverterWindow extends JFrame {
 
@@ -259,7 +260,7 @@ public class SCDConverterWindow extends JFrame {
 							"Converted",
 							"Ogg to SCD Converter", JOptionPane.INFORMATION_MESSAGE);
 				} catch (IOException e1) {
-					e1.printStackTrace();
+					Utils.getGlobalLogger().error(e1);
 					JOptionPane
 					.showMessageDialog(
 							null,
@@ -391,13 +392,11 @@ public class SCDConverterWindow extends JFrame {
 				txtPath.setText(fileChooser.getSelectedFile()
 						.getCanonicalPath());
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			try {
 				currentOggFile = fileChooser.getSelectedFile();
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}

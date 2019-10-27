@@ -32,6 +32,7 @@ import javax.swing.table.TableColumn;
 
 import com.fragmenterworks.ffxivextract.Strings;
 
+import com.fragmenterworks.ffxivextract.helpers.Utils;
 import com.fragmenterworks.ffxivextract.models.Log_File;
 import com.fragmenterworks.ffxivextract.models.Log_File.Log_Entry;
 
@@ -119,7 +120,7 @@ public class LogViewerWindow extends JFrame {
 							path+=".csv";
 						saveLog(path, path.endsWith(".txt") ? SAVETYPE_PLAIN : SAVETYPE_CSV);
 					} catch (IOException e1) {						
-						e1.printStackTrace();
+						Utils.getGlobalLogger().error(e1);
 					}					
 				}
 			}
@@ -190,11 +191,9 @@ public class LogViewerWindow extends JFrame {
 					}
 					
 				} catch (FileNotFoundException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					Utils.getGlobalLogger().error(e);
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					Utils.getGlobalLogger().error(e);
 				}
 			}
 		}

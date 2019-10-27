@@ -11,8 +11,7 @@ public class IrisShader extends Shader {
 	private int eyeCatchTexLocation;
 	private int eyeColorLocation;
 	
-	public IrisShader(GL3 gl)
-			throws IOException {
+	public IrisShader(GL3 gl) throws IOException {
 		//super(gl, "/res/shaders/model_vert.glsl", "/res/shaders/iris_frag.glsl", true);	
 		super(gl, MinifiedShaders.model_vert_glsl, MinifiedShaders.iris_frag_glsl, false);
 		

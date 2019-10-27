@@ -9,9 +9,10 @@ import java.util.ArrayList;
 
 import com.fragmenterworks.ffxivextract.Constants;
 
+import com.fragmenterworks.ffxivextract.helpers.Utils;
 import com.fragmenterworks.ffxivextract.models.directx.D3DXShader_ConstantTable;
 
-public class SHCD_File {
+public class SHCD_File extends Game_File {
 
 	public final static int SHADERTYPE_VERTEX = 0;
 	public final static int SHADERTYPE_PIXEL = 1;
@@ -28,7 +29,8 @@ public class SHCD_File {
 	
 	private D3DXShader_ConstantTable constantTable;
 	
-	public SHCD_File(String path) throws IOException{
+	public SHCD_File(String path, ByteOrder endian) throws IOException{
+		super(endian);
 		File file = new File(path);
 		FileInputStream fis = new FileInputStream(file);
 		byte[] data = new byte[(int) file.length()];
@@ -37,18 +39,24 @@ public class SHCD_File {
 		loadSHPK(data);
 	}
 
-	public SHCD_File(byte[] data) throws IOException {
+	public SHCD_File(byte[] data, ByteOrder endian) throws IOException {
+		super(endian);
 		loadSHPK(data);
 	}
 
 	private void loadSHPK(byte[] data) throws IOException {
 		
 		ByteBuffer bb = ByteBuffer.wrap(data);
-		bb.order(ByteOrder.LITTLE_ENDIAN);
-		
+		bb.order(endian);
+
+		int magic = bb.getInt();
+
 		//Check Signatures
-		if (bb.getInt() != 0x64436853)
-			throw new IOException("Not a ShCd file");
+		if (magic != 0x64436853) {
+			Utils.getGlobalLogger().error("SHCD magic was incorrect.");
+			Utils.getGlobalLogger().debug("Magic was {}", String.format("0x%08X", magic));
+			return;
+		}
 		
 		//Read in header
 		bb.getShort();
@@ -88,23 +96,32 @@ public class SHCD_File {
 		//Constant Table in bytecode IF DX9
 		if (directXVersion.equals("DX9\0"))
 			constantTable = D3DXShader_ConstantTable.getConstantTable(shaderBytecode);
-		
-		if (Constants.DEBUG && constantTable != null)
+
+		if (constantTable != null)
 		{
-			System.out.println(constantTable.Creator);
-			System.out.println(constantTable.Target);
-			System.out.println("Constants:");
-			for (int i = 0; i < constantTable.constantInfo.length; i++)
-			{
-				System.out.println(constantTable.constantInfo[i].Name + " " + constantTable.constantInfo[i].TypeInfo.Columns + "x" +constantTable.constantInfo[i].TypeInfo.Rows + " Index: " + constantTable.constantInfo[i].RegisterIndex + " Count: " + constantTable.constantInfo[i].RegisterCount);
-				
-				if (constantTable.constantInfo[i].TypeInfo.StructMembers != 0)
-				{
-					System.out.println("Struct!:");
-					for (int j = 0; j < constantTable.constantInfo[i].TypeInfo.StructMemberInfo.length; j++)
-						System.out.println("=>" + constantTable.constantInfo[i].TypeInfo.StructMemberInfo[j].Name);
+			StringBuilder s = new StringBuilder();
+
+			for (int i = 0; i < constantTable.constantInfo.length; i++) {
+				s.append(" ");
+				s.append(constantTable.constantInfo[i].TypeInfo.Columns);
+				s.append("x");
+				s.append(constantTable.constantInfo[i].TypeInfo.Rows);
+				s.append(" Index: ");
+				s.append(constantTable.constantInfo[i].RegisterIndex);
+				s.append(" Count: ");
+				s.append(constantTable.constantInfo[i].RegisterCount);
+
+				if (constantTable.constantInfo[i].TypeInfo.StructMembers != 0) {
+					s.append("Struct!\n");
+					for (int j = 0; j < constantTable.constantInfo[i].TypeInfo.StructMemberInfo.length; j++) {
+						s.append("  => ");
+						s.append(constantTable.constantInfo[i].TypeInfo.StructMemberInfo[j].Name);
+					}
 				}
 			}
+
+			Utils.getGlobalLogger().trace("SHCD info:\nCreator: {}\nTarget: {}\nConstants: {}",
+											constantTable.Creator, constantTable.Target, s.toString());
 		}
 	}
 	

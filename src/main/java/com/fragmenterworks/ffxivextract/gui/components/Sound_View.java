@@ -24,6 +24,7 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.AbstractTableModel;
 
+import com.fragmenterworks.ffxivextract.helpers.Utils;
 import com.fragmenterworks.ffxivextract.helpers.JOrbisPlayer;
 import com.fragmenterworks.ffxivextract.helpers.MSADPCM_Decode;
 import com.fragmenterworks.ffxivextract.models.SCD_File;
@@ -103,21 +104,15 @@ public class Sound_View extends JPanel {
 
 			@Override
 			public void componentShown(ComponentEvent arg0) {
-				// TODO Auto-generated method stub
-				
-			}
+				}
 			
 			@Override
 			public void componentResized(ComponentEvent arg0) {
-				// TODO Auto-generated method stub
-				
-			}
+				}
 			
 			@Override
 			public void componentMoved(ComponentEvent arg0) {
-				// TODO Auto-generated method stub
-				
-			}
+				}
 			
 			@Override
 			public void componentHidden(ComponentEvent arg0) {
@@ -199,8 +194,7 @@ public class Sound_View extends JPanel {
 
 	public void playOgg(byte[] body)
 	{
-		System.out.println("Trying to play " + body.length + " bytes...");
-
+		Utils.getGlobalLogger().info("Trying to play {} bytes...", body.length);
 		oggPlayer.play(new ByteArrayInputStream(body));
 	}
 
@@ -228,7 +222,7 @@ public class Sound_View extends JPanel {
 		
 		// Check if the line is supported.
 		if (!AudioSystem.isLineSupported(datalineInfo)) {
-			System.err.println("Audio output line is not supported.");
+			Utils.getGlobalLogger().error("Audio output line is not supported.");
 			return;
 		}
 
@@ -240,18 +234,13 @@ public class Sound_View extends JPanel {
 			outputLine = (SourceDataLine) AudioSystem.getLine(datalineInfo);
 			outputLine.open(audioFormat);
 		} catch (LineUnavailableException exception) {
-			System.out.println("The audio output line could not be opened due "
-					+ "to resource restrictions.");
-			System.err.println(exception);
+			Utils.getGlobalLogger().error("The audio output line could not be opened due to resource restrictions.", exception);
 			return;
 		} catch (IllegalStateException exception) {
-			System.out.println("The audio output line is already open.");
-			System.err.println(exception);
+			Utils.getGlobalLogger().error("The audio output line is already open.", exception);
 			return;
 		} catch (SecurityException exception) {
-			System.out.println("The audio output line could not be opened due "
-					+ "to security restrictions.");
-			System.err.println(exception);
+			Utils.getGlobalLogger().error("The audio output line could not be opened due to security restrictions.", exception);
 			return;
 		}
 

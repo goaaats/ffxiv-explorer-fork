@@ -28,6 +28,7 @@ import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
+import com.fragmenterworks.ffxivextract.helpers.Utils;
 import com.fragmenterworks.ffxivextract.storage.HashDatabase;
 import com.jogamp.opengl.GLCapabilities;
 import com.jogamp.opengl.GLProfile;
@@ -190,16 +191,13 @@ public class ModelViewerMonsters extends JPanel {
 				String modelPath = null;
 				byte[] modelData = null;
 				try {
+					Utils.getGlobalLogger().info("Loading type {} with id {}", entries.get(selected).type, entries.get(selected).id);
 					
-					System.out.println("Loading Type: " + entries.get(selected).type + " with id: " + entries.get(selected).id);
-					
-					switch (filteredEntries.get(selected).type)
-					{
+					switch (filteredEntries.get(selected).type) {
 					case 2:
 						EquipableRender demihuman = new EquipableRender();
 						
-						switch(filteredEntries.get(selected).id)
-						{
+						switch(filteredEntries.get(selected).id) {
 						case 1: //Chocobo													
 							demihuman.setModel(EquipableRender.DWN, modelIndexFile, "chara/demihuman/d0001/obj/equipment/e0001/model/d0001e0001_dwn.mdl", 1);
 							demihuman.setModel(EquipableRender.MET, modelIndexFile, "chara/demihuman/d0001/obj/equipment/e0001/model/d0001e0001_met.mdl", 1);
@@ -328,7 +326,6 @@ public class ModelViewerMonsters extends JPanel {
 						modelData = modelIndexFile.extractFile(modelPath);
 						if (modelData != null)
 						{
-							System.out.println("Adding Entry: " + modelPath);
 							HashDatabase.addPathToDB(modelPath, "040000");
 							Model model = new Model(modelPath,modelIndexFile,modelData, modelIndex.getEndian());
 							model.loadVariant(filteredEntries.get(selected).varient);
@@ -336,9 +333,9 @@ public class ModelViewerMonsters extends JPanel {
 						}
 						else
 						{
-							System.out.println("Model not found");
+							Utils.getGlobalLogger().debug("Model {} not found!", modelPath);
 							txtPath.setText(modelPath);
-							txtModelInfo.setText("Model not found");
+							txtModelInfo.setText("Model not found!");
 							renderer.clear();
 							return;
 						}
@@ -354,11 +351,9 @@ public class ModelViewerMonsters extends JPanel {
 						break;
 					}		
 				} catch (FileNotFoundException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					Utils.getGlobalLogger().error(e);
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					Utils.getGlobalLogger().error(e);
 				}
 				
 				
@@ -469,21 +464,15 @@ public class ModelViewerMonsters extends JPanel {
 			
 			@Override
 			public void mouseExited(MouseEvent arg0) {
-				// TODO Auto-generated method stub
-				
-			}
+				}
 			
 			@Override
 			public void mouseEntered(MouseEvent arg0) {
-				// TODO Auto-generated method stub
-				
-			}
+				}
 			
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
-				// TODO Auto-generated method stub
-				
-			}
+				}
 		});
         addMouseWheelListener(new MouseWheelListener() {
 			
@@ -504,9 +493,9 @@ public class ModelViewerMonsters extends JPanel {
 				return;
 			}
 		} catch (FileNotFoundException e1) {
-			e1.printStackTrace();
+			Utils.getGlobalLogger().error(e1);
 		} catch (IOException e1) {
-			e1.printStackTrace();
+			Utils.getGlobalLogger().error(e1);
 		}
         
         panel_3.add( glcanvas, BorderLayout.CENTER);
@@ -544,7 +533,7 @@ public class ModelViewerMonsters extends JPanel {
 		}
 		catch (Exception e)
 		{
-			//e.printStackTrace();
+			//Utils.getGlobalLogger().error(e);
 			return false;			
 		}
 		

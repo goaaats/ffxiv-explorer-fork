@@ -1,5 +1,7 @@
 package com.fragmenterworks.ffxivextract.models;
 
+import com.fragmenterworks.ffxivextract.helpers.Utils;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -39,22 +41,23 @@ public class EXDF_File extends Game_File {
 			int magic = buffer.getInt();
 			int version = buffer.getShort();
 
-			if (magic != 0x45584446 || version != 2)
-				throw new IOException("Not a EXDF");
-			
+			if (magic != 0x45584446 || version != 2) {
+				Utils.getGlobalLogger().error("EXDF magic was incorrect.");
+				Utils.getGlobalLogger().debug("Magic was {}", String.format("0x%08X", magic));
+				return;
+			}
+
 			buffer.getShort();
 			
 			int offsetTableSize = buffer.getInt();
 			//int dataSectionSize = buffer.getInt();
 			
 			buffer.position(0x20);
-			
-			//Load offsets			
+
 			entryOffsets = new EXDF_Offset[offsetTableSize/8];
 			for (int i = 0; i < offsetTableSize/8; i++)			
 				entryOffsets[i] = new EXDF_Offset(buffer.getInt(), buffer.getInt());
-		
-			
+
 		} 		
 		catch (BufferUnderflowException underflowException) {} 
 		catch (BufferOverflowException overflowException) {}
@@ -203,7 +206,6 @@ public class EXDF_File extends Game_File {
 		}
 
 		public boolean getByteBool(short offset2) {
-			// TODO Auto-generated method stub
 			return false;
 		}
 

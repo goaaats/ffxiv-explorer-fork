@@ -1,16 +1,19 @@
 package com.fragmenterworks.ffxivextract.models;
 
+import com.fragmenterworks.ffxivextract.helpers.Utils;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
-public class SKLB_File {
+public class SKLB_File extends Game_File {
 
 	private byte havokData[];
 	
-	public SKLB_File(String path) throws IOException{
+	public SKLB_File(String path, ByteOrder endian) throws IOException {
+		super(endian);
 		File file = new File(path);
 		FileInputStream fis = new FileInputStream(file);
 		byte[] data = new byte[(int) file.length()];
@@ -19,18 +22,22 @@ public class SKLB_File {
 		loadSKLB(data);
 	}
 
-	public SKLB_File(byte[] data) throws IOException {
+	public SKLB_File(byte[] data, ByteOrder endian) throws IOException {
+		super(endian);
 		loadSKLB(data);
 	}
 
 	private void loadSKLB(byte[] data) throws IOException {
 		ByteBuffer bb = ByteBuffer.wrap(data);
-		bb.order(ByteOrder.LITTLE_ENDIAN);
-		
-		//HEADER
-		if (bb.getInt() != 0x736b6c62)
-			throw new IOException("Not a SKLB");
-		
+		bb.order(endian);
+
+		int magic = bb.getInt();
+		if (magic != 0x736B6C62) {
+			Utils.getGlobalLogger().error("SKLB magic was incorrect.");
+			Utils.getGlobalLogger().debug("Magic was {}", String.format("0x%08X", magic));
+			return;
+		}
+
 		int version = bb.getInt();
 		
 		int offsetToSkelSection = -1;

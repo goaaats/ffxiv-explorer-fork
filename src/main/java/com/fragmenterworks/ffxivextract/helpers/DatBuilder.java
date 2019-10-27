@@ -13,11 +13,13 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 
+import com.fragmenterworks.ffxivextract.helpers.Utils;
 import com.jcraft.jzlib.GZIPOutputStream;
 
 public class DatBuilder {
 	
 	private EARandomAccessFile fileOut = null;
+	private String path;
 	private long currentOffset = 0x800;
 	private int index;
 	private ByteOrder endian;
@@ -25,6 +27,7 @@ public class DatBuilder {
 	public DatBuilder(int index, String outPath, ByteOrder endian) throws FileNotFoundException
 	{
 		this.endian = endian;
+		path = outPath;
 		this.index = index + 1;
 		
 		File f = new File(outPath);
@@ -56,7 +59,7 @@ public class DatBuilder {
 				blocks.add(currentBlock);
 				position += 16000;					
 			} catch (IOException e) {
-				e.printStackTrace();					
+				Utils.getGlobalLogger().error(e);
 			}
 			
 			if (currentBlock.uncompressedSize > largestBlock)
@@ -83,7 +86,7 @@ public class DatBuilder {
 		//Generate Header
 		byte tempHeader[] = new byte[0x9900];
 		ByteBuffer headerBB = ByteBuffer.wrap(tempHeader);
-		headerBB.order(ByteOrder.LITTLE_ENDIAN);
+		headerBB.order(endian);
 		headerBB.putInt(0x100);
 		headerBB.putInt(2);
 		headerBB.putInt(data.length);
@@ -121,7 +124,7 @@ public class DatBuilder {
 				
 				byte data2[] = new byte[16 + block.compressedSize];
 				ByteBuffer bb = ByteBuffer.wrap(data2);
-				bb.order(ByteOrder.LITTLE_ENDIAN);
+				bb.order(endian);
 				
 				//Write Header
 				bb.putInt(0x10);
@@ -142,13 +145,11 @@ public class DatBuilder {
 				curposition += 1;
 			
 			long entryOffset = ((currentOffset)/8) + ((index-1) * 2);
-			
 			currentOffset = curposition;
-			
-			System.out.println(String.format("Added file at path \"%s\", to offset: 0x%X", path, entryOffset));
-			
+
+			Utils.getGlobalLogger().debug("Added file at path {} to offset {}", path, String.format("0x%08X", entryOffset));
+
 			return entryOffset;
-		
 	}	
 
 	private byte[] buildSqpackDatHeader()
@@ -157,7 +158,7 @@ public class DatBuilder {
 		
 		try{
 			ByteBuffer sqpackHeaderBB = ByteBuffer.wrap(sqpackHeader);
-			sqpackHeaderBB.order(ByteOrder.LITTLE_ENDIAN);
+			sqpackHeaderBB.order(endian);
 			
 			int signature = 0x61507153;
 			int signature2 = 0x00006b63;				
@@ -177,7 +178,7 @@ public class DatBuilder {
 			sqpackHeaderBB.put(md.digest());
 				
 		} catch (NoSuchAlgorithmException e) {
-			e.printStackTrace();
+			Utils.getGlobalLogger().error(e);
 			return null;
 		}
 		
@@ -190,7 +191,7 @@ public class DatBuilder {
 		
 		try{
 			ByteBuffer dataHeaderBB = ByteBuffer.wrap(dataHeader);
-			dataHeaderBB.order(ByteOrder.LITTLE_ENDIAN);
+			dataHeaderBB.order(endian);
 			
 			dataHeaderBB.putInt(dataHeader.length);
 			dataHeaderBB.putInt(0);
@@ -210,7 +211,7 @@ public class DatBuilder {
 			dataHeaderBB.put(md.digest());
 				
 		} catch (NoSuchAlgorithmException e) {
-			e.printStackTrace();
+			Utils.getGlobalLogger().error(e);
 			return null;
 		}
 		
@@ -246,23 +247,20 @@ public class DatBuilder {
 			
 			totalSize = (short) (nextOffset - offset);
 		}
-		
 	}
 
 	public void finish() {
 		
-		try{		
-			byte buffer[] = new byte[2048];
+		try {
+			byte[] buffer = new byte[2048];
 			ByteBuffer bb = ByteBuffer.wrap(buffer);		
 			fileOut.seek(0x800);
 			MessageDigest md = null;
 			try {
 				md = MessageDigest.getInstance("SHA1");
 			} catch (NoSuchAlgorithmException e) {
-				e.printStackTrace();
-			}
-			while (true)
-			{
+				Utils.getGlobalLogger().error(e);
+			} while (true) {
 				int bytesRead = fileOut.read(buffer);
 				bb.rewind();
 				if (bytesRead <= 0)
@@ -277,18 +275,15 @@ public class DatBuilder {
 			fileOut.write(buildSqpackDatHeader());
 			fileOut.write(buildSqpackDatDataHeader((int) currentOffset, sha1, index));
 			fileOut.close();
-			
-			System.out.println("Dat file created.");
-		}
-		catch (IOException e)
-		{
-			e.printStackTrace();			
-		}
-		finally{
+
+			Utils.getGlobalLogger().info("Dat file created at {}!", path);
+		} catch (IOException e) {
+			Utils.getGlobalLogger().error("Unable to create DAT file.", e);
+		} finally {
 			try {
 				fileOut.close();
 			} catch (IOException e) {
-				e.printStackTrace();
+				Utils.getGlobalLogger().error(e);
 			}
 		}
 	}

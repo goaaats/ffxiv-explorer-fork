@@ -10,6 +10,7 @@ import java.io.OutputStreamWriter;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 
+import com.fragmenterworks.ffxivextract.helpers.Utils;
 import com.fragmenterworks.ffxivextract.helpers.FFXIV_String;
 import com.fragmenterworks.ffxivextract.helpers.SparseArray;
 import com.fragmenterworks.ffxivextract.models.EXDF_File;
@@ -71,7 +72,7 @@ public class EXDF_View extends JScrollPane implements ItemListener{
 	private SparseArray<String> columnNames = new SparseArray<String>();
 
 	//Given a EXD file, figure out EXH name, and look for it.
-	public EXDF_View(SqPack_IndexFile currentIndex, String fullPath, EXDF_File file, boolean showAsHex) {
+	public EXDF_View(SqPack_IndexFile currentIndex, String fullPath, boolean showAsHex) {
 
 		this();
 
@@ -111,9 +112,8 @@ public class EXDF_View extends JScrollPane implements ItemListener{
 			if (data != null)
 				exhFile = new EXHF_File(data);
 		} catch (IOException e) {
-			e.printStackTrace();
+			Utils.getGlobalLogger().error(e);
 		}
-
 
 		//No EXH file found...
 		if (exhFile == null)
@@ -288,17 +288,13 @@ public class EXDF_View extends JScrollPane implements ItemListener{
 					continue;
 
 				String formattedExdName = exdName;
-
 				formattedExdName = String.format(exdName, exhFile.getPageTable()[i].pageNum, EXHF_File.languageCodes[exhFile.getLanguageTable()[j]]);
-
 				formattedExdName = formattedExdName.substring(formattedExdName.lastIndexOf("/")+1);
-
 
 				try {
 					//Hey we accidently found something
 					if (HashDatabase.getFileName(HashDatabase.computeCRC(formattedExdName.getBytes(), 0, formattedExdName.getBytes().length)) == null){
-						if (!(numLanguages > 5 && (formattedExdName.contains("chs")||formattedExdName.contains("cht")||formattedExdName.contains("ko")))){
-							System.out.println("Adding: " + formattedExdName);
+						if (!(numLanguages > 5 && (formattedExdName.contains("chs") || formattedExdName.contains("cht") || formattedExdName.contains("ko")))){
 							HashDatabase.addPathToDB(exhFolder +"/"+formattedExdName, currentIndex.getName());
 						}
 					}
@@ -307,7 +303,7 @@ public class EXDF_View extends JScrollPane implements ItemListener{
 					if (exdFile != null && data != null)
 						exdFile[(i*numLanguages)+j] = new EXDF_File(data);
 				} catch (IOException e) {
-					e.printStackTrace();
+					Utils.getGlobalLogger().error(e);
 				}
 
 
@@ -506,7 +502,7 @@ public class EXDF_View extends JScrollPane implements ItemListener{
 			}
 			catch (Exception e)
 			{
-				e.printStackTrace();
+				Utils.getGlobalLogger().error(e);
 				return "";
 			}
 		}
@@ -727,7 +723,6 @@ public class EXDF_View extends JScrollPane implements ItemListener{
 			}
 
 			if (path != null){
-				System.out.println("Adding " + path);
 				HashDatabase.addPathToDB(path,"040000");
 				if (path2 != null)
 					HashDatabase.addPathToDB(path2,"040000");

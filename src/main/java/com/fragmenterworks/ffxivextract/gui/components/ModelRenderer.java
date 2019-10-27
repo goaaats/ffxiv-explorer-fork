@@ -7,6 +7,7 @@ import java.nio.FloatBuffer;
 import java.util.ArrayList;
 
 import com.fragmenterworks.ffxivextract.Constants;
+import com.fragmenterworks.ffxivextract.helpers.Utils;
 import com.fragmenterworks.ffxivextract.helpers.HavokNative;
 import com.fragmenterworks.ffxivextract.helpers.Matrix;
 import com.fragmenterworks.ffxivextract.models.Model;
@@ -277,7 +278,7 @@ public class ModelRenderer implements GLEventListener {
 			blurShader = new BlurShader(gl);
 			blendShader = new BlendShader(gl);
 		} catch (IOException e) {
-			e.printStackTrace();
+			Utils.getGlobalLogger().error(e);
 		}
 	}
 	
@@ -328,8 +329,7 @@ public class ModelRenderer implements GLEventListener {
 	    gl.glGenRenderbuffers(rboId.length, rboId, 0);
 	}
 	
-	private void initFrameBuffer(GL3 gl, int id, int width, int height)
-	{ 				
+	private void initFrameBuffer(GL3 gl, int id, int width, int height) {
 	    gl.glBindTexture(GL3.GL_TEXTURE_2D, fboTexture[id]);
 	    
 	    gl.glTexParameteri(GL3.GL_TEXTURE_2D, GL3.GL_TEXTURE_WRAP_S, GL3.GL_CLAMP_TO_EDGE);
@@ -352,7 +352,6 @@ public class ModelRenderer implements GLEventListener {
 	    gl.glBindFramebuffer(GL3.GL_FRAMEBUFFER, 0);
 	    
 	    if(gl.glCheckFramebufferStatus(GL3.GL_FRAMEBUFFER) != GL3.GL_FRAMEBUFFER_COMPLETE)
-	    	System.out.println("Error creating framebuffer!");
+	    	Utils.getGlobalLogger().error("Error creating framebuffer.");
 	}
-
 }

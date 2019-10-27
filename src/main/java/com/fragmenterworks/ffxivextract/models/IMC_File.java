@@ -8,7 +8,7 @@ import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class IMC_File {
+public class IMC_File extends Game_File {
 
 	private int numVariances;
 	private int partMask;	
@@ -16,7 +16,8 @@ public class IMC_File {
 	
 	HashMap<Integer, ImcPart> parts = new HashMap<Integer, ImcPart>();
 
-	public IMC_File(String path) throws IOException{
+	public IMC_File(String path, ByteOrder endian) throws IOException{
+		super(endian);
 		File file = new File(path);
 		FileInputStream fis = new FileInputStream(file);
 		byte[] data = new byte[(int) file.length()];
@@ -25,14 +26,15 @@ public class IMC_File {
 		loadIMC(data);
 	}
 
-	public IMC_File(byte[] data) throws IOException {
+	public IMC_File(byte[] data, ByteOrder endian) throws IOException {
+		super(endian);
 		loadIMC(data);
 	}
 	
 	private void loadIMC(byte[] data)
 	{
 		ByteBuffer bb = ByteBuffer.wrap(data);
-		bb.order(ByteOrder.LITTLE_ENDIAN);
+		bb.order(endian);
 		
 		numVariances = bb.getShort();
 		partMask = bb.getShort();

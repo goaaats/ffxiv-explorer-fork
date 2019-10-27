@@ -1,5 +1,8 @@
 package com.fragmenterworks.ffxivextract.helpers;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -7,6 +10,11 @@ import java.io.IOException;
 
 public class Utils {
 
+    private static final Logger logger = LogManager.getLogger();
+
+    public static Logger getGlobalLogger() {
+        return logger;
+    }
 	/**
      * Converts a single precision (32 bit) floating point value
      * into half precision (16 bit).

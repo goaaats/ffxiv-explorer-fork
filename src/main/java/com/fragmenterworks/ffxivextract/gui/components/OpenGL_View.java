@@ -119,21 +119,15 @@ public class OpenGL_View extends JPanel {
 			
 			@Override
 			public void mouseExited(MouseEvent arg0) {
-				// TODO Auto-generated method stub
-				
-			}
+				}
 			
 			@Override
 			public void mouseEntered(MouseEvent arg0) {
-				// TODO Auto-generated method stub
-				
-			}
+				}
 			
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
-				// TODO Auto-generated method stub
-				
-			}
+				}
 		});
         addMouseWheelListener(new MouseWheelListener() {
 			

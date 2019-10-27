@@ -5,6 +5,7 @@ import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 
 import com.fragmenterworks.ffxivextract.Constants;
+import com.fragmenterworks.ffxivextract.helpers.Utils;
 
 public class LoDSubModel {
 
@@ -37,11 +38,9 @@ public class LoDSubModel {
         int indexBuffSize = bb.getInt();
         int vertOffset = bb.getInt();
         int indexOffset = bb.getInt();
-		
-        if (Constants.DEBUG){
-	        System.out.println("Number of meshes: " + numMeshes);
-	        System.out.println(String.format("Vert Table Size: %d\nIndex Table Size: %d\nVert Table Offset: %d\nIndex Table Offset: %d\n", vertBuffSize, indexBuffSize, vertOffset, indexOffset));
-        }
+
+		Utils.getGlobalLogger().debug("Num meshes: {}", numMeshes);
+		Utils.getGlobalLogger().debug("\tVert table size: {}\n\tIndex table size: {}\n\tVert table offset: {}\n\tIndex table offset: {}", vertBuffSize, indexBuffSize, vertOffset, indexOffset);
         
 		return new LoDSubModel(meshOffset, numMeshes, vertBuffSize, indexBuffSize, vertOffset, indexOffset);
 	}

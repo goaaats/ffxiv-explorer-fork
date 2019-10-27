@@ -7,6 +7,7 @@ import java.nio.FloatBuffer;
 import java.util.Hashtable;
 import java.util.Scanner;
 
+import com.fragmenterworks.ffxivextract.helpers.Utils;
 import com.fragmenterworks.ffxivextract.gui.components.OpenGL_View;
 import com.fragmenterworks.ffxivextract.helpers.Matrix;
 import com.fragmenterworks.ffxivextract.models.Material;
@@ -143,9 +144,8 @@ public class Shader {
         if (compiled[0] == 0) {
            byte[] infoLog = new byte[1024];
            gl.glGetShaderInfoLog(shader, 1024, null, 0, infoLog, 0);
-           System.out.println(new String(infoLog));
+           Utils.getGlobalLogger().debug("Shader info: {}", new String(infoLog));
            gl.glDeleteShader(shader);
-           shader = 0;
            return 0;
         }
 		

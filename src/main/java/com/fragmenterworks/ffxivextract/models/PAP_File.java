@@ -1,19 +1,22 @@
 package com.fragmenterworks.ffxivextract.models;
 
+import com.fragmenterworks.ffxivextract.helpers.Utils;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
-public class PAP_File {
+public class PAP_File extends Game_File {
 
 	private int numAnimations;
 	private byte havokData[];
 	private String[] animationNames;
 	private int[] animationIndex;
 	
-	public PAP_File(String path) throws IOException{
+	public PAP_File(String path, ByteOrder endian) throws IOException{
+		super(endian);
 		File file = new File(path);
 		FileInputStream fis = new FileInputStream(file);
 		byte[] data = new byte[(int) file.length()];
@@ -22,18 +25,23 @@ public class PAP_File {
 		loadPAP(data);
 	}
 
-	public PAP_File(byte[] data) throws IOException {
+	public PAP_File(byte[] data, ByteOrder endian) throws IOException {
+		super(endian);
 		loadPAP(data);
 	}
 
 	private void loadPAP(byte[] data) throws IOException {
 		ByteBuffer bb = ByteBuffer.wrap(data);
-		bb.order(ByteOrder.LITTLE_ENDIAN);
-		
-		//HEADER
-		if (bb.getInt() != 0x20706170)
-			throw new IOException("Not a PAP");
-		
+		bb.order(endian);
+
+		int magic = bb.getInt();
+
+		if (magic != 0x20706170) {
+			Utils.getGlobalLogger().error("PAP magic was incorrect.");
+			Utils.getGlobalLogger().debug("Magic was {}", String.format("0x%08X", magic));
+			return;
+		}
+
 		bb.getShort();
 		bb.getShort();
 		numAnimations = bb.getShort();

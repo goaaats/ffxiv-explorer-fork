@@ -1,6 +1,7 @@
 package com.fragmenterworks.ffxivextract.gui;
 
 import com.fragmenterworks.ffxivextract.Strings;
+import com.fragmenterworks.ffxivextract.helpers.Utils;
 import com.fragmenterworks.ffxivextract.helpers.DatBuilder;
 import com.fragmenterworks.ffxivextract.helpers.EARandomAccessFile;
 import com.fragmenterworks.ffxivextract.helpers.LERandomAccessFile;
@@ -297,8 +298,7 @@ public class FileInjectorWindow extends JFrame {
                 try {
                     createBackup();
                 } catch (IOException e1) {
-                    // TODO Auto-generated catch block
-                    e1.printStackTrace();
+                    Utils.getGlobalLogger().error(e1);
                 }
             }
         });
@@ -310,8 +310,7 @@ public class FileInjectorWindow extends JFrame {
                 try {
                     restoreFromBackup();
                 } catch (IOException e1) {
-                    // TODO Auto-generated catch block
-                    e1.printStackTrace();
+                    Utils.getGlobalLogger().error(e1);
                 }
             }
         });
@@ -390,7 +389,7 @@ public class FileInjectorWindow extends JFrame {
                             "Write Error",
                             "There was an error writing to the modded index file.",
                             JOptionPane.ERROR_MESSAGE);
-                    e.printStackTrace();
+                    Utils.getGlobalLogger().error(e);
                     return;
                 }
                 try {
@@ -410,7 +409,7 @@ public class FileInjectorWindow extends JFrame {
                             "Write Error",
                             "There was an error writing to the modded index file.",
                             JOptionPane.ERROR_MESSAGE);
-                    e.printStackTrace();
+                    Utils.getGlobalLogger().error(e);
                     return;
                 }
 
@@ -487,14 +486,12 @@ public class FileInjectorWindow extends JFrame {
                 txtDatPath.setText(fileChooser.getSelectedFile()
                         .getCanonicalPath());
             } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                Utils.getGlobalLogger().error(e);
             }
             try {
                 loadFile(fileChooser.getSelectedFile());
             } catch (Exception e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                Utils.getGlobalLogger().error(e);
             }
         }
     }
@@ -518,7 +515,7 @@ public class FileInjectorWindow extends JFrame {
         backup = new File(file.getParentFile().getAbsoluteFile(),
                 file.getName() + ".bak");
         if (backup.exists()) {
-            System.out.println("Backup found, checking file.");
+            Utils.getGlobalLogger().info("Backup found, checking file.");
             btnRestore.setEnabled(true);
             lblBackup.setText("Backup exists. Remember to restore before patching.");
         } else {
@@ -570,8 +567,7 @@ public class FileInjectorWindow extends JFrame {
 		/*
 		// Throw and remake backup
 		if (originalFiles.length != editedFiles.length) {
-			System.out
-					.println("File mismatch, there was an update... remaking backup");
+			Utils.getGlobalLogger().info("File mismatch, there was an update... remaking backup");
 			backup.delete();
 			copyFile(file, backup);
 			originalMusicFile = new SqPack_IndexFile(
@@ -581,7 +577,7 @@ public class FileInjectorWindow extends JFrame {
 		}
 		*/
 
-        System.out.println("File is good.");
+		Utils.getGlobalLogger().info("File is good.");
         btnBackup.setEnabled(false);
         btnRestore.setEnabled(true);
 
@@ -625,7 +621,7 @@ public class FileInjectorWindow extends JFrame {
 
     private void createBackup() throws IOException {
         // Create backup
-        System.out.println("Creating backup.");
+        Utils.getGlobalLogger().info("Creating backup.");
         copyFile(edittingIndexFile, backup);
         editMusicFile = new SqPack_IndexFile(edittingIndexFile.getCanonicalPath(), true);
         originalMusicFile = new SqPack_IndexFile(backup.getCanonicalPath(), true);
@@ -667,7 +663,7 @@ public class FileInjectorWindow extends JFrame {
 
     private void restoreFromBackup() throws IOException {
         // Create backup
-        System.out.println("Restoring...");
+        Utils.getGlobalLogger().info("Restoring...");
 
         if (!edittingIndexFile.delete()) {
             JOptionPane.showMessageDialog(FileInjectorWindow.this,
@@ -840,19 +836,19 @@ public class FileInjectorWindow extends JFrame {
             else
                 txtSetTo.setForeground(Color.decode("#006400"));
 
-            System.out.println("Data changed");
+            Utils.getGlobalLogger().info("Data changed!");
         } catch (FileNotFoundException e) {
             JOptionPane.showMessageDialog(FileInjectorWindow.this,
                     Strings.ERROR_CANNOT_OPEN_INDEX,
                     Strings.DIALOG_TITLE_ERROR,
                     JOptionPane.ERROR_MESSAGE);
-            e.printStackTrace();
+            Utils.getGlobalLogger().error(e);
         } catch (IOException e) {
             JOptionPane.showMessageDialog(FileInjectorWindow.this,
                     Strings.ERROR_EDITIO,
                     Strings.DIALOG_TITLE_ERROR,
                     JOptionPane.ERROR_MESSAGE);
-            e.printStackTrace();
+            Utils.getGlobalLogger().error(e);
         }
     }
 
@@ -881,7 +877,7 @@ public class FileInjectorWindow extends JFrame {
         } catch (FileNotFoundException e) {
             return;
         } catch (IOException e) {
-            e.printStackTrace();
+            Utils.getGlobalLogger().error(e);
         }
 
         customDatPath = toLoad.datPath;
@@ -915,7 +911,7 @@ public class FileInjectorWindow extends JFrame {
             fileOut.write(json.getBytes());
             fileOut.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            Utils.getGlobalLogger().error(e);
         }
     }
 

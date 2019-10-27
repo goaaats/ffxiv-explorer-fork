@@ -9,8 +9,7 @@ public class BlendShader extends Shader {
 	
 	int tex1Location, tex2Location, intensityLocation;
 	
-	public BlendShader(GL3 gl)
-			throws IOException {
+	public BlendShader(GL3 gl) throws IOException {
 		//super(gl, "/res/shaders/fbout_vert.glsl", "/res/shaders/blend_frag.glsl", true);	
 		super(gl, MinifiedShaders.fbout_vert_glsl, MinifiedShaders.blend_frag_glsl, false);
 		

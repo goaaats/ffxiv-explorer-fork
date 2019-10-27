@@ -1,28 +1,29 @@
 package com.fragmenterworks.ffxivextract.models;
 
+import com.fragmenterworks.ffxivextract.helpers.Utils;
+
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
 
-public class AVFX_File {
+public class AVFX_File extends Game_File {
 
 	public int fileSize;
 	public ArrayList<AVFX_Packet> packets = new ArrayList<AVFX_Packet>();
 		
-	public AVFX_File(byte[] data)
-	{
+	public AVFX_File(byte[] data, ByteOrder endian) {
+		super(endian);
 		ByteBuffer bb = ByteBuffer.wrap(data);
-		bb.order(ByteOrder.LITTLE_ENDIAN);		
+		bb.order(endian);
 		
 		bb.getInt(); //Signature
 		fileSize = bb.getInt(); //File Size
 		
 		while(bb.hasRemaining())
 			packets.add(new AVFX_Packet(bb));
-				
 	}
 	
-	class AVFX_Packet{
+	class AVFX_Packet {
 		byte[] tag = new byte[4];
 		int dataSize;
 		byte data[];
@@ -63,14 +64,12 @@ public class AVFX_File {
 				string += String.format("%02x, ", data[i]);
 			
 			return new StringBuffer(new String(tag)).reverse().toString().trim() + " : " + (data.length == 4 ? string : "");
-		}		
-		
+		}
 	}
 	
-	public void printOut()
-	{
+	public void printOut() {
 		for (AVFX_Packet ap : packets)
-			System.out.println(ap);
+			Utils.getGlobalLogger().trace(ap);
 	}
 	
 }

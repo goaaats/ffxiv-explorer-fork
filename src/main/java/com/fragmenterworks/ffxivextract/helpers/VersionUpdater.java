@@ -8,6 +8,7 @@ import java.net.URL;
 import java.nio.charset.Charset;
 
 import com.fragmenterworks.ffxivextract.Constants;
+import com.fragmenterworks.ffxivextract.helpers.Utils;
 import com.google.gson.Gson;
 
 public class VersionUpdater {
@@ -23,7 +24,7 @@ public class VersionUpdater {
 	    	verCheck = gson.fromJson(rd, VersionCheckObject.class);	      
 	    } 
 	    catch (IOException e) {
-			e.printStackTrace();
+			Utils.getGlobalLogger().error(e);
 		}
 		return verCheck;	    	    
 	}

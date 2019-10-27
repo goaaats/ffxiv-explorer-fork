@@ -1,5 +1,6 @@
 package com.fragmenterworks.ffxivextract.models.uldStuff;
 
+import com.fragmenterworks.ffxivextract.helpers.Utils;
 import com.fragmenterworks.ffxivextract.helpers.SparseArray;
 
 import java.lang.reflect.Constructor;
@@ -48,7 +49,7 @@ public class TLHDSetTypeB_Entry {
 				Constructor c = aClass.getDeclaredConstructor(ByteBuffer.class);
 				return (TLHDSetTypeB_Entry_Item_Type)c.newInstance(data);
 			} catch ( NoSuchMethodException | InvocationTargetException | IllegalAccessException | InstantiationException e ) {
-				e.printStackTrace();
+				Utils.getGlobalLogger().error(e);
 			}
 		}
 		return null;

@@ -8,6 +8,8 @@ import com.jcraft.jorbis.*;
 import com.jcraft.jogg.*;
 import com.jogamp.opencl.llb.CL;
 
+import com.fragmenterworks.ffxivextract.helpers.Utils;
+
 public class JOrbisPlayer
 {
     private javax.sound.sampled.Line.Info lineInfo;
@@ -42,7 +44,7 @@ public class JOrbisPlayer
             clip.open(audioFormat, audio, 0, new Integer(audio.length));
             clip.start();
         }
-        catch(Exception e){e.printStackTrace();}
+        catch(Exception e){Utils.getGlobalLogger().error(e);}
     }
 
     public void stop()
@@ -92,7 +94,7 @@ public class JOrbisPlayer
             }
             catch(Exception e)
             {
-                System.err.println(e);
+                Utils.getGlobalLogger().error(e);
                 System.exit(-1);
             }
             oy.wrote(bytes);
@@ -104,7 +106,7 @@ public class JOrbisPlayer
                 if(bytes<4096)break;
 
                 // error case.  Must not be Vorbis data
-                System.err.println("Input does not appear to be an Ogg bitstream.");
+                Utils.getGlobalLogger().error("Input does not appear to be an Ogg bitstream.");
                 System.exit(1);
             }
 
@@ -125,21 +127,21 @@ public class JOrbisPlayer
             if(os.pagein(og)<0)
             {
                 // error; stream version mismatch perhaps
-                System.err.println("Error reading first page of Ogg bitstream data.");
+                Utils.getGlobalLogger().error("Error reading first page of Ogg bitstream data.");
                 System.exit(1);
             }
 
             if(os.packetout(op)!=1)
             {
                 // no page? must not be vorbis
-                System.err.println("Error reading initial header packet.");
+                Utils.getGlobalLogger().error("Error reading initial header packet.");
                 System.exit(1);
             }
 
             if(vi.synthesis_headerin(vc,op)<0)
             {
                 // error case; not a vorbis header
-                System.err.println("This Ogg bitstream does not contain Vorbis audio data.");
+                Utils.getGlobalLogger().error("This Ogg bitstream does not contain Vorbis audio data.");
                 System.exit(1);
             }
 
@@ -176,7 +178,7 @@ public class JOrbisPlayer
                             {
                                 // Uh oh; data at some point was corrupted or missing!
                                 // We can't tolerate that in a header.  Die.
-                                System.err.println("Corrupt secondary header.  Exiting.");
+                                Utils.getGlobalLogger().error("Corrupt secondary header.  Exiting.");
                                 System.exit(1);
                             }
                             vi.synthesis_headerin(vc,op);
@@ -193,12 +195,12 @@ public class JOrbisPlayer
                 }
                 catch(Exception e)
                 {
-                    System.err.println(e);
+                    Utils.getGlobalLogger().error(e);
                     System.exit(1);
                 }
                 if(bytes==0 && i<2)
                 {
-                    System.err.println("End of file before finding all Vorbis headers!");
+                    Utils.getGlobalLogger().error("End of file before finding all Vorbis headers!");
                     System.exit(1);
                 }
                 oy.wrote(bytes);
@@ -211,12 +213,12 @@ public class JOrbisPlayer
                 for(int j=0; j<ptr.length;j++)
                 {
                     if(ptr[j]==null) break;
-                    System.err.println(new String(ptr[j], 0, ptr[j].length-1));
+                    Utils.getGlobalLogger().trace(new String(ptr[j], 0, ptr[j].length-1));
                 }
                 channels=vi.channels;
                 rate=vi.rate;
-                //System.err.println("\nBitstream is "+vi.channels+" channel, "+vi.rate+"Hz");
-                //System.err.println("Encoded by: "+new String(vc.vendor, 0, vc.vendor.length-1)+"\n");
+                Utils.getGlobalLogger().trace("\nBitstream is {} channel, {} }Hz", vi.channels, vi.rate);
+                Utils.getGlobalLogger().trace("Encoded by: {}", new String(vc.vendor, 0, vc.vendor.length-1));
             }
 
             convsize=4096/vi.channels;
@@ -241,7 +243,7 @@ public class JOrbisPlayer
                     if(result==0)break; // need more data
                     if(result==-1)
                     { // missing or corrupt data at this page position
-                        System.err.println("Corrupt or missing data in bitstream; continuing...");
+                        Utils.getGlobalLogger().error("Corrupt or missing data in bitstream; continuing...");
                     }
                     else
                     {
@@ -306,10 +308,6 @@ public class JOrbisPlayer
                                         }
                                     }
 
-                                    //if(clipflag)
-                                    //  System.err.println("Clipping in frame "+vd.sequence);
-
-                                    //System.out.write(convbuffer, 0, 2*vi.channels*bout);
                                     bytearrayoutputstream.write(convbuffer, 0, 2*vi.channels*bout);
 
                                     vd.synthesis_read(bout); // tell libvorbis how
@@ -331,7 +329,7 @@ public class JOrbisPlayer
                     }
                     catch(Exception e)
                     {
-                        System.err.println(e);
+                        Utils.getGlobalLogger().error(e);
                         System.exit(1);
                     }
                     oy.wrote(bytes);
@@ -354,7 +352,6 @@ public class JOrbisPlayer
 
         // OK, clean up the framer
         oy.clear();
-        //System.err.println("locked and loaded");
         bytearrayoutputstream.close();
         return bytearrayoutputstream.toByteArray();
     }

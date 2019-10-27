@@ -2,6 +2,7 @@ package com.fragmenterworks.ffxivextract.helpers;
 
 import com.fragmenterworks.ffxivextract.Constants;
 import com.fragmenterworks.ffxivextract.Main;
+import com.fragmenterworks.ffxivextract.helpers.Utils;
 import com.fragmenterworks.ffxivextract.models.SqPack_IndexFile;
 import com.fragmenterworks.ffxivextract.models.Texture_File;
 
@@ -47,7 +48,7 @@ public class FileTools {
 			sqPakPath = Constants.datPath;
 		}
 		String iconPath = String.format("ui/icon/%06d/%06d.tex", iconID - (iconID % 1000), iconID);
-		System.out.println("IconPath="+iconPath+", iconID="+iconID);
+		Utils.getGlobalLogger().debug("IconPath: {}, iconID: {}", iconPath, iconID);
 		BufferedImage bi = getTexture(sqPakPath, iconPath);
 		return bi;
 	}
@@ -85,7 +86,7 @@ public class FileTools {
 			try {
 				return index.extractFile(lowerpath);
 			} catch ( IOException e ) {
-				e.printStackTrace();
+				Utils.getGlobalLogger().error(e);
 			}
 		}
 		return new byte[0];
@@ -165,7 +166,7 @@ public class FileTools {
 			BufferedImage bf = tf.decode(0, new HashMap<>());
 			return bf;
 		} catch ( ImageDecoding.ImageDecodingException e ) {
-			e.printStackTrace();
+			Utils.getGlobalLogger().error(e);
 		}
 		return null;
 

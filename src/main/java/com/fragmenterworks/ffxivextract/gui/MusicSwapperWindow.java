@@ -37,6 +37,7 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.filechooser.FileFilter;
 
+import com.fragmenterworks.ffxivextract.helpers.Utils;
 import com.fragmenterworks.ffxivextract.helpers.DatBuilder;
 import com.fragmenterworks.ffxivextract.helpers.EARandomAccessFile;
 import com.fragmenterworks.ffxivextract.helpers.LERandomAccessFile;
@@ -315,8 +316,7 @@ public class MusicSwapperWindow extends JFrame {
 				try {
 					createBackup();
 				} catch (IOException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
+					Utils.getGlobalLogger().error(e1);
 				}
 			}
 		});
@@ -328,8 +328,7 @@ public class MusicSwapperWindow extends JFrame {
 				try {
 					restoreFromBackup();
 				} catch (IOException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
+					Utils.getGlobalLogger().error(e1);
 				}
 			}
 		});
@@ -505,13 +504,11 @@ public class MusicSwapperWindow extends JFrame {
 				txtDatPath.setText(fileChooser.getSelectedFile()
 						.getCanonicalPath());
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			try {
 				loadFile(fileChooser.getSelectedFile());
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}

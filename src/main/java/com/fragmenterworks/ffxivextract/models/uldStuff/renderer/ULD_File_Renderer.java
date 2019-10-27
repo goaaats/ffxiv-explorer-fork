@@ -1,5 +1,6 @@
 package com.fragmenterworks.ffxivextract.models.uldStuff.renderer;
 
+import com.fragmenterworks.ffxivextract.helpers.Utils;
 import com.fragmenterworks.ffxivextract.helpers.FileTools;
 import com.fragmenterworks.ffxivextract.helpers.SparseArray;
 import com.fragmenterworks.ffxivextract.models.*;
@@ -140,7 +141,7 @@ public class ULD_File_Renderer implements MouseListener, MouseMotionListener {
 				Constructor<? extends GraphicsElement> constructor = aClass.getDeclaredConstructor();
 				return constructor.newInstance();
 			} catch ( NoSuchMethodException | IllegalAccessException | InstantiationException | InvocationTargetException e ) {
-//				e.printStackTrace();
+//				Utils.getGlobalLogger().error(e);
 				return null;
 			}
 		}
@@ -149,7 +150,7 @@ public class ULD_File_Renderer implements MouseListener, MouseMotionListener {
 			constructor = GraphicsContainer.class.getDeclaredConstructor();
 			return constructor.newInstance();
 		} catch ( NoSuchMethodException | InvocationTargetException | IllegalAccessException | InstantiationException e ) {
-//			e.printStackTrace();
+//			Utils.getGlobalLogger().error(e);
 		}
 		return null;
 	}
@@ -169,7 +170,7 @@ public class ULD_File_Renderer implements MouseListener, MouseMotionListener {
 		try {
 			ULD_File uld = new ULD_File(data, ByteOrder.LITTLE_ENDIAN);
 
-			System.out.println(uld);
+			Utils.getGlobalLogger().trace(uld);
 			ULD_File_Renderer renderer = new ULD_File_Renderer(sqPakPath, uld);
 			JFrame jf = new JFrame();
 			JPanel content = new JPanel();
@@ -209,7 +210,7 @@ public class ULD_File_Renderer implements MouseListener, MouseMotionListener {
 			}, 1000/2, 100/2);*/
 
 		} catch ( IOException e ) {
-//			e.printStackTrace();
+//			Utils.getGlobalLogger().error(e);
 		}
 	}
 
@@ -220,7 +221,7 @@ public class ULD_File_Renderer implements MouseListener, MouseMotionListener {
 				Constructor<? extends UIComponent> constructor = aClass.getDeclaredConstructor(int.class);
 				return constructor.newInstance(index);
 			} catch ( NoSuchMethodException | IllegalAccessException | InstantiationException | InvocationTargetException e ) {
-//				e.printStackTrace();
+				
 			}
 		}
 		return null;
@@ -361,7 +362,7 @@ public class ULD_File_Renderer implements MouseListener, MouseMotionListener {
 
 	@Override
 	public void mouseClicked(final MouseEvent e) {
-		System.out.println("uld::mouseClicked(" + e.getPoint() + ")");
+		Utils.getGlobalLogger().trace("uld::mouseClicked(" + e.getPoint() + ")");
 		LinkedList<GraphicsElement> list = new LinkedList<>();
 		list.addAll(graphics.values());
 		while(list.size() > 0){
@@ -376,7 +377,7 @@ public class ULD_File_Renderer implements MouseListener, MouseMotionListener {
 							break;
 						}
 					}else{
-						System.out.println(node._getPathString());
+						Utils.getGlobalLogger().trace(node._getPathString());
 					}
 				}
 				if(node.lastChild != null){
@@ -385,7 +386,7 @@ public class ULD_File_Renderer implements MouseListener, MouseMotionListener {
 				node = node.previousItem;
 			}
 		}
-		System.out.println("uld::mouseClicked_end");
+		Utils.getGlobalLogger().trace("uld::mouseClicked_end");
 
 	}
 
@@ -411,7 +412,7 @@ public class ULD_File_Renderer implements MouseListener, MouseMotionListener {
 
 	@Override
 	public void mouseDragged(final MouseEvent e) {
-		System.out.println("uld::mouseDragged(" + e.getPoint() + ")");
+		Utils.getGlobalLogger().trace("uld::mouseDragged(" + e.getPoint() + ")");
 		LinkedList<GraphicsElement> list = new LinkedList<>();
 		list.addAll(graphics.values());
 		while(list.size() > 0){
@@ -433,7 +434,7 @@ public class ULD_File_Renderer implements MouseListener, MouseMotionListener {
 				node = node.previousItem;
 			}
 		}
-		System.out.println("uld::mouseDragged_end");
+		Utils.getGlobalLogger().trace("uld::mouseDragged_end");
 	}
 
 	@Override
@@ -545,7 +546,7 @@ public class ULD_File_Renderer implements MouseListener, MouseMotionListener {
 				GraphicsElement container = list.pollFirst();
 				GraphicsElement node = container.lastChild;
 				while ( node != null ) {
-					System.out.println("\t" + node.nodeIndex + "[" + node.type + "]" + " :: " + node.drawn.getBounds());
+					Utils.getGlobalLogger().trace("\t" + node.nodeIndex + "[" + node.type + "]" + " :: " + node.drawn.getBounds());
 					if ( node.drawn.contains(event.getPoint()) ) { //node.drawX <= e.getX() && node.drawX + node.drawWidth >= e.getX() && node.drawY <= e.getY() && node.drawY + node.drawHeight >= e.getY()
 						callback.callback(node, event);
 						if ( event.isConsumed() ) {
@@ -563,19 +564,19 @@ public class ULD_File_Renderer implements MouseListener, MouseMotionListener {
 
 		@Override
 		public void mouseClicked(final MouseEvent e) {
-			System.out.println("uiComponent[" + index + "]::mouseClicked(" + e.getPoint() + ")");
-			//System.out.println("\t" + graphics.drawn.getBounds());
+			Utils.getGlobalLogger().trace("uiComponent[" + index + "]::mouseClicked(" + e.getPoint() + ")");
+			//Utils.getGlobalLogger().trace("\t" + graphics.drawn.getBounds());
 			fireMouseClickedEvent(e);
 			if ( !e.isConsumed() ) {
 				fireOnAllHits(e, (node, event) -> {
 					if ( node instanceof MouseListener ) {
 						((MouseListener)node).mouseClicked(event);
 					} else {
-						System.out.println(node._getPathString());
+						Utils.getGlobalLogger().trace(node._getPathString());
 					}
 				});
 			}
-			System.out.println("uiComponent[" + index + "]::mouseClicked_end");
+			Utils.getGlobalLogger().trace("uiComponent[" + index + "]::mouseClicked_end");
 		}
 
 		@Override
@@ -795,16 +796,13 @@ public class ULD_File_Renderer implements MouseListener, MouseMotionListener {
 			if ( !visible ) {
 				return;
 			}
-			//System.out.println("GraphicsElement:" + nodeIndex + ":paint(width=" + _strpadleft(width) + ", height=" + _strpadleft(height) + ")[x=" + _strpadleft(left) + ", y=" + _strpadleft(top) + ", w=" + _strpadleft(this.width) + ", h=" + _strpadleft(this.height) + ", scaleX=" + _strpadleft(scaleX) + ", scaleY=" + _strpadleft(scaleY) + ", rotation=" + _strpadleft(rotation) + ", origoX=" + _strpadleft(transformOriginX) + ", origoY=" + _strpadleft(transformOriginY) + "]");
+			//Utils.getGlobalLogger().trace("GraphicsElement:" + nodeIndex + ":paint(width=" + _strpadleft(width) + ", height=" + _strpadleft(height) + ")[x=" + _strpadleft(left) + ", y=" + _strpadleft(top) + ", w=" + _strpadleft(this.width) + ", h=" + _strpadleft(this.height) + ", scaleX=" + _strpadleft(scaleX) + ", scaleY=" + _strpadleft(scaleY) + ", rotation=" + _strpadleft(rotation) + ", origoX=" + _strpadleft(transformOriginX) + ", origoY=" + _strpadleft(transformOriginY) + "]");
 			applyGraphicsTransform(g);
-			//System.out.println(g.getTransform());
-			//Collections.reverse(values);
 			if ( PAINT_DEBUG ) {
 				g.setColor(Color.red);
 				g.drawRect(0, 0, this.width, this.height);
 				g.drawString(_getPathString(), 3, 14);
 			}
-			//System.out.println("-----CHILDS-----");
 			GraphicsElement child = lastChild;
 			while ( child != null ) {
 				//GraphicsElement child = (GraphicsElement)_child;
@@ -1093,7 +1091,7 @@ public class ULD_File_Renderer implements MouseListener, MouseMotionListener {
 		@Override
 		public void paint(final Graphics2D g, int width, int height) {
 			super.paint(g, width, height);
-			//System.out.println("GraphicsImage:" + nodeIndex + ":paint(id=" + id + ")");
+			//Utils.getGlobalLogger().trace("GraphicsImage:" + nodeIndex + ":paint(id=" + id + ")");
 			//if(width != this.width || height != this.height) {
 			//generateLocalImage(width, height);
 			//}
@@ -1193,11 +1191,11 @@ public class ULD_File_Renderer implements MouseListener, MouseMotionListener {
 
 		@Override
 		public void mouseClicked(final MouseEvent e) {
-			System.out.println("graphicsComponent::mouseClicked(" + e.getPoint() + ")");
+			Utils.getGlobalLogger().trace("graphicsComponent::mouseClicked(" + e.getPoint() + ")");
 			if ( component != null ) {
 				component.mouseClicked(e);
 			}
-			System.out.println("graphicsComponent::mouseClicked_end");
+			Utils.getGlobalLogger().trace("graphicsComponent::mouseClicked_end");
 		}
 
 		@Override
@@ -1312,7 +1310,7 @@ public class ULD_File_Renderer implements MouseListener, MouseMotionListener {
 				( (GraphicsComponent)btnClose ).component.addMouseListener(new MouseAdapter() {
 					@Override
 					public void mouseClicked(final MouseEvent e) {
-						System.out.println("Close Button of " + type + " pressed");
+						Utils.getGlobalLogger().trace("Close Button of " + type + " pressed");
 						e.consume();
 					}
 				});
@@ -1321,7 +1319,7 @@ public class ULD_File_Renderer implements MouseListener, MouseMotionListener {
 				( (GraphicsComponent)btnHelp ).component.addMouseListener(new MouseAdapter() {
 					@Override
 					public void mouseClicked(final MouseEvent e) {
-						System.out.println("Help Button of " + type + " pressed");
+						Utils.getGlobalLogger().trace("Help Button of " + type + " pressed");
 						e.consume();
 					}
 				});
@@ -1330,7 +1328,7 @@ public class ULD_File_Renderer implements MouseListener, MouseMotionListener {
 				( (GraphicsComponent)btnSettings ).component.addMouseListener(new MouseAdapter() {
 					@Override
 					public void mouseClicked(final MouseEvent e) {
-						System.out.println("Settings Button of " + type + " pressed");
+						Utils.getGlobalLogger().trace("Settings Button of " + type + " pressed");
 						e.consume();
 					}
 				});
@@ -1339,7 +1337,7 @@ public class ULD_File_Renderer implements MouseListener, MouseMotionListener {
 				( (GraphicsComponent)btnMagnify ).component.addMouseListener(new MouseAdapter() {
 					@Override
 					public void mouseClicked(final MouseEvent e) {
-						System.out.println("Magnify Button of " + type + " pressed");
+						Utils.getGlobalLogger().trace("Magnify Button of " + type + " pressed");
 						e.consume();
 					}
 				});

@@ -19,6 +19,7 @@ import java.awt.event.ItemListener;
 import javax.swing.JComboBox;
 import javax.swing.border.EmptyBorder;
 
+import com.fragmenterworks.ffxivextract.helpers.Utils;
 import com.fragmenterworks.ffxivextract.models.Mesh;
 import com.fragmenterworks.ffxivextract.models.ParameterInfo;
 import com.fragmenterworks.ffxivextract.models.SHCD_File;
@@ -88,16 +89,16 @@ public class Shader_View extends JPanel {
 			processCTable(0, shader.getShaderType(), shader.getConstantTable());						
 			hexView.setBytes(shader.getShaderBytecode());
 			
-			for (ParameterInfo pi:shader.getShaderHeader().paramInfo)
-				System.out.println(String.format("Name: %s, Id: 0x%04x", pi.parameterName, pi.id));
+			for (ParameterInfo pi : shader.getShaderHeader().paramInfo)
+				Utils.getGlobalLogger().debug("Name: {}, Id: {}", pi.parameterName, String.format("0x%04X", pi.id));
 		}
 		else
 		{			
 			processCTable(i, shaderPack.getShaderType(i), shaderPack.getConstantTable(i));
 			hexView.setBytes(shaderPack.getShaderBytecode(i));
 			
-			for (ParameterInfo pi:shaderPack.getShaderHeader(i).paramInfo)
-				System.out.println(String.format("Name: %s, Id: 0x%04x", pi.parameterName, pi.id));
+			for (ParameterInfo pi : shaderPack.getShaderHeader(i).paramInfo)
+				Utils.getGlobalLogger().debug("Name: {}, Id: {}", pi.parameterName, String.format("0x%04X", pi.id));
 		}
 	}
 

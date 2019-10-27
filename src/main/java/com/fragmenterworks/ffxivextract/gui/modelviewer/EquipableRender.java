@@ -40,8 +40,7 @@ public class EquipableRender {
 		
 		if (modelData == null)
 			return;
-		
-		System.out.println("Adding Entry: " + modelPath);
+
 		HashDatabase.addPathToDB(modelPath, "040000");
 		
 		Model model = new Model(modelPath,modelIndexFile,modelData, modelIndexFile.getEndian());

@@ -37,6 +37,7 @@ import javax.swing.event.ChangeListener;
 
 import com.bric.swing.ColorPicker;
 import com.fragmenterworks.ffxivextract.Constants;
+import com.fragmenterworks.ffxivextract.helpers.Utils;
 import com.fragmenterworks.ffxivextract.gui.components.EXDF_View;
 import com.fragmenterworks.ffxivextract.gui.components.ModelCharacterRenderer;
 import com.fragmenterworks.ffxivextract.gui.components.OpenGL_View;
@@ -477,21 +478,15 @@ public class Outfitter extends JPanel {
 			
 			@Override
 			public void mouseExited(MouseEvent arg0) {
-				// TODO Auto-generated method stub
-				
-			}
+				}
 			
 			@Override
 			public void mouseEntered(MouseEvent arg0) {
-				// TODO Auto-generated method stub
-				
-			}
+				}
 			
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
-				// TODO Auto-generated method stub
-				
-			}
+				}
 		});
         addMouseWheelListener(new MouseWheelListener() {
 			
@@ -529,14 +524,13 @@ public class Outfitter extends JPanel {
 			modelPath = String.format("chara/human/c%04d/obj/body/b%04d/model/c%04db%04d_top.mdl", characterNumber, id, characterNumber, id);
 			modelData = modelIndexFile.extractFile(modelPath);
 		} catch (FileNotFoundException e) {
-			e.printStackTrace();
+			Utils.getGlobalLogger().error(e);
 		} catch (IOException e) {
-			e.printStackTrace();
+			Utils.getGlobalLogger().error(e);
 		}
 		
 		if (modelData != null)
 		{
-			System.out.println("Adding Entry: " + modelPath);
 			HashDatabase.addPathToDB(modelPath, "040000");
 			
 			Model model = new Model(modelPath,modelIndexFile,modelData, modelIndexFile.getEndian());
@@ -566,14 +560,13 @@ public class Outfitter extends JPanel {
 			modelPath = String.format("chara/human/c%04d/obj/hair/h%04d/model/c%04dh%04d_hir.mdl", characterNumber, id, characterNumber, id);
 			modelData = modelIndexFile.extractFile(modelPath);
 		} catch (FileNotFoundException e) {
-			e.printStackTrace();
+			Utils.getGlobalLogger().error(e);
 		} catch (IOException e) {
-			e.printStackTrace();
+			Utils.getGlobalLogger().error(e);
 		}
 		
 		if (modelData != null)
 		{
-			System.out.println("Adding Entry: " + modelPath);
 			HashDatabase.addPathToDB(modelPath, "040000");
 			
 			Model model = new Model(modelPath,modelIndexFile,modelData, modelIndexFile.getEndian());
@@ -602,14 +595,13 @@ public class Outfitter extends JPanel {
 			modelPath = String.format("chara/human/c%04d/obj/face/f%04d/model/c%04df%04d_fac.mdl", characterNumber, id, characterNumber, id);
 			modelData = modelIndexFile.extractFile(modelPath);
 		} catch (FileNotFoundException e) {
-			e.printStackTrace();
+			Utils.getGlobalLogger().error(e);
 		} catch (IOException e) {
-			e.printStackTrace();
+			Utils.getGlobalLogger().error(e);
 		}
 		
 		if (modelData != null)
 		{
-			System.out.println("Adding Entry: " + modelPath);
 			HashDatabase.addPathToDB(modelPath, "040000");
 			
 			Model model = new Model(modelPath,modelIndexFile,modelData, modelIndexFile.getEndian());
@@ -636,14 +628,13 @@ public class Outfitter extends JPanel {
 			modelPath = String.format("chara/human/c%04d/obj/tail/t%04d/model/c%04dt%04d_til.mdl", characterNumber, id, characterNumber, id);
 			modelData = modelIndexFile.extractFile(modelPath);
 		} catch (FileNotFoundException e) {
-			e.printStackTrace();
+			Utils.getGlobalLogger().error(e);
 		} catch (IOException e) {
-			e.printStackTrace();
+			Utils.getGlobalLogger().error(e);
 		}
 		
 		if (modelData != null)
 		{
-			System.out.println("Adding Entry: " + modelPath);
 			HashDatabase.addPathToDB(modelPath, "040000");
 			
 			Model model = new Model(modelPath,modelIndexFile,modelData, modelIndexFile.getEndian());
@@ -688,7 +679,7 @@ public class Outfitter extends JPanel {
 			}
 			catch (Exception e)
 			{
-				e.printStackTrace();
+				Utils.getGlobalLogger().error(e);
 				return;
 			}
 		}
@@ -769,24 +760,21 @@ public class Outfitter extends JPanel {
 			
 			if (modelPath == null)
 			{
-				System.out.println("Error couldn't build path");
+				Utils.getGlobalLogger().error("Couldn't build model path.");
 				return;
 			}
 			
 			modelData = modelIndexFile.extractFile(modelPath);
 		} catch (FileNotFoundException e) {
-			e.printStackTrace();
+			Utils.getGlobalLogger().error(e);
 		} catch (IOException e) {
-			e.printStackTrace();
+			Utils.getGlobalLogger().error(e);
 		}
 		
 		if (modelData == null && (characterNumber != 101 && characterNumber != 201))
 		{
-			System.out.println(String.format("Model for charId %04d not detected, falling back to %s Hyur model.", characterNumber, currentBody % 2 == 0 ? "female" : "male"));
-			
+			Utils.getGlobalLogger().info("Model for charId {} not detected, falling back to {} Hyur model.", String.format("%04d", characterNumber), currentBody % 2 == 0 ? "female" : "male");
 			loadEquipModel(fallback(characterNumber), modelSlot, selected);
-						
-			
 			return;			
 		}
 		
@@ -795,7 +783,6 @@ public class Outfitter extends JPanel {
 		
 		if (modelData != null)
 		{
-			System.out.println("Adding Entry: " + modelPath);
 			HashDatabase.addPathToDB(modelPath, "040000");
 			
 			Model model = new Model(modelPath,modelIndexFile,modelData, modelIndexFile.getEndian());

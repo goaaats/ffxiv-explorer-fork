@@ -126,7 +126,6 @@ public class SettingsWindow extends JDialog {
 				txtDatPath.setText(fileChooser.getSelectedFile()
 						.getCanonicalPath());
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}			
 		}

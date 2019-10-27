@@ -32,6 +32,7 @@ import javax.xml.bind.DatatypeConverter;
 import com.fragmenterworks.ffxivextract.Constants;
 import com.fragmenterworks.ffxivextract.Strings;
 
+import com.fragmenterworks.ffxivextract.helpers.Utils;
 import com.fragmenterworks.ffxivextract.models.SqPack_IndexFile;
 import com.fragmenterworks.ffxivextract.models.SqPack_IndexFile.SqPack_File;
 import com.fragmenterworks.ffxivextract.models.SqPack_IndexFile.SqPack_Folder;
@@ -275,8 +276,7 @@ public class SearchWindow extends JDialog {
 							break;
 					}
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					Utils.getGlobalLogger().error(e);
 				}
 
 			}
@@ -363,7 +363,7 @@ public class SearchWindow extends JDialog {
 					}
 
 				} catch (IOException e) {
-					e.printStackTrace();
+					Utils.getGlobalLogger().error(e);
 				}
 
 			}

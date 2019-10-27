@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.sql.SQLException;
 
+import com.fragmenterworks.ffxivextract.helpers.Utils;
 import com.fragmenterworks.ffxivextract.storage.HashDatabase;
 import com.fragmenterworks.ffxivextract.Constants;
 import com.fragmenterworks.ffxivextract.gui.components.EXDF_View;
@@ -22,9 +23,8 @@ import com.fragmenterworks.ffxivextract.models.SqPack_IndexFile.SqPack_Folder;
 
 public class HashFinding_Utils {
 
-	public static void findExhHashes()
-	{
-		System.out.println("Opening Root.exl");
+	public static void findExhHashes() {
+		Utils.getGlobalLogger().info("Opening root.exl...");
 		
 		byte[] rootData = null;
 		SqPack_IndexFile index = null;
@@ -32,13 +32,13 @@ public class HashFinding_Utils {
 			index = new SqPack_IndexFile(Constants.datPath + "\\game\\sqpack\\ffxiv\\0a0000.win32.index", true);
 			rootData = index.extractFile("exd/root.exl");
 		} catch (IOException e) {
-			e.printStackTrace();
+			Utils.getGlobalLogger().error(e);
 		}
 		
 		if (rootData == null)
 			return;
-		
-		System.out.println("Root.exl file loaded, starting search.");
+
+		Utils.getGlobalLogger().info("Loaded root.exl...");
 		
 		try {
 			InputStream in  = new ByteArrayInputStream(rootData);
@@ -48,8 +48,7 @@ public class HashFinding_Utils {
 			try {
 				HashDatabase.setAutoCommit(false);
 			} catch (SQLException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
+				Utils.getGlobalLogger().error(e1);
 			}
 			boolean pastHeader = false;
 			boolean readingString = false;
@@ -80,12 +79,10 @@ public class HashFinding_Utils {
 					readingString = false;
 					for (String code : EXHF_File.languageCodes) {
 						String exdName = String.format("exd/%s_0%s.exd", sBuilder.toString(), code);
-						System.out.println("Adding: " + exdName);
 						HashDatabase.addPathToDB(exdName, "0a0000", HashDatabase.globalConnection);
 					}
 					String exhName = String.format("exd/%s.exh", sBuilder.toString());
 					HashDatabase.addPathToDB(exhName, "0a0000", HashDatabase.globalConnection);
-//					System.out.println("Found: " + exhName);
 					sBuilder.setLength(0);
 					continue;
 				}
@@ -101,23 +98,21 @@ public class HashFinding_Utils {
 			try {
 				HashDatabase.commit();
 			} catch (SQLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				Utils.getGlobalLogger().error(e);
 			}
 			HashDatabase.closeConnection();
 			in.close();
 			
 		} catch (IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+			Utils.getGlobalLogger().error(e1);
 		}
-		
-		System.out.println("Done searching for exhs");
+
+		Utils.getGlobalLogger().info("Done searching for EXD/EXHs.");
 	}
 	
 	public static void findMusicHashes()
 	{
-		System.out.println("Opening bgm.exh");
+		Utils.getGlobalLogger().info("Opening bgm.exh...");
 		
 		byte[] exhData = null;
 		SqPack_IndexFile index = null;
@@ -125,7 +120,7 @@ public class HashFinding_Utils {
 			index = new SqPack_IndexFile(Constants.datPath + "\\game\\sqpack\\ffxiv\\0a0000.win32.index", true);
 			exhData = index.extractFile("exd/bgm.exh");
 		} catch (IOException e) {
-			e.printStackTrace();
+			Utils.getGlobalLogger().error(e);
 		}
 		
 		if (exhData == null)
@@ -135,21 +130,19 @@ public class HashFinding_Utils {
 		try {
 			viewer = new EXDF_View(index, "exd/bgm.exh", new EXHF_File(exhData));
 		} catch (IOException e2) {
-			// TODO Auto-generated catch block
-			e2.printStackTrace();
+			Utils.getGlobalLogger().error(e2);
 		}
 		
 		if (viewer == null)
 			return;
-		
-		System.out.println("bgm.exh file loaded, filling db.");
+
+		Utils.getGlobalLogger().info("bgm.exh loaded.");
 		
 		HashDatabase.beginConnection();
 		try {
 			HashDatabase.setAutoCommit(false);
 		} catch (SQLException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+			Utils.getGlobalLogger().error(e1);
 		}
 		for (int i = 1; i < viewer.getTable().getRowCount(); i++)
 		{
@@ -161,19 +154,16 @@ public class HashFinding_Utils {
 			String archive = path.contains("ex1") ? "0c0100" : "0c0000";
 			
 			HashDatabase.addPathToDB(path, archive, HashDatabase.globalConnection);
-			System.out.println("Found: " + path);
 		}
 		
 		try {
 			HashDatabase.commit();
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Utils.getGlobalLogger().error(e);
 		}
 		HashDatabase.closeConnection();
-	
-		
-		System.out.println("Done searching for music.");
+
+		Utils.getGlobalLogger().info("Done searching for BGM.");
 	}
 	
 	public static void findMapHashes()
@@ -185,7 +175,7 @@ public class HashFinding_Utils {
 				index = new SqPack_IndexFile(Constants.datPath + "\\game\\sqpack\\ffxiv\\0a0000.win32.index", true);
 				exhData = index.extractFile("exd/map.exh");
 			} catch (IOException e) {
-				e.printStackTrace();
+				Utils.getGlobalLogger().error(e);
 			}
 			
 			if (exhData == null)
@@ -198,8 +188,7 @@ public class HashFinding_Utils {
 			try {
 				HashDatabase.setAutoCommit(false);
 			} catch (SQLException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
+				Utils.getGlobalLogger().error(e1);
 			}
 			for (int i = 0; i < mapView.getTable().getRowCount(); i++)
 			{
@@ -220,21 +209,19 @@ public class HashFinding_Utils {
 				HashDatabase.addPathToDB( mapFolder + "/" + split[0] + split[1] + "m_m.tex", "060000", HashDatabase.globalConnection);
 				HashDatabase.addPathToDB( mapFolder + "/" + split[0] + split[1] + "m_s.tex", "060000", HashDatabase.globalConnection);
 				HashDatabase.addPathToDB( mapFolder + "/" + split[0] + split[1] + "d.tex", "060000", HashDatabase.globalConnection);
-				
-				System.out.println("Added maps for: " + mapFolder + "/" + split[0] + split[1]);
+
+				Utils.getGlobalLogger().info("Added maps for {}/{}{}", mapFolder, split[0], split[1]);
 			}
 			try {
 				HashDatabase.commit();
 			} catch (SQLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				Utils.getGlobalLogger().error(e);
 			}
 			HashDatabase.closeConnection();
 			
 		} catch (IOException e) {
-			e.printStackTrace();
+			Utils.getGlobalLogger().error(e);
 		}
-		
 	}
 	
 	public static void getModelsFromModelChara(String path)
@@ -264,59 +251,43 @@ public class HashFinding_Utils {
 					typePath = "chara/monster/m";
 					imcPath = String.format("%s%04d/obj/body/b%04d/b%04d.imc", typePath,id,model,model);
 					modelPath = String.format("%s%04d/obj/body/b%04d/model/m%04db%04d.mdl", typePath,id,model,id,model);
-					System.out.println(imcPath);
-					System.out.println(modelPath);								
+
 					HashDatabase.addPathToDB(imcPath, "040000");
 					HashDatabase.addPathToDB(modelPath, "040000");
 					
 					skelPath = String.format("%s%04d/skeleton/base/b%04d/eid_m%04db%04d.eid", typePath,id,model,id,model);
-					System.out.println(skelPath);
 					HashDatabase.addPathToDB(skelPath, "040000");
 					skelPath = String.format("%s%04d/skeleton/base/b%04d/skl_m%04db%04d.sklp", typePath,id,model,id,model);
-					System.out.println(skelPath);
 					HashDatabase.addPathToDB(skelPath, "040000");
 					skelPath = String.format("%s%04d/skeleton/base/b%04d/skl_m%04db%04d.sklb", typePath,id,model,id,model);
-					System.out.println(skelPath);
 					skelPath = String.format("%s%04d/animation/a%04d/bt_common/resident/monster.pap", typePath,id,0);
-					System.out.println(skelPath);
 					HashDatabase.addPathToDB(skelPath, "040000");
 					skelPath = String.format("%s%04d/animation/a%04d/bt_common/event/event_wandering_action.pap", typePath,id,0);
-					System.out.println(skelPath);
 					HashDatabase.addPathToDB(skelPath, "040000");
 					skelPath = String.format("%s%04d/animation/a%04d/bt_common/mon_sp/m%04d/mon_sp001.pap", typePath,id,0,id);
-					System.out.println(skelPath);
 					HashDatabase.addPathToDB(skelPath, "040000");
 					break;
 				case 4:
 					typePath = "chara/demihuman/d";
 					imcPath = String.format("%s%04d/obj/equipment/e%04d/e%04d.imc", typePath,id,model,model);
-					System.out.println(imcPath);
 					HashDatabase.addPathToDB(imcPath, "040000");
 					
-					modelPath = String.format("%s%04d/obj/equipment/e%04d/model/d%04de%04d_met.mdl", typePath,id,model,id,model);					
-					System.out.println(modelPath);												
+					modelPath = String.format("%s%04d/obj/equipment/e%04d/model/d%04de%04d_met.mdl", typePath,id,model,id,model);
 					HashDatabase.addPathToDB(modelPath, "040000");
-					modelPath = String.format("%s%04d/obj/equipment/e%04d/model/d%04de%04d_top.mdl", typePath,id,model,id,model);					
-					System.out.println(modelPath);												
+					modelPath = String.format("%s%04d/obj/equipment/e%04d/model/d%04de%04d_top.mdl", typePath,id,model,id,model);
 					HashDatabase.addPathToDB(modelPath, "040000");
-					modelPath = String.format("%s%04d/obj/equipment/e%04d/model/d%04de%04d_dwn.mdl", typePath,id,model,id,model);					
-					System.out.println(modelPath);												
+					modelPath = String.format("%s%04d/obj/equipment/e%04d/model/d%04de%04d_dwn.mdl", typePath,id,model,id,model);
 					HashDatabase.addPathToDB(modelPath, "040000");
-					modelPath = String.format("%s%04d/obj/equipment/e%04d/model/d%04de%04d_sho.mdl", typePath,id,model,id,model);					
-					System.out.println(modelPath);												
+					modelPath = String.format("%s%04d/obj/equipment/e%04d/model/d%04de%04d_sho.mdl", typePath,id,model,id,model);
 					HashDatabase.addPathToDB(modelPath, "040000");
 					break;
 				}
-				
-					
 			}
 			reader.close();			
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Utils.getGlobalLogger().error(e);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Utils.getGlobalLogger().error(e);
 		}
 	}
 	
@@ -381,11 +352,9 @@ public class HashFinding_Utils {
 			reader.close();
 			writer.close();
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Utils.getGlobalLogger().error(e);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Utils.getGlobalLogger().error(e);
 		}
 	}
 	
@@ -400,7 +369,7 @@ public class HashFinding_Utils {
 					{
 						if (folder.getFiles()[j].getName().contains(".mdl"))
 						{
-							System.out.println("->Getting model " + folder.getFiles()[j].getName());
+							Utils.getGlobalLogger().info("=> Getting model {}", folder.getFiles()[j].getName());
 							Model m = new Model(folder.getName() + "/" + folder.getFiles()[j].getName(), currentIndex, currentIndex.extractFile(folder.getFiles()[j].dataoffset, null), currentIndex.getEndian());
 							for (int x = 0; x < m.getNumVariants(); x++)
 								m.loadVariant(x);
@@ -409,8 +378,7 @@ public class HashFinding_Utils {
 			}
 						
 		} catch (IOException e2) {
-			// TODO Auto-generated catch block
-			e2.printStackTrace();
+			Utils.getGlobalLogger().error(e2);
 		}
 	}
 
@@ -463,8 +431,7 @@ public class HashFinding_Utils {
 			}
 						
 		} catch (IOException e2) {
-			// TODO Auto-generated catch block
-			e2.printStackTrace();
+			Utils.getGlobalLogger().error(e2);
 		}
 	}
 	

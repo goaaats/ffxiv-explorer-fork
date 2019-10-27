@@ -15,17 +15,12 @@ import com.fragmenterworks.ffxivextract.helpers.ImageDecoding.ImageDecodingExcep
 public class Texture_File extends Game_File {
 
 	final public int compressionType;
-
 	final public int numMipMaps;
-
-
 	final public int uncompressedWidth;
 	final public int uncompressedHeight;
-
 	final public int mipmapOffsets[];
 	final public byte data[];
 
-	
 	public Texture_File(byte data[], ByteOrder endian) {
 		super(endian);
 
@@ -46,16 +41,13 @@ public class Texture_File extends Game_File {
 		bb.position(0x1c);
 		
 		for (int i = 0; i < numMipMaps; i++)		
-			mipmapOffsets[i] = bb.getInt();		
-		
+			mipmapOffsets[i] = bb.getInt();
 	}
 	
-	public final BufferedImage decode(int index, 
-			final Map<String, Object> parameters) throws ImageDecodingException {
+	public final BufferedImage decode(int index, final Map<String, Object> parameters) throws ImageDecodingException {
 
-		if (data == null) {
+		if (data == null)
 			throw new NullPointerException("Data is null");
-		}
 		
 		int mipMapDivide = (int) (index == 0 ? 1 : Math.pow(2, index));
 		

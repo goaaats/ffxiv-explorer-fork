@@ -29,6 +29,7 @@ import javax.swing.filechooser.FileFilter;
 
 import com.fragmenterworks.ffxivextract.Constants;
 import com.fragmenterworks.ffxivextract.Strings;
+import com.fragmenterworks.ffxivextract.helpers.Utils;
 import com.fragmenterworks.ffxivextract.gui.components.*;
 import com.fragmenterworks.ffxivextract.models.*;
 import com.fragmenterworks.ffxivextract.storage.HashDatabase;
@@ -89,7 +90,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
             bg = ImageIO.read(getClass().getResource("/triangular.png"));
             paint = new TexturePaint(bg, new Rectangle(120, 120));
         } catch (IOException e) {
-            e.printStackTrace();
+            Utils.getGlobalLogger().error(e);
         }
 
         setupMenu();
@@ -190,20 +191,6 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
         pnlProgBar.add(prgLoadingBar);
 
         setLocationRelativeTo(null);
-
-        //Check Windows registry for a FFXIV folder
-        //String value = null;
-		/*try {
-			value = WinRegistry.readString (
-				    WinRegistry.HKEY_LOCAL_MACHINE,
-				   "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion",
-				   "ProductName");
-		} catch (Exception e){}
-		*/
-        if (Constants.DEBUG) {
-            //lastOpenedFile = new File("E:\\Program Files (x86)\\SquareEnix\\FINAL FANTASY XIV - A Realm Reborn\\game\\sqpack\\ffxiv\\0a0000.win32.index");
-            //openFile(lastOpenedFile);
-        }
 
         Preferences prefs = Preferences.userNodeForPackage(com.fragmenterworks.ffxivextract.Main.class);
 
@@ -422,8 +409,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
                     try {
                         HashDatabase.setAutoCommit(false);
                     } catch (SQLException e1) {
-                        // TODO Auto-generated catch block
-                        e1.printStackTrace();
+                        Utils.getGlobalLogger().error(e1);
                     }
 
                     int count = 0;
@@ -435,11 +421,9 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
                                 String path = "";
                                 try {
                                     path = line.substring(line.indexOf(',') + 2);
-                                    System.out.println(path);
-
                                     HashDatabase.addPathToDB(path, "*", HashDatabase.globalConnection);
                                 } catch (java.lang.StringIndexOutOfBoundsException e) {
-                                    System.out.println("Could not parse: " + line);
+                                    Utils.getGlobalLogger().error("Couldn't parse line {}", line, e);
                                 }
                             }
                             count++;
@@ -455,8 +439,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
                     try {
                         HashDatabase.commit();
                     } catch (SQLException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
+                        Utils.getGlobalLogger().error(e);
                     }
                     HashDatabase.closeConnection();
                 }
@@ -686,16 +669,14 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 
             data = currentIndexFile.extractFile(file.dataoffset, null);
         } catch (FileNotFoundException eFNF) {
-            if (Constants.DEBUG)
-                eFNF.printStackTrace();
+            Utils.getGlobalLogger().error("Could not find dat {} for {}", currentIndexFile.getDatNum(file.getOffset()), file.getName(), eFNF);
             JLabel lblFNFError = new JLabel("The dat for this file is missing!");
             tabs.addTab("Extract Error", lblFNFError);
             hexView.setBytes(null);
             splitPane.setRightComponent(tabs);
             return;
         } catch (IOException e) {
-            if (Constants.DEBUG)
-                e.printStackTrace();
+            Utils.getGlobalLogger().error("Could not extract file {}", file.getName(), e);
             JLabel lblLoadError = new JLabel("Something went terribly wrong extracting this file.");
             tabs.addTab("Extract Error", lblLoadError);
             hexView.setBytes(null);
@@ -734,20 +715,16 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 
         //TOOD: refactor this to use byte magic
         if (data.length >= 3 && checkMagic(data, "EXDF")) {
-            try {
-                if (exhfComponent == null || !exhfComponent.isSame(file.getName()))
-                    exhfComponent = new EXDF_View(currentIndexFile, HashDatabase.getFolder(file.getId2()) + "/" + file.getName(), new EXDF_File(data), options_showAsHex.getState());
-                tabs.addTab("EXDF File", exhfComponent);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            if (exhfComponent == null || !exhfComponent.isSame(file.getName()))
+                exhfComponent = new EXDF_View(currentIndexFile, HashDatabase.getFolder(file.getId2()) + "/" + file.getName(), options_showAsHex.getState());
+            tabs.addTab("EXDF File", exhfComponent);
         } else if (data.length >= 3 && checkMagic(data, "EXHF")) {
             try {
                 if (exhfComponent == null || !exhfComponent.isSame(file.getName()))
-                    exhfComponent = new EXDF_View(currentIndexFile, HashDatabase.getFolder(file.getId2()) + "/" + file.getName(), new EXDF_File(data), options_showAsHex.getState());
+                    exhfComponent = new EXDF_View(currentIndexFile, HashDatabase.getFolder(file.getId2()) + "/" + file.getName(), new EXHF_File(data), options_showAsHex.getState());
                 tabs.addTab("EXHF File", exhfComponent);
             } catch (IOException e) {
-                e.printStackTrace();
+                Utils.getGlobalLogger().error(e);
             }
         } else if (data.length >= 8 && checkMagic(data, "SEDBSSCF")) {
             Sound_View scdComponent;
@@ -755,10 +732,10 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
                 scdComponent = new Sound_View(new SCD_File(data, currentIndexFile.getEndian()));
                 tabs.addTab("SCD File", scdComponent);
             } catch (IOException e) {
-                e.printStackTrace();
+                Utils.getGlobalLogger().error(e);
             }
         } else if (data.length >= 4 && checkMagic(data, "XFVA")) {
-            AVFX_File avfxFile = new AVFX_File(data);
+            AVFX_File avfxFile = new AVFX_File(data, currentIndexFile.getEndian());
 //			avfxFile.printOut();
         } else if (contentType == 4 || file.getName().endsWith("atex")) {
             Image_View imageComponent = new Image_View(new Texture_File(data, currentIndexFile.getEndian()));
@@ -796,41 +773,41 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
                 luaView = new Lua_View(("-- Decompiled using unluac_2015_06_13 2.0.1 by tehtmi (https://sourceforge.net/projects/unluac/)\n" + pout.toString()).split("\\r?\\n"));
                 tabs.addTab("Decompiled Lua", luaView);
             } catch (Exception e) {
-                e.printStackTrace();
+                Utils.getGlobalLogger().error(e);
             }
         } else if (data.length >= 4 && checkMagic(data, "pap ")) {
             try {
-                PAP_View papView = new PAP_View(new PAP_File(data));
+                PAP_View papView = new PAP_View(new PAP_File(data, currentIndexFile.getEndian()));
                 tabs.addTab("Animation File", papView);
             } catch (IOException e) {
-                e.printStackTrace();
+                Utils.getGlobalLogger().error(e);
             }
         } else if (data.length >= 4 && checkMagic(data, "ShCd")) {
             try {
-                Shader_View shaderView = new Shader_View(new SHCD_File(data));
+                Shader_View shaderView = new Shader_View(new SHCD_File(data, currentIndexFile.getEndian()));
                 tabs.addTab("Shader File", shaderView);
             } catch (IOException e) {
-                e.printStackTrace();
+                Utils.getGlobalLogger().error(e);
             }
         } else if (data.length >= 4 && checkMagic(data, "ShPk")) {
             try {
-                Shader_View shaderView = new Shader_View(new SHPK_File(data));
+                Shader_View shaderView = new Shader_View(new SHPK_File(data, currentIndexFile.getEndian()));
                 tabs.addTab("Shader Pack", shaderView);
             } catch (IOException e) {
-                e.printStackTrace();
+                Utils.getGlobalLogger().error(e);
             }
         } else if (data.length >= 4 && checkMagic(data, "SGB1")) {
             try {
-                SGB_File sgbFile = new SGB_File(data);
+                SGB_File sgbFile = new SGB_File(data, currentIndexFile.getEndian());
             } catch (IOException e) {
-                e.printStackTrace();
+                Utils.getGlobalLogger().error(e);
             }
         } else if (data.length >= 4 && checkMagic(data, "uldh")) {
             try {
                 ULD_View uldView = new ULD_View(new ULD_File(data, currentIndexFile.getEndian()));
                 tabs.addTab("ULD Renderer", uldView);
             } catch (IOException e) {
-                e.printStackTrace();
+                Utils.getGlobalLogger().error(e);
             }
         } else if (file.getName().equals("human.cmp")) {
             try {
@@ -838,7 +815,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
                 CMP_View cmpView = new CMP_View(cmpFile);
                 tabs.addTab("CMP Viewer", cmpView);
             } catch (IOException e) {
-                e.printStackTrace();
+                Utils.getGlobalLogger().error(e);
             }
         }
 
@@ -972,7 +949,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
                         "There was an error opening this index file.",
                         "File Open Error",
                         JOptionPane.ERROR_MESSAGE);
-                e.printStackTrace();
+                Utils.getGlobalLogger().error(e);
                 return null;
             }
             return null;
@@ -980,8 +957,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 
         @Override
         protected void done() {
-            if (Constants.DEBUG)
-                currentIndexFile.displayIndexInfo();
+            Utils.getGlobalLogger().trace("{}", currentIndexFile);
 
             setTitle(Constants.APPNAME + " [" + selectedFile.getName() + "]");
             file_Close.setEnabled(true);
@@ -1061,13 +1037,11 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
                     } else if (extension.equals(".exd") && doConvert) {
                         if (tempView != null && tempView.isSame(files.get(i).getName()))
                             continue;
-                        EXDF_File file = new EXDF_File(data);
 
-                        tempView = new EXDF_View(currentIndexFile, HashDatabase.getFolder(fileTree.getSelectedFiles().get(i).getId2()) + "/" + fileTree.getSelectedFiles().get(i).getName(), file, options_showAsHex.getState());
+                        tempView = new EXDF_View(currentIndexFile, HashDatabase.getFolder(fileTree.getSelectedFiles().get(i).getId2()) + "/" + fileTree.getSelectedFiles().get(i).getName(), options_showAsHex.getState());
 
                         //Remove the thing
                         String exhName = files.get(i).getName();
-                        System.out.println(exhName);
 
                         for (int l = 0; l < EXHF_File.languageCodes.length; l++)
                             exhName = exhName.replace(String.format("%s.exd", EXHF_File.languageCodes[l]), "");
@@ -1112,21 +1086,21 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
                         continue;
                     } else if (extension.equals(".hkx") && doConvert) {
                         if (data.length >= 4 && data[0] == 'p' && data[1] == 'a' && data[2] == 'p' && data[3] == ' ') {
-                            PAP_File pap = new PAP_File(data);
+                            PAP_File pap = new PAP_File(data, currentIndexFile.getEndian());
                             dataToSave = pap.getHavokData();
                         } else if (data.length >= 4 && data[0] == 'b' && data[1] == 'l' && data[2] == 'k' && data[3] == 's') {
-                            SKLB_File pap = new SKLB_File(data);
+                            SKLB_File pap = new SKLB_File(data, currentIndexFile.getEndian());
                             dataToSave = pap.getHavokData();
                         }
 
                         extension = ".hkx";
                     } else if (extension.equals(".cso") && doConvert) {
-                        SHCD_File shader = new SHCD_File(data);
+                        SHCD_File shader = new SHCD_File(data, currentIndexFile.getEndian());
                         dataToSave = shader.getShaderBytecode();
                         extension = ".cso";
                     } else if (extension.equals(".shpk") && doConvert) {
                         try {
-                            SHPK_File shader = new SHPK_File(data);
+                            SHPK_File shader = new SHPK_File(data, currentIndexFile.getEndian());
 
                             for (int j = 0; j < shader.getNumVertShaders(); j++) {
                                 dataToSave = shader.getShaderBytecode(j);
@@ -1170,7 +1144,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
                             }
 
                         } catch (IOException e) {
-                            e.printStackTrace();
+                            Utils.getGlobalLogger().error(e);
                         }
 
                     } else if (extension.equals(".png") && doConvert) {
@@ -1244,7 +1218,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
                     out.write(dataToSave, 0, dataToSave.length);
                     out.close();
                 } catch (FileNotFoundException e) {
-                    e.printStackTrace();
+                    Utils.getGlobalLogger().error(e);
 
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -1289,9 +1263,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 
     @Override
     public void windowActivated(WindowEvent arg0) {
-        // TODO Auto-generated method stub
-
-    }
+        }
 
     @Override
     public void windowClosed(WindowEvent arg0) {
@@ -1304,27 +1276,19 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 
     @Override
     public void windowDeactivated(WindowEvent arg0) {
-        // TODO Auto-generated method stub
-
-    }
+        }
 
     @Override
     public void windowDeiconified(WindowEvent arg0) {
-        // TODO Auto-generated method stub
-
-    }
+        }
 
     @Override
     public void windowIconified(WindowEvent arg0) {
-        // TODO Auto-generated method stub
-
-    }
+        }
 
     @Override
     public void windowOpened(WindowEvent arg0) {
-        // TODO Auto-generated method stub
-
-    }
+        }
 
 
 }

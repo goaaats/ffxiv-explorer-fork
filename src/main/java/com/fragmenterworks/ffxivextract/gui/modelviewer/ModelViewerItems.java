@@ -28,6 +28,7 @@ import javax.swing.event.ListDataListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
+import com.fragmenterworks.ffxivextract.helpers.Utils;
 import com.fragmenterworks.ffxivextract.helpers.EXDDef;
 import com.fragmenterworks.ffxivextract.storage.HashDatabase;
 import com.jogamp.opengl.GLCapabilities;
@@ -380,21 +381,15 @@ public class ModelViewerItems extends JPanel {
 			
 			@Override
 			public void mouseExited(MouseEvent arg0) {
-				// TODO Auto-generated method stub
-				
-			}
+				}
 			
 			@Override
 			public void mouseEntered(MouseEvent arg0) {
-				// TODO Auto-generated method stub
-				
-			}
+				}
 			
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
-				// TODO Auto-generated method stub
-				
-			}
+				}
 		});
         addMouseWheelListener(new MouseWheelListener() {
 			
@@ -414,9 +409,9 @@ public class ModelViewerItems extends JPanel {
     			return;
         	}
 		} catch (FileNotFoundException e1) {
-			e1.printStackTrace();
+			Utils.getGlobalLogger().error(e1);
 		} catch (IOException e1) {
-			e1.printStackTrace();
+			Utils.getGlobalLogger().error(e1);
 		}    
         
         for (int i = 0; i < charIds.size(); i++)
@@ -524,15 +519,14 @@ public class ModelViewerItems extends JPanel {
 			
 			modelData = modelIndexFile.extractFile(modelPath);
 		} catch (FileNotFoundException e) {
-			e.printStackTrace();
+			Utils.getGlobalLogger().error(e);
 		} catch (IOException e) {
-			e.printStackTrace();
+			Utils.getGlobalLogger().error(e);
 		}
 		
-		if (modelData == null && (characterNumber != 101 && characterNumber != 201))
-		{
-			System.out.println(String.format("Model for charId %04d not detected, falling back to %s Hyur model.", characterNumber, currentBody % 2 == 0 ? "female" : "male"));
-			
+		if (modelData == null && (characterNumber != 101 && characterNumber != 201)) {
+			Utils.getGlobalLogger().info("Model for charId {} not detected, falling back to {} Hyur model.", String.format("%04d", characterNumber), currentBody % 2 == 0 ? "female" : "male");
+
 			if (currentBody % 2 == 0)
 				loadModel(201, selected);
 			else
@@ -544,7 +538,6 @@ public class ModelViewerItems extends JPanel {
 		
 		if (modelData != null)
 		{
-			System.out.println("Adding Entry: " + modelPath);
 			HashDatabase.addPathToDB(modelPath, "040000");
 			
 			Model model = new Model(modelPath, modelIndexFile, modelData, modelIndexFile.getEndian());
@@ -587,7 +580,7 @@ public class ModelViewerItems extends JPanel {
 		}
 		catch (Exception e)
 		{
-			e.printStackTrace();
+			Utils.getGlobalLogger().error(e);
 			return false;
 		}
 		lstItems.setModel(new ItemsListModel());

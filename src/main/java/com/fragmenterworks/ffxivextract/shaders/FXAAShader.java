@@ -8,8 +8,7 @@ public class FXAAShader extends Shader {
 
 	int texLocation, sizeLocation;
 	
-	public FXAAShader(GL3 gl)
-			throws IOException {
+	public FXAAShader(GL3 gl) throws IOException {
 		//super(gl, "/res/shaders/fbout_vert.glsl", "/res/shaders/fxaa_frag.glsl", true);	
 		super(gl, MinifiedShaders.fbout_vert_glsl, MinifiedShaders.fxaa_frag_glsl, false);
 		

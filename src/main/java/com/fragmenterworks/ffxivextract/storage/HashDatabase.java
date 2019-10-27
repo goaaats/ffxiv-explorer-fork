@@ -16,6 +16,7 @@ import java.util.HashMap;
 
 import com.fragmenterworks.ffxivextract.Constants;
 
+import com.fragmenterworks.ffxivextract.helpers.Utils;
 import com.fragmenterworks.ffxivextract.helpers.EARandomAccessFile;
 
 public class HashDatabase {
@@ -53,14 +54,14 @@ public class HashDatabase {
 		} catch (SQLException e) {
 			// if the error message is "out of memory",
 			// it probably means no database file is found
-			System.err.println(e.getMessage());
+			Utils.getGlobalLogger().error(e);
 		} finally {
 			try {
 				if (connection != null)
 					connection.close();
 			} catch (SQLException e) {
 				// connection close failed.
-				e.printStackTrace();
+				Utils.getGlobalLogger().error(e);
 			}
 		}
 	}
@@ -80,14 +81,14 @@ public class HashDatabase {
 			rs.close();
 			statement.close();
 		} catch (SQLException e) {
-			System.err.println(e.getMessage());
+			Utils.getGlobalLogger().error(e);
 			return -1;
 		} finally {
 			try {
 				if (connection != null)
 					connection.close();
 			} catch (SQLException e) {
-				e.printStackTrace();
+				Utils.getGlobalLogger().error(e);
 			}
 		}
 
@@ -101,8 +102,7 @@ public class HashDatabase {
 		int folderHash = computeCRC(folderName.getBytes(), 0,
 				folderName.getBytes().length);
 
-		//if (Constants.DEBUG)
-		System.out.println("Adding Folder Entry: " + folderName);
+		Utils.getGlobalLogger().info("Adding folder entry: {}", folderName);
 
 		Connection connection = null;
 		try{
@@ -115,14 +115,14 @@ public class HashDatabase {
 
 			folders.put((long) folderHash, folderName);
 		} catch (SQLException e) {
-			System.err.println(e.getMessage());
+			Utils.getGlobalLogger().error(e);
 			return false;
 		} finally {
 			try {
 				if (connection != null)
 					connection.close();
 			} catch (SQLException e) {
-				e.printStackTrace();
+				Utils.getGlobalLogger().error(e);
 			}
 		}
 		return true;
@@ -134,7 +134,7 @@ public class HashDatabase {
 		try {
 			conn = DriverManager.getConnection("jdbc:sqlite:./hashlist.db");
 		} catch (Exception e) {
-			e.printStackTrace();
+			Utils.getGlobalLogger().error(e);
 			return false;
 		}
 		return addPathToDB(fullPath, archive, conn);
@@ -148,8 +148,7 @@ public class HashDatabase {
 		int folderHash = computeCRC(folder.getBytes(), 0, folder.getBytes().length);
 		int fileHash = computeCRC(filename.getBytes(), 0, filename.getBytes().length);
 
-		if (Constants.DEBUG)
-			System.out.println("Adding Entry: " + fullPath);
+		Utils.getGlobalLogger().debug("Adding entry {}", fullPath);
 
 		try {
 			Statement statement = conn.createStatement();
@@ -165,7 +164,7 @@ public class HashDatabase {
 			files.put((long) fileHash, filename);
 
 		} catch (SQLException e) {
-			e.printStackTrace();
+			Utils.getGlobalLogger().error(e);
 			return false;
 		}
 		return true;
@@ -179,8 +178,7 @@ public class HashDatabase {
 			BufferedReader br = new BufferedReader(new FileReader(path));
 			String line;
 
-			Connection connection = DriverManager
-					.getConnection("jdbc:sqlite:./hashlist.db");
+			Connection connection = DriverManager.getConnection("jdbc:sqlite:./hashlist.db");
 			connection.setAutoCommit(false);
 
 			while ((line = br.readLine()) != null) {
@@ -188,19 +186,14 @@ public class HashDatabase {
 				if (line.equals(""))
 					continue;
 
-				String folder = line.substring(0, line.lastIndexOf('/'))
-						.toLowerCase();
-				String filename = line.substring(line.lastIndexOf('/') + 1,
-						line.length()).toLowerCase();
+				String folder = line.substring(0, line.lastIndexOf('/')).toLowerCase();
+				String filename = line.substring(line.lastIndexOf('/') + 1).toLowerCase();
 
 				// Read
-				long fileHash = computeCRC(filename.getBytes(), 0,
-						filename.getBytes().length);
-				long folderHash = computeCRC(folder.getBytes(), 0,
-						folder.getBytes().length);
+				long fileHash = computeCRC(filename.getBytes(), 0, filename.getBytes().length);
+				long folderHash = computeCRC(folder.getBytes(), 0, folder.getBytes().length);
 
-				if (Constants.DEBUG)
-					System.out.println("Adding Entry: " + line);
+				Utils.getGlobalLogger().info("Adding folder entry: {}", line);
 
 				try {
 					Statement statement = connection.createStatement();
@@ -212,7 +205,7 @@ public class HashDatabase {
 					statement.executeUpdate(String.format("UPDATE  filenames set name='%s' where hash=%d", filename, fileHash));
 
 				} catch (SQLException e) {
-					System.err.println(e.getMessage());
+					Utils.getGlobalLogger().error("Encountered an error adding {} / {} to database", folder, filename, e);
 				}
 				numAdded++;
 			}
@@ -221,14 +214,13 @@ public class HashDatabase {
 				if (connection != null)
 					connection.close();
 			} catch (SQLException e) {
-				System.err.println(e);
+				Utils.getGlobalLogger().error("Encountered an error closing the DB connection.", e);
 			}
 			br.close();
 		} catch (IOException e) {
-			e.printStackTrace();
+			Utils.getGlobalLogger().error("Encountered an error batch-adding paths from TXT.", e);
 		}
-
-		System.out.println("Added " + numAdded +" new entries.");
+		Utils.getGlobalLogger().info("Added {} new DB entries.", numAdded);
 	}
 
 	// This is a quick n dirty SQDB reader. Skip 0x800 bytes of header, the
@@ -283,12 +275,9 @@ public class HashDatabase {
 				}
 
 				folder = fullPath.substring(0, fullPath.lastIndexOf('/'));
-				filename = fullPath.substring(fullPath.lastIndexOf('/') + 1,
-						fullPath.length());
+				filename = fullPath.substring(fullPath.lastIndexOf('/') + 1);
 
-				if (Constants.DEBUG)
-					System.out.println("Adding Entry: " + fullPath);
-
+				Utils.getGlobalLogger().info("Adding folder entry: {}", fullPath);
 
 				try{
 					Statement statement = connection.createStatement();
@@ -296,7 +285,7 @@ public class HashDatabase {
 					statement.executeUpdate("insert or ignore into folders values("+ folderHash + ", '" + folder + "',0)");
 					statement.executeUpdate("insert or ignore into filenames values("+ fileHash + ", '" + fullPath + "',0)");
 				} catch (SQLException e) {
-					System.err.println(e.getMessage());
+					Utils.getGlobalLogger().error("Encountered an error adding {} / {} to database", folder, filename, e);
 				}
 
 				// Reset
@@ -312,24 +301,19 @@ public class HashDatabase {
 				connection.commit();
 				connection.close();
 			} catch (SQLException e) {
-				System.err.println(e);
+				Utils.getGlobalLogger().error("Encountered an error closing the DB connection.", e);
 			}
 			file.close();
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Utils.getGlobalLogger().error("Encountered an error batch-adding paths from SQDB.", e);
 		}
 	}
 
 	public static void beginConnection() {
 		try {
-			globalConnection = DriverManager
-					.getConnection("jdbc:sqlite:./hashlist.db");
+			globalConnection = DriverManager.getConnection("jdbc:sqlite:./hashlist.db");
 		} catch (SQLException e) {
-			e.printStackTrace();
+			Utils.getGlobalLogger().error(e);
 		}
 	}
 
@@ -338,7 +322,7 @@ public class HashDatabase {
 			globalConnection.close();
 			globalConnection = null;
 		} catch (SQLException e) {
-			e.printStackTrace();
+			Utils.getGlobalLogger().error(e);
 		}
 	}
 
@@ -350,8 +334,7 @@ public class HashDatabase {
 		String fullPath = getFileFullPathName(hash);
 		if (fullPath == null)
 			return null;
-		return fullPath.substring(fullPath.lastIndexOf('/') + 1,
-				fullPath.length()).toLowerCase();
+		return fullPath.substring(fullPath.lastIndexOf('/') + 1).toLowerCase();
 	}
 
 	public static String getFileFullPathName(long hash) {
@@ -375,7 +358,6 @@ public class HashDatabase {
 
 		for (int i = 0; i < cbEndUnalignedBytes; ++i) {
 			dwCRC = crc_table_0f085d0[(dwCRC ^ pbBuffer.get()) & 0x000000FF] ^ (dwCRC >>> 8);
-			//System.out.println(String.format("%d\n",dwCRC));
 		}
 
 		return dwCRC;
@@ -387,7 +369,7 @@ public class HashDatabase {
 			statement.setQueryTimeout(30); // set timeout to 30 sec.
 			statement.executeUpdate("update 'filenames' set used = 1 where hash = " + id);
 		} catch (SQLException e) {
-			System.err.println(e.getMessage());
+			Utils.getGlobalLogger().error(e);
 		}
 	}
 
@@ -397,7 +379,7 @@ public class HashDatabase {
 			statement.setQueryTimeout(30); // set timeout to 30 sec.
 			statement.executeUpdate("update 'folders' set used = 1 where hash = " + id);
 		} catch (SQLException e) {
-			System.err.println(e.getMessage());
+			Utils.getGlobalLogger().error(e);
 		}
 	}
 

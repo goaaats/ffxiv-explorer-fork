@@ -15,6 +15,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.border.TitledBorder;
 
+import com.fragmenterworks.ffxivextract.helpers.Utils;
 import com.fragmenterworks.ffxivextract.helpers.ImageDecoding.ImageDecodingException;
 import com.fragmenterworks.ffxivextract.models.Texture_File;
 
@@ -73,8 +74,7 @@ public class Image_View extends JPanel {
 			if (currentTexture.compressionType == 0x2460)
 				imgPreviewCanvas.setHighQualityRenderingEnabled(false);			
 		} catch (ImageDecodingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Utils.getGlobalLogger().error(e);
 		}
 	}
 

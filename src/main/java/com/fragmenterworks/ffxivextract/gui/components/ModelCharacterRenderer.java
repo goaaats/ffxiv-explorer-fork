@@ -7,6 +7,7 @@ import java.nio.FloatBuffer;
 import java.util.ArrayList;
 
 import com.fragmenterworks.ffxivextract.Constants;
+import com.fragmenterworks.ffxivextract.helpers.Utils;
 import com.fragmenterworks.ffxivextract.helpers.Matrix;
 import com.fragmenterworks.ffxivextract.models.Model;
 import com.fragmenterworks.ffxivextract.shaders.BlendShader;
@@ -132,10 +133,7 @@ public class ModelCharacterRenderer implements GLEventListener {
 		}
 		
 		for (Model model : modelsToUnload)
-		{
-				model.unload(gl);
-				System.out.println("Model unloaded");
-		}
+			model.unload(gl);
 		
 		modelsToUnload.clear();
 
@@ -254,7 +252,7 @@ public class ModelCharacterRenderer implements GLEventListener {
 			blurShader = new BlurShader(gl);
 			blendShader = new BlendShader(gl);
 		} catch (IOException e) {
-			e.printStackTrace();
+			Utils.getGlobalLogger().error(e);
 		}
 	}
 	
@@ -329,7 +327,7 @@ public class ModelCharacterRenderer implements GLEventListener {
 	    gl.glBindFramebuffer(GL3.GL_FRAMEBUFFER, 0);
 	    
 	    if(gl.glCheckFramebufferStatus(GL3.GL_FRAMEBUFFER) != GL3.GL_FRAMEBUFFER_COMPLETE)
-	    	System.out.println("Error creating framebuffer!");
+	    	Utils.getGlobalLogger().error("Error creating framebuffer!");
 	}
 
 	public void setHairColor(float[] colorComponents) {

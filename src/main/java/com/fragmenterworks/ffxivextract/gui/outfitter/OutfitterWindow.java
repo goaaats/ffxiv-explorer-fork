@@ -10,6 +10,7 @@ import javax.swing.JOptionPane;
 import javax.swing.SwingWorker;
 
 import com.fragmenterworks.ffxivextract.Strings;
+import com.fragmenterworks.ffxivextract.helpers.Utils;
 import com.fragmenterworks.ffxivextract.gui.components.EXDF_View;
 import com.fragmenterworks.ffxivextract.gui.modelviewer.Loading_Dialog;
 import com.fragmenterworks.ffxivextract.models.EXHF_File;
@@ -84,7 +85,7 @@ public class OutfitterWindow extends JFrame {
 					itemView = new EXDF_View(exdIndexFile, "exd/item.exh", exhfFile);
 					getContentPane().add(new Outfitter(modelIndexFile, itemView));
 				} catch (IOException e1) {
-					e1.printStackTrace();
+					Utils.getGlobalLogger().error(e1);
 					getContentPane().removeAll();
 					getContentPane().add(new JLabel("Error: Could not find game files. Is DAT path correct?"));
 					return null;

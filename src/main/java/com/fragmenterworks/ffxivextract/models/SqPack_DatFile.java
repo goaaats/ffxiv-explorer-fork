@@ -6,6 +6,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Calendar;
 
+import com.fragmenterworks.ffxivextract.helpers.Utils;
 import com.fragmenterworks.ffxivextract.gui.components.Loading_Dialog;
 import com.fragmenterworks.ffxivextract.helpers.EARandomAccessFile;
 
@@ -19,7 +20,7 @@ public class SqPack_DatFile {
 	public final static int TYPE_MODEL = 3;
 	public final static int TYPE_BINARY = 2;
 	public final static int TYPE_PLACEHOLDER = 1;
-	
+
 	private EARandomAccessFile currentFilePointer;
 	private ByteOrder endian;
 
@@ -27,7 +28,7 @@ public class SqPack_DatFile {
 		this.endian = endian;
 		currentFilePointer = new EARandomAccessFile(path, "r", endian);
 	}
-	
+
 	@SuppressWarnings("unused")
 	protected byte[] extractFile(long fileOffset, Loading_Dialog loadingDialog) throws IOException {
 		currentFilePointer.seek(fileOffset);
@@ -37,37 +38,26 @@ public class SqPack_DatFile {
 		currentFilePointer.readInt(); // UNKNOWN
 		int blockBufferSize = currentFilePointer.readInt() * 0x80;
 		int blockCount = currentFilePointer.readInt();
-		
+
 		byte extraHeader[] = null;
 		int extraHeaderSize = 0;
 
-		if (Constants.DEBUG){
-			System.out.println("================================");
-			System.out.println(String.format("File @ %08x", fileOffset));
-			System.out.println("================================");
-			System.out.println("Header Length: " + headerLength);
-			System.out.println("Content Type: " + contentType);
-			System.out.println("File Size: " + fileSize);
-			System.out.println("Block Buffer Size: " + blockBufferSize);
-		}			
-		
+		Utils.getGlobalLogger().trace("\nFile @ {}\n\tHeader length: {}\n\tContent type: {}\n\tFile size: {}\n\tBlock buffer size: {}",
+										String.format("File @ %08x", fileOffset), headerLength, contentType, fileSize, blockBufferSize);
+
+		Utils.getGlobalLogger().trace("Block data: ...");
+
 		Data_Block[][] dataBlocks = null;
 
-		if (Constants.DEBUG){
-			System.out.println("================================");
-			System.out.println("Block Data for this file");
-			System.out.println("================================");			
-		}
-		
 		//How to get the blocks
 		switch (contentType)
 		{
 		case TYPE_TEXTURE:
-			
+
 			TextureBlocks blocks[] = new TextureBlocks[blockCount];
-			
+
 			dataBlocks = new Data_Block[blockCount][];
-			
+
 			for (int i = 0; i < blockCount; i++) {
 				int frameStartOffset = currentFilePointer.readInt();
 				int frameSize = currentFilePointer.readInt();
@@ -77,30 +67,30 @@ public class SqPack_DatFile {
 				blocks[i] = new TextureBlocks(frameStartOffset, frameSize, blockTableOffset, numSubBlocks);
 				dataBlocks[i] = new Data_Block[numSubBlocks];
 			}
-			
+
 			for (int i = 0; i < blockCount; i++)
 			{
 				TextureBlocks block = blocks[i];
 				dataBlocks[i][0] = new Data_Block(block.offset);
 				int runningTotal = block.offset;
 				for (int j = 1; j < block.subblockSize; j++)
-				{					
+				{
 					runningTotal += currentFilePointer.readShort();
 					dataBlocks[i][j] = new Data_Block(runningTotal);
 				}
 				currentFilePointer.readShort();
 			}
-			
+
 			extraHeaderSize = blocks[0].offset;
 			extraHeader = new byte[extraHeaderSize];
 			currentFilePointer.seek(fileOffset + headerLength);
 			currentFilePointer.read(extraHeader, 0, extraHeaderSize);
-			
+
 			break;
 		case TYPE_MODEL:
-			
-			ContentType3Container container = new ContentType3Container();								
-			
+
+			ContentType3Container container = new ContentType3Container();
+
 			for (int i = 0; i < 11; i++)
 				container.chunkDecompressedSizes[i] = currentFilePointer.readInt();
 			for (int i = 0; i < 11; i++)
@@ -115,19 +105,19 @@ public class SqPack_DatFile {
 				container.chunkNumBlocks[i] = currentFilePointer.readShort();
 				numBlocks+= container.chunkNumBlocks[i];
 			}
-			
+
 			container.blockSizes = new short[numBlocks];
-			
+
 			//Skip, unknown
 			container.numMeshes = currentFilePointer.readShort();
 			container.numMaterials = currentFilePointer.readShort();
 			short y1 = currentFilePointer.readShort();
 			short y2 = currentFilePointer.readShort();
-			
+
 			for (int i = 0; i < numBlocks; i++)
 				container.blockSizes[i] = currentFilePointer.readShort();
-			
-			//int CHOSEN_CHUNK = 2; 
+
+			//int CHOSEN_CHUNK = 2;
 
 			int pos = 0x44;
 			byte[] mdlData = new byte[fileSize];
@@ -136,18 +126,18 @@ public class SqPack_DatFile {
 			bb.order(endian);
 			bb.putShort(container.numMeshes);
 			bb.putShort(container.numMaterials);
-			currentFilePointer.seek(fileOffset + headerLength + container.chunkOffsets[0]);			
+			currentFilePointer.seek(fileOffset + headerLength + container.chunkOffsets[0]);
 			for (int i = 0; i < container.blockSizes.length; i++)
-			{					
+			{
 				int lastPos = (int) currentFilePointer.getFilePointer();
-				
+
 				// Block Header
 				int blockHeaderLength2 = currentFilePointer.readInt();
 				currentFilePointer.readInt(); // NULL
-				int compressedBlockSize2 = currentFilePointer.readInt(); 
+				int compressedBlockSize2 = currentFilePointer.readInt();
 				int decompressedBlockSize2 = currentFilePointer.readInt();
-					
-				byte[] decompressedBlock2 = null;			
+
+				byte[] decompressedBlock2 = null;
 				if (compressedBlockSize2 == 32000 || decompressedBlockSize2 == 1) //Not actually compressed, just read decompressed size
 				{
 					decompressedBlock2 = new byte[decompressedBlockSize2];
@@ -155,79 +145,16 @@ public class SqPack_DatFile {
 				}
 				else //Gotta decompress
 					decompressedBlock2 = decompressBlock(compressedBlockSize2, decompressedBlockSize2);
-				
+
 				System.arraycopy(decompressedBlock2, 0, mdlData, pos, decompressedBlockSize2);
 				pos+=decompressedBlockSize2;
-				
+
 				currentFilePointer.seek(lastPos + container.blockSizes[i]);
-			}						
-			/*
-			pos = container.chunkDecompressedSizes[0];
-			currentFilePointer.seek(fileOffset + headerLength + container.chunkOffsets[1]);			
-			for (int i = 0; i < container.chunkNumBlocks[1]; i++)
-			{					
-				int lastPos = (int) currentFilePointer.getFilePointer();
-				
-				// Block Header
-				int blockHeaderLength2 = currentFilePointer.readInt();
-				currentFilePointer.readInt(); // NULL
-				int compressedBlockSize2 = currentFilePointer.readInt(); 
-				int decompressedBlockSize2 = currentFilePointer.readInt();
-					
-				byte[] decompressedBlock2 = null;			
-				if (compressedBlockSize2 == 32000 || decompressedBlockSize2 == 1) //Not actually compressed, just read decompressed size
-				{
-					decompressedBlock2 = new byte[decompressedBlockSize2];
-					currentFilePointer.readFully(decompressedBlock2);
-				}
-				else //Gotta decompress
-					decompressedBlock2 = decompressBlock(compressedBlockSize2, decompressedBlockSize2);
-				
-				System.arraycopy(decompressedBlock2, 0, mdlData, pos, decompressedBlockSize2);
-				pos+=decompressedBlockSize2;
-				
-				currentFilePointer.seek(lastPos + container.blockSizes[container.chunkStartBlockIndex[1]+i]);
-			}			
-			
-			pos = container.chunkDecompressedSizes[1]+container.chunkDecompressedSizes[0];
-			currentFilePointer.seek(fileOffset + headerLength + container.chunkOffsets[2]);			
-			for (int i = 0; i < container.chunkNumBlocks[2]; i++)
-			{					
-				int lastPos = (int) currentFilePointer.getFilePointer();
-				
-				// Block Header
-				int blockHeaderLength2 = currentFilePointer.readInt();
-				currentFilePointer.readInt(); // NULL
-				int compressedBlockSize2 = currentFilePointer.readInt(); 
-				int decompressedBlockSize2 = currentFilePointer.readInt();
-					
-				byte[] decompressedBlock2 = null;			
-				if (compressedBlockSize2 == 32000 || decompressedBlockSize2 == 1) //Not actually compressed, just read decompressed size
-				{
-					decompressedBlock2 = new byte[decompressedBlockSize2];
-					currentFilePointer.readFully(decompressedBlock2);
-				}
-				else //Gotta decompress
-					decompressedBlock2 = decompressBlock(compressedBlockSize2, decompressedBlockSize2);
-				
-				System.arraycopy(decompressedBlock2, 0, mdlData, pos, decompressedBlockSize2);
-				pos+=decompressedBlockSize2;
-				
-				currentFilePointer.seek(lastPos + container.blockSizes[container.chunkStartBlockIndex[2]+i]);
 			}
-			
-			
-			System.out.println(container.numChunk1Entries);
-			/*
-			System.out.println(String.format("0x%x",y1));
-			System.out.println(String.format("0x%x",y2));
-			System.out.println("--------");
-			*/
-			
 			return mdlData;
-		case TYPE_BINARY: 
+		case TYPE_BINARY:
 			dataBlocks = new Data_Block[1][blockCount];
-			
+
 			// Read in Block Info Header
 			for (int i = 0; i < blockCount; i++) {
 				int offset = currentFilePointer.readInt();
@@ -236,78 +163,76 @@ public class SqPack_DatFile {
 				int decompressedBlockSize = paddingAndSize >> 16 & 0xFFFF;
 
 				dataBlocks[0][i] = new Data_Block(offset, padding, decompressedBlockSize);
-			
-				if (Constants.DEBUG){
-					System.out.println("Block #" + i);
-					System.out.println("Offset: " + String.format("%X", offset));
-					System.out.println("Padding: " + padding);
-					System.out.println("Uncompressed Size: " + decompressedBlockSize);
-				}
-			}		
+
+				Utils.getGlobalLogger().trace("Block #{}\n\tOffset: {}\n\tPadding: {}\n\tUncompressed size: {}",
+											i, String.format("%X", offset), padding, decompressedBlockSize);
+			}
 			break;
-		}		
-		
+		}
+
 		byte decompressedFile[] = null;
 		int currentFileOffset = -1;
-		
+
 		try{
 		if (fileSize + extraHeaderSize < 0)
 			return null;
-				
+
 		decompressedFile = new byte[fileSize];
 		}
 		catch (Exception e)
 		{
 			return null;
 		}
-		
+
 		//If we got a loading dialog
 		if (loadingDialog != null)
 			loadingDialog.setMaxBlocks(dataBlocks[0].length);
-		
+
 		if (dataBlocks == null || dataBlocks[0] == null)
 			return null;
-		
+
 		int mipmapPosTable[] = null;
-		
+
 		//Load in file offsets for mipmaps
 		if (extraHeader != null && contentType == TYPE_TEXTURE)
 		{
 			ByteBuffer bb = ByteBuffer.wrap(extraHeader);
 			bb.order(endian);
-			
-			bb.position(0x0E);			
+
+			bb.position(0x0E);
 			int numMipmaps = bb.getShort();
 			mipmapPosTable = new int[numMipmaps];
-			
+
 			if (numMipmaps < blockCount)
 				mipmapPosTable = new int[blockCount];
-			
+
 			bb.position(0x1C);
 			for (int i = 0; i < numMipmaps; i++)
 				mipmapPosTable[i] = bb.getInt();
 		}
-		
+
 		//Extract File
 		for (int j = 0; j < (contentType == TYPE_TEXTURE ? blockCount : 1); j++){
-			if (mipmapPosTable != null)				
+			if (mipmapPosTable != null)
 				currentFileOffset = mipmapPosTable[j];
 			else
 				currentFileOffset = 0;
-			
+
 			for (int i = 0; i < dataBlocks[j].length; i++)
 			{
 				// Block Header
 				currentFilePointer.seek(fileOffset + headerLength + dataBlocks[j][i].offset);
 				int blockHeaderLength = currentFilePointer.readInt();
 				currentFilePointer.readInt(); // NULL
-				int compressedBlockSize = currentFilePointer.readInt(); 
+				int compressedBlockSize = currentFilePointer.readInt();
 				int decompressedBlockSize = currentFilePointer.readInt();
-					
-				if (Constants.DEBUG)
-					System.out.println("Decompressing block " + i + " @ file offset: " + currentFilePointer.getFilePointer() + " @ block offset: " + String.format("%X", dataBlocks[j][i].offset) + ". Compressed Size: " + compressedBlockSize + " and Decompressed Size: " + decompressedBlockSize + ". Block Size: " + dataBlocks[j][i].padding);
-				
-				byte[] decompressedBlock = null;			
+
+				Utils.getGlobalLogger().trace("Decompressing block {} @ file offset {} @ block offset: {}",
+												i, currentFilePointer.getFilePointer(), String.format("%X", dataBlocks[j][i].offset));
+				Utils.getGlobalLogger().trace("Compressed size: {}, decompressed size: {}, block size: {}",
+												compressedBlockSize, decompressedBlockSize, dataBlocks[j][i].padding);
+
+				byte[] decompressedBlock = null;
 				if (compressedBlockSize == 32000 || decompressedBlockSize == 1) //Not actually compressed, just read decompressed size
 				{
 					decompressedBlock = new byte[decompressedBlockSize];
@@ -320,24 +245,24 @@ public class SqPack_DatFile {
 					System.arraycopy(decompressedBlock, 0, decompressedFile, currentFileOffset, decompressedBlockSize);
 				} catch (ArrayIndexOutOfBoundsException e) {
 					// Couldn't tell you
-//					e.printStackTrace();
+//					Utils.getGlobalLogger().error(e);
 				}
 
 				currentFileOffset += decompressedBlockSize;
-				
-				if (loadingDialog != null)			
-					loadingDialog.nextBlock(i+1);			
+
+				if (loadingDialog != null)
+					loadingDialog.nextBlock(i+1);
 			}
 		}
 		if (extraHeader != null)
 			System.arraycopy(extraHeader, 0, decompressedFile, 0, extraHeaderSize);
-		
+
 		return decompressedFile;
 	}
 
 	@SuppressWarnings("deprecation")
 	private byte[] decompressBlock(int compressedSize, int decompressedSize) throws IOException{
-		
+
 		// Build the zlib header stuff
 		byte[] decompressedData = new byte[decompressedSize];
 		byte[] gzipedData = new byte[compressedSize + 6]; // Need to add 6 bytes
@@ -355,10 +280,10 @@ public class SqPack_DatFile {
 		byte[] checksumByte = ByteBuffer.allocate(4)
 				.order(ByteOrder.BIG_ENDIAN).putInt(checksum).array();
 		System.arraycopy(checksumByte, 0, gzipedData, 2 + compressedSize, 4);
-		
+
 		//Decompress this block
 		try {
-			
+
 			Inflater inflater = new Inflater();
 
 			inflater.setInput(gzipedData);
@@ -386,17 +311,16 @@ public class SqPack_DatFile {
 
 			return decompressedData;
 		} catch (Exception e) {
-			e.printStackTrace();
+			Utils.getGlobalLogger().error(e);
 		}
 		return null;
 	}
 
-	@SuppressWarnings("deprecation")
 	private static void CHECK_ERR(Inflater z, int err, String msg) {
 		if (err != JZlib.Z_OK) {
 			if (z.msg != null)
-				System.out.print(z.msg + " ");
-			System.out.println(msg + " error: " + err);
+				Utils.getGlobalLogger().error("Inflater error: {}", z.msg);
+			Utils.getGlobalLogger().error("{} error: {}", msg, err);
 			System.exit(1);
 		}
 	}
@@ -417,18 +341,18 @@ public class SqPack_DatFile {
 		}
 		return (int) ((s2 << 16) + s1);
 	}
-	
+
 	protected class Data_Block{
 		public final int offset;
 		public final int padding;
 		public final int decompressedSize;
-		
+
 		public Data_Block(int offset, int padding, int decompressedSize){
 			this.offset = offset;
 			this.padding = padding;
 			this.decompressedSize = decompressedSize;
 		}
-		
+
 		public Data_Block(int offset)
 		{
 			this.offset = offset;
@@ -436,20 +360,20 @@ public class SqPack_DatFile {
 			this.decompressedSize = -1;
 		}
 	}
-	
+
 	protected class TextureBlocks{
 		public final int offset;
-		public final int padding;		
+		public final int padding;
 		public final int tableOffset;
 		public final int subblockSize;
-		
+
 		public TextureBlocks(int offset, int padding, int tableOffset, int subblocksize){
 			this.offset = offset;
 			this.padding = padding;
 			this.tableOffset = tableOffset;
 			this.subblockSize = subblocksize;
 		}
-		
+
 	}
 
 	protected int getContentType(long offset) throws IOException {
@@ -457,7 +381,7 @@ public class SqPack_DatFile {
 		currentFilePointer.readInt(); //Header Length
 		return currentFilePointer.readInt();
 	}
-	
+
 	protected Calendar getTimeStamp() throws IOException
 	{
 		// Timestamp
@@ -474,11 +398,11 @@ public class SqPack_DatFile {
             int mi   = (int) (time /   10000) %   100;
             int ss   = (int) (time /     100) %   100;
             int ms   = (int) (time          ) %   100;
-            
+
             Calendar timestamp = Calendar.getInstance();
             timestamp.set(yyyy, mm, dd, hh24, mi, ss);
             return timestamp;
-		}		
+		}
 		return null;
 	}
 }

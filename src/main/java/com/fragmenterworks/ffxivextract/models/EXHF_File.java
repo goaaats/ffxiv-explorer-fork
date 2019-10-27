@@ -1,5 +1,7 @@
 package com.fragmenterworks.ffxivextract.models;
 
+import com.fragmenterworks.ffxivextract.helpers.Utils;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -45,17 +47,14 @@ public class EXHF_File extends Game_File {
 		buffer.order(endian);
 
 		try {
-			
-			//Header
-			int magicNum = buffer.getInt();
-			
-			if (magicNum != 0x45584846) //EXHF
-				throw new IOException("Not a EXHF");
-			
+			int magic = buffer.getInt();
 			int version = buffer.getShort();
-			
-			if (version != 0x3)
-				throw new IOException("Not a EXHF");
+
+			if (magic != 0x45584846 || version != 3) {
+				Utils.getGlobalLogger().error("EXHF magic was incorrect.");
+				Utils.getGlobalLogger().debug("Magic was {}", String.format("0x%08X", magic));
+				return;
+			}
 			
 			datasetChunkSize = buffer.getShort();
 			int numDataSetTable = buffer.getShort();

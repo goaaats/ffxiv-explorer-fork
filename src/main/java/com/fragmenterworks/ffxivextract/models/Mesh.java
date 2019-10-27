@@ -5,26 +5,22 @@ import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 
 import com.fragmenterworks.ffxivextract.Constants;
+import com.fragmenterworks.ffxivextract.helpers.Utils;
 import com.jogamp.common.nio.Buffers;
 import com.jogamp.graph.geom.Vertex;
 
-public class Mesh{
+public class Mesh {
 		
 	final public int numBuffers;
 	public ByteBuffer vertBuffers[];
 	public ByteBuffer indexBuffer;
-	
 	final public int[] vertexBufferOffsets;
 	final public int[] vertexSizes;
 	final public int indexBufferOffset;		
 	final public int numVerts, numIndex;
-	
 	final public int partTableOffset, partTableCount;
-	
 	final public int boneListIndex;
-	
 	final public int materialNumber;
-	
 	final public int vertElementIndex;
 	
 	public Mesh(ByteBuffer bb, int elementIndex)
@@ -36,13 +32,7 @@ public class Mesh{
     	partTableOffset = bb.getShort();
     	partTableCount = bb.getShort();
     	boneListIndex = bb.getShort();
-    	
-    	/*if (i == 0){
-    	System.out.println(String.format("0x%04x", partOffset));
-    	System.out.println(partCount);
-    	System.out.println(boneListIndex);
-    	}*/
-    	
+
     	indexBufferOffset = bb.getInt();
     	
     	//Seems FFXIV already stores the offset of the aux buffer (and others). DOH! Learned from Saint Coinach...
@@ -63,17 +53,9 @@ public class Mesh{
 		for (int i = 0; i < numBuffers; i++)
 			vertBuffers[i] = Buffers.newDirectByteBuffer(numVerts * vertexSizes[i]);
 		indexBuffer = Buffers.newDirectByteBuffer(numIndex * 2);
-    	
-		System.out.println("Num Parts: " + partTableCount);
-		
-    	if (Constants.DEBUG)
-    	{
-        	System.out.println("numVerts: " + numVerts);
-        	System.out.println("numIndex: " + numIndex);	   
-        	
-        	System.out.println("vertOffset: " + vertexBufferOffsets[0]);
-        	System.out.println("indexOffset: " + indexBufferOffset);
-    	}
+
+		Utils.getGlobalLogger().debug("Num parts: {}\n\tNum verts: {}\n\tNum indices: {}\n\tVertex offset: {}\n\tIndex offset: {}",
+										partTableCount, numVerts, numIndex, vertexBufferOffsets[0], indexBufferOffset);
 	}
 
 	public void loadMeshes(ByteBuffer bb, int lodVertexOffset, int lodIndexOffset) throws BufferOverflowException, BufferUnderflowException{
@@ -92,7 +74,6 @@ public class Mesh{
 		bbTemp = bb.duplicate ();    	
     	bbTemp.limit (bbTemp.position() + (2 * numIndex));
     	indexBuffer.put (bbTemp);
-	
 	}
 
 	public int getVertexElementIndex() {

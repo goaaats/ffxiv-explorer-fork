@@ -3,6 +3,7 @@ package com.fragmenterworks.ffxivextract.helpers;
 import java.nio.ByteBuffer;
 
 import com.fragmenterworks.ffxivextract.Constants;
+import com.fragmenterworks.ffxivextract.helpers.Utils;
 
 public class HavokNative {
 
@@ -28,7 +29,7 @@ public class HavokNative {
 			System.loadLibrary("havok");
 		}catch (UnsatisfiedLinkError e)
 		{
-			e.printStackTrace();
+			Utils.getGlobalLogger().error(e);
 		}
 	}
 	

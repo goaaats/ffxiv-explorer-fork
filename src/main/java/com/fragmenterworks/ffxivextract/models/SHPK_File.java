@@ -7,9 +7,10 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
 
+import com.fragmenterworks.ffxivextract.helpers.Utils;
 import com.fragmenterworks.ffxivextract.models.directx.D3DXShader_ConstantTable;
 
-public class SHPK_File {
+public class SHPK_File extends Game_File {
 
 	public final static int SHADERTYPE_VERTEX = 0;
 	public final static int SHADERTYPE_PIXEL = 1;
@@ -28,7 +29,8 @@ public class SHPK_File {
 	
 	ArrayList<ShaderHeader> shaderHeaders = new ArrayList<ShaderHeader>();
 	
-	public SHPK_File(String path) throws IOException{
+	public SHPK_File(String path, ByteOrder endian) throws IOException{
+		super(endian);
 		File file = new File(path);
 		FileInputStream fis = new FileInputStream(file);
 		byte[] data = new byte[(int) file.length()];
@@ -37,21 +39,25 @@ public class SHPK_File {
 		loadSHPK(data);
 	}
 
-	public SHPK_File(byte[] data) throws IOException {
+	public SHPK_File(byte[] data, ByteOrder endian) throws IOException {
+		super(endian);
 		loadSHPK(data);
 	}
 
 	private void loadSHPK(byte[] data) throws IOException {
-		
 		this.data = data;
 		
 		ByteBuffer bb = ByteBuffer.wrap(data);
-		bb.order(ByteOrder.LITTLE_ENDIAN);
-		
+		bb.order(endian);
+
+		int magic = bb.getInt();
 		//Check Signatures
-		if (bb.getInt() != 0x6B506853)
-			throw new IOException("Not a SHPK file");
-		
+		if (magic != 0x6B506853) {
+			Utils.getGlobalLogger().error("SHPK magic was incorrect.");
+			Utils.getGlobalLogger().debug("Magic was {}", String.format("0x%08X", magic));
+			return;
+		}
+
 		bb.getInt();
 		
 		byte dxStringBuffer[] = new byte[4];

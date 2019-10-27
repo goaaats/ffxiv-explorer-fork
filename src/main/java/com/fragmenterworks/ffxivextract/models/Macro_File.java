@@ -41,10 +41,10 @@ public class Macro_File {
 		ByteBuffer bb = ByteBuffer.wrap(macrobookData);
 		bb.order(ByteOrder.LITTLE_ENDIAN);
 		bb.position(1);
-		for (int i = 0; i < MAX_MACROS; i++){
-			//System.out.println("\nMacro #" + i);
-			entries[i] = readMacroEntry(bb);}			
+		for (int i = 0; i < MAX_MACROS; i++) {
+			entries[i] = readMacroEntry(bb);
 		}
+	}
 	
 	private Macro_Entry readMacroEntry(ByteBuffer bb) throws IOException{		
 		
@@ -60,9 +60,7 @@ public class Macro_File {
 		int titleSize = bb.getShort();
 		bb.get(buffer, 0, titleSize);
 		title = new String(buffer, 0, titleSize-1 , "UTF-8");
-		
-		//System.out.println(title);
-		
+
 		if (bb.get() != 'I') //something wrong
 			throw new IOException("Didn't find I marker where it should be");
 		
@@ -71,10 +69,7 @@ public class Macro_File {
 		bb.get(buffer, 0, iconSize);
 		icon = new String(buffer, 0, iconSize , "UTF-8");
 		iconInt = Integer.parseInt(icon.trim(), 16);
-		
-		
-		//System.out.println(iconInt);
-		
+
 		//K?
 		if (bb.get() != 'K') //something wrong
 			throw new IOException("Didn't find K marker where it should be");
@@ -91,11 +86,7 @@ public class Macro_File {
 			int lineSize = bb.getShort();
 			bb.get(buffer, 0, lineSize);
 			lines[i] = new String(buffer, 0, lineSize-1 , "UTF-8");
-			
-			//if (!lines[i].equals("\0") && !lines[i].isEmpty())
-				//System.out.println(lines[i]);
-		}		
-		
+		}
 		return new Macro_Entry(title, iconInt, lines);		
 	}
 

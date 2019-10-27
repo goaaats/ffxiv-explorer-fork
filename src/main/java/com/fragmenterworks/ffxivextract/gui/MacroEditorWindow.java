@@ -323,13 +323,11 @@ public class MacroEditorWindow extends JFrame {
 				txtDatPath.setText(fileChooser.getSelectedFile()
 						.getCanonicalPath());
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			try {
 				loadFile(fileChooser.getSelectedFile());
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -574,7 +572,6 @@ public class MacroEditorWindow extends JFrame {
 						super.replace(fb, offset, length, text, attrs);	
 					}
 				} catch (UnsupportedEncodingException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}	    	
 		    					
