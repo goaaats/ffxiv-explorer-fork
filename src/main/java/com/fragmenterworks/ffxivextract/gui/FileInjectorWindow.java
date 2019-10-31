@@ -36,7 +36,7 @@ class FileInjectorWindow extends JFrame {
     private SqPack_IndexFile editMusicFile, originalMusicFile;
     private SqPack_File[] editedFiles;
     private final Hashtable<Integer, Integer> originalPositionTable = new Hashtable<Integer, Integer>(); //Fucking hack, but this is my fix if we want alphabetical sort
-    private ByteOrder workingEndian;
+    private ByteOrder endian;
 
     //CUSTOM MUSIC STUFF
     private int currentDatIndex;
@@ -364,7 +364,7 @@ class FileInjectorWindow extends JFrame {
                     File datlstfile = new File(customDatPath + ".lst");
                     datlstfile.delete();
 
-                    DatBuilder builder = new DatBuilder(currentDatIndex, customDatPath, workingEndian);
+                    DatBuilder builder = new DatBuilder(currentDatIndex, customDatPath, endian);
                     for (int i = 0; i < lstCustomMusic.getModel().getSize(); i++) {
                         lastLoaded = (String) lstCustomMusic.getModel().getElementAt(i);
                         customPaths.add((String) lstCustomMusic.getModel().getElementAt(i));
@@ -387,7 +387,7 @@ class FileInjectorWindow extends JFrame {
                 }
                 try {
                     //Edit Index
-                    EARandomAccessFile output = new EARandomAccessFile(edittingIndexFile, "rw", workingEndian);
+                    EARandomAccessFile output = new EARandomAccessFile(edittingIndexFile, "rw", endian);
                     output.seek(0x450);
                     output.writeInt(currentDatIndex + 1);
                     output.close();
@@ -571,7 +571,7 @@ class FileInjectorWindow extends JFrame {
         btnRestore.setEnabled(true);
 
         // Set Current Index
-        EARandomAccessFile input = new EARandomAccessFile(backup, "r", workingEndian);
+        EARandomAccessFile input = new EARandomAccessFile(backup, "r", endian);
         input.seek(0x450);
         currentDatIndex = input.readInt();
         input.close();
@@ -777,28 +777,45 @@ class FileInjectorWindow extends JFrame {
             lref.readFully(buffer, 0, 6);
             bref.readFully(bigBuffer, 0, 6);
 
-            if (buffer[0] == 'S' && buffer[1] == 'q' && buffer[2] == 'P'
-                    && buffer[3] == 'a' && buffer[4] == 'c' && buffer[5] == 'k') {
-                workingEndian = ByteOrder.LITTLE_ENDIAN;
-            } else if (bigBuffer[0] == 'S' && bigBuffer[1] == 'q' && bigBuffer[2] == 'P'
-                    && bigBuffer[3] == 'a' && bigBuffer[4] == 'c' && bigBuffer[5] == 'k') {
-                workingEndian = ByteOrder.BIG_ENDIAN;
-            } else {
+            if (buffer[0] != 'S' || buffer[1] != 'q' || buffer[2] != 'P'
+                    || buffer[3] != 'a' || buffer[4] != 'c' || buffer[5] != 'k') {
                 lref.close();
-                bref.close();
-                throw new IOException("Not a SqPack file");
+
+                Utils.getGlobalLogger().error("SqPack magic was incorrect.");
+
+                StringBuilder s = new StringBuilder();
+                for (int i = 0; i < 6; i++)
+                    s.append(String.format("%X", buffer[i]));
+                String strMagic = new String(buffer);
+                Utils.getGlobalLogger().debug("Magic was 0x{} // {}", s.toString(), strMagic);
+                return;
             }
 
+            // Get Header Length
             lref.seek(0x0c);
             bref.seek(0x0c);
+            int headerLength = lref.readInt();
+            int bHeaderLength = bref.readInt();
 
-            int headerLength;
-            if (workingEndian == ByteOrder.LITTLE_ENDIAN)
-                headerLength = lref.readInt();
+            lref.readInt(); // Unknown
+            bref.readInt();
+
+            // Get Header Type, has to be 2 for index
+            int type = lref.readInt();
+            int bType = bref.readInt();
+
+            if (type != 2 && bType != 2) {
+                Utils.getGlobalLogger().error("SqPack type was incorrect.");
+                Utils.getGlobalLogger().debug("Type was LE: {}, BE: {}", type, bType);
+                return;
+            }
+
+            if (type == 2)
+                endian = ByteOrder.LITTLE_ENDIAN;
             else
-                headerLength = bref.readInt();
+                endian = ByteOrder.BIG_ENDIAN;
 
-            EARandomAccessFile ref = new EARandomAccessFile(edittingIndexFile.getCanonicalPath(), "rw", workingEndian);
+            EARandomAccessFile ref = new EARandomAccessFile(edittingIndexFile.getCanonicalPath(), "rw", endian);
             ref.seek(headerLength);
             int segHeaderLengthres = ref.readInt();
 
@@ -895,8 +912,7 @@ class FileInjectorWindow extends JFrame {
         Gson gson = new Gson();
         String json = gson.toJson(toSave);
         try {
-            FileOutputStream fileOut =
-                    new FileOutputStream(customDatPath + ".lst");
+            FileOutputStream fileOut = new FileOutputStream(customDatPath + ".lst");
             fileOut.write(json.getBytes());
             fileOut.close();
         } catch (IOException e) {

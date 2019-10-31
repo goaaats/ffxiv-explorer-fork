@@ -10,6 +10,8 @@ import com.fragmenterworks.ffxivextract.models.EXHF_File;
 import com.fragmenterworks.ffxivextract.models.EXHF_File.EXDF_Dataset;
 import com.fragmenterworks.ffxivextract.models.SqPack_IndexFile;
 import com.fragmenterworks.ffxivextract.storage.HashDatabase;
+import com.sun.org.apache.xalan.internal.xsltc.compiler.util.Util;
+import unluac.decompile.Constant;
 
 import javax.swing.*;
 import javax.swing.border.CompoundBorder;
@@ -21,6 +23,8 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 @SuppressWarnings("serial")
 public class EXDF_View extends JScrollPane implements ItemListener {
@@ -728,11 +732,17 @@ public class EXDF_View extends JScrollPane implements ItemListener {
     }
 
     private void loadColumnNames(String exhname) {
+
+        String path = Constants.EXH_NAMES_PATH + exhname.replace("exh", "lst");
+        if (!Files.exists(Paths.get(path)))
+            return;
+        Utils.getGlobalLogger().info("Loading column names from {}", path);
+
         try {
-            BufferedReader br = new BufferedReader(new FileReader(Constants.EXH_NAMES_PATH + exhname.replace("exh", "lst")));
+            BufferedReader br = new BufferedReader(new FileReader(path));
             for (String line; (line = br.readLine()) != null; ) {
                 //Skip comments and whitespace
-                if (line.startsWith("#") || line.isEmpty() || line.equals(""))
+                if (line.startsWith("#") || line.isEmpty())
                     continue;
                 if (line.contains(":")) {
                     String[] split = line.split(":", 2);

@@ -1,27 +1,42 @@
 package com.fragmenterworks.ffxivextract.gui.components;
 
-import com.fragmenterworks.ffxivextract.Strings;
-import com.fragmenterworks.ffxivextract.storage.HashDatabase;
-
-import javax.swing.*;
-import javax.swing.border.EmptyBorder;
-import java.awt.*;
+import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.net.URL;
 
+import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+
+import com.fragmenterworks.ffxivextract.Strings;
+import com.fragmenterworks.ffxivextract.models.SqPack_IndexFile;
+import com.fragmenterworks.ffxivextract.storage.HashDatabase;
+
 public class Path_to_Hash_Window extends JFrame {
 
-    private final JTextField edtFullPath;
-    private final JTextArea txtOutput;
+    private JPanel contentPane;
+    private JTextField edtFullPath;
+    private JTextArea txtOutput;
+    private JPanel panel_2;
+    private JPanel panel_3;
+    private JButton btnCalculate;
+    private JButton btnClose;
+    private JScrollPane scrollPane;
 
-    public Path_to_Hash_Window() {
+    SqPack_IndexFile currentIndex;
+
+    public Path_to_Hash_Window(SqPack_IndexFile currentIndex) {
+
+        this.currentIndex = currentIndex;
+
         setTitle(Strings.PATHTOHASH_TITLE);
         URL imageURL = getClass().getResource("/frameicon.png");
         ImageIcon image = new ImageIcon(imageURL);
         this.setIconImage(image.getImage());
         setBounds(100, 100, 510, 220);
-        JPanel contentPane = new JPanel();
+        contentPane = new JPanel();
         contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
         contentPane.setLayout(new BorderLayout(0, 0));
         setContentPane(contentPane);
@@ -31,7 +46,7 @@ public class Path_to_Hash_Window extends JFrame {
         panel_1.setBorder(new EmptyBorder(5, 0, 0, 0));
         panel_1.setLayout(new BoxLayout(panel_1, BoxLayout.X_AXIS));
 
-        JScrollPane scrollPane = new JScrollPane();
+        scrollPane = new JScrollPane();
         panel_1.add(scrollPane);
 
         txtOutput = new JTextArea(Strings.PATHTOHASH_INTRO);
@@ -39,7 +54,7 @@ public class Path_to_Hash_Window extends JFrame {
         txtOutput.setRows(2);
         txtOutput.setEditable(false);
 
-        JPanel panel_2 = new JPanel();
+        panel_2 = new JPanel();
         panel_2.setBorder(new EmptyBorder(5, 5, 5, 5));
         contentPane.add(panel_2, BorderLayout.NORTH);
         panel_2.setLayout(new BoxLayout(panel_2, BoxLayout.Y_AXIS));
@@ -55,20 +70,37 @@ public class Path_to_Hash_Window extends JFrame {
         panel.add(edtFullPath);
         edtFullPath.setColumns(10);
 
-        JPanel panel_3 = new JPanel();
+        panel_3 = new JPanel();
         contentPane.add(panel_3, BorderLayout.SOUTH);
 
-        JButton btnCalculate = new JButton(Strings.PATHTOHASH_BUTTON_HASHTHIS);
+        btnCalculate = new JButton(Strings.PATHTOHASH_BUTTON_HASHTHIS);
         panel_3.add(btnCalculate);
-        btnCalculate.addActionListener(new ActionListener() {
+
+        edtFullPath.getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                calcHash();
+            }
 
             @Override
-            public void actionPerformed(ActionEvent e) {
+            public void removeUpdate(DocumentEvent e) {
+                calcHash();
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
                 calcHash();
             }
         });
 
-        JButton btnClose = new JButton(Strings.PATHTOHASH_BUTTON_CLOSE);
+        btnCalculate.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                commit();
+            }
+        });
+
+        btnClose = new JButton(Strings.PATHTOHASH_BUTTON_CLOSE);
         panel_3.add(btnClose);
         btnClose.addActionListener(new ActionListener() {
 
@@ -79,10 +111,20 @@ public class Path_to_Hash_Window extends JFrame {
         });
     }
 
-    private void calcHash() {
+    private void commit() {
+        boolean result = HashDatabase.addPathToDB(edtFullPath.getText(), currentIndex.getName());
+        JOptionPane.showMessageDialog(this,
+                "The path was " + (result ? "successfully" : "unsuccessfully") + "added to the database.",
+                "File Open Error",
+                result ? JOptionPane.INFORMATION_MESSAGE : JOptionPane.ERROR_MESSAGE);
+    }
+
+    private void calcHash()
+    {
         String path = edtFullPath.getText();
 
-        if (!path.contains("/")) {
+        if (!path.contains("/"))
+        {
             txtOutput.setText(Strings.PATHTOHASH_ERROR_INVALID);
             return;
         }
@@ -91,15 +133,33 @@ public class Path_to_Hash_Window extends JFrame {
 
         String folder = path.substring(0, path.lastIndexOf('/'))
                 .toLowerCase();
-        String filename = path.substring(path.lastIndexOf('/') + 1
-        );
+        String filename = path.substring(path.lastIndexOf('/') + 1,
+                path.length());
 
         int folderHash = HashDatabase.computeCRC(folder.getBytes(), 0,
                 folder.getBytes().length);
         int fileHash = HashDatabase.computeCRC(filename.getBytes(), 0,
                 filename.getBytes().length);
+        int fullHash = HashDatabase.computeCRC(path.getBytes(), 0, path.getBytes().length);
 
-        txtOutput.setText(Strings.PATHTOHASH_FOLDER_HASH + String.format("0x%08X (%s)", folderHash, Long.toString(folderHash & 0xFFFFFFFFL)) + "\n" + Strings.PATHTOHASH_FILE_HASH + String.format("0x%08X (%s)", fileHash, Long.toString(fileHash & 0xFFFFFFFFL)));
+        String base = "";
+
+        try {
+            if (currentIndex.extractFile(path) == null) {
+                btnCalculate.setEnabled(false);
+                base = "FILE NOT FOUND!\n";
+            } else {
+                btnCalculate.setEnabled(true);
+            }
+        } catch (Exception e) {
+            base = "FILE NOT FOUND!\n";
+            btnCalculate.setEnabled(false);
+        }
+
+        txtOutput.setText(base +
+                Strings.PATHTOHASH_FOLDER_HASH + String.format("0x%08X (%s)", folderHash, Long.toString(folderHash & 0xFFFFFFFFL)) + "\n"+
+                Strings.PATHTOHASH_FILE_HASH + String.format("0x%08X (%s)", fileHash, Long.toString(fileHash & 0xFFFFFFFFL)) + "\n" +
+                "Full hash: " + String.format("0x%08X (%s)", fullHash, Long.toString(fullHash & 0xFFFFFFFFL)));
     }
 
 }

@@ -45,25 +45,28 @@
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-shade-plugin</artifactId>
-                <version>3.2.1</version>
+                <artifactId>maven-assembly-plugin</artifactId>
                 <configuration>
-                    <finalName>ffxiv-explorer</finalName>
-                    <transformers>
-                        <transformer
-                                implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                            <manifestEntries>
-                                <Main-Class>com.fragmenterworks.ffxivextract.Main</Main-Class>
-                                <Multi-Release>true</Multi-Release>
-                            </manifestEntries>
-                        </transformer>
-                    </transformers>
+                    <finalName>ffxiv_explorer</finalName>
+                    <appendAssemblyId>false</appendAssemblyId>
+                    <archive>
+                        <manifest>
+                            <mainClass>com.fragmenterworks.ffxivextract.Main</mainClass>
+                        </manifest>
+                        <manifestEntries>
+                            <Multi-Release>true</Multi-Release>
+                        </manifestEntries>
+                    </archive>
+                    <descriptors>
+                        <descriptor>src/main/assembly/application.xml</descriptor>
+                    </descriptors>
                 </configuration>
                 <executions>
                     <execution>
+                        <id>make-assembly</id>
                         <phase>package</phase>
                         <goals>
-                            <goal>shade</goal>
+                            <goal>single</goal>
                         </goals>
                     </execution>
                 </executions>
@@ -80,11 +83,12 @@
                         <configuration>
                             <headerType>gui</headerType>
                             <outfile>target/FFXIV_Explorer.exe</outfile>
-                            <jar>target/ffxiv-explorer.jar</jar>
+                            <dontWrapJar>true</dontWrapJar>
+                            <jar>ffxiv_explorer.jar</jar>
                             <errTitle>FFXIV Explorer Error</errTitle>
                             <classPath>
                                 <mainClass>com.fragmenterworks.ffxivextract.Main</mainClass>
-                                <addDependencies>false</addDependencies>
+                                <addDependencies>true</addDependencies>
                             </classPath>
                             <icon>src/main/resources/explorer.ico</icon>
                             <jre>

@@ -48,6 +48,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
     private final JLabel lblOffsetValue;
     private final JLabel lblHashValue;
     private final JLabel lblContentTypeValue;
+    private final JLabel lblHashInfoValue;
     private final Hex_View hexView = new Hex_View(16);
     private EXDF_View exhfComponent;
     private final JProgressBar prgLoadingBar;
@@ -161,6 +162,17 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 
         lblContentTypeValue = new JLabel("*");
         pnlInfo.add(lblContentTypeValue);
+
+        JSeparator separator_3 = new JSeparator();
+        separator_3.setPreferredSize(new Dimension(1, 16));
+        separator_3.setOrientation(SwingConstants.VERTICAL);
+        pnlInfo.add(separator_3);
+
+        lblHashInfoValue = new JLabel("* / *");
+        pnlInfo.add(lblHashInfoValue);
+
+        JLabel lblHashInfo = new JLabel(" filenames loaded");
+        pnlInfo.add(lblHashInfo);
 
         JPanel pnlProgBar = new JPanel();
         pnlStatusBar.add(pnlProgBar, BorderLayout.EAST);
@@ -279,7 +291,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
             } else if (event.getActionCommand().equals("searchagain") && search_searchAgain.isEnabled()) {
                 searchWindow.searchAgain();
             } else if (event.getActionCommand().equals("hashcalc")) {
-                Path_to_Hash_Window hasher = new Path_to_Hash_Window();
+                Path_to_Hash_Window hasher = new Path_to_Hash_Window(currentIndexFile);
                 hasher.setLocationRelativeTo(FileManagerWindow.this);
                 hasher.setVisible(true);
             } else if (event.getActionCommand().equals("modelviewer")) {
@@ -945,6 +957,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
             searchWindow = new SearchWindow(FileManagerWindow.this, currentIndexFile, FileManagerWindow.this);
             for (int i = 0; i < menu.getMenuCount(); i++)
                 menu.getMenu(i).setEnabled(true);
+            lblHashInfoValue.setText(String.format("%d / %d", currentIndexFile.getNumUnhashedFiles(), currentIndexFile.getTotalFiles()));
         }
     }
 
