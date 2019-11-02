@@ -1,16 +1,18 @@
 package com.fragmenterworks.ffxivextract.gui.components;
 
-import java.awt.BorderLayout;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.net.URL;
 
 import javax.swing.*;
+import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
 import com.fragmenterworks.ffxivextract.Strings;
+import com.fragmenterworks.ffxivextract.helpers.Utils;
 import com.fragmenterworks.ffxivextract.models.SqPack_IndexFile;
 import com.fragmenterworks.ffxivextract.storage.HashDatabase;
 
@@ -119,8 +121,7 @@ public class Path_to_Hash_Window extends JFrame {
                 result ? JOptionPane.INFORMATION_MESSAGE : JOptionPane.ERROR_MESSAGE);
     }
 
-    private void calcHash()
-    {
+    private void calcHash() {
         String path = edtFullPath.getText();
 
         if (!path.contains("/"))
@@ -131,30 +132,26 @@ public class Path_to_Hash_Window extends JFrame {
 
         path = path.trim();
 
-        String folder = path.substring(0, path.lastIndexOf('/'))
-                .toLowerCase();
-        String filename = path.substring(path.lastIndexOf('/') + 1,
-                path.length());
+        String folder = path.substring(0, path.lastIndexOf('/')).toLowerCase();
+        String filename = path.substring(path.lastIndexOf('/') + 1);
 
-        int folderHash = HashDatabase.computeCRC(folder.getBytes(), 0,
-                folder.getBytes().length);
-        int fileHash = HashDatabase.computeCRC(filename.getBytes(), 0,
-                filename.getBytes().length);
+        int folderHash = HashDatabase.computeCRC(folder.getBytes(), 0, folder.getBytes().length);
+        int fileHash = HashDatabase.computeCRC(filename.getBytes(), 0, filename.getBytes().length);
         int fullHash = HashDatabase.computeCRC(path.getBytes(), 0, path.getBytes().length);
 
         String base = "";
+        Border border = BorderFactory.createLineBorder(Color.RED, 2);
 
         try {
-            if (currentIndex.extractFile(path) == null) {
-                btnCalculate.setEnabled(false);
-                base = "FILE NOT FOUND!\n";
-            } else {
-                btnCalculate.setEnabled(true);
+            if (currentIndex.extractFile(path) != null) {
+                HashDatabase.addPathToDB(edtFullPath.getText(), currentIndex.getName());
+                border = BorderFactory.createLineBorder(Color.GREEN, 2);
             }
         } catch (Exception e) {
-            base = "FILE NOT FOUND!\n";
-            btnCalculate.setEnabled(false);
+            Utils.getGlobalLogger().error(e);
         }
+
+        txtOutput.setBorder(border);
 
         txtOutput.setText(base +
                 Strings.PATHTOHASH_FOLDER_HASH + String.format("0x%08X (%s)", folderHash, Long.toString(folderHash & 0xFFFFFFFFL)) + "\n"+

@@ -15,6 +15,10 @@ public class PAP_File extends Game_File {
     private String[] animationNames;
     private int[] animationIndex;
 
+    private short modelId;
+    private byte baseId;
+    private byte variantId;
+
     public PAP_File(String path, ByteOrder endian) throws IOException {
         super(endian);
         File file = new File(path);
@@ -45,8 +49,11 @@ public class PAP_File extends Game_File {
         bb.getShort();
         bb.getShort();
         numAnimations = bb.getShort();
-        bb.getShort();
-        bb.getShort();
+
+        modelId = bb.getShort();
+        baseId = bb.get();
+        variantId = bb.get();
+
         bb.getInt();
         int havokPosition = bb.getInt();
         int footerPosition = bb.getInt();
@@ -96,4 +103,15 @@ public class PAP_File extends Game_File {
         return havokData;
     }
 
+    public short getModelId() {
+        return modelId;
+    }
+
+    public byte getBaseId() {
+        return baseId;
+    }
+
+    public byte getVariantId() {
+        return variantId;
+    }
 }
