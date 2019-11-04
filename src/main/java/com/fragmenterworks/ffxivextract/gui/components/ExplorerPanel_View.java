@@ -3,7 +3,9 @@ package com.fragmenterworks.ffxivextract.gui.components;
 import com.fragmenterworks.ffxivextract.models.SqPack_IndexFile;
 import com.fragmenterworks.ffxivextract.models.SqPack_IndexFile.SqPack_File;
 import com.fragmenterworks.ffxivextract.models.SqPack_IndexFile.SqPack_Folder;
+import sun.awt.datatransfer.TransferableProxy;
 
+import javax.sound.sampled.Clip;
 import javax.swing.*;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -11,17 +13,26 @@ import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 import java.awt.*;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
+import java.awt.datatransfer.Transferable;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Enumeration;
 
 @SuppressWarnings("serial")
-public class ExplorerPanel_View extends JScrollPane {
+public class ExplorerPanel_View extends JScrollPane implements MouseListener {
 
     private final JTree fileTree;
     private final DefaultMutableTreeNode root = new DefaultMutableTreeNode("No File Loaded");
     JScrollPane scroller;
+
+    PopupMenu contextMenu;
 
     public ExplorerPanel_View() {
         setBackground(Color.WHITE);
@@ -31,7 +42,40 @@ public class ExplorerPanel_View extends JScrollPane {
 
         fileTree.setCellRenderer(new TreeRenderer());
         fileTree.setShowsRootHandles(false);
+        fileTree.addMouseListener(this);
 
+        contextMenu = new PopupMenu();
+        MenuItem copyPath = new MenuItem("Copy full path");
+        copyPath.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String path = "";
+                TreePath[] selectedPaths = fileTree.getSelectionPaths();
+
+                if (selectedPaths == null)
+                    return;
+
+                TreePath tp = selectedPaths[0];
+                Object obj = ((DefaultMutableTreeNode) tp.getLastPathComponent()).getUserObject();
+
+                if (obj == null)
+                    return;
+                else if (obj instanceof SqPack_Folder)
+                    path = ((SqPack_Folder) obj).getName();
+                else if (obj instanceof SqPack_File) {
+                    // It's messy but...
+                    SqPack_Folder folder = (SqPack_Folder) ((DefaultMutableTreeNode) tp.getParentPath().getLastPathComponent()).getUserObject();
+                    SqPack_File file = (SqPack_File) obj;
+
+                    path = folder.getName() + "/" + file.getName();
+                }
+                StringSelection selection = new StringSelection(path);
+                Clipboard clip = Toolkit.getDefaultToolkit().getSystemClipboard();
+                clip.setContents(selection, selection);
+            }
+        });
+        contextMenu.add(copyPath);
+        this.add(contextMenu);
         this.getViewport().add(fileTree);
     }
 
@@ -69,6 +113,31 @@ public class ExplorerPanel_View extends JScrollPane {
     public void fileClosed() {
         root.removeAllChildren();
         ((DefaultTreeModel) fileTree.getModel()).reload();
+    }
+
+    @Override
+    public void mouseClicked(MouseEvent e) {
+        if (SwingUtilities.isRightMouseButton(e)) {
+            int row = fileTree.getClosestRowForLocation(e.getX(), e.getY());
+            fileTree.setSelectionRow(row);
+            contextMenu.show(fileTree, e.getX(), e.getY());
+        }
+    }
+
+    @Override
+    public void mousePressed(MouseEvent e) {
+    }
+
+    @Override
+    public void mouseReleased(MouseEvent e) {
+    }
+
+    @Override
+    public void mouseEntered(MouseEvent e) {
+    }
+
+    @Override
+    public void mouseExited(MouseEvent e) {
     }
 
     private class TreeRenderer extends DefaultTreeCellRenderer {
