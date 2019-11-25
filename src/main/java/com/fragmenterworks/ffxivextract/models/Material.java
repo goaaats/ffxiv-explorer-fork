@@ -276,7 +276,7 @@ public class Material extends Game_File {
             this.unknown2 = unknown2;
             this.index = index;
 
-            Utils.getGlobalLogger().debug("Shader name: {}", ShaderIdHelper.getName(id));
+            Utils.getGlobalLogger().trace("Shader name: {}", ShaderIdHelper.getName(id));
         }
     }
 }

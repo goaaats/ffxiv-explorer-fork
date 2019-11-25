@@ -16,6 +16,7 @@ import unluac.decompile.OutputProvider;
 import unluac.parse.BHeader;
 
 import javax.imageio.ImageIO;
+import javax.rmi.CORBA.Util;
 import javax.swing.*;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
@@ -65,6 +66,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
     private JMenuItem search_searchAgain;
     private JCheckBoxMenuItem options_enableUpdate;
     private JCheckBoxMenuItem options_showAsHex;
+    private JCheckBoxMenuItem options_sortByOffset;
 
     public FileManagerWindow(String title) {
         addWindowListener(this);
@@ -396,48 +398,12 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
             } else if (event.getActionCommand().equals("cedumpimport")) {
                 JFileChooser fc = new JFileChooser();
                 int returnVal = fc.showOpenDialog(getParent()); //Where frame is the parent component
-
-                File file = null;
                 if (returnVal == JFileChooser.APPROVE_OPTION) {
-                    file = fc.getSelectedFile();
-
-                    HashDatabase.beginConnection();
-                    try {
-                        HashDatabase.setAutoCommit(false);
-                    } catch (SQLException e1) {
-                        Utils.getGlobalLogger().error(e1);
-                    }
-
-                    int count = 0;
-                    try {
-                        BufferedReader br = new BufferedReader(new FileReader(file));
-
-                        for (String line = br.readLine(); line != null; line = br.readLine()) {
-                            if (count != 0) {
-                                String path = "";
-                                try {
-                                    path = line.substring(line.indexOf(',') + 2);
-                                    HashDatabase.addPathToDB(path, "*", HashDatabase.globalConnection);
-                                } catch (java.lang.StringIndexOutOfBoundsException e) {
-                                    Utils.getGlobalLogger().error("Couldn't parse line {}", line, e);
-                                }
-                            }
-                            count++;
-                        }
-                    } catch (Exception exc) {
-                        JOptionPane.showMessageDialog(
-                                FileManagerWindow.this,
-                                exc,
-                                "Fail",
-                                JOptionPane.ERROR_MESSAGE);
-
-                    }
-                    try {
-                        HashDatabase.commit();
-                    } catch (SQLException e) {
-                        Utils.getGlobalLogger().error(e);
-                    }
-                    HashDatabase.closeConnection();
+                    int added  = HashDatabase.importFilePaths(fc.getSelectedFile());
+                    if (added > 0)
+                        Utils.getGlobalLogger().info("Added {} new paths to db.", added);
+                    else
+                        Utils.getGlobalLogger().error("Added {} new paths before an error occurred.", added * -1);
                 }
             } else if (event.getActionCommand().equals("fileinject")) {
                 FileInjectorWindow swapper = new FileInjectorWindow();
@@ -532,6 +498,9 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
         options_showAsHex = new JCheckBoxMenuItem(Strings.MENUITEM_EXD_HEX_OPTION, false);
         options_showAsHex.setActionCommand("options_showAsHex");
 
+        options_sortByOffset = new JCheckBoxMenuItem(Strings.MENUITEM_EXD_OFFSET_OPTION, false);
+        options_sortByOffset.setActionCommand("options_sortByOffset");
+
         Preferences prefs = Preferences.userNodeForPackage(com.fragmenterworks.ffxivextract.Main.class);
         options_enableUpdate = new JCheckBoxMenuItem(Strings.MENUITEM_ENABLEUPDATE, prefs.getBoolean(Constants.PREF_DO_DB_UPDATE, false));
         options_enableUpdate.setActionCommand("options_update");
@@ -578,6 +547,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
         options.add(options_settings);
         options.add(options_enableUpdate);
         options.add(options_showAsHex);
+        options.add(options_sortByOffset);
 
         help.add(help_About);
 
@@ -712,12 +682,12 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
         //TOOD: refactor this to use byte magic
         if (data.length >= 3 && checkMagic(data, "EXDF")) {
             if (exhfComponent == null || !exhfComponent.isSame(file.getName()))
-                exhfComponent = new EXDF_View(currentIndexFile, HashDatabase.getFolder(file.getId2()) + "/" + file.getName(), options_showAsHex.getState());
+                exhfComponent = new EXDF_View(currentIndexFile, HashDatabase.getFolder(file.getId2()) + "/" + file.getName(), options_showAsHex.getState(), options_sortByOffset.getState());
             tabs.addTab("EXDF File", exhfComponent);
         } else if (data.length >= 3 && checkMagic(data, "EXHF")) {
             try {
                 if (exhfComponent == null || !exhfComponent.isSame(file.getName()))
-                    exhfComponent = new EXDF_View(currentIndexFile, HashDatabase.getFolder(file.getId2()) + "/" + file.getName(), new EXHF_File(data), options_showAsHex.getState());
+                    exhfComponent = new EXDF_View(currentIndexFile, HashDatabase.getFolder(file.getId2()) + "/" + file.getName(), new EXHF_File(data), options_showAsHex.getState(), options_sortByOffset.getState());
                 tabs.addTab("EXHF File", exhfComponent);
             } catch (IOException e) {
                 Utils.getGlobalLogger().error(e);
@@ -1001,7 +971,11 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
                             continue;
                         EXHF_File file = new EXHF_File(data);
 
-                        tempView = new EXDF_View(currentIndexFile, HashDatabase.getFolder(fileTree.getSelectedFiles().get(i).getId2()) + "/" + fileTree.getSelectedFiles().get(i).getName(), file, options_showAsHex.getState());
+                        tempView = new EXDF_View(currentIndexFile,
+                                                HashDatabase.getFolder(fileTree.getSelectedFiles().get(i).getId2()) + "/" + fileTree.getSelectedFiles().get(i).getName(),
+                                                file,
+                                                options_showAsHex.getState(),
+                                                options_sortByOffset.getState());
 
                         for (int l = 0; l < (tempView.getNumLangs()); l++) {
 
@@ -1027,7 +1001,10 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
                         if (tempView != null && tempView.isSame(files.get(i).getName()))
                             continue;
 
-                        tempView = new EXDF_View(currentIndexFile, HashDatabase.getFolder(fileTree.getSelectedFiles().get(i).getId2()) + "/" + fileTree.getSelectedFiles().get(i).getName(), options_showAsHex.getState());
+                        tempView = new EXDF_View(currentIndexFile,
+                                HashDatabase.getFolder(fileTree.getSelectedFiles().get(i).getId2()) + "/" + fileTree.getSelectedFiles().get(i).getName(),
+                                options_showAsHex.getState(),
+                                options_sortByOffset.getState());
 
                         //Remove the thing
                         String exhName = files.get(i).getName();

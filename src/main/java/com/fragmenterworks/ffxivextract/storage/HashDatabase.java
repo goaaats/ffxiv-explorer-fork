@@ -5,6 +5,7 @@ import com.fragmenterworks.ffxivextract.helpers.EARandomAccessFile;
 import com.fragmenterworks.ffxivextract.helpers.Utils;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -140,6 +141,9 @@ public class HashDatabase {
         int folderHash = computeCRC(folder.getBytes(), 0, folder.getBytes().length);
         int fileHash = computeCRC(filename.getBytes(), 0, filename.getBytes().length);
 
+        if (folders.containsKey((long) folderHash) && files.containsKey((long) fileHash))
+            return false;
+
         Utils.getGlobalLogger().debug("Adding entry {}", fullPath);
 
         try {
@@ -160,6 +164,48 @@ public class HashDatabase {
             return false;
         }
         return true;
+    }
+
+    public static int importFilePaths(File selectedFile) {
+
+        HashDatabase.beginConnection();
+        try {
+            HashDatabase.setAutoCommit(false);
+        } catch (SQLException e1) {
+            Utils.getGlobalLogger().error(e1);
+        }
+
+        int count = 0;
+        try {
+            BufferedReader br = new BufferedReader(new FileReader(selectedFile));
+
+            for (String line = br.readLine(); line != null; line = br.readLine()) {
+                String path = "";
+                try {
+                    int indexof;
+                    if ((indexof = line.indexOf(',')) == -1)
+                        path = line;
+                    else
+                        path = line.substring(indexof + 2);
+
+                    if (HashDatabase.addPathToDB(path, "*", HashDatabase.globalConnection))
+                        count++;
+                } catch (java.lang.StringIndexOutOfBoundsException e) {
+                    Utils.getGlobalLogger().error("Couldn't parse line {}", line, e);
+                }
+            }
+        } catch (Exception exc) {
+            return count * -1;
+        }
+
+        try {
+            HashDatabase.commit();
+        } catch (SQLException e) {
+            Utils.getGlobalLogger().error(e);
+        }
+        HashDatabase.closeConnection();
+
+        return count;
     }
 
     // This is used to read a list of paths from a string (IE: extracted from
@@ -593,5 +639,4 @@ public class HashDatabase {
             0x2C6FDE2C, 0x94D3B949, 0x090481F0, 0xB1B8E695, 0xA30D497B,
             0x1BB12E1E, 0x43D23E48, 0xFB6E592D, 0xE9DBF6C3, 0x516791A6,
             0xCCB0A91F, 0x740CCE7A, 0x66B96194, 0xDE0506F1};
-
 }

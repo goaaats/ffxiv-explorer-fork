@@ -38,8 +38,8 @@ public class LoDSubModel {
         int vertOffset = bb.getInt();
         int indexOffset = bb.getInt();
 
-        Utils.getGlobalLogger().debug("Num meshes: {}", numMeshes);
-        Utils.getGlobalLogger().debug("\tVert table size: {}\n\tIndex table size: {}\n\tVert table offset: {}\n\tIndex table offset: {}", vertBuffSize, indexBuffSize, vertOffset, indexOffset);
+        Utils.getGlobalLogger().trace("Num meshes: {}", numMeshes);
+        Utils.getGlobalLogger().trace("\tVert table size: {}\n\tIndex table size: {}\n\tVert table offset: {}\n\tIndex table offset: {}", vertBuffSize, indexBuffSize, vertOffset, indexOffset);
 
         return new LoDSubModel(meshOffset, numMeshes, vertBuffSize, indexBuffSize, vertOffset, indexOffset);
     }

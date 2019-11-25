@@ -10,14 +10,14 @@ import com.fragmenterworks.ffxivextract.models.EXHF_File;
 import com.fragmenterworks.ffxivextract.models.EXHF_File.EXDF_Dataset;
 import com.fragmenterworks.ffxivextract.models.SqPack_IndexFile;
 import com.fragmenterworks.ffxivextract.storage.HashDatabase;
-import com.sun.org.apache.xalan.internal.xsltc.compiler.util.Util;
-import unluac.decompile.Constant;
 
 import javax.swing.*;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableColumn;
 import java.awt.*;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
@@ -25,6 +25,8 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Comparator;
 
 @SuppressWarnings("serial")
 public class EXDF_View extends JScrollPane implements ItemListener {
@@ -51,16 +53,20 @@ public class EXDF_View extends JScrollPane implements ItemListener {
 
     private int langOverride = -1;
     private boolean showAsHex = false;
+    private boolean sortByOffset = false;
 
     private final SparseArray<String> columnNames = new SparseArray<String>();
 
     //Given a EXD file, figure out EXH name, and look for it.
-    public EXDF_View(SqPack_IndexFile currentIndex, String fullPath, boolean showAsHex) {
+    public EXDF_View(SqPack_IndexFile currentIndex, String fullPath, boolean showAsHex, boolean sortByOffset) {
 
         this();
 
         this.currentIndex = currentIndex;
         this.showAsHex = showAsHex;
+
+        //TODO maybe implement swapping this on the fly. eventually
+        this.sortByOffset = sortByOffset;
 
         fullPath = fullPath.toLowerCase();
 
@@ -120,11 +126,11 @@ public class EXDF_View extends JScrollPane implements ItemListener {
     }
 
     public EXDF_View(SqPack_IndexFile currentIndex, String fullPath, EXHF_File file) {
-        this(currentIndex, fullPath, file, false);
+        this(currentIndex, fullPath, file, false, false);
     }
 
     //Given a EXH file, figure out EXD name, and look for it.
-    public EXDF_View(SqPack_IndexFile currentIndex, String fullPath, EXHF_File file, boolean showAsHex) {
+    public EXDF_View(SqPack_IndexFile currentIndex, String fullPath, EXHF_File file, boolean showAsHex, boolean sortByOffset) {
 
         this();
 
@@ -133,6 +139,7 @@ public class EXDF_View extends JScrollPane implements ItemListener {
         this.currentIndex = currentIndex;
         this.exhFile = file;
         this.showAsHex = showAsHex;
+        this.sortByOffset = sortByOffset;
 
         //If the name is unknown, don't bother
         if (!fullPath.contains(".exh")) {
@@ -248,10 +255,28 @@ public class EXDF_View extends JScrollPane implements ItemListener {
         JScrollPane scrollPane = new JScrollPane();
         panel_2.add(scrollPane, BorderLayout.CENTER);
 
-        table = new JTable();
+        table = new JTable(){
+            @Override
+            public Component prepareRenderer(TableCellRenderer renderer, int row, int column) {
+                Component component = super.prepareRenderer(renderer, row, column);
+                int rendererWidth = component.getPreferredSize().width;
+
+                TableColumn tableColumn = getColumnModel().getColumn(column);
+                Object value = tableColumn.getHeaderValue();
+                TableCellRenderer renderer2 = tableColumn.getHeaderRenderer();
+
+                if (renderer2 == null)
+                    renderer = table.getTableHeader().getDefaultRenderer();
+
+                Component c = renderer.getTableCellRendererComponent(table, value, false, false, -1, column);
+                int headerWidth = c.getPreferredSize().width;
+
+                tableColumn.setPreferredWidth(Math.max(rendererWidth + getIntercellSpacing().width, Math.max(headerWidth, tableColumn.getPreferredWidth())));
+                return component;
+            }
+        };
+        table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
         scrollPane.setViewportView(table);
-
-
     }
 
     //Given a exd name, find all related exds (by page/language)
@@ -282,8 +307,6 @@ public class EXDF_View extends JScrollPane implements ItemListener {
                 } catch (IOException e) {
                     Utils.getGlobalLogger().error(e);
                 }
-
-
             }
         }
 
@@ -293,9 +316,7 @@ public class EXDF_View extends JScrollPane implements ItemListener {
     private void setupUI() {
 
         loadColumnNames(exhName);
-
         table.setModel(new EXDTableModel(exhFile, exdFile));
-        table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 
         lblExhName.setText(exhName);
         lblExhNumEntries.setText("" + exhFile.getNumEntries() + ((exhFile.getNumEntries() == exhFile.getTrueNumEntries() ? "" : " (Page Sum: " + exhFile.getTrueNumEntries() + ")")));
@@ -314,6 +335,34 @@ public class EXDF_View extends JScrollPane implements ItemListener {
 
         cmbLanguage.setSelectedIndex(Constants.defaultLanguage > exhFile.getNumLanguages() - 1 ? 0 : Constants.defaultLanguage);
 
+        if (this.sortByOffset)
+        {
+            java.util.List<TableColumn> tempColumns = new ArrayList<>();
+
+            // keep index column, love that column
+            for (int i = 1; i < table.getColumnModel().getColumnCount(); i++)
+                tempColumns.add(table.getColumnModel().getColumn(i));
+
+            int count = table.getColumnModel().getColumnCount();
+            for (int i = count - 1; i >= 1; i--)
+                table.getColumnModel().removeColumn(table.getColumnModel().getColumn(i));
+
+            tempColumns.sort((o1, o2) -> {
+                String headerOne = (String) o1.getHeaderValue();
+                String headerTwo = (String) o2.getHeaderValue();
+
+                String offsetTextOne = headerOne.substring(headerOne.lastIndexOf("[") + 3, headerOne.lastIndexOf("]"));
+                String offsetTextTwo = headerTwo.substring(headerTwo.lastIndexOf("[") + 3, headerTwo.lastIndexOf("]"));
+
+                int offsetOne = Integer.parseInt(offsetTextOne, 16);
+                int offsetTwo = Integer.parseInt(offsetTextTwo, 16);
+
+                return Integer.compare(offsetOne, offsetTwo);
+            });
+
+            for (TableColumn c : tempColumns)
+                table.getColumnModel().addColumn(c);
+        }
     }
 
     //Setup UI to complain that the EXH file was not found
@@ -350,8 +399,13 @@ public class EXDF_View extends JScrollPane implements ItemListener {
         public String getColumnName(int column) {
             if (column == 0)
                 return "Index";
-            else
-                return (column - 1) + " " + columnNames.get(column - 1, "[" + resolveTypeToString(exhFile.getDatasetTable()[column - 1].type) + "(" + String.format("0x%x", exhFile.getDatasetTable()[column - 1].type) + ")]" + "[" + String.format("0x%x", exhFile.getDatasetTable()[column - 1].offset) + "]");
+            else {
+                String columnType = "[" + resolveTypeToString(exhFile.getDatasetTable()[column - 1].type) + "]";
+                String offset = String.format("[0x%s]", String.format("%x", exhFile.getDatasetTable()[column - 1].offset).toUpperCase());
+                String mainTitle = columnNames.get(column - 1, columnType);
+
+                return String.format("%d %s %s", column - 1, mainTitle, offset);
+            }
         }
 
         @Override

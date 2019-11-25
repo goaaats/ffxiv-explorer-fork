@@ -85,6 +85,7 @@ public class Strings {
     public static final String MENUITEM_QUIT = "Quit";
     public static final String MENUITEM_ABOUT = "About";
     public static final String MENUITEM_EXD_HEX_OPTION = "Show EX numbers as hex";
+    public static final String MENUITEM_EXD_OFFSET_OPTION = "Sort EXD columns by offset";
 
     //Buttons
     public static final String BUTTONNAMES_BROWSE = "Browse";

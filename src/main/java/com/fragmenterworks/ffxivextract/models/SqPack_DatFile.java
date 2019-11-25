@@ -40,8 +40,8 @@ public class SqPack_DatFile {
         byte[] extraHeader = null;
         int extraHeaderSize = 0;
 
-        Utils.getGlobalLogger().trace("\nFile @ {}\n\tHeader length: {}\n\tContent type: {}\n\tFile size: {}\n\tBlock buffer size: {}",
-                String.format("File @ %08x", fileOffset), headerLength, contentType, fileSize, blockBufferSize);
+        Utils.getGlobalLogger().trace("\nFile @ {}\n\tHeader length: {}\n\tContent type: {}\n\tFile size: {}\n\tBlock buffer size: {}\n\tBlock count: {}",
+                String.format("%08x", fileOffset), headerLength, contentType, fileSize, blockBufferSize, blockCount);
 
         Utils.getGlobalLogger().trace("Block data: ...");
 

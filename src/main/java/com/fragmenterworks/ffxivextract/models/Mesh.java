@@ -51,7 +51,7 @@ public class Mesh {
             vertBuffers[i] = Buffers.newDirectByteBuffer(numVerts * vertexSizes[i]);
         indexBuffer = Buffers.newDirectByteBuffer(numIndex * 2);
 
-        Utils.getGlobalLogger().debug("Num parts: {}\n\tNum verts: {}\n\tNum indices: {}\n\tVertex offset: {}\n\tIndex offset: {}",
+        Utils.getGlobalLogger().trace("Num parts: {}\n\tNum verts: {}\n\tNum indices: {}\n\tVertex offset: {}\n\tIndex offset: {}",
                 partTableCount, numVerts, numIndex, vertexBufferOffsets[0], indexBufferOffset);
     }
 
