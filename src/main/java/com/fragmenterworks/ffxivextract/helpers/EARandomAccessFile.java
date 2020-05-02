@@ -26,6 +26,20 @@ public class EARandomAccessFile {
         work = new byte[8];
     }
 
+    public int peekInt() throws IOException {
+        long pos = raf.getFilePointer();
+        int ret = readInt();
+        raf.seek(pos);
+        return ret;
+    }
+
+    public short peekShort() throws IOException {
+        long pos = raf.getFilePointer();
+        short ret = readShort();
+        raf.seek(pos);
+        return ret;
+    }
+
     /**
      * constructors.
      *
