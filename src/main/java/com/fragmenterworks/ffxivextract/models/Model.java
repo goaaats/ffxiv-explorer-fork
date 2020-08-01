@@ -1,7 +1,6 @@
 package com.fragmenterworks.ffxivextract.models;
 
 import com.fragmenterworks.ffxivextract.Constants;
-import com.fragmenterworks.ffxivextract.helpers.DebugListener;
 import com.fragmenterworks.ffxivextract.helpers.GLHelper;
 import com.fragmenterworks.ffxivextract.helpers.HavokNative;
 import com.fragmenterworks.ffxivextract.helpers.ImageDecoding.ImageDecodingException;
