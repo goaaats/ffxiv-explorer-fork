@@ -21,6 +21,7 @@ import javax.swing.*;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.filechooser.FileFilter;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
@@ -400,10 +401,18 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
                 int returnVal = fc.showOpenDialog(getParent()); //Where frame is the parent component
                 if (returnVal == JFileChooser.APPROVE_OPTION) {
                     int added  = HashDatabase.importFilePaths(fc.getSelectedFile());
-                    if (added > 0)
+                    if (added >= 0)
                         Utils.getGlobalLogger().info("Added {} new paths to db.", added);
                     else
                         Utils.getGlobalLogger().error("Added {} new paths before an error occurred.", added * -1);
+                }
+            } else if (event.getActionCommand().equals("dbimport")) {
+                JFileChooser fc = new JFileChooser();
+                FileFilter filter = new FileNameExtensionFilter("FFXIV Explorer database", "db");
+                fc.setFileFilter(filter);
+                int returnVal = fc.showOpenDialog(getParent()); //Where frame is the parent component
+                if (returnVal == JFileChooser.APPROVE_OPTION) {
+                    HashDatabase.importDatabase(fc.getSelectedFile());
                 }
             } else if (event.getActionCommand().equals("fileinject")) {
                 FileInjectorWindow swapper = new FileInjectorWindow();
@@ -420,21 +429,27 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
         JMenu search = new JMenu(Strings.MENU_SEARCH);
         JMenu dataviewers = new JMenu(Strings.MENU_DATAVIEWERS);
         JMenu tools = new JMenu(Strings.MENU_TOOLS);
+        JMenu database = new JMenu(Strings.MENU_DATABASE);
         JMenu options = new JMenu(Strings.MENU_OPTIONS);
         JMenu help = new JMenu(Strings.MENU_HELP);
+
         JMenuItem file_Open = new JMenuItem(Strings.MENUITEM_OPEN);
         file_Open.setActionCommand("open");
+
         file_Close = new JMenuItem(Strings.MENUITEM_CLOSE);
         file_Close.setEnabled(false);
         file_Close.setActionCommand("close");
+
         file_Extract = new JMenuItem(Strings.MENUITEM_EXTRACT);
         file_Extract.setEnabled(false);
         file_Extract.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_E, KeyEvent.CTRL_MASK));
+
         file_ExtractRaw = new JMenuItem(Strings.MENUITEM_EXTRACTRAW);
         file_ExtractRaw.setEnabled(false);
         file_ExtractRaw.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_E, KeyEvent.SHIFT_MASK | KeyEvent.CTRL_MASK));
         file_Extract.setActionCommand("extractc");
         file_ExtractRaw.setActionCommand("extractr");
+
         JMenuItem file_Quit = new JMenuItem(Strings.MENUITEM_QUIT);
         file_Quit.setActionCommand("quit");
         file_Open.addActionListener(menuHandler);
@@ -467,9 +482,9 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
         tools_musicswapper.setActionCommand("musicswapper");
         tools_musicswapper.addActionListener(menuHandler);
 
-        JMenuItem tools_hashcalculator = new JMenuItem(Strings.MENUITEM_HASHCALC);
-        tools_hashcalculator.setActionCommand("hashcalc");
-        tools_hashcalculator.addActionListener(menuHandler);
+        JMenuItem db_hashcalculator = new JMenuItem(Strings.MENUITEM_HASHCALC);
+        db_hashcalculator.setActionCommand("hashcalc");
+        db_hashcalculator.addActionListener(menuHandler);
 
         JMenuItem tools_macroEditor = new JMenuItem(Strings.MENUITEM_MACROEDITOR);
         tools_macroEditor.setActionCommand("macroeditor");
@@ -511,9 +526,14 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
         help_About.setActionCommand("about");
         help_About.addActionListener(menuHandler);
 
-        JMenuItem tools_importcedump = new JMenuItem(Strings.MENUITEM_CEDUMPIMPORT);
-        tools_importcedump.setActionCommand("cedumpimport");
-        tools_importcedump.addActionListener(menuHandler);
+        JMenuItem db_importcedump = new JMenuItem(Strings.MENUITEM_CEDUMPIMPORT);
+        db_importcedump.setActionCommand("cedumpimport");
+        db_importcedump.addActionListener(menuHandler);
+
+        JMenuItem db_importdb = new JMenuItem(Strings.MENUITEM_DBIMPORT);
+        db_importdb.setActionCommand("dbimport");
+        db_importdb.addActionListener(menuHandler);
+
 
         JMenuItem tools_fileinject = new JMenuItem(Strings.MENUITEM_FILEINJECT);
         tools_fileinject.setActionCommand("fileinject");
@@ -537,12 +557,14 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
         tools.add(tools_fileinject);
         tools.add(tools_macroEditor);
         tools.add(tools_logViewer);
-        tools.add(tools_hashcalculator);
-        tools.add(tools_importcedump);
         tools.addSeparator();
         tools.add(tools_findexhs);
         tools.add(tools_findmusic);
         tools.add(tools_findmaps);
+
+        database.add(db_hashcalculator);
+        database.add(db_importcedump);
+        database.add(db_importdb);
 
         options.add(options_settings);
         options.add(options_enableUpdate);
@@ -556,6 +578,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
         menu.add(search);
         menu.add(dataviewers);
         menu.add(tools);
+        menu.add(database);
         menu.add(options);
         menu.add(help);
 
@@ -650,7 +673,10 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
             return;
         }
 
-        if (contentType == 3) {
+        //disable opengl for BE packs
+        boolean threedee = !currentIndexFile.isBigEndian();
+
+        if (contentType == 3 && threedee) {
             OpenGL_View view = null;
 
             try {
@@ -710,33 +736,9 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
             try {
                 Lua_View luaView;
 
-                ByteBuffer buffer = ByteBuffer.wrap(data);
-                buffer.order(ByteOrder.LITTLE_ENDIAN);
-                buffer.rewind();
+                String text = getDecompiledLuaString(data);
 
-                BHeader header = new BHeader(buffer, new unluac.Configuration());
-                Decompiler d = new Decompiler(header.main);
-                Decompiler.State t = d.decompile();
-                final StringBuilder pout = new StringBuilder();
-
-                d.print(t, new OutputProvider() {
-                    @Override
-                    public void print(String s) {
-                        pout.append(s);
-                    }
-
-                    @Override
-                    public void print(byte b) {
-                        pout.append(b);
-                    }
-
-                    @Override
-                    public void println() {
-                        pout.append("\n");
-                    }
-                });
-
-                luaView = new Lua_View(("-- Decompiled using unluac_2015_06_13 2.0.1 by tehtmi (https://sourceforge.net/projects/unluac/)\n" + pout.toString()).split("\\r?\\n"));
+                luaView = new Lua_View(("-- Decompiled using unluac_2015_06_13 2.0.1 by tehtmi (https://sourceforge.net/projects/unluac/)\n" + text).split("\\r?\\n"));
                 tabs.addTab("Decompiled Lua", luaView);
             } catch (Exception e) {
                 Utils.getGlobalLogger().error(e);
@@ -749,19 +751,19 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
                 Utils.getGlobalLogger().error(e);
             }
         } else if (data.length >= 4 && checkMagic(data, "ShCd")) {
-            try {
-                Shader_View shaderView = new Shader_View(new SHCD_File(data, currentIndexFile.getEndian()));
-                tabs.addTab("Shader File", shaderView);
-            } catch (IOException e) {
-                Utils.getGlobalLogger().error(e);
-            }
+//            try {
+//                Shader_View shaderView = new Shader_View(new SHCD_File(data, currentIndexFile.getEndian()));
+//                tabs.addTab("Shader File", shaderView);
+//            } catch (IOException e) {
+//                Utils.getGlobalLogger().error(e);
+//            }
         } else if (data.length >= 4 && checkMagic(data, "ShPk")) {
-            try {
-                Shader_View shaderView = new Shader_View(new SHPK_File(data, currentIndexFile.getEndian()));
-                tabs.addTab("Shader Pack", shaderView);
-            } catch (IOException e) {
-                Utils.getGlobalLogger().error(e);
-            }
+//            try {
+//                Shader_View shaderView = new Shader_View(new SHPK_File(data, currentIndexFile.getEndian()));
+//                tabs.addTab("Shader Pack", shaderView);
+//            } catch (IOException e) {
+//                Utils.getGlobalLogger().error(e);
+//            }
         } else if (data.length >= 4 && checkMagic(data, "SGB1")) {
             try {
                 SGB_File sgbFile = new SGB_File(data, currentIndexFile.getEndian());
@@ -769,8 +771,8 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
                 Utils.getGlobalLogger().error(e);
             }
         } else if (data.length >= 4 && checkMagic(data, "uldh")) {
-            ULD_View uldView = new ULD_View(new ULD_File(data, currentIndexFile.getEndian()));
-            tabs.addTab("ULD Renderer", uldView);
+//            ULD_View uldView = new ULD_View(new ULD_File(data, currentIndexFile.getEndian()));
+//            tabs.addTab("ULD Renderer", uldView);
         } else if (file.getName().equals("human.cmp")) {
             CMP_File cmpFile = new CMP_File(data);
             CMP_View cmpView = new CMP_View(cmpFile);
@@ -806,14 +808,17 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
             }
         }
 
-        for (int i = 0; i < magic.length(); i++) {
-            if (bigBuf[i] != magic.charAt(i)) {
+        if (matchesLittle)
+            return true;
+
+        for (int i = magic.length() - 1; i >= 0; i--) {
+            if (bigBuf[i] != magic.charAt(magic.length() - 1 - i)) {
                 matchesBig = false;
                 break;
             }
         }
 
-        return matchesLittle || matchesBig;
+        return matchesBig;
     }
 
     private void extract(boolean doConvert) {
@@ -854,7 +859,35 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
             loadingDialog.setLocationRelativeTo(this);
             loadingDialog.setVisible(true);
         }
+    }
 
+    private String getDecompiledLuaString(byte[] data) {
+        ByteBuffer buffer = ByteBuffer.wrap(data);
+        buffer.order(ByteOrder.LITTLE_ENDIAN);
+        buffer.rewind();
+
+        BHeader header = new BHeader(buffer, new unluac.Configuration());
+        Decompiler d = new Decompiler(header.main);
+        Decompiler.State t = d.decompile();
+        final StringBuilder pout = new StringBuilder();
+
+        d.print(t, new OutputProvider() {
+            @Override
+            public void print(String s) {
+                pout.append(s);
+            }
+
+            @Override
+            public void print(byte b) {
+                pout.append(b);
+            }
+
+            @Override
+            public void println() {
+                pout.append("\n");
+            }
+        });
+        return pout.toString();
     }
 
     private String getExtension(int contentType, byte[] data) {
@@ -964,20 +997,80 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
                     byte[] data = currentIndexFile.extractFile(files.get(i).getOffset(), loadingDialog);
                     byte[] dataToSave = null;
 
-                    String extension = getExtension(currentIndexFile.getContentType(files.get(i).getOffset()), data);
+                    if (data == null)
+                        continue;
 
-                    if (extension.equals(".exh") && doConvert) {
-                        if (tempView != null && tempView.isSame(files.get(i).getName()))
+                    int contentType = currentIndexFile.getContentType(files.get(i).getOffset());
+                    String extension = getExtension(contentType, data);
+
+                    if (doConvert) {
+                        if (extension.equals(".exh")) {
+                            if (tempView != null && tempView.isSame(files.get(i).getName()))
+                                continue;
+                            EXHF_File file = new EXHF_File(data);
+
+                            tempView = new EXDF_View(currentIndexFile,
+                                    HashDatabase.getFolder(fileTree.getSelectedFiles().get(i).getId2()) + "/" + fileTree.getSelectedFiles().get(i).getName(),
+                                    file,
+                                    options_showAsHex.getState(),
+                                    options_sortByOffset.getState());
+
+                            for (int l = 0; l < (tempView.getNumLangs()); l++) {
+
+                                String path = lastSaveLocation.getCanonicalPath();
+
+                                if (fileName == null)
+                                    fileName = String.format("%X", files.get(i).getId());
+
+                                if (folderName == null)
+                                    folderName = String.format("%X", files.get(i).getId2());
+
+                                path = lastSaveLocation.getCanonicalPath() + "\\" + folderName + "\\" + fileName;
+
+                                File mkDirPath = new File(path);
+                                mkDirPath.getParentFile().mkdirs();
+
+                                tempView.saveCSV(path + EXHF_File.languageCodes[tempView.getExhFile().getLanguageTable()[l]] + ".csv", l);
+
+                            }
+
                             continue;
-                        EXHF_File file = new EXHF_File(data);
+                        } else if (extension.equals(".exd")) {
+                            if (tempView != null && tempView.isSame(files.get(i).getName()))
+                                continue;
 
-                        tempView = new EXDF_View(currentIndexFile,
-                                                HashDatabase.getFolder(fileTree.getSelectedFiles().get(i).getId2()) + "/" + fileTree.getSelectedFiles().get(i).getName(),
-                                                file,
-                                                options_showAsHex.getState(),
-                                                options_sortByOffset.getState());
+                            tempView = new EXDF_View(currentIndexFile,
+                                    HashDatabase.getFolder(fileTree.getSelectedFiles().get(i).getId2()) + "/" + fileTree.getSelectedFiles().get(i).getName(),
+                                    options_showAsHex.getState(),
+                                    options_sortByOffset.getState());
 
-                        for (int l = 0; l < (tempView.getNumLangs()); l++) {
+                            //Remove the thing
+                            String exhName = files.get(i).getName();
+
+                            for (int l = 0; l < EXHF_File.languageCodes.length; l++)
+                                exhName = exhName.replace(String.format("%s.exd", EXHF_File.languageCodes[l]), "");
+
+                            exhName = exhName.substring(0, exhName.lastIndexOf("_")) + ".exh";
+
+                            for (int l = 0; l < (tempView.getNumLangs()); l++) {
+                                String path = lastSaveLocation.getCanonicalPath();
+
+                                fileName = exhName;
+
+                                if (folderName == null)
+                                    folderName = String.format("%X", files.get(i).getId2());
+
+                                path = lastSaveLocation.getCanonicalPath() + "\\" + folderName + "\\" + fileName;
+
+                                File mkDirPath = new File(path);
+                                mkDirPath.getParentFile().mkdirs();
+
+                                tempView.saveCSV(path + EXHF_File.languageCodes[tempView.getExhFile().getLanguageTable()[l]] + ".csv", l);
+                            }
+
+                            continue;
+                        } else if (extension.equals(".obj")) {
+                            Model model = new Model(folderName + "/" + fileName, currentIndexFile, data, currentIndexFile.getEndian());
 
                             String path = lastSaveLocation.getCanonicalPath();
 
@@ -992,85 +1085,94 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
                             File mkDirPath = new File(path);
                             mkDirPath.getParentFile().mkdirs();
 
-                            tempView.saveCSV(path + EXHF_File.languageCodes[tempView.getExhFile().getLanguageTable()[l]] + ".csv", l);
+                            WavefrontObjectWriter.writeObj(path, model, currentIndexFile.getEndian());
 
-                        }
-
-                        continue;
-                    } else if (extension.equals(".exd") && doConvert) {
-                        if (tempView != null && tempView.isSame(files.get(i).getName()))
                             continue;
+                        } else if (extension.equals(".hkx")) {
+                            if (data.length >= 4 && data[0] == 'p' && data[1] == 'a' && data[2] == 'p' && data[3] == ' ') {
+                                PAP_File pap = new PAP_File(data, currentIndexFile.getEndian());
+                                dataToSave = pap.getHavokData();
+                            } else if (data.length >= 4 && data[0] == 'b' && data[1] == 'l' && data[2] == 'k' && data[3] == 's') {
+                                SKLB_File pap = new SKLB_File(data, currentIndexFile.getEndian());
+                                dataToSave = pap.getHavokData();
+                            }
 
-                        tempView = new EXDF_View(currentIndexFile,
-                                HashDatabase.getFolder(fileTree.getSelectedFiles().get(i).getId2()) + "/" + fileTree.getSelectedFiles().get(i).getName(),
-                                options_showAsHex.getState(),
-                                options_sortByOffset.getState());
+                            extension = ".hkx";
+                        } else if (extension.equals(".cso")) {
+                            SHCD_File shader = new SHCD_File(data, currentIndexFile.getEndian());
+                            dataToSave = shader.getShaderBytecode();
+                            extension = ".cso";
+                        } else if (extension.equals(".shpk") && doConvert) {
+                            try {
+                                SHPK_File shader = new SHPK_File(data, currentIndexFile.getEndian());
 
-                        //Remove the thing
-                        String exhName = files.get(i).getName();
+                                for (int j = 0; j < shader.getNumVertShaders(); j++) {
+                                    dataToSave = shader.getShaderBytecode(j);
+                                    extension = ".vs.cso";
+                                    String path = lastSaveLocation.getCanonicalPath();
 
-                        for (int l = 0; l < EXHF_File.languageCodes.length; l++)
-                            exhName = exhName.replace(String.format("%s.exd", EXHF_File.languageCodes[l]), "");
+                                    if (fileName == null)
+                                        fileName = String.format("%X", files.get(i).getId());
 
-                        exhName = exhName.substring(0, exhName.lastIndexOf("_")) + ".exh";
+                                    if (folderName == null)
+                                        folderName = String.format("%X", files.get(i).getId2());
 
-                        for (int l = 0; l < (tempView.getNumLangs()); l++) {
-                            String path = lastSaveLocation.getCanonicalPath();
+                                    path = lastSaveLocation.getCanonicalPath() + "\\" + folderName + "\\" + fileName;
 
-                            fileName = exhName;
+                                    File mkDirPath = new File(path);
+                                    mkDirPath.getParentFile().mkdirs();
 
-                            if (folderName == null)
-                                folderName = String.format("%X", files.get(i).getId2());
+                                    EARandomAccessFile out = new EARandomAccessFile(path + j + extension, "rw", ByteOrder.LITTLE_ENDIAN);
+                                    out.write(dataToSave, 0, dataToSave.length);
+                                    out.close();
+                                }
+                                for (int j = 0; j < shader.getNumPixelShaders(); j++) {
+                                    dataToSave = shader.getShaderBytecode(shader.getNumVertShaders() + j);
+                                    extension = ".ps.cso";
+                                    String path = lastSaveLocation.getCanonicalPath();
 
-                            path = lastSaveLocation.getCanonicalPath() + "\\" + folderName + "\\" + fileName;
+                                    if (fileName == null)
+                                        fileName = String.format("%X", files.get(i).getId());
 
-                            File mkDirPath = new File(path);
-                            mkDirPath.getParentFile().mkdirs();
+                                    if (folderName == null)
+                                        folderName = String.format("%X", files.get(i).getId2());
 
-                            tempView.saveCSV(path + EXHF_File.languageCodes[tempView.getExhFile().getLanguageTable()[l]] + ".csv", l);
-                        }
+                                    path = lastSaveLocation.getCanonicalPath() + "\\" + folderName + "\\" + fileName;
 
-                        continue;
-                    } else if (extension.equals(".obj") && doConvert) {
-                        Model model = new Model(folderName + "/" + fileName, currentIndexFile, data, currentIndexFile.getEndian());
+                                    File mkDirPath = new File(path);
+                                    mkDirPath.getParentFile().mkdirs();
 
-                        String path = lastSaveLocation.getCanonicalPath();
+                                    EARandomAccessFile out = new EARandomAccessFile(path + j + extension, "rw", ByteOrder.LITTLE_ENDIAN);
+                                    out.write(dataToSave, 0, dataToSave.length);
+                                    out.close();
+                                }
 
-                        if (fileName == null)
-                            fileName = String.format("%X", files.get(i).getId());
+                            } catch (IOException e) {
+                                Utils.getGlobalLogger().error(e);
+                            }
+                        } else if (extension.equals(".png")) {
+                            Texture_File tex = new Texture_File(data, currentIndexFile.getEndian());
+                            dataToSave = tex.getImage("png");
+                            extension = ".png";
+                        } else if (extension.equals(".luab")) {
+                            String text = getDecompiledLuaString(data);
+                            dataToSave = text.getBytes();
+                        } else if (extension.equals(".scd")) {
+                            SCD_File file = new SCD_File(data, currentIndexFile.getEndian());
 
-                        if (folderName == null)
-                            folderName = String.format("%X", files.get(i).getId2());
+                            for (int s = 0; s < file.getNumEntries(); s++) {
+                                SCD_Sound_Info info = file.getSoundInfo(s);
+                                if (info == null)
+                                    continue;
+                                if (info.dataType == 0x06) {
+                                    dataToSave = file.getConverted(s);
+                                    extension = ".ogg";
+                                } else if (info.dataType == 0x0C) {
+                                    dataToSave = file.getConverted(s);
+                                    extension = ".wav";
+                                } else
+                                    continue;
 
-                        path = lastSaveLocation.getCanonicalPath() + "\\" + folderName + "\\" + fileName;
-
-                        File mkDirPath = new File(path);
-                        mkDirPath.getParentFile().mkdirs();
-
-                        WavefrontObjectWriter.writeObj(path, model, currentIndexFile.getEndian());
-
-                        continue;
-                    } else if (extension.equals(".hkx") && doConvert) {
-                        if (data.length >= 4 && data[0] == 'p' && data[1] == 'a' && data[2] == 'p' && data[3] == ' ') {
-                            PAP_File pap = new PAP_File(data, currentIndexFile.getEndian());
-                            dataToSave = pap.getHavokData();
-                        } else if (data.length >= 4 && data[0] == 'b' && data[1] == 'l' && data[2] == 'k' && data[3] == 's') {
-                            SKLB_File pap = new SKLB_File(data, currentIndexFile.getEndian());
-                            dataToSave = pap.getHavokData();
-                        }
-
-                        extension = ".hkx";
-                    } else if (extension.equals(".cso") && doConvert) {
-                        SHCD_File shader = new SHCD_File(data, currentIndexFile.getEndian());
-                        dataToSave = shader.getShaderBytecode();
-                        extension = ".cso";
-                    } else if (extension.equals(".shpk") && doConvert) {
-                        try {
-                            SHPK_File shader = new SHPK_File(data, currentIndexFile.getEndian());
-
-                            for (int j = 0; j < shader.getNumVertShaders(); j++) {
-                                dataToSave = shader.getShaderBytecode(j);
-                                extension = ".vs.cso";
                                 String path = lastSaveLocation.getCanonicalPath();
 
                                 if (fileName == null)
@@ -1084,73 +1186,12 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
                                 File mkDirPath = new File(path);
                                 mkDirPath.getParentFile().mkdirs();
 
-                                EARandomAccessFile out = new EARandomAccessFile(path + j + extension, "rw", ByteOrder.LITTLE_ENDIAN);
+                                EARandomAccessFile out = new EARandomAccessFile(path + (file.getNumEntries() == 1 ? "" : "_" + s) + extension, "rw", ByteOrder.LITTLE_ENDIAN);
                                 out.write(dataToSave, 0, dataToSave.length);
                                 out.close();
                             }
-                            for (int j = 0; j < shader.getNumPixelShaders(); j++) {
-                                dataToSave = shader.getShaderBytecode(shader.getNumVertShaders() + j);
-                                extension = ".ps.cso";
-                                String path = lastSaveLocation.getCanonicalPath();
-
-                                if (fileName == null)
-                                    fileName = String.format("%X", files.get(i).getId());
-
-                                if (folderName == null)
-                                    folderName = String.format("%X", files.get(i).getId2());
-
-                                path = lastSaveLocation.getCanonicalPath() + "\\" + folderName + "\\" + fileName;
-
-                                File mkDirPath = new File(path);
-                                mkDirPath.getParentFile().mkdirs();
-
-                                EARandomAccessFile out = new EARandomAccessFile(path + j + extension, "rw", ByteOrder.LITTLE_ENDIAN);
-                                out.write(dataToSave, 0, dataToSave.length);
-                                out.close();
-                            }
-
-                        } catch (IOException e) {
-                            Utils.getGlobalLogger().error(e);
+                            continue;
                         }
-
-                    } else if (extension.equals(".png") && doConvert) {
-                        Texture_File tex = new Texture_File(data, currentIndexFile.getEndian());
-                        dataToSave = tex.getImage("png");
-                        extension = ".png";
-                    } else if (extension.equals(".scd") && doConvert) {
-                        SCD_File file = new SCD_File(data, currentIndexFile.getEndian());
-
-                        for (int s = 0; s < file.getNumEntries(); s++) {
-                            SCD_Sound_Info info = file.getSoundInfo(s);
-                            if (info == null)
-                                continue;
-                            if (info.dataType == 0x06) {
-                                dataToSave = file.getConverted(s);
-                                extension = ".ogg";
-                            } else if (info.dataType == 0x0C) {
-                                dataToSave = file.getConverted(s);
-                                extension = ".wav";
-                            } else
-                                continue;
-
-                            String path = lastSaveLocation.getCanonicalPath();
-
-                            if (fileName == null)
-                                fileName = String.format("%X", files.get(i).getId());
-
-                            if (folderName == null)
-                                folderName = String.format("%X", files.get(i).getId2());
-
-                            path = lastSaveLocation.getCanonicalPath() + "\\" + folderName + "\\" + fileName;
-
-                            File mkDirPath = new File(path);
-                            mkDirPath.getParentFile().mkdirs();
-
-                            EARandomAccessFile out = new EARandomAccessFile(path + (file.getNumEntries() == 1 ? "" : "_" + s) + extension, "rw", ByteOrder.LITTLE_ENDIAN);
-                            out.write(dataToSave, 0, dataToSave.length);
-                            out.close();
-                        }
-                        continue;
                     } else {
                         dataToSave = data;
                     }
@@ -1165,17 +1206,21 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 
                     String path = lastSaveLocation.getCanonicalPath();
 
-                    if (fileName == null) {
+                    if (fileName == null)
                         fileName = String.format("%X", files.get(i).getId());
-                        if (!doConvert)
-                            extension = "";
-                    } else if (!doConvert)
-                        extension = "";
 
                     if (folderName == null)
                         folderName = String.format("%X", files.get(i).getId2());
 
+                    if (!doConvert)
+                        extension = "";
+
                     path = lastSaveLocation.getCanonicalPath() + "\\" + folderName + "\\" + fileName;
+                    if (currentIndexFile.isBigEndian()) {
+                        int period = path.lastIndexOf(".");
+                        String ext = path.substring(period);
+                        path = path.replace(ext, ".ps3.d" + ext);
+                    }
 
                     File mkDirPath = new File(path);
                     mkDirPath.getParentFile().mkdirs();

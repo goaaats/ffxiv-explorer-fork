@@ -1,6 +1,7 @@
 package com.fragmenterworks.ffxivextract.models;
 
 import com.fragmenterworks.ffxivextract.Constants;
+import com.fragmenterworks.ffxivextract.helpers.DebugListener;
 import com.fragmenterworks.ffxivextract.helpers.GLHelper;
 import com.fragmenterworks.ffxivextract.helpers.HavokNative;
 import com.fragmenterworks.ffxivextract.helpers.ImageDecoding.ImageDecodingException;
@@ -75,7 +76,9 @@ public class Model extends Game_File {
         ByteBuffer bb = ByteBuffer.wrap(data);
         bb.order(endian);
 
-        int numTotalMeshes = bb.getShort();
+        ModelFileHeader header = ModelFileHeader.read(bb);
+
+        int numTotalMeshes = header.vertexDeclarationNum;
 
         //Count DirectX Vertex Elements
         vertexElements = new DX9VertexElement[numTotalMeshes][];
@@ -102,7 +105,8 @@ public class Model extends Game_File {
         bb.position(0x44 + (0x88 * numTotalMeshes));
 
         //Strings
-        int numStrings = bb.getInt();
+        short numStrings = bb.getShort();
+        bb.getShort(); //padding
         int stringBlockSize = bb.getInt();
 
         stringArray = new String[numStrings];
@@ -121,7 +125,6 @@ public class Model extends Game_File {
             }
             end++;
         }
-
 
         //Counts
         bb.getInt();
@@ -640,19 +643,29 @@ public class Model extends Game_File {
                     shader.setBoneMatrix(gl, numBones, boneMatrixBuffer);
                 }
 
-                //Draw
+                int indBufPos = 0;
+                int numIndex = 0;
+
                 if (mesh.partTableCount != 0) {
-                    mesh.indexBuffer.position((meshPartTable[mesh.partTableOffset + partNum].indexOffset * 2) - (mesh.indexBufferOffset * 2));
-                    shader.enableAttribs(gl);
-                    gl.glDrawElements(GL3.GL_TRIANGLES, meshPartTable[mesh.partTableOffset + partNum].indexCount, GL3.GL_UNSIGNED_SHORT, mesh.indexBuffer);
-                    shader.disableAttribs(gl);
+                    indBufPos = (meshPartTable[mesh.partTableOffset + partNum].indexOffset * 2) - (mesh.indexBufferOffset * 2);
+                    numIndex = meshPartTable[mesh.partTableOffset + partNum].indexCount;
                 } else {
-                    mesh.indexBuffer.position(0);
-                    shader.enableAttribs(gl);
-                    gl.glDrawElements(GL3.GL_TRIANGLES, mesh.numIndex, GL3.GL_UNSIGNED_SHORT, mesh.indexBuffer);
-                    shader.disableAttribs(gl);
+                    indBufPos = 0;
+                    numIndex = mesh.numIndex;
                 }
 
+                Utils.getGlobalLogger().trace("GL Error: {}", gl.glGetError());
+
+                Utils.getGlobalLogger().trace("Vert buffer 1 info:");
+
+                Utils.getGlobalLogger().trace("Drawing index buffer, pos {} num {}", indBufPos, numIndex);
+
+                //Draw
+                mesh.indexBuffer.position(indBufPos);
+                shader.enableAttribs(gl);
+
+                gl.glDrawElements(GL3.GL_TRIANGLES, numIndex, GL3.GL_UNSIGNED_SHORT, mesh.indexBuffer);
+                shader.disableAttribs(gl);
             }
 
             //Draw Skeleton
@@ -676,6 +689,26 @@ public class Model extends Game_File {
         if (numBones != -1) {
             HavokNative.debugRenderBones();
         }
+    }
+
+    private void debugbuffer(ByteBuffer buffer) {
+        int pos = buffer.position();
+        if (pos == buffer.limit())
+            buffer.position(0);
+        System.out.println(buffer);
+        System.out.print("first 4: ");
+        for (int i = 0; i < 4; i++) {
+            System.out.printf("%d ", buffer.get());
+        }
+
+        buffer.position(buffer.limit() - 30);
+
+        System.out.print("\nlast 30: ");
+        for (int i = 0; i < 30; i++) {
+            System.out.printf("%d ", buffer.get());
+        }
+        System.out.println();
+        buffer.position(pos);
     }
 
     private double currentTime = (double) System.currentTimeMillis() / 1000.0f;

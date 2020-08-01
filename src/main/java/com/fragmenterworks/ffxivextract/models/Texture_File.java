@@ -117,7 +117,7 @@ public class Texture_File extends Game_File {
                         uncompressedHeight / (mipMapDivide), 0, 0);
             }
             case 0x2460: {
-                return ImageDecoding.decodeImageRGBAF(data, mipmapOffsets[index], uncompressedWidth / (mipMapDivide), uncompressedHeight / (mipMapDivide), 0, 0);
+                return ImageDecoding.decodeImageRGBAF(data, endian, mipmapOffsets[index], uncompressedWidth / (mipMapDivide), uncompressedHeight / (mipMapDivide), 0, 0);
             }
         }
         throw new ImageDecodingException("Unsupported format: "

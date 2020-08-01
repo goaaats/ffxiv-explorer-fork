@@ -60,6 +60,7 @@ public class Strings {
     public static final String MENU_SEARCH = "Search";
     public static final String MENU_DATAVIEWERS = "Data Viewers";
     public static final String MENU_TOOLS = "Tools";
+    public static final String MENU_DATABASE = "Database";
     public static final String MENU_OPTIONS = "Options";
     public static final String MENU_HELP = "Help";
 
@@ -75,6 +76,7 @@ public class Strings {
     public static final String MENUITEM_FILEINJECT = "File injector";
     public static final String MENUITEM_HASHCALC = "Path -> Hash Calculator";
     public static final String MENUITEM_CEDUMPIMPORT = "Import Cheat Engine path dump";
+    public static final String MENUITEM_DBIMPORT = "Import Database";
     public static final String MENUITEM_MACROEDITOR = "Macro Editor";
     public static final String MENUITEM_LOGVIEWER = "Log Viewer";
     public static final String MENUITEM_FIND_EXH = "Find Exh Hashes";
@@ -106,6 +108,4 @@ public class Strings {
     public static final String MSG_FILEINJECT = "This program modifies FFXIV ARR's files. I am not responsible in the case where swapping files leads to a ban or damaged game. Use at your own risk.\n\nRemember to restore before patching the game as the patcher may have issues with modified files.\n	\nThe index file is automatically backed up as \"<file>.index.bak\" in the same folder as \"<file>.index\".";
     public static final String MSG_OUTFITTER_TITLE = "This is still experimental!";
     public static final String MSG_OUTFITTER = "This feature is still being figured out and experimented with! Some races and items may not look correct. \nSome of the races and items do not load properly due to model reuse which is then scaled/translated. \nMost items should render properly for Hyur, male Roegadyn, and Lalafell models. Setting hair and face \nto 0 will clear them, which is useful for helmet items. \n\nAnyway, hope you have fun!";
-
-
 }

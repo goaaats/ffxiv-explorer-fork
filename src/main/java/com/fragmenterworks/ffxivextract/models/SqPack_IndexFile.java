@@ -377,7 +377,7 @@ public class SqPack_IndexFile {
         int readFiles(EARandomAccessFile ref, JProgressBar prgLoadingBar, JLabel lblLoadingBarString, boolean isIndex2) throws IOException {
             ref.seek(fileIndexOffset);
             int namedFiles = 0;
-
+//            System.out.println(this.id + ": " + this.getName());
             for (int i = 0; i < files.length; i++) {
                 if (!isIndex2) {
                     int id, id2;
@@ -413,8 +413,13 @@ public class SqPack_IndexFile {
                         lblLoadingBarString.setText((int) (prgLoadingBar.getPercentComplete() * 100) + "%");
 
                 }
-                if (!files[i].getName().startsWith("~"))
-                    namedFiles++;
+//                System.out.println(files[i].id + ": " + files[i].getName());
+//                System.out.println(files[i].id2 + ": " + files[i].getName());
+//                if (!files[i].getName().startsWith("~")) {
+//                    System.out.println(this.getName() + "/" + files[i].getName());
+//                    namedFiles++;
+//                }
+
             }
             return namedFiles;
         }
@@ -551,19 +556,19 @@ public class SqPack_IndexFile {
     public byte[] extractFile(String foldername, String filename) throws IOException {
         if (getPath().contains("index2")) {
             String fullPath = foldername + "/" + filename;
-            int hash = HashDatabase.computeCRC(fullPath.getBytes(), 0, fullPath.getBytes().length);
+            int hash = HashDatabase.computeCRC(fullPath.toLowerCase().getBytes(), 0, fullPath.getBytes().length);
             for (SqPack_File f : getPackFolders()[0].getFiles()) {
                 if (f.getId() == hash)
                     return extractFile(f.getOffset());
             }
         } else {
-            int hash1 = HashDatabase.computeCRC(foldername.getBytes(), 0, foldername.getBytes().length);
+            int hash1 = HashDatabase.computeCRC(foldername.toLowerCase().getBytes(), 0, foldername.getBytes().length);
 
             if (!isFastloaded) {
                 for (SqPack_Folder f : getPackFolders()) {
                     if (f.getId() == hash1) {
 
-                        int hash2 = HashDatabase.computeCRC(filename.getBytes(), 0, filename.getBytes().length);
+                        int hash2 = HashDatabase.computeCRC(filename.toLowerCase().getBytes(), 0, filename.getBytes().length);
                         for (SqPack_File file : f.getFiles()) {
                             if (file.id == hash2) {
                                 return extractFile(file.getOffset());
@@ -577,7 +582,7 @@ public class SqPack_IndexFile {
                 for (int i = 0; i < packFolders[0].getFiles().length; i++) {
                     SqPack_File file = packFolders[0].getFiles()[i];
                     if (file.getId2() == hash1) {
-                        int hash2 = HashDatabase.computeCRC(filename.getBytes(), 0, filename.getBytes().length);
+                        int hash2 = HashDatabase.computeCRC(filename.toLowerCase().getBytes(), 0, filename.getBytes().length);
                         if (file.getId() == hash2)
                             return extractFile(file.getOffset());
                     }

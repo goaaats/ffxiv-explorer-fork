@@ -391,20 +391,21 @@ public final class ImageDecoding {
      * @return
      * @throws ImageDecodingException
      */
-    public static BufferedImage decodeImageRGBAF(final byte[] data, final int offset, final int targetWidth, final int targetHeight, final int compressedWidth, final int compressedHeight) throws ImageDecodingException {
+    public static BufferedImage decodeImageRGBAF(final byte[] data, ByteOrder endian, final int offset, final int targetWidth, final int targetHeight, final int compressedWidth, final int compressedHeight) throws ImageDecodingException {
         final BufferedImage img = new BufferedImage(targetWidth, targetHeight, BufferedImage.TYPE_INT_ARGB);
         if (data.length < (targetHeight * targetWidth * 8)) {
             throw new ImageDecodingException("Data too short");
         }
 
         final ByteBuffer buffer = ByteBuffer.wrap(data);
-        buffer.order(ByteOrder.LITTLE_ENDIAN);
+        buffer.order(endian);
         buffer.position(offset);
 
         int p = 0;
         for (int y = 0; y < targetHeight; y++) {
             for (int x = 0; x < targetWidth; x++) {
 
+                // this may need to be reversed with endian
                 float fr = Utils.convertHalfToFloat(buffer.getShort());
                 float fg = Utils.convertHalfToFloat(buffer.getShort());
                 float fb = Utils.convertHalfToFloat(buffer.getShort());
