@@ -154,6 +154,10 @@ public class Sound_View extends JPanel {
                         return "OGG";
                     case 0x0C:
                         return "MS-ADPCM";
+                    case 0x07:
+                        return "PS3";
+                    default:
+                        return Integer.toHexString(info.dataType);
                 }
             } else if (columnIndex == 3)
                 return info.frequency;
@@ -165,7 +169,7 @@ public class Sound_View extends JPanel {
                 return info.loopEnd;
             else
                 return "";
-            return "";
+//            return "";
         }
 
     }

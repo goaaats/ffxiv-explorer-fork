@@ -45,4 +45,32 @@ public class ModelFileHeader {
         bb.put(enableEdgeGeometry);
         bb.put(padding);
     }
+
+    public static ModelFileHeader read(ByteBuffer bb) {
+        ModelFileHeader ret = new ModelFileHeader();
+        ret.version = bb.getInt();
+        ret.stackMemorySize = bb.getInt();
+        ret.runtimeMemorySize = bb.getInt();
+        ret.vertexDeclarationNum = bb.getShort();
+        ret.materialNum = bb.getShort();
+
+        for (int i = 0; i < 3; i++)
+            ret.vertexDataOffset[i] = bb.getInt();
+
+        for (int i = 0; i < 3; i++)
+            ret.indexDataOffset[i] = bb.getInt();
+
+        for (int i = 0; i < 3; i++)
+            ret.vertexBufferSize[i] = bb.getInt();
+
+        for (int i = 0; i < 3; i++)
+            ret.indexBufferSize[i] = bb.getInt();
+
+        ret.lodNum = bb.get();
+        ret.enableIndexBufferStreaming = bb.get();
+        ret.enableEdgeGeometry = bb.get();
+        ret.padding = bb.get();
+
+        return ret;
+    }
 }

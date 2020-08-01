@@ -27,13 +27,11 @@ public class Texture_File extends Game_File {
 
         ByteBuffer bb = ByteBuffer.wrap(data);
         bb.order(endian);
-        bb.getInt(); // Uknown
-        compressionType = bb.getShort();
-        bb.get();
-        bb.get();
+        int attribute = bb.getInt(); // Uknown
+        compressionType = bb.getInt();
         uncompressedWidth = bb.getShort();
         uncompressedHeight = bb.getShort();
-        bb.getShort();
+        short depth = bb.getShort();
         numMipMaps = bb.getShort();
         mipmapOffsets = new int[numMipMaps];
 

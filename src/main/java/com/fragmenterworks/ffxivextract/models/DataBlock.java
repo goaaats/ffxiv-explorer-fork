@@ -74,7 +74,6 @@ public class DataBlock {
 
         compressedData = new byte[compressedSize];
         decompressedData = new byte[decompressedSize];
-        System.out.println();
 
         file.readFully(compressedData, 0, compressedSize);
     }

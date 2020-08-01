@@ -3,6 +3,7 @@ package com.fragmenterworks.ffxivextract.storage;
 import com.fragmenterworks.ffxivextract.Constants;
 import com.fragmenterworks.ffxivextract.helpers.EARandomAccessFile;
 import com.fragmenterworks.ffxivextract.helpers.Utils;
+import unluac.decompile.Constant;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -166,6 +167,81 @@ public class HashDatabase {
         return true;
     }
 
+    public static void importDatabase(File selectedFile) {
+
+        HashDatabase.beginConnection();
+        try {
+            HashDatabase.setAutoCommit(false);
+        } catch (SQLException e1) {
+            Utils.getGlobalLogger().error(e1);
+        }
+
+        HashMap<Long, String> tmpFiles = new HashMap<>();
+        HashMap<Long, String> tmpFolders = new HashMap<>();
+
+        int fileCount = 0;
+        int folderCount = 0;
+        try {
+            Connection connection = DriverManager.getConnection("jdbc:sqlite:" + selectedFile.getAbsolutePath());
+            PreparedStatement fileq = connection.prepareStatement("select hash, name from filenames");
+            PreparedStatement folderq = connection.prepareStatement("select hash, path from folders");
+
+            ResultSet rs = fileq.executeQuery();
+            while (rs.next())
+                tmpFiles.put(rs.getLong(1), rs.getString(2));
+            rs.close();
+
+            ResultSet rs2 = folderq.executeQuery();
+            while (rs2.next())
+                tmpFolders.put(rs2.getLong(1), rs2.getString(2));
+            rs2.close();
+
+            for (Long val : tmpFiles.keySet()) {
+                if (files.containsKey(val))
+                    continue;
+
+                PreparedStatement fstmt = globalConnection.prepareStatement("insert or ignore into filenames values(?, ?, 0, ?, ?)");
+                fstmt.setLong(1, val);
+                fstmt.setString(2, tmpFiles.get(val));
+                fstmt.setString(3, "*");
+                fstmt.setInt(4, Constants.DB_VERSION_CODE);
+
+                fstmt.execute();
+                fstmt.close();
+                fileCount++;
+            }
+
+            for (Long val : tmpFolders.keySet()) {
+                if (folders.containsKey( val))
+                    continue;
+
+                PreparedStatement fstmt = globalConnection.prepareStatement("insert or ignore into folders values(?, ?, 0, ?, ?)");
+                fstmt.setLong(1, val);
+                fstmt.setString(2, tmpFiles.get(val));
+                fstmt.setString(3, "*");
+                fstmt.setInt(4, Constants.DB_VERSION_CODE);
+
+                fstmt.execute();
+                fstmt.close();
+                folderCount++;
+            }
+
+        } catch (Exception exc) {
+            Utils.getGlobalLogger().error("An error occurred attempting to add paths.", exc);
+        }
+
+
+
+        try {
+            HashDatabase.commit();
+        } catch (SQLException e) {
+            Utils.getGlobalLogger().error(e);
+        }
+        HashDatabase.closeConnection();
+
+        Utils.getGlobalLogger().info("Added {} new folders and {} new files from {} to current database.", folderCount, fileCount, selectedFile.getAbsolutePath());
+    }
+
     public static int importFilePaths(File selectedFile) {
 
         HashDatabase.beginConnection();
@@ -195,6 +271,7 @@ public class HashDatabase {
                 }
             }
         } catch (Exception exc) {
+            Utils.getGlobalLogger().error("An error occurred attempting to add paths.", exc);
             return count * -1;
         }
 

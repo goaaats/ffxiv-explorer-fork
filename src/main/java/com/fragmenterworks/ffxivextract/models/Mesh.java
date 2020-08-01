@@ -6,6 +6,7 @@ import com.jogamp.common.nio.Buffers;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 
 public class Mesh {
 
@@ -22,7 +23,8 @@ public class Mesh {
     private final int vertElementIndex;
 
     public Mesh(ByteBuffer bb, int elementIndex) {
-        numVerts = bb.getInt();
+        numVerts = bb.getShort();
+        bb.getShort();
         numIndex = bb.getInt();
 
         materialNumber = bb.getShort();
@@ -58,22 +60,52 @@ public class Mesh {
     public void loadMeshes(ByteBuffer bb, int lodVertexOffset, int lodIndexOffset) throws BufferOverflowException, BufferUnderflowException {
 
         ByteBuffer bbTemp;
+        boolean swapBuffers = false;
 
         //Vert Table
         for (int i = 0; i < numBuffers; i++) {
             bb.position(lodVertexOffset + vertexBufferOffsets[i]);
             bbTemp = bb.duplicate();
             bbTemp.limit(bbTemp.position() + ((vertexSizes[i] * numVerts)));
-            vertBuffers[i].put(bbTemp);
+
+            if (bb.order() == ByteOrder.BIG_ENDIAN && swapBuffers) {
+                byte[] newTmp = reverseElements(bbTemp.array(), bbTemp.position(), bbTemp.limit() - bbTemp.position(), 2, (bbTemp.limit() - bbTemp.position()) / 2);
+                vertBuffers[i].put(newTmp);
+            } else {
+                vertBuffers[i].put(bbTemp);
+            }
         }
         //Index Table
         bb.position(lodIndexOffset + (indexBufferOffset * 2));
         bbTemp = bb.duplicate();
         bbTemp.limit(bbTemp.position() + (2 * numIndex));
-        indexBuffer.put(bbTemp);
+
+        if (bb.order() == ByteOrder.BIG_ENDIAN && swapBuffers) {
+            byte[] newTmp = reverseElements(bbTemp.array(), bbTemp.position(), bbTemp.limit() - bbTemp.position(), 2, numIndex);
+            indexBuffer.put(newTmp);
+        } else {
+            indexBuffer.put(bbTemp);
+        }
     }
 
     public int getVertexElementIndex() {
         return vertElementIndex;
+    }
+
+    private byte[] reverseElements(byte[] src, int start, int length, int elemSize, int elemAmt) {
+        byte[] dest = new byte[length];
+        byte[] tmp = new byte[length];
+        System.arraycopy(src, start, tmp, 0, length);
+
+        for (int i = 0; i < elemAmt; i++) {
+            for (int j = elemSize - 1; j >= 0; j--) {
+                int destOffset = i * elemSize + (elemSize - j - 1);
+                int srcOffset = start + (i * elemSize + j);
+                int tmpInternalSrcOffset = srcOffset - start;
+                dest[destOffset] = src[srcOffset];
+            }
+        }
+
+        return dest;
     }
 }
