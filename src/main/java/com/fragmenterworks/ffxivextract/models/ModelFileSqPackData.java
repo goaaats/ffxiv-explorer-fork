@@ -4,25 +4,6 @@ import com.fragmenterworks.ffxivextract.helpers.EARandomAccessFile;
 
 import java.io.IOException;
 
-/*
-struct tagMODEL_FILE_HEADER_BLOCK
-{
-    uint32_t m_uVersion;
-    uint32_t m_uStackMemorySize;
-    uint32_t m_uRuntimeMemorySize;
-    uint16_t m_uVertexDeclarationNum;
-    uint16_t m_uMaterialNum;
-    uint32_t m_uVertexDataOffset[3];
-    uint32_t m_uIndexDataOffset[3];
-    uint32_t m_uVertexBufferSize[3];
-    uint32_t m_uIndexBufferSize[3];
-    uint8_t m_uLODNum;
-    bool m_bEnableIndexBufferStreaming;
-    bool m_bEnableEdgeGeometry;
-    uint8_t m_uPadding;
-}
- */
-
 public class ModelFileSqPackData {
 
     //chunk decompressed sizes
