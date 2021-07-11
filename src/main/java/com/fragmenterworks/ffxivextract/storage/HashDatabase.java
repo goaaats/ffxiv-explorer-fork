@@ -3,7 +3,6 @@ package com.fragmenterworks.ffxivextract.storage;
 import com.fragmenterworks.ffxivextract.Constants;
 import com.fragmenterworks.ffxivextract.helpers.EARandomAccessFile;
 import com.fragmenterworks.ffxivextract.helpers.Utils;
-import unluac.decompile.Constant;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -13,6 +12,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.sql.*;
 import java.util.HashMap;
+import java.util.List;
 
 public class HashDatabase {
 
@@ -20,6 +20,7 @@ public class HashDatabase {
 
     private static HashMap<Long, String> files;
     private static HashMap<Long, String> folders;
+    private static HashMap<Long, String> fullPaths;
 
     public static void init() throws ClassNotFoundException {
         Class.forName("org.sqlite.JDBC");
@@ -31,9 +32,11 @@ public class HashDatabase {
 
             files = new HashMap<>();
             folders = new HashMap<>();
+            fullPaths = new HashMap<>();
 
             PreparedStatement fileq = connection.prepareStatement("select hash, name from filenames");
             PreparedStatement folderq = connection.prepareStatement("select hash, path from folders");
+            PreparedStatement fullpath = connection.prepareStatement("select hash, folderhash, filehash from fullpaths");
 
             ResultSet rs = fileq.executeQuery();
             while (rs.next())
@@ -43,9 +46,18 @@ public class HashDatabase {
             while (rs2.next())
                 folders.put(rs2.getLong(1), rs2.getString(2));
 
+            ResultSet rs3 = fullpath.executeQuery();
+            while (rs3.next()) {
+                long fpHash = rs3.getLong(1);
+                long folderHash = rs3.getLong(2);
+                long fileHash = rs3.getLong(3);
+
+                fullPaths.put(fpHash, folders.get(folderHash) + "/" + files.get(fileHash));
+            }
+
             rs.close();
             rs2.close();
-
+            rs3.close();
         } catch (SQLException e) {
             // if the error message is "out of memory",
             // it probably means no database file is found
@@ -89,39 +101,6 @@ public class HashDatabase {
         return Integer.parseInt(version);
     }
 
-    public static boolean addFolderToDB(String folderName, String archive) {
-        if (folderName.endsWith("/"))
-            folderName = folderName.substring(0, folderName.length() - 1);
-
-        int folderHash = computeCRC(folderName.getBytes(), 0,
-                folderName.getBytes().length);
-
-        Utils.getGlobalLogger().info("Adding folder entry: {}", folderName);
-
-        Connection connection = null;
-        try {
-            connection = DriverManager
-                    .getConnection("jdbc:sqlite:./hashlist.db");
-            Statement statement = connection.createStatement();
-            statement.setQueryTimeout(30); // set timeout to 30 sec.
-            statement.executeUpdate(String.format("insert or ignore into folders values(%d, '%s', '0', '%s', %d)", folderHash, folderName, archive, Constants.DB_VERSION_CODE));
-            statement.close();
-
-            folders.put((long) folderHash, folderName);
-        } catch (SQLException e) {
-            Utils.getGlobalLogger().error(e);
-            return false;
-        } finally {
-            try {
-                if (connection != null)
-                    connection.close();
-            } catch (SQLException e) {
-                Utils.getGlobalLogger().error(e);
-            }
-        }
-        return true;
-    }
-
     // Used to add a string to the db. Automatically hashes and splits it.
     public static boolean addPathToDB(String fullPath, String archive) {
         Connection conn;
@@ -141,24 +120,30 @@ public class HashDatabase {
 
         int folderHash = computeCRC(folder.getBytes(), 0, folder.getBytes().length);
         int fileHash = computeCRC(filename.getBytes(), 0, filename.getBytes().length);
+        int fullHash = computeCRC(fullPath.getBytes(), 0, fullPath.getBytes().length);
 
-        if (folders.containsKey((long) folderHash) && files.containsKey((long) fileHash))
+        if (folders.containsKey((long) folderHash)
+            && files.containsKey((long) fileHash)
+            && fullPaths.containsKey((long) fullHash))
             return false;
 
-        Utils.getGlobalLogger().debug("Adding entry {}", fullPath);
+//        Utils.getGlobalLogger().debug("Adding entry {}", fullPath);
 
         try {
             Statement statement = conn.createStatement();
             statement.setQueryTimeout(30); // set timeout to 30 sec.
             statement.executeUpdate(String.format("insert or ignore into folders values(%d, '%s', 0, '%s', '%s')", folderHash, folder, archive, Constants.DB_VERSION_CODE));
-            statement.executeUpdate(String.format("UPDATE  folders set path='%s' where hash=%d", folder, folderHash));
+            statement.executeUpdate(String.format("UPDATE folders set path='%s' where hash=%d", folder, folderHash));
             statement.executeUpdate(String.format("insert or ignore into filenames values(%d, '%s', 0, '%s', '%s')", fileHash, filename, archive, Constants.DB_VERSION_CODE));
-            statement.executeUpdate(String.format("UPDATE  filenames set name='%s' where hash=%d", filename, fileHash));
+            statement.executeUpdate(String.format("UPDATE filenames set name='%s' where hash=%d", filename, fileHash));
+            statement.executeUpdate(String.format("insert or ignore into fullpaths values(%d, %d, %d, %d)", fullHash, folderHash, fileHash, Constants.DB_VERSION_CODE));
+            statement.executeUpdate(String.format("UPDATE fullpaths set folderhash=%d, filehash=%d where hash=%d", fullHash, folderHash, fileHash));
 
             statement.close();
 
             folders.put((long) folderHash, folder);
             files.put((long) fileHash, filename);
+            fullPaths.put((long) fullHash, fullPath);
 
         } catch (SQLException e) {
             Utils.getGlobalLogger().error(e);
@@ -283,6 +268,23 @@ public class HashDatabase {
         HashDatabase.closeConnection();
 
         return count;
+    }
+
+    public static void loadShitQuickly(List<String> shit) throws Exception {
+        globalConnection.setAutoCommit(false);
+        for (String fullPath : shit) {
+
+            String folder = fullPath.substring(0, fullPath.lastIndexOf('/')).toLowerCase();
+            String filename = fullPath.substring(fullPath.lastIndexOf('/') + 1).toLowerCase();
+
+            int folderHash = computeCRC(folder.getBytes(), 0, folder.getBytes().length);
+            int fileHash = computeCRC(filename.getBytes(), 0, filename.getBytes().length);
+            int fullHash = computeCRC(fullPath.getBytes(), 0, fullPath.getBytes().length);
+
+            Statement statement = globalConnection.createStatement();
+            statement.executeUpdate(String.format("insert or ignore into fullpaths values(%d, %d, %d, %d)", fullHash, folderHash, fileHash, Constants.DB_VERSION_CODE));
+        }
+        globalConnection.commit();
     }
 
     // This is used to read a list of paths from a string (IE: extracted from
@@ -452,6 +454,10 @@ public class HashDatabase {
 
     private static String getFileFullPathName(long hash) {
         return files.getOrDefault(hash, null);
+    }
+
+    public static String getFullPath(long hash) {
+        return fullPaths.getOrDefault(hash, null);
     }
 
     //Created from MSDN's CRC tables and code as well as RozeDoyanawa's Java implementation
