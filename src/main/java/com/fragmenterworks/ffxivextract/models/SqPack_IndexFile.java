@@ -476,19 +476,14 @@ public class SqPack_IndexFile {
             this.id2 = id2;
             this.dataoffset = offset;
 
-            //For Index2
-            //if (id2 == -1)
-            //this.name = HashDatabase.getFullpath(id);
-            //else
-
             if (loadNames) {
                 if (id2 != -1)
                     this.name = HashDatabase.getFileName(id);
+                else
+                    this.name = HashDatabase.getFullPath(id);
                 if (this.name == null)
                     this.name = String.format("~%x", id);
             }
-            //else
-            //HashDatabase.flagFileNameAsUsed(id);
         }
 
         public int getId() {
