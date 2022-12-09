@@ -110,18 +110,17 @@ public class Main {
                 prefs.putBoolean(Constants.PREF_DO_DB_UPDATE, false);
         }
 
-        // Version Check
-        if (prefs.getBoolean(Constants.PREF_DO_DB_UPDATE, false)) {
-            VersionCheckObject checkObj = VersionUpdater.checkForUpdates();
-
-            if (HashDatabase.getHashDBVersion() < checkObj.currentDbVer
-                    || Constants.APP_VERSION_CODE < checkObj.currentAppVer) {
-                Update_Dialog updateDialog = new Update_Dialog(checkObj);
-                updateDialog.setLocationRelativeTo(fileMan);
-                updateDialog.setVisible(true);
-            }
-        }
-
+        // Version Check (disabled in fork)
+//        if (prefs.getBoolean(Constants.PREF_DO_DB_UPDATE, false)) {
+//            VersionCheckObject checkObj = VersionUpdater.checkForUpdates();
+//
+//            if (HashDatabase.getHashDBVersion() < checkObj.currentDbVer
+//                    || Constants.APP_VERSION_CODE < checkObj.currentAppVer) {
+//                Update_Dialog updateDialog = new Update_Dialog(checkObj);
+//                updateDialog.setLocationRelativeTo(fileMan);
+//                updateDialog.setVisible(true);
+//            }
+//        }
     }
 
 }
