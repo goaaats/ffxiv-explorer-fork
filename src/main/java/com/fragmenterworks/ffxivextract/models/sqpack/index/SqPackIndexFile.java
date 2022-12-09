@@ -200,7 +200,7 @@ public class SqPackIndexFile implements IHashUpdateListener {
 				String fileName = null;
 
 				for (var synonym : synonyms64) {
-					if (synonym.hash == element.hash) {
+					if (synonym.getOffset() == element.getOffset()) {
 						var fullPath = synonym.path;
 						var lastSlash = fullPath.lastIndexOf('/');
 						folderName = fullPath.substring(0, lastSlash);
@@ -262,7 +262,7 @@ public class SqPackIndexFile implements IHashUpdateListener {
 				String fileName = null;
 
 				for (var synonym : synonyms32) {
-					if (synonym.hash == element.hash) {
+					if (synonym.getOffset() == element.getOffset()) {
 						var fullPath = synonym.path;
 						var lastSlash = fullPath.lastIndexOf('/');
 						folderName = fullPath.substring(0, lastSlash);
