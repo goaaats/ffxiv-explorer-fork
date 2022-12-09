@@ -2,12 +2,9 @@ package com.fragmenterworks.ffxivextract.models.sqpack.index;
 
 import com.fragmenterworks.ffxivextract.helpers.EARandomAccessFile;
 
-public class Synonym32 extends HashElement {
+public class Synonym32 extends SynonymElement {
 
 	public int hash;
-	public int unknown;
-	public int index;
-	public String path;
 
 	public static Synonym32 read(EARandomAccessFile file) {
 		Synonym32 element = new Synonym32();

@@ -159,7 +159,7 @@ public class SqPackIndexFile implements IHashUpdateListener {
 			for (int i = 0; i < hashCount; i++) {
 				if (progressBar != null) {
 					progressBar.setValue(i);
-					loadLabel.setText(progressBar.getPercentComplete() * 100 + "%");
+					loadLabel.setText("Loading hashes: " + i + "/" + hashCount);
 				}
 
 				HashElement32 element = HashElement32.read(file);
@@ -170,7 +170,7 @@ public class SqPackIndexFile implements IHashUpdateListener {
 			for (int i = 0; i < synonymCount; i++) {
 				if (progressBar != null) {
 					progressBar.setValue(hashCount + i);
-					loadLabel.setText(progressBar.getPercentComplete() * 100 + "%");
+					loadLabel.setText("Loading synonyms: " + i + "/" + synonymCount);
 				}
 
 				Synonym32 element = Synonym32.read(file);
@@ -180,130 +180,157 @@ public class SqPackIndexFile implements IHashUpdateListener {
 		}
 	}
 
+	private void parseElement64(HashElement64 element) {
+
+		if (element.isSynonym())
+			return;
+
+		String folderName = null;
+		String fileName = null;
+
+		var folderHash = element.getFolderHash();
+		var fileHash = element.getFileHash();
+
+		var entry = HashDatabase.getFullPathEntry(indexId, folderHash, fileHash);
+
+		// There's no full path with these hashes, but we can name them separately
+		if (entry == null) {
+			folderName = HashDatabase.getFolder(indexId, folderHash);
+			fileName = HashDatabase.getFile(indexId, folderHash, fileHash);
+		} else {
+			folderName = entry.getFolderName();
+			fileName = entry.getFileName();
+		}
+
+		String finalFolderName = folderName;
+		SqPackFolder folder = folderCache.getOrDefault(finalFolderName, null);
+		if (folder == null) {
+			folder = new SqPackFolder(element, element.getFolderHash(), folderName);
+			folderCache.put(folder.getName(), folder);
+		}
+
+		var file = new SqPackFile(element, element.getFileHash(), fileName, folder);
+		folder.getFiles().add(file);
+		files.add(file);
+
+		var unhashed = 0;
+		if (file.getName().charAt(0) != '~') unhashed++;
+		if (folder.getName().charAt(0) != '~') unhashed++;
+
+		itemsLoaded += 2;
+		itemsUnhashed += unhashed;
+	}
+
+	private void parseElement32(HashElement32 element) {
+
+		if (element.isSynonym())
+			return;
+
+		String folderName = null;
+		String fileName = null;
+		String fullName = null;
+
+		var entry = HashDatabase.getFullPathEntry(indexId, element.hash);
+
+		// If there's no full path with these hashes we must fall back
+		// to a single name which will be used as the "file name"
+		if (entry == null) {
+			// This is only used for the string format. Keeps it one place
+			fullName = HashDatabase.getFullPath(indexId, element.hash);
+		} else {
+			folderName = entry.getFolderName();
+			fileName = entry.getFileName();
+		}
+
+		// if fullName is null, folderName and fileName are populated
+		if (fullName == null) {
+			var crc = PathUtils.computeHashesWithLower(folderName + "/" + fileName);
+			SqPackFolder folder = folderCache.getOrDefault(folderName, null);
+			if (folder == null) {
+				folder = new SqPackFolder(element, crc.folderHash, folderName);
+				folderCache.put(folder.getName(), folder);
+			}
+
+			var file = new SqPackFile(element, crc.fileHash, fileName, folder);
+			folder.getFiles().add(file);
+			files.add(file);
+			itemsUnhashed += 1;
+		} else {
+			var file = new SqPackFile(element, element.hash, fullName, null);
+			files.add(file);
+		}
+
+		itemsLoaded += 1;
+	}
+
+	private void parseSynonym(SynonymElement synonym) {
+		var fullPath = synonym.path;
+		var lastSlash = fullPath.lastIndexOf('/');
+		var folderName = fullPath.substring(0, lastSlash);
+		var fileName = fullPath.substring(lastSlash + 1);
+
+		var crc = PathUtils.computeHashesWithLower(folderName + "/" + fileName);
+
+		SqPackFolder folder = folderCache.getOrDefault(folderName, null);
+		if (folder == null) {
+			folder = new SqPackFolder(synonym, crc.folderHash, folderName);
+			folderCache.put(folder.getName(), folder);
+		}
+
+		var file = new SqPackFile(synonym, crc.fileHash, fileName, folder);
+		folder.getFiles().add(file);
+		files.add(file);
+
+		itemsLoaded += 2;
+		itemsUnhashed += 2;
+	}
+
 	private void parseContent(JProgressBar progressBar, JLabel loadLabel) {
 
 		if (fileInfo.indexType == 0) {
-
 			if (progressBar != null) {
-				progressBar.setMaximum(hashes64.size());
+				progressBar.setMaximum(synonyms64.size() + hashes64.size());
 				progressBar.setValue(0);
 			}
 
-			for (var element : hashes64) {
+			for (var synonym : synonyms64) {
+				if (progressBar != null)
+					progressBar.setValue(progressBar.getValue() + 1);
+				if (loadLabel != null)
+					loadLabel.setText("Parsing: " + progressBar.getValue() + "/" + progressBar.getMaximum());
+				parseSynonym(synonym);
+			}
 
+			for (var element : hashes64) {
 				if (progressBar != null)
 					progressBar.setValue(progressBar.getValue() + 1);
 				if (loadLabel != null)
 					loadLabel.setText("Parsing: " + progressBar.getValue() + "/" + progressBar.getMaximum());
 
-				String folderName = null;
-				String fileName = null;
-
-				for (var synonym : synonyms64) {
-					if (synonym.getOffset() == element.getOffset()) {
-						var fullPath = synonym.path;
-						var lastSlash = fullPath.lastIndexOf('/');
-						folderName = fullPath.substring(0, lastSlash);
-						fileName = fullPath.substring(lastSlash + 1);
-						break;
-					}
-				}
-
-				if (folderName == null && fileName == null) {
-					var folderHash = element.getFolderHash();
-					var fileHash = element.getFileHash();
-
-					var entry = HashDatabase.getFullPathEntry(indexId, folderHash, fileHash);
-
-					// There's no full path with these hashes, but we can name them separately
-					if (entry == null) {
-						folderName = HashDatabase.getFolder(indexId, folderHash);
-						fileName = HashDatabase.getFile(indexId, folderHash, fileHash);
-					} else {
-						folderName = entry.getFolderName();
-						fileName = entry.getFileName();
-					}
-				}
-
-				String finalFolderName = folderName;
-				SqPackFolder folder = folderCache.getOrDefault(finalFolderName, null);
-				if (folder == null) {
-					folder = new SqPackFolder(element, element.getFolderHash(), folderName);
-					folderCache.put(folder.getName(), folder);
-				}
-
-				var file = new SqPackFile(element, element.getFileHash(), fileName, folder);
-				folder.getFiles().add(file);
-				files.add(file);
-
-				var unhashed = 0;
-				if (file.getName().charAt(0) != '~') unhashed++;
-				if (folder.getName().charAt(0) != '~') unhashed++;
-
-				itemsLoaded += 2;
-				itemsUnhashed += unhashed;
+				parseElement64(element);
 			}
 		} else if (fileInfo.indexType == 2) {
 
 			if (progressBar != null) {
-				progressBar.setMaximum(hashes32.size());
+				progressBar.setMaximum(synonyms32.size() + hashes32.size());
 				progressBar.setValue(0);
 			}
 
-			// This sucks, man
-			for (var element : hashes32) {
+			for (var synonym : synonyms32) {
+				if (progressBar != null)
+					progressBar.setValue(progressBar.getValue() + 1);
+				if (loadLabel != null)
+					loadLabel.setText("Parsing: " + progressBar.getValue() + "/" + progressBar.getMaximum());
+				parseSynonym(synonym);
+			}
 
+			for (var element : hashes32) {
 				if (progressBar != null)
 					progressBar.setValue(progressBar.getValue() + 1);
 				if (loadLabel != null)
 					loadLabel.setText("Parsing: " + progressBar.getValue() + "/" + progressBar.getMaximum());
 
-				String folderName = null;
-				String fileName = null;
-
-				for (var synonym : synonyms32) {
-					if (synonym.getOffset() == element.getOffset()) {
-						var fullPath = synonym.path;
-						var lastSlash = fullPath.lastIndexOf('/');
-						folderName = fullPath.substring(0, lastSlash);
-						fileName = fullPath.substring(lastSlash + 1);
-						break;
-					}
-				}
-
-				String fullName = null;
-				if (folderName == null && fileName == null) {
-
-					var entry = HashDatabase.getFullPathEntry(indexId, element.hash);
-
-					// If there's no full path with these hashes we must fall back
-					// to a single name which will be used as the "file name"
-					if (entry == null) {
-						// This is only used for the string format. Keeps it one place
-						fullName = HashDatabase.getFullPath(indexId, element.hash);
-					} else {
-						folderName = entry.getFolderName();
-						fileName = entry.getFileName();
-					}
-				}
-
-				// if fullName is null, folderName and fileName are populated
-				if (fullName == null) {
-					var crc = PathUtils.computeHashesWithLower(folderName + "/" + fileName);
-					String finalFolderName = folderName;
-					SqPackFolder folder = folderCache.getOrDefault(finalFolderName, null);
-					if (folder == null) {
-						folder = new SqPackFolder(element, crc.folderHash, folderName);
-						folderCache.put(folder.getName(), folder);
-					}
-
-					var file = new SqPackFile(element, crc.fileHash, fileName, folder);
-					folder.getFiles().add(file);
-					files.add(file);
-				} else {
-					var file = new SqPackFile(element, element.hash, fullName, null);
-					files.add(file);
-				}
+				parseElement32(element);
 			}
 		}
 
