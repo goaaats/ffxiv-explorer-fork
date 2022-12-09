@@ -232,7 +232,8 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
         fileTree.fileClosed();
         if (hardClose)
             SqPackIndexFile.removeFromCache(currentIndexFile);
-        pathHashWindow.setIndex(null);
+        if (pathHashWindow != null)
+            pathHashWindow.setIndex(null);
         currentIndexFile = null;
 
         setTitle(Constants.APPNAME);
@@ -982,7 +983,8 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
             lblLoadingBarString.setVisible(false);
             fileTree.fileOpened(currentIndexFile);
             searchWindow = new SearchWindow(FileManagerWindow.this, currentIndexFile, FileManagerWindow.this);
-            pathHashWindow.setIndex(currentIndexFile);
+            if (pathHashWindow != null)
+                pathHashWindow.setIndex(currentIndexFile);
             for (int i = 0; i < menu.getMenuCount(); i++)
                 menu.getMenu(i).setEnabled(true);
             lblHashInfoValue.setText(String.format("%d / %d", currentIndexFile.getNumItemsUnhashed(), currentIndexFile.getNumItemsLoaded()));
