@@ -240,6 +240,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
         hexView.setBytes(null);
         splitPane.setRightComponent(defaultScrollPane);
         file_Close.setEnabled(false);
+        file_hardClose.setEnabled(false);
         search_search.setEnabled(false);
         search_searchAgain.setEnabled(false);
 
@@ -492,6 +493,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
         file_Quit.setActionCommand("quit");
         file_Open.addActionListener(menuHandler);
         file_Close.addActionListener(menuHandler);
+        file_hardClose.addActionListener(menuHandler);
         file_Extract.addActionListener(menuHandler);
         file_ExtractRaw.addActionListener(menuHandler);
         file_Quit.addActionListener(menuHandler);
@@ -578,6 +580,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 
         file.add(file_Open);
         file.add(file_Close);
+        file.add(file_hardClose);
         file.addSeparator();
         file.add(file_Extract);
         file.add(file_ExtractRaw);
@@ -977,6 +980,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 
             setTitle(Constants.APPNAME + " [" + selectedFile.getName() + "]");
             file_Close.setEnabled(true);
+            file_hardClose.setEnabled(true);
             search_search.setEnabled(true);
             prgLoadingBar.setValue(0);
             prgLoadingBar.setVisible(false);
