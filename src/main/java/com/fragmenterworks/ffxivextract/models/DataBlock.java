@@ -106,31 +106,19 @@ public class DataBlock {
 
         //Decompress this block
         try {
-            Inflater inflater = new Inflater();
 
-            inflater.setInput(gzData);
-            inflater.setOutput(decompressedData);
+            java.util.zip.Inflater inflater = new java.util.zip.Inflater();
 
-            int err = inflater.init();
-            CHECK_ERR(inflater, err, "inflateInit");
+            inflater.setInput(gzData, 0, compressedSize);
+            int resultLength = inflater.inflate(decompressedData);
 
-            while (inflater.total_out < decompressedSize && inflater.total_in < gzData.length) {
-                inflater.avail_in = inflater.avail_out = 1;
-                //Force small buffers?
-                err = inflater.inflate(JZlib.Z_NO_FLUSH);
-                if (err == JZlib.Z_STREAM_END)
-                    break;
-                CHECK_ERR(inflater, err, "inflate");
-            }
-
-            err = inflater.end();
-            CHECK_ERR(inflater, err, "inflateEnd");
-
-            inflater.finished();
+//            if (resultLength != decompressedSize)
+//                System.err.printf("Size mismatch on new deflate: %d | %d\n", decompressedSize, resultLength);
+            inflater.end();
 
             return decompressedData;
         } catch (Exception e) {
-            Utils.getGlobalLogger().error(e);
+            Utils.getGlobalLogger().error("", e);
         }
         return null;
     }

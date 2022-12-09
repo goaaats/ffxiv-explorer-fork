@@ -7,8 +7,9 @@ import com.fragmenterworks.ffxivextract.helpers.ImageDecoding.ImageDecodingExcep
 import com.fragmenterworks.ffxivextract.helpers.Utils;
 import com.fragmenterworks.ffxivextract.models.IMC_File.VarianceInfo;
 import com.fragmenterworks.ffxivextract.models.directx.DX9VertexElement;
+import com.fragmenterworks.ffxivextract.models.sqpack.index.SqPackIndexFile;
 import com.fragmenterworks.ffxivextract.shaders.*;
-import com.fragmenterworks.ffxivextract.storage.HashDatabase;
+import com.fragmenterworks.ffxivextract.paths.database.HashDatabase;
 import com.jogamp.common.nio.Buffers;
 import com.jogamp.opengl.GL3;
 import com.jogamp.opengl.GL3bc;
@@ -26,7 +27,8 @@ public class Model extends Game_File {
 
     //Used to find other files
     private final String modelPath;
-    private final SqPack_IndexFile currentIndex;
+    private final SqPackIndexFile currentIndex;
+    private SqPackIndexFile bgCommonIndex; //in case a material in a different archive is needed
 
     //Model Info
     private final IMC_File imcFile;
@@ -37,28 +39,17 @@ public class Model extends Game_File {
     private final short numMaterialStrings;
     private short numShpStrings;
     private final MeshPart[] meshPartTable;
-
     private final Material[] materials;
     private final LoDSubModel[] lodModels = new LoDSubModel[3];
     private final BoneList[] boneLists;
-
     private ByteBuffer boneMatrixBuffer;
     private int numBones = -1;
-
     private final long[] atrMasks;
-
     private final String[] boneStrings;
-
     private PAP_File animFile;
-
     private SimpleShader simpleShader;
-
     private boolean isVRAMLoaded = false;
     private boolean isMarkedForDelete = false;
-
-    //Incase a material in a different archive is needed
-    private SqPack_IndexFile bgCommonIndex;
-
     private int imcPartsKey = 0;
     private int currentVariant = 1;
 
@@ -66,7 +57,7 @@ public class Model extends Game_File {
         this(null, null, data, endian);
     }
 
-    public Model(String modelPath, SqPack_IndexFile index, byte[] data, ByteOrder endian) throws BufferOverflowException, BufferUnderflowException {
+    public Model(String modelPath, SqPackIndexFile index, byte[] data, ByteOrder endian) throws BufferOverflowException, BufferUnderflowException {
         super(endian);
 
         this.modelPath = modelPath;
@@ -335,7 +326,7 @@ public class Model extends Game_File {
                     HavokNative.startHavok();
                 } catch (UnsatisfiedLinkError e) {
                     numBones = -1;
-                    Utils.getGlobalLogger().error(e);
+                    Utils.getGlobalLogger().error("", e);
                     return;
                 }
 
@@ -376,15 +367,13 @@ public class Model extends Game_File {
             if (data == null)
                 return null;
 
-            HashDatabase.addPathToDB(imcPath, currentIndex.getName());
+            HashDatabase.addPath(imcPath);
 
             return new IMC_File(data, endian);
-        } catch (IOException e) {
+        } catch (Exception e) {
             Utils.getGlobalLogger().error("Couldn't create IMC file {}", imcPath, e);
         }
-
         return null;
-
     }
 
     public void loadVariant(int variantNumber) {
@@ -450,24 +439,15 @@ public class Model extends Game_File {
                 }
 
                 try {
-                    SqPack_IndexFile indexToUse = currentIndex;
-                    byte[] materialData = currentIndex.extractFile(materialFolderPath, fileString);
+                    SqPackIndexFile indexToUse = currentIndex;
+                    byte[] materialData = currentIndex.extractFile(materialFolderPath + "/" + fileString);
 
                     //If not found, check other archives
                     if (materialData == null) {
                         //If we need bgcommon, open it
                         if (materialFolderPath.startsWith("bgcommon")) {
-                            if (bgCommonIndex == null) {
-                                String path = currentIndex.getPath();
-                                if (path.lastIndexOf("/") != -1)
-                                    path = path.substring(0, path.lastIndexOf("/sqpack"));
-                                else
-                                    path = path.substring(0, path.lastIndexOf("\\sqpack"));
-                                path += "/sqpack/ffxiv/010000.win32.index";
-                                bgCommonIndex = new SqPack_IndexFile(path, true);
-                            }
-
-                            materialData = bgCommonIndex.extractFile(materialFolderPath, fileString);
+                            bgCommonIndex = currentIndex.getIndexForIdFromSameRepo(0x020000);
+                            materialData = bgCommonIndex.extractFile(materialFolderPath + "/" + fileString);
                             indexToUse = bgCommonIndex;
                         }
                     }
@@ -475,16 +455,12 @@ public class Model extends Game_File {
                     if (materialData != null) {
                         materials[i] = new Material(materialFolderPath, indexToUse, materialData, endian);
 
-                        HashDatabase.addPathToDB(materialFolderPath + "/" + fileString, indexToUse.getName());
+                        HashDatabase.addPath(materialFolderPath + "/" + fileString);
                     }
                 } catch (FileNotFoundException e) {
-                    Utils.getGlobalLogger().error(e);
-                } catch (IOException e) {
-                    Utils.getGlobalLogger().error(e);
+                    Utils.getGlobalLogger().error("", e);
                 }
-
             }
-
         }
 
         //If there was a body material, grab it HACK HERE
@@ -495,16 +471,13 @@ public class Model extends Game_File {
             int body = Integer.parseInt(s1.substring(5, 9));
             materialFolderPath = String.format("chara/human/c%04d/obj/body/b%04d/material", chara, body);
 
-            HashDatabase.addPathToDB(materialFolderPath, "040000");
+            HashDatabase.addPath(materialFolderPath);
 
             try {
-                materials[bodyMaterialSpot] = new Material(materialFolderPath, currentIndex, currentIndex.extractFile(materialFolderPath, s), getEndian());
-            } catch (FileNotFoundException e) {
-                Utils.getGlobalLogger().error(e);
-            } catch (IOException e) {
-                Utils.getGlobalLogger().error(e);
+                materials[bodyMaterialSpot] = new Material(materialFolderPath, currentIndex, currentIndex.extractFile(materialFolderPath + "/" + s), getEndian());
+            } catch (Exception e) {
+                Utils.getGlobalLogger().error("", e);
             }
-
         }
     }
 

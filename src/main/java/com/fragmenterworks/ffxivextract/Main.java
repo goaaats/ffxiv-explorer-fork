@@ -6,7 +6,7 @@ import com.fragmenterworks.ffxivextract.helpers.PathSearcher;
 import com.fragmenterworks.ffxivextract.helpers.Utils;
 import com.fragmenterworks.ffxivextract.helpers.VersionUpdater;
 import com.fragmenterworks.ffxivextract.helpers.VersionUpdater.VersionCheckObject;
-import com.fragmenterworks.ffxivextract.storage.HashDatabase;
+import com.fragmenterworks.ffxivextract.paths.database.HashDatabase;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.config.Configurator;
@@ -30,16 +30,22 @@ public class Main {
         }
 
         // Init the hash database
-        try {
-            File dbFile = new File("./" + Constants.DBFILE_NAME);
-            if (dbFile.exists())
+        File dbFile = new File("./" + Constants.DBFILE_NAME);
+        boolean dbInit = false;
+
+        if (dbFile.exists()) {
+            try {
                 HashDatabase.init();
-            else
-                JOptionPane.showMessageDialog(null,
-                        Constants.DBFILE_NAME + " is missing. No file or folder names will be shown... instead the file's hashes will be displayed.",
-                        "Hash DB Load Error", JOptionPane.ERROR_MESSAGE);
-        } catch (ClassNotFoundException e1) {
-            Utils.getGlobalLogger().error(e1);
+                dbInit = true;
+            } catch (Exception e) {
+                Utils.getGlobalLogger().error("Error loading hash database.", e);
+            }
+        }
+
+        if (!dbInit) {
+            JOptionPane.showMessageDialog(null,
+                    Constants.DBFILE_NAME + " is missing. No file or folder names will be shown... instead the file's hashes will be displayed.",
+                    "Hash DB Load Error", JOptionPane.ERROR_MESSAGE);
         }
 
         Level currentLevel = LogManager.getRootLogger().getLevel();
@@ -55,8 +61,9 @@ public class Main {
                     System.out.println("Searches an archive for strings that start with <str>\n-pathsearch <path to index> <str>");
             }
 
-            if (args[0].equals("-debug") && currentLevel.intLevel() < Level.DEBUG.intLevel())
-                Configurator.setAllLevels(LogManager.getRootLogger().getName(), Level.DEBUG);
+//            if (args[0].equals("-debug") && currentLevel.intLevel() < Level.DEBUG.intLevel())
+//                Configurator.setAllLevels(LogManager.getRootLogger().getName(), Level.DEBUG);
+                Configurator.setAllLevels(LogManager.getRootLogger().getName(), Level.TRACE);
 
             // PATHSEARCH
             if (args[0].equals("-pathsearch")) {

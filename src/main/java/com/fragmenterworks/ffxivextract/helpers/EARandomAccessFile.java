@@ -242,7 +242,7 @@ public class EARandomAccessFile {
      * @return long read. like RandomAcessFile.readLong except little endian.
      * @throws IOException if read fails.
      */
-    private long readLong() throws IOException {
+    public long readLong() throws IOException {
         raf.readFully(work, 0, 8);
 
         if (endian == ByteOrder.BIG_ENDIAN)

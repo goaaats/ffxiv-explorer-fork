@@ -12,7 +12,6 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.prefs.Preferences;
 
-@SuppressWarnings("serial")
 class SettingsWindow extends JDialog {
     private final JTextField txtDatPath;
 

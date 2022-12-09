@@ -10,14 +10,12 @@ public class Constants {
 	public static final String APPNAME = "FFXIV Data Explorer";
 	public static final String VERSION = "v1.8";
 	public static final int APP_VERSION_CODE = 10;
-	public static final int DB_VERSION_CODE = 8;	
+	public static final int DB_VERSION_CODE = 9;
 	
 	public static final String COMMIT = "5eabfdab3245a3188bc62454fe6f1f9bf471c053";
 	public static boolean HAVOK_ENABLED = false;
 	public static boolean DEBUG = false;
 	public static boolean EASTER_EGG = false;
-
-	public static Connection GLOBAL_CONN;
 
 	public static final String URL_WEBSITE = "http://ffxivexplorer.fragmenterworks.com";
 	public static final String URL_VERSION_CHECK = URL_WEBSITE
@@ -30,6 +28,7 @@ public class Constants {
 	public static final String PREF_FIRSTRUN = "pref_firstrun";
 	public static final String PREF_LASTOPENED = "pref_lastopened";
 	public static final String PREF_DO_DB_UPDATE = "pref_dbupdate";
+	public static final String PREF_INDEX_UPDATE_LIVE = "pref_indexupdate";
 	public static final String PREF_DAT_PATH = "pref_datpath";
 	public static final String PREF_DEFAULT_LANG = "pref_deflang";
 	

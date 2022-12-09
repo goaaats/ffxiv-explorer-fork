@@ -2,8 +2,9 @@ package com.fragmenterworks.ffxivextract.models;
 
 import com.fragmenterworks.ffxivextract.helpers.ShaderIdHelper;
 import com.fragmenterworks.ffxivextract.helpers.Utils;
+import com.fragmenterworks.ffxivextract.models.sqpack.index.SqPackIndexFile;
 import com.fragmenterworks.ffxivextract.shaders.*;
-import com.fragmenterworks.ffxivextract.storage.HashDatabase;
+import com.fragmenterworks.ffxivextract.paths.database.HashDatabase;
 import com.jogamp.opengl.GL3;
 
 import java.io.FileNotFoundException;
@@ -56,7 +57,7 @@ public class Material extends Game_File {
     }
 
     //Constructor grabs info and texture files
-    public Material(String folderPath, SqPack_IndexFile currentIndex, byte[] data, ByteOrder endian) {
+    public Material(String folderPath, SqPackIndexFile currentIndex, byte[] data, ByteOrder endian) {
         super(endian);
 
         if (data == null)
@@ -106,10 +107,10 @@ public class Material extends Game_File {
                 String folderName = s.substring(0, s.lastIndexOf("/"));
                 String fileString = s.substring(s.lastIndexOf("/") + 1);
 
-                HashDatabase.addPathToDB(s, currentIndex.getName());
+                HashDatabase.addPath(s);
 
                 try {
-                    byte[] extracted = currentIndex.extractFile(folderName, fileString);
+                    byte[] extracted = currentIndex.extractFile(folderName + "/" + fileString);
                     if (extracted == null)
                         continue;
 
@@ -123,13 +124,9 @@ public class Material extends Game_File {
                         mask = new Texture_File(extracted, endian);
                     else
                         colorSet = new Texture_File(extracted, endian);
-
-                } catch (FileNotFoundException e) {
-                    Utils.getGlobalLogger().error(e);
-                } catch (IOException e) {
-                    Utils.getGlobalLogger().error(e);
+                } catch (Exception e) {
+                    Utils.getGlobalLogger().error("", e);
                 }
-
             }
         }
 
@@ -200,7 +197,7 @@ public class Material extends Game_File {
             else
                 shader = new DefaultShader(gl);
         } catch (IOException e) {
-            Utils.getGlobalLogger().error(e);
+            Utils.getGlobalLogger().error("", e);
         }
 
         shaderReady = true;

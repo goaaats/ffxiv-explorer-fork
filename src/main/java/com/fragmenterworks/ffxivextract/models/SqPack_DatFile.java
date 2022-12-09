@@ -8,6 +8,7 @@ import com.jcraft.jzlib.JZlib;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Calendar;
@@ -19,16 +20,23 @@ public class SqPack_DatFile {
     private final static int TYPE_BINARY = 2;
     public final static int TYPE_PLACEHOLDER = 1;
 
+    private final String path;
     private EARandomAccessFile currentFilePointer;
     private final ByteOrder endian;
 
-    SqPack_DatFile(String path, ByteOrder endian) throws FileNotFoundException {
+    public SqPack_DatFile(String path, ByteOrder endian) throws FileNotFoundException {
         this.endian = endian;
-        currentFilePointer = new EARandomAccessFile(path, "r", endian);
+        this.path = path;
     }
 
-    @SuppressWarnings("unused")
-    protected byte[] extractFile(long fileOffset, Loading_Dialog loadingDialog) throws IOException {
+    public byte[] extractFile(long fileOffset, Loading_Dialog loadingDialog) throws IOException {
+        open();
+        var ret = extractFileInternal(fileOffset, loadingDialog);
+        close();
+        return ret;
+    }
+
+    private byte[] extractFileInternal(long fileOffset, Loading_Dialog loadingDialog) throws IOException {
         currentFilePointer.seek(fileOffset);
         int headerLength = currentFilePointer.readInt();
         int contentType = currentFilePointer.readInt();
@@ -408,7 +416,7 @@ public class SqPack_DatFile {
                     System.arraycopy(decompressedBlock, 0, decompressedFile, currentFileOffset, decompressedBlockSize);
                 } catch (ArrayIndexOutOfBoundsException e) {
                     // Couldn't tell you
-//					Utils.getGlobalLogger().error(e);
+//					Utils.getGlobalLogger().error("", e);
                 }
 
                 currentFileOffset += decompressedBlockSize;
@@ -424,6 +432,45 @@ public class SqPack_DatFile {
     }
 
     private byte[] decompressBlock(int compressedSize, int decompressedSize) throws IOException {
+
+        // Build the zlib header stuff
+        byte[] decompressedData = new byte[decompressedSize];
+        byte[] gzipedData = new byte[compressedSize + 6]; // Need to add 6 bytes
+        // for missing zlib
+        // header/footer
+        // Zlib Magic Number
+        gzipedData[0] = (byte) 0x78;
+        gzipedData[1] = (byte) 0x9C;
+
+        // Actual Data
+        currentFilePointer.readFully(gzipedData, 2, compressedSize);
+
+        // Checksum
+        int checksum = adler32(gzipedData, 2, compressedSize);
+        byte[] checksumByte = ByteBuffer.allocate(4)
+                .order(ByteOrder.BIG_ENDIAN).putInt(checksum).array();
+        System.arraycopy(checksumByte, 0, gzipedData, 2 + compressedSize, 4);
+
+        //Decompress this block
+        try {
+
+            java.util.zip.Inflater inflater = new java.util.zip.Inflater();
+
+            inflater.setInput(gzipedData, 0, compressedSize);
+            int resultLength = inflater.inflate(decompressedData);
+
+//            if (resultLength != decompressedSize)
+//                System.err.printf("Size mismatch on new deflate: %d | %d\n", decompressedSize, resultLength);
+            inflater.end();
+
+            return decompressedData;
+        } catch (Exception e) {
+            Utils.getGlobalLogger().error("", e);
+        }
+        return null;
+    }
+
+    private byte[] decompressBlock1(int compressedSize, int decompressedSize) throws IOException {
 
         // Build the zlib header stuff
         byte[] decompressedData = new byte[decompressedSize];
@@ -473,7 +520,7 @@ public class SqPack_DatFile {
 
             return decompressedData;
         } catch (Exception e) {
-            Utils.getGlobalLogger().error(e);
+            Utils.getGlobalLogger().error("", e);
         }
         return null;
     }
@@ -485,6 +532,10 @@ public class SqPack_DatFile {
             Utils.getGlobalLogger().error("{} error: {}", msg, err);
             System.exit(1);
         }
+    }
+
+    void open() throws IOException {
+        currentFilePointer = new EARandomAccessFile(path, "r", endian);
     }
 
     void close() throws IOException {
@@ -536,17 +587,22 @@ public class SqPack_DatFile {
         }
     }
 
-    int getContentType(long offset) throws IOException {
+    public int getContentType(long offset) throws IOException {
+        open();
         currentFilePointer.seek(offset);
         currentFilePointer.readInt(); //Header Length
-        return currentFilePointer.readInt();
+        var contentType = currentFilePointer.readInt();
+        close();
+        return contentType;
     }
 
     Calendar getTimeStamp() throws IOException {
         // Timestamp
+        open();
         currentFilePointer.seek(0x18);
         int date = currentFilePointer.readInt();
         int time = currentFilePointer.readInt();
+        close();
         if (date != 0) {
             //Copied code from Cassiope example, too lazy to write my own lol.
             int yyyy = (date / 10000) % 10000;

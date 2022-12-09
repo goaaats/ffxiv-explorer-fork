@@ -1,36 +1,32 @@
 package com.fragmenterworks.ffxivextract.gui.components;
 
-import com.fragmenterworks.ffxivextract.models.SqPack_IndexFile;
-import com.fragmenterworks.ffxivextract.models.SqPack_IndexFile.SqPack_File;
-import com.fragmenterworks.ffxivextract.models.SqPack_IndexFile.SqPack_Folder;
-import sun.awt.datatransfer.TransferableProxy;
+import com.fragmenterworks.ffxivextract.helpers.Utils;
+import com.fragmenterworks.ffxivextract.models.sqpack.index.IIndexUpdateListener;
+import com.fragmenterworks.ffxivextract.models.sqpack.index.SqPackIndexFile;
+import com.fragmenterworks.ffxivextract.models.sqpack.model.SqPackFile;
+import com.fragmenterworks.ffxivextract.models.sqpack.model.SqPackFolder;
+import com.fragmenterworks.ffxivextract.paths.CrcResult;
+import com.fragmenterworks.ffxivextract.paths.database.IHashUpdateListener;
 
-import javax.sound.sampled.Clip;
 import javax.swing.*;
 import javax.swing.event.TreeSelectionListener;
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeCellRenderer;
-import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.TreePath;
+import javax.swing.tree.*;
 import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
-import java.awt.datatransfer.Transferable;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Enumeration;
 
-@SuppressWarnings("serial")
-public class ExplorerPanel_View extends JScrollPane implements MouseListener {
+public class ExplorerPanel_View extends JScrollPane implements MouseListener, IIndexUpdateListener {
+
+    private SqPackIndexFile currentIndex;
+    private boolean enableHashUpdate = true;
 
     private final JTree fileTree;
     private final DefaultMutableTreeNode root = new DefaultMutableTreeNode("No File Loaded");
-    JScrollPane scroller;
 
     PopupMenu contextMenu;
 
@@ -46,33 +42,26 @@ public class ExplorerPanel_View extends JScrollPane implements MouseListener {
 
         contextMenu = new PopupMenu();
         MenuItem copyPath = new MenuItem("Copy full path");
-        copyPath.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                String path = "";
-                TreePath[] selectedPaths = fileTree.getSelectionPaths();
+        copyPath.addActionListener(e -> {
+            String path = "";
+            TreePath[] selectedPaths = fileTree.getSelectionPaths();
 
-                if (selectedPaths == null)
-                    return;
+            if (selectedPaths == null)
+                return;
 
-                TreePath tp = selectedPaths[0];
-                Object obj = ((DefaultMutableTreeNode) tp.getLastPathComponent()).getUserObject();
+            TreePath tp = selectedPaths[0];
+            Object obj = ((DefaultMutableTreeNode) tp.getLastPathComponent()).getUserObject();
 
-                if (obj == null)
-                    return;
-                else if (obj instanceof SqPack_Folder)
-                    path = ((SqPack_Folder) obj).getName();
-                else if (obj instanceof SqPack_File) {
-                    // It's messy but...
-                    SqPack_Folder folder = (SqPack_Folder) ((DefaultMutableTreeNode) tp.getParentPath().getLastPathComponent()).getUserObject();
-                    SqPack_File file = (SqPack_File) obj;
-
-                    path = folder.getName() + "/" + file.getName();
-                }
-                StringSelection selection = new StringSelection(path);
-                Clipboard clip = Toolkit.getDefaultToolkit().getSystemClipboard();
-                clip.setContents(selection, selection);
+            if (obj == null)
+                return;
+            else if (obj instanceof SqPackFolder)
+                path = ((SqPackFolder) obj).getName();
+            else if (obj instanceof SqPackFile) {
+                path = ((SqPackFile) obj).getFullPath();
             }
+            StringSelection selection = new StringSelection(path);
+            Clipboard clip = Toolkit.getDefaultToolkit().getSystemClipboard();
+            clip.setContents(selection, selection);
         });
         contextMenu.add(copyPath);
         this.add(contextMenu);
@@ -83,36 +72,40 @@ public class ExplorerPanel_View extends JScrollPane implements MouseListener {
         fileTree.addTreeSelectionListener(l);
     }
 
-    public void fileOpened(SqPack_IndexFile index) {
-
-        if (index.hasNoFolders()) {
-            SqPack_Folder fakefolder = index.getPackFolders()[0];
-            Arrays.sort(fakefolder.getFiles(), fileComparator);
-            for (int j = 0; j < fakefolder.getFiles().length; j++)
-                root.add(new DefaultMutableTreeNode(fakefolder.getFiles()[j]));
-        } else {
-            Arrays.sort(index.getPackFolders(), folderComparator);
-
-            for (int i = 0; i < index.getPackFolders().length; i++) {
-                SqPack_Folder folder = index.getPackFolders()[i];
-
-                DefaultMutableTreeNode folderNode = new DefaultMutableTreeNode(folder);
-
-                Arrays.sort(folder.getFiles(), fileComparator);
-
-                for (int j = 0; j < folder.getFiles().length; j++)
-                    folderNode.add(new DefaultMutableTreeNode(folder.getFiles()[j]));
-
-                root.add(folderNode);
-            }
-        }
-
+    public void fileOpened(SqPackIndexFile index) {
+        currentIndex = index;
+        currentIndex.addListener(this);
+        load();
         ((DefaultTreeModel) fileTree.getModel()).reload();
     }
 
     public void fileClosed() {
-        root.removeAllChildren();
+        currentIndex.removeListener(this);
+        currentIndex = null;
+        unload();
         ((DefaultTreeModel) fileTree.getModel()).reload();
+    }
+
+    public void load() {
+        for (var folder : currentIndex.getFolders()) {
+            DefaultMutableTreeNode folderNode = new DefaultMutableTreeNode(folder);
+            for (var file : folder.getFiles())
+                folderNode.add(new DefaultMutableTreeNode(file));
+            root.add(folderNode);
+        }
+        for (var file : currentIndex.getFiles()) {
+            if (file.getParent() == null)
+                root.add(new DefaultMutableTreeNode(file));
+        }
+    }
+
+    private void unload() {
+        root.removeAllChildren();
+    }
+
+    public void setEnableHashUpdate(boolean enableHashUpdate)
+    {
+        this.enableHashUpdate = enableHashUpdate;
     }
 
     @Override
@@ -125,45 +118,40 @@ public class ExplorerPanel_View extends JScrollPane implements MouseListener {
     }
 
     @Override
-    public void mousePressed(MouseEvent e) {
-    }
+    public void onIndexUpdate() {
+        Utils.getGlobalLogger().debug("Index update");
 
-    @Override
-    public void mouseReleased(MouseEvent e) {
-    }
+        if (!enableHashUpdate) {
+            Utils.getGlobalLogger().debug("Ignored");
+            return;
+        }
 
-    @Override
-    public void mouseEntered(MouseEvent e) {
-    }
-
-    @Override
-    public void mouseExited(MouseEvent e) {
+        unload();
+        load();
+        ((DefaultTreeModel) fileTree.getModel()).reload();
     }
 
     private class TreeRenderer extends DefaultTreeCellRenderer {
 
-        private final Icon fileIcon =
-                (Icon) UIManager.get("FileView.fileIcon");
-        private final Icon folderIcon =
-                (Icon) UIManager.get("FileView.directoryIcon");
+        private final Icon fileIcon = (Icon) UIManager.get("FileView.fileIcon");
+        private final Icon folderIcon = (Icon) UIManager.get("FileView.directoryIcon");
 
         @Override
-        public Component getTreeCellRendererComponent(JTree tree, Object value,
-                                                      boolean sel, boolean exp, boolean leaf, int row, boolean hasFocus) {
+        public Component getTreeCellRendererComponent(JTree tree, Object value, boolean sel, boolean exp, boolean leaf, int row, boolean hasFocus) {
             DefaultMutableTreeNode node = (DefaultMutableTreeNode) value;
             setTextNonSelectionColor(Color.BLACK);
 
-            if (node.getUserObject() instanceof SqPack_Folder) //FOLDER
+            if (node.getUserObject() instanceof SqPackFolder) //FOLDER
             {
-                SqPack_Folder folder = (SqPack_Folder) node.getUserObject();
+                SqPackFolder folder = (SqPackFolder) node.getUserObject();
 
                 value = folder.getName();
 
                 setOpenIcon(getDefaultOpenIcon());
                 setClosedIcon(getDefaultClosedIcon());
-            } else if (node.getUserObject() instanceof SqPack_File) //FILE
+            } else if (node.getUserObject() instanceof SqPackFile) //FILE
             {
-                SqPack_File file = (SqPack_File) node.getUserObject();
+                SqPackFile file = (SqPackFile) node.getUserObject();
 	        	
 	        	/*if (currentCompareFile != null && currentCompareFile.isNewFile(file.getId()))
 	        		setTextNonSelectionColor(new Color(0,150,0));
@@ -184,13 +172,10 @@ public class ExplorerPanel_View extends JScrollPane implements MouseListener {
                 setClosedIcon(folderIcon);
             }
 
-            super.getTreeCellRendererComponent(
-                    tree, value, sel, exp, leaf, row, hasFocus);
-
+            super.getTreeCellRendererComponent(tree, value, sel, exp, leaf, row, hasFocus);
             return this;
         }
     }
-
 
     public boolean isOnlyFolder() {
         TreePath[] selectedPaths = fileTree.getSelectionPaths();
@@ -203,11 +188,11 @@ public class ExplorerPanel_View extends JScrollPane implements MouseListener {
 
         Object obj = ((DefaultMutableTreeNode) selectedPaths[0].getLastPathComponent()).getUserObject();
 
-        return (obj instanceof SqPack_Folder);
+        return (obj instanceof SqPackFolder);
     }
 
-    public ArrayList<SqPack_File> getSelectedFiles() {
-        ArrayList<SqPack_File> selectedFiles = new ArrayList<SqPack_File>();
+    public ArrayList<SqPackFile> getSelectedFiles() {
+        ArrayList<SqPackFile> selectedFiles = new ArrayList<>();
         TreePath[] selectedPaths = fileTree.getSelectionPaths();
 
         if (selectedPaths == null)
@@ -217,16 +202,16 @@ public class ExplorerPanel_View extends JScrollPane implements MouseListener {
             Object obj = ((DefaultMutableTreeNode) tp.getLastPathComponent()).getUserObject();
             if (obj == null)
                 continue;
-            if (obj instanceof SqPack_Folder) {
+            if (obj instanceof SqPackFolder) {
                 int children = ((DefaultMutableTreeNode) tp.getLastPathComponent()).getChildCount();
                 for (int i = 0; i < children; i++) {
-                    SqPack_File file = (SqPack_File) ((DefaultMutableTreeNode) ((DefaultMutableTreeNode) tp.getLastPathComponent()).getChildAt(i)).getUserObject();
+                    SqPackFile file = (SqPackFile) ((DefaultMutableTreeNode) ((DefaultMutableTreeNode) tp.getLastPathComponent()).getChildAt(i)).getUserObject();
                     if (!selectedFiles.contains(file))
                         selectedFiles.add(file);
                 }
             }
-            if (obj instanceof SqPack_File)
-                selectedFiles.add((SqPack_File) obj);
+            if (obj instanceof SqPackFile)
+                selectedFiles.add((SqPackFile) obj);
         }
 
         return selectedFiles;
@@ -234,37 +219,28 @@ public class ExplorerPanel_View extends JScrollPane implements MouseListener {
 
     public void select(long offset) {
         DefaultMutableTreeNode root = (DefaultMutableTreeNode) fileTree.getModel().getRoot();
-        Enumeration<DefaultMutableTreeNode> e = root.depthFirstEnumeration();
+        Enumeration<TreeNode> e = root.depthFirstEnumeration();
         while (e.hasMoreElements()) {
-            DefaultMutableTreeNode node = e.nextElement();
-            if (node.getUserObject() instanceof SqPack_File) {
-                SqPack_File file = (SqPack_File) node.getUserObject();
-                if (offset == file.getOffset()) {
+            var node = (DefaultMutableTreeNode) e.nextElement();
+            if (node.getUserObject() instanceof SqPackFile) {
+                SqPackFile file = (SqPackFile) node.getUserObject();
+                if (offset == file.getElement().getOffset()) {
                     fileTree.setSelectionPath(new TreePath(node.getPath()));
                 }
             }
         }
     }
 
+    @Override
+    public void mousePressed(MouseEvent e) {}
 
-    private final Comparator<SqPack_Folder> folderComparator = new Comparator<SqPack_Folder>() {
+    @Override
+    public void mouseReleased(MouseEvent e) {}
 
-        @Override
-        public int compare(SqPack_Folder o1, SqPack_Folder o2) {
+    @Override
+    public void mouseEntered(MouseEvent e) {}
 
-            return o1.getName().compareTo(o2.getName());
-        }
-    };
-
-    private final Comparator<SqPack_File> fileComparator = new Comparator<SqPack_File>() {
-
-        @Override
-        public int compare(SqPack_File o1, SqPack_File o2) {
-
-            return o1.getName().compareTo(o2.getName());
-        }
-    };
-
-
+    @Override
+    public void mouseExited(MouseEvent e) {}
 }
 

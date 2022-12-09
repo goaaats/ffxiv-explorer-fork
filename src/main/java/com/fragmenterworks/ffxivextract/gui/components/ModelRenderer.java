@@ -261,7 +261,7 @@ public class ModelRenderer implements GLEventListener {
             blurShader = new BlurShader(gl);
             blendShader = new BlendShader(gl);
         } catch (IOException e) {
-            Utils.getGlobalLogger().error(e);
+            Utils.getGlobalLogger().error("", e);
         }
     }
 

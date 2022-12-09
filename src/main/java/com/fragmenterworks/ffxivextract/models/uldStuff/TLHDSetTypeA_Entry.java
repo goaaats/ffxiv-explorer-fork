@@ -57,7 +57,7 @@ public class TLHDSetTypeA_Entry {
                 Constructor c = aClass.getDeclaredConstructor(ByteBuffer.class);
                 return (TLHDSetTypeA_Entry_Item_Type) c.newInstance(data);
             } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException | InstantiationException e) {
-                Utils.getGlobalLogger().error(e);
+                Utils.getGlobalLogger().error("", e);
             }
         }
         return null;

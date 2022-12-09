@@ -4,7 +4,7 @@ import com.fragmenterworks.ffxivextract.Strings;
 import com.fragmenterworks.ffxivextract.gui.components.EXDF_View;
 import com.fragmenterworks.ffxivextract.helpers.Utils;
 import com.fragmenterworks.ffxivextract.models.EXHF_File;
-import com.fragmenterworks.ffxivextract.models.SqPack_IndexFile;
+import com.fragmenterworks.ffxivextract.models.sqpack.index.SqPackIndexFile;
 
 import javax.swing.*;
 import java.awt.*;
@@ -16,9 +16,9 @@ public class ModelViewerWindow extends JFrame {
     private final JFrame parent;
     private Loading_Dialog dialog;
     private final String sqPackPath;
-    private SqPack_IndexFile exdIndexFile;
-    private SqPack_IndexFile modelIndexFile;
-    private SqPack_IndexFile buildingIndexFile;
+    private SqPackIndexFile exdIndexFile;
+    private SqPackIndexFile modelIndexFile;
+    private SqPackIndexFile buildingIndexFile;
     private final JTabbedPane tabbedPane;
     private EXDF_View itemView;
 
@@ -38,15 +38,15 @@ public class ModelViewerWindow extends JFrame {
 
     }
 
-    public SqPack_IndexFile getExdIndexFile() {
+    public SqPackIndexFile getExdIndexFile() {
         return exdIndexFile;
     }
 
-    public SqPack_IndexFile getModelIndexFile() {
+    public SqPackIndexFile getModelIndexFile() {
         return modelIndexFile;
     }
 
-    public SqPack_IndexFile getBuildingIndexFile() {
+    public SqPackIndexFile getBuildingIndexFile() {
         return buildingIndexFile;
     }
 
@@ -70,15 +70,13 @@ public class ModelViewerWindow extends JFrame {
 
         @Override
         protected Void doInBackground() {
-
-
             try {
-                dialog.nextFile(0, "..\\game\\sqpack\\ffxiv\\0a0000.win32.index");
-                exdIndexFile = new SqPack_IndexFile(getSqpackPath() + "\\game\\sqpack\\ffxiv\\0a0000.win32.index", true);
-                dialog.nextFile(1, "..\\game\\sqpack\\ffxiv\\040000.win32.index");
-                modelIndexFile = new SqPack_IndexFile(getSqpackPath() + "\\game\\sqpack\\ffxiv\\040000.win32.index", true);
-                dialog.nextFile(2, "..\\game\\sqpack\\ffxiv\\010000.win32.index");
-                buildingIndexFile = new SqPack_IndexFile(getSqpackPath() + "\\game\\sqpack\\ffxiv\\010000.win32.index", true);
+                dialog.nextFile(0, "0a0000");
+                exdIndexFile = SqPackIndexFile.read(getSqpackPath() + "\\game\\sqpack\\ffxiv\\0a0000.win32.index");
+                dialog.nextFile(1, "040000");
+                modelIndexFile = exdIndexFile.getIndexForIdFromSameRepo(0x040000);
+                dialog.nextFile(2, "010000");
+                buildingIndexFile = exdIndexFile.getIndexForIdFromSameRepo(0x010000);
                 dialog.nextFile(3, "Setting up lists...");
                 EXHF_File exhfFile = new EXHF_File(exdIndexFile.extractFile("exd/item.exh"));
                 itemView = new EXDF_View(exdIndexFile, "exd/item.exh", exhfFile);

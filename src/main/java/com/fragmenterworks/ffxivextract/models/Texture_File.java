@@ -114,7 +114,7 @@ public class Texture_File extends Game_File {
                 return ImageDecoding.decodeImageRGBA(data,
                         mipmapOffsets[index],
                         uncompressedWidth / (mipMapDivide),
-                        uncompressedHeight / (mipMapDivide), 0, 0);
+                        uncompressedHeight / (mipMapDivide), 0, 0, endian);
             }
             case 0x2460: {
                 return ImageDecoding.decodeImageRGBAF(data, endian, mipmapOffsets[index], uncompressedWidth / (mipMapDivide), uncompressedHeight / (mipMapDivide), 0, 0);

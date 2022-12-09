@@ -2,13 +2,16 @@ package com.fragmenterworks.ffxivextract.helpers;
 
 import com.fragmenterworks.ffxivextract.Constants;
 import com.fragmenterworks.ffxivextract.Main;
-import com.fragmenterworks.ffxivextract.models.SqPack_IndexFile;
 import com.fragmenterworks.ffxivextract.models.Texture_File;
+import com.fragmenterworks.ffxivextract.models.sqpack.index.SqPackIndexFile;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.ByteOrder;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.prefs.Preferences;
 
@@ -26,22 +29,6 @@ public class FileTools {
         }
     }
 
-
-    public static BufferedImage getIcon(SqPack_IndexFile sqPak, int iconID) {
-        String file;
-        if (sqPak == null) {
-            file = Constants.datPath;
-        } else {
-            file = sqPak.getPath();
-            file = new File(file).getParentFile().getPath();
-        }
-        return getIcon(file, iconID);
-    }
-
-    public static BufferedImage getIcon(int iconID) {
-        return getIcon((String) null, iconID);
-    }
-
     public static BufferedImage getIcon(String sqPakPath, int iconID) {
         if (sqPakPath == null) {
             sqPakPath = Constants.datPath;
@@ -52,17 +39,28 @@ public class FileTools {
         return bi;
     }
 
-
-    public static byte[] getRaw(SqPack_IndexFile sqPak, String path) {
-        String file = sqPak.getPath();
-        String sqpakpath = new File(file).getParentFile().getPath();
-        return getRaw(sqpakpath, path);
+    public static byte[] getBytes(String filePath) {
+        try {
+            return Files.readAllBytes(Paths.get(filePath));
+        } catch (IOException e) {
+            Utils.getGlobalLogger().error("Error reading file: {}", filePath, e);
+        }
+        return new byte[0];
     }
 
-    public static byte[] getRaw(String path) {
-        return getRaw((String) null, path);
+    public static byte[] peek(String filePath, int offset, int length) {
+        try {
+            FileInputStream fis = new FileInputStream(filePath);
+            byte[] data = new byte[length];
+            fis.skip(offset);
+            fis.read(data);
+            fis.close();
+            return data;
+        } catch (IOException e) {
+            Utils.getGlobalLogger().error("Error reading file: {}", filePath, e);
+        }
+        return new byte[0];
     }
-
 
     public static byte[] getRaw(String sqPakPath, String path) {
         if (sqPakPath == null) {
@@ -79,13 +77,18 @@ public class FileTools {
             sqPakPath += "\\game\\sqpack\\ffxiv\\";
         }
 
-        SqPack_IndexFile index = SqPack_IndexFile.createIndexFileForPath(sqPakPath + dat + ".index", true);
+        SqPackIndexFile index = null;
+        try {
+            index = SqPackIndexFile.read(sqPakPath + dat + ".index");
+        } catch (IOException e) {
+            Utils.getGlobalLogger().error("Error reading index file: {}", sqPakPath + dat + ".index", e);
+        }
 
         if (index != null) {
             try {
                 return index.extractFile(lowerpath);
-            } catch (IOException e) {
-                Utils.getGlobalLogger().error(e);
+            } catch (Exception e) {
+                Utils.getGlobalLogger().error("", e);
             }
         }
         return new byte[0];
@@ -166,10 +169,8 @@ public class FileTools {
             BufferedImage bf = tf.decode(0, new HashMap<>());
             return bf;
         } catch (ImageDecoding.ImageDecodingException e) {
-            Utils.getGlobalLogger().error(e);
+            Utils.getGlobalLogger().error("", e);
         }
         return null;
-
     }
-
 }

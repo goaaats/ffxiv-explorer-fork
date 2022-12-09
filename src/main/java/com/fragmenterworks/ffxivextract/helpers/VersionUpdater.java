@@ -12,7 +12,6 @@ import java.nio.charset.StandardCharsets;
 
 public class VersionUpdater {
 
-
     public static VersionCheckObject checkForUpdates() {
         VersionCheckObject verCheck = null;
         try {
@@ -21,7 +20,7 @@ public class VersionUpdater {
             BufferedReader rd = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
             verCheck = gson.fromJson(rd, VersionCheckObject.class);
         } catch (IOException e) {
-            Utils.getGlobalLogger().error(e);
+            Utils.getGlobalLogger().error("", e);
         }
         return verCheck;
     }

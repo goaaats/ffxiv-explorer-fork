@@ -7,8 +7,8 @@ import com.fragmenterworks.ffxivextract.helpers.SparseArray;
 import com.fragmenterworks.ffxivextract.helpers.Utils;
 import com.fragmenterworks.ffxivextract.models.EXHF_File;
 import com.fragmenterworks.ffxivextract.models.Model;
-import com.fragmenterworks.ffxivextract.models.SqPack_IndexFile;
-import com.fragmenterworks.ffxivextract.storage.HashDatabase;
+import com.fragmenterworks.ffxivextract.models.sqpack.index.SqPackIndexFile;
+import com.fragmenterworks.ffxivextract.paths.database.HashDatabase;
 import com.jogamp.opengl.GLCapabilities;
 import com.jogamp.opengl.GLProfile;
 import com.jogamp.opengl.awt.GLCanvas;
@@ -63,11 +63,11 @@ class ModelViewerMonsters extends JPanel {
     private int lastOriginX, lastOriginY;
     private int lastX, lastY;
 
-    private final SqPack_IndexFile modelIndexFile;
+    private final SqPackIndexFile modelIndexFile;
 
     private final SparseArray<String> names = new SparseArray<String>();
 
-    public ModelViewerMonsters(ModelViewerWindow parent, SqPack_IndexFile modelIndex) {
+    public ModelViewerMonsters(ModelViewerWindow parent, SqPackIndexFile modelIndex) {
 
         this.parent = parent;
         this.modelIndexFile = modelIndex;
@@ -302,7 +302,7 @@ class ModelViewerMonsters extends JPanel {
                             modelPath = String.format("chara/monster/m%04d/obj/body/b%04d/model/m%04db%04d.mdl", filteredEntries.get(selected).id, filteredEntries.get(selected).model, filteredEntries.get(selected).id, filteredEntries.get(selected).model);
                             modelData = modelIndexFile.extractFile(modelPath);
                             if (modelData != null) {
-                                HashDatabase.addPathToDB(modelPath, "040000");
+                                HashDatabase.addPath(modelPath);
                                 Model model = new Model(modelPath, modelIndexFile, modelData, modelIndex.getEndian());
                                 model.loadVariant(filteredEntries.get(selected).varient);
                                 renderer.setModel(model);
@@ -325,9 +325,9 @@ class ModelViewerMonsters extends JPanel {
                             break;
                     }
                 } catch (FileNotFoundException e) {
-                    Utils.getGlobalLogger().error(e);
+                    Utils.getGlobalLogger().error("", e);
                 } catch (IOException e) {
-                    Utils.getGlobalLogger().error(e);
+                    Utils.getGlobalLogger().error("", e);
                 }
 
 
@@ -479,7 +479,7 @@ class ModelViewerMonsters extends JPanel {
     }
 
     private boolean loadMonsters() throws IOException {
-        SqPack_IndexFile indexFile = parent.getExdIndexFile();
+        SqPackIndexFile indexFile = parent.getExdIndexFile();
         EXHF_File exhfFile = new EXHF_File(indexFile.extractFile("exd/modelchara.exh"));
         EXDF_View view = new EXDF_View(indexFile, "exd/modelchara.exh", exhfFile);
 
@@ -499,7 +499,7 @@ class ModelViewerMonsters extends JPanel {
 
             }
         } catch (Exception e) {
-            //Utils.getGlobalLogger().error(e);
+            //Utils.getGlobalLogger().error("", e);
             return false;
         }
 

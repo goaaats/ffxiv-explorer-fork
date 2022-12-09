@@ -97,7 +97,7 @@ public class ULD_File extends Game_File {
                 Constructor c = aClass.getDeclaredConstructor(ByteBuffer.class);
                 return (GraphicsNodeTypeData) c.newInstance(data);
             } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException | InstantiationException e) {
-                Utils.getGlobalLogger().error(e);
+                Utils.getGlobalLogger().error("", e);
             }
         }
         return null;
@@ -118,7 +118,7 @@ public class ULD_File extends Game_File {
                 Constructor c = aClass.getDeclaredConstructor(ByteBuffer.class);
                 return (COHDEntryType) c.newInstance(data);
             } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException | InstantiationException e) {
-                Utils.getGlobalLogger().error(e);
+                Utils.getGlobalLogger().error("", e);
             }
         }
         return null;

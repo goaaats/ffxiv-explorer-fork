@@ -38,7 +38,12 @@ public class Strings {
     public static final String PATHTOHASH_PATH = "Path: ";
     public static final String PATHTOHASH_FOLDER_HASH = "Folder Hash: ";
     public static final String PATHTOHASH_FILE_HASH = "File Hash: ";
-    public static final String PATHTOHASH_BUTTON_HASHTHIS = "Calculate";
+    public static final String PATHTOHASH_FULL_HASH = "Full Hash: ";
+    public static final String PATHTOHASH_AUTO_COMMIT = "Add to DB automatically if path exists";
+    public static final String PATHTOHASH_BUTTON_COMMIT = "Add to DB (force)";
+    public static final String PATHTOHASH_BUTTON_FORCE_WARNING =
+            "This will add the path to the database, even if it may not actually exist.\n" +
+            "The only way to undo this is manually removing paths with an SQLite tool. Are you sure?";
     public static final String PATHTOHASH_BUTTON_CLOSE = "Close";
     public static final String PATHTOHASH_INTRO = "Set a valid path in the form of \"folder/subfolder/file.ext\"\nand click calculate.";
     public static final String PATHTOHASH_ERROR_INVALID = "Not a valid path.";
@@ -66,17 +71,17 @@ public class Strings {
 
     public static final String MENUITEM_OPEN = "Open";
     public static final String MENUITEM_CLOSE = "Close";
+    public static final String MENUITEM_HARDCLOSE = "Hard Close";
     public static final String MENUITEM_EXTRACT = "Extract";
     public static final String MENUITEM_EXTRACTRAW = "Extract Raw";
     public static final String MENUITEM_SEARCH = "Search";
     public static final String MENUITEM_SEARCHAGAIN = "Search Again";
     public static final String MENUITEM_MODELVIEWER = "Model Viewer";
     public static final String MENUITEM_OUTFITTER = "Outfitter (Experimental)";
-    public static final String MENUITEM_MUSICSWAPPER = "Music Swapper";
-    public static final String MENUITEM_FILEINJECT = "File injector";
+    public static final String MENUITEM_SCDCONV = "SCD Converter";
     public static final String MENUITEM_HASHCALC = "Path -> Hash Calculator";
-    public static final String MENUITEM_CEDUMPIMPORT = "Import Cheat Engine path dump";
-    public static final String MENUITEM_DBIMPORT = "Import Database";
+    public static final String MENUITEM_PATHLISTIMPORT = "Import Path List";
+    public static final String MENUITEM_DBUPDATE = "Download Latest Paths";
     public static final String MENUITEM_MACROEDITOR = "Macro Editor";
     public static final String MENUITEM_LOGVIEWER = "Log Viewer";
     public static final String MENUITEM_FIND_EXH = "Find Exh Hashes";
@@ -88,6 +93,7 @@ public class Strings {
     public static final String MENUITEM_ABOUT = "About";
     public static final String MENUITEM_EXD_HEX_OPTION = "Show EX numbers as hex";
     public static final String MENUITEM_EXD_OFFSET_OPTION = "Sort EXD columns by offset";
+    public static final String MENUITEM_UPDATE_INDEX = "Reload open index when new hash is added";
 
     //Buttons
     public static final String BUTTONNAMES_BROWSE = "Browse";

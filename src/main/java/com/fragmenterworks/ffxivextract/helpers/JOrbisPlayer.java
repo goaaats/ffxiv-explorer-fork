@@ -48,7 +48,7 @@ public class JOrbisPlayer {
             clip.open(audioFormat, audio, 0, new Integer(audio.length));
             clip.start();
         } catch (Exception e) {
-            Utils.getGlobalLogger().error(e);
+            Utils.getGlobalLogger().error("", e);
         }
     }
 
@@ -93,7 +93,7 @@ public class JOrbisPlayer {
             try {
                 bytes = input.read(buffer, index, 4096);
             } catch (Exception e) {
-                Utils.getGlobalLogger().error(e);
+                Utils.getGlobalLogger().error("", e);
                 System.exit(-1);
             }
             oy.wrote(bytes);
@@ -182,7 +182,7 @@ public class JOrbisPlayer {
                 try {
                     bytes = input.read(buffer, index, 4096);
                 } catch (Exception e) {
-                    Utils.getGlobalLogger().error(e);
+                    Utils.getGlobalLogger().error("", e);
                     System.exit(1);
                 }
                 if (bytes == 0 && i < 2) {
@@ -295,7 +295,7 @@ public class JOrbisPlayer {
                     try {
                         bytes = input.read(buffer, index, 4096);
                     } catch (Exception e) {
-                        Utils.getGlobalLogger().error(e);
+                        Utils.getGlobalLogger().error("", e);
                         System.exit(1);
                     }
                     oy.wrote(bytes);

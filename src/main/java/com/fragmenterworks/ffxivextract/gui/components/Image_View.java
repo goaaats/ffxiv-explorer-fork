@@ -64,7 +64,7 @@ public class Image_View extends JPanel {
             if (currentTexture.compressionType == 0x2460)
                 imgPreviewCanvas.setHighQualityRenderingEnabled(false);
         } catch (ImageDecodingException e) {
-            Utils.getGlobalLogger().error(e);
+            Utils.getGlobalLogger().error("", e);
         }
     }
 

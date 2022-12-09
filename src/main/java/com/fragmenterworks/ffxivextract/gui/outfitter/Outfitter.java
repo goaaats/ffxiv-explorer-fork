@@ -12,8 +12,8 @@ import com.fragmenterworks.ffxivextract.helpers.EXDDef;
 import com.fragmenterworks.ffxivextract.helpers.SparseArray;
 import com.fragmenterworks.ffxivextract.helpers.Utils;
 import com.fragmenterworks.ffxivextract.models.Model;
-import com.fragmenterworks.ffxivextract.models.SqPack_IndexFile;
-import com.fragmenterworks.ffxivextract.storage.HashDatabase;
+import com.fragmenterworks.ffxivextract.models.sqpack.index.SqPackIndexFile;
+import com.fragmenterworks.ffxivextract.paths.database.HashDatabase;
 import com.jogamp.opengl.GLCapabilities;
 import com.jogamp.opengl.GLProfile;
 import com.jogamp.opengl.awt.GLCanvas;
@@ -27,8 +27,6 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.awt.event.*;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -81,10 +79,10 @@ class Outfitter extends JPanel {
     private int lastOriginX, lastOriginY;
     private int lastX, lastY;
 
-    private final SqPack_IndexFile modelIndexFile;
+    private final SqPackIndexFile modelIndexFile;
     private final EXDF_View itemView;
 
-    public Outfitter(SqPack_IndexFile modelIndex, EXDF_View itemView) {
+    public Outfitter(SqPackIndexFile modelIndex, EXDF_View itemView) {
         this.modelIndexFile = modelIndex;
         this.itemView = itemView;
 
@@ -491,14 +489,12 @@ class Outfitter extends JPanel {
         try {
             modelPath = String.format("chara/human/c%04d/obj/body/b%04d/model/c%04db%04d_top.mdl", characterNumber, id, characterNumber, id);
             modelData = modelIndexFile.extractFile(modelPath);
-        } catch (FileNotFoundException e) {
-            Utils.getGlobalLogger().error(e);
-        } catch (IOException e) {
-            Utils.getGlobalLogger().error(e);
+        } catch (Exception e) {
+            Utils.getGlobalLogger().error("", e);
         }
 
         if (modelData != null) {
-            HashDatabase.addPathToDB(modelPath, "040000");
+            HashDatabase.addPath(modelPath);
 
             Model model = new Model(modelPath, modelIndexFile, modelData, modelIndexFile.getEndian());
             model.loadVariant(-1);
@@ -523,14 +519,12 @@ class Outfitter extends JPanel {
         try {
             modelPath = String.format("chara/human/c%04d/obj/hair/h%04d/model/c%04dh%04d_hir.mdl", characterNumber, id, characterNumber, id);
             modelData = modelIndexFile.extractFile(modelPath);
-        } catch (FileNotFoundException e) {
-            Utils.getGlobalLogger().error(e);
-        } catch (IOException e) {
-            Utils.getGlobalLogger().error(e);
+        } catch (Exception e) {
+            Utils.getGlobalLogger().error("", e);
         }
 
         if (modelData != null) {
-            HashDatabase.addPathToDB(modelPath, "040000");
+            HashDatabase.addPath(modelPath);
 
             Model model = new Model(modelPath, modelIndexFile, modelData, modelIndexFile.getEndian());
             model.loadVariant(-1);
@@ -555,14 +549,12 @@ class Outfitter extends JPanel {
         try {
             modelPath = String.format("chara/human/c%04d/obj/face/f%04d/model/c%04df%04d_fac.mdl", characterNumber, id, characterNumber, id);
             modelData = modelIndexFile.extractFile(modelPath);
-        } catch (FileNotFoundException e) {
-            Utils.getGlobalLogger().error(e);
-        } catch (IOException e) {
-            Utils.getGlobalLogger().error(e);
+        } catch (Exception e) {
+            Utils.getGlobalLogger().error("", e);
         }
 
         if (modelData != null) {
-            HashDatabase.addPathToDB(modelPath, "040000");
+            HashDatabase.addPath(modelPath);
 
             Model model = new Model(modelPath, modelIndexFile, modelData, modelIndexFile.getEndian());
             model.loadVariant(-1);
@@ -585,14 +577,12 @@ class Outfitter extends JPanel {
         try {
             modelPath = String.format("chara/human/c%04d/obj/tail/t%04d/model/c%04dt%04d_til.mdl", characterNumber, id, characterNumber, id);
             modelData = modelIndexFile.extractFile(modelPath);
-        } catch (FileNotFoundException e) {
-            Utils.getGlobalLogger().error(e);
-        } catch (IOException e) {
-            Utils.getGlobalLogger().error(e);
+        } catch (Exception e) {
+            Utils.getGlobalLogger().error("", e);
         }
 
         if (modelData != null) {
-            HashDatabase.addPathToDB(modelPath, "040000");
+            HashDatabase.addPath(modelPath);
 
             Model model = new Model(modelPath, modelIndexFile, modelData, modelIndexFile.getEndian());
             model.loadVariant(-1);
@@ -631,7 +621,7 @@ class Outfitter extends JPanel {
 
                 currentItem = new ModelItemEntry(name, id, model, varient, type);
             } catch (Exception e) {
-                Utils.getGlobalLogger().error(e);
+                Utils.getGlobalLogger().error("", e);
                 return;
             }
         } else //Load small clothes
@@ -702,10 +692,8 @@ class Outfitter extends JPanel {
             }
 
             modelData = modelIndexFile.extractFile(modelPath);
-        } catch (FileNotFoundException e) {
-            Utils.getGlobalLogger().error(e);
-        } catch (IOException e) {
-            Utils.getGlobalLogger().error(e);
+        } catch (Exception e) {
+            Utils.getGlobalLogger().error("", e);
         }
 
         if (modelData == null && (characterNumber != 101 && characterNumber != 201)) {
@@ -718,7 +706,7 @@ class Outfitter extends JPanel {
             modelSlot = 13;
 
         if (modelData != null) {
-            HashDatabase.addPathToDB(modelPath, "040000");
+            HashDatabase.addPath(modelPath);
 
             Model model = new Model(modelPath, modelIndexFile, modelData, modelIndexFile.getEndian());
             model.loadVariant(currentItem.varient == 0 ? 1 : currentItem.varient);

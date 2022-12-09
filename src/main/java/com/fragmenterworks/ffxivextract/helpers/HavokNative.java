@@ -37,7 +37,7 @@ public class HavokNative {
         try {
             System.loadLibrary("havok");
         } catch (UnsatisfiedLinkError e) {
-            Utils.getGlobalLogger().error(e);
+            Utils.getGlobalLogger().error("", e);
         }
     }
 

@@ -95,7 +95,7 @@ public class Hex_View extends JScrollPane {
                 }
             }
 
-            tableColumn.setPreferredWidth(preferredWidth);
+            tableColumn.setPreferredWidth(preferredWidth + 2);
         }
 
         txtHexData.setTableHeader(null);

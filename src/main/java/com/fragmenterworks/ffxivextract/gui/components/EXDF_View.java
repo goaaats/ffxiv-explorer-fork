@@ -8,8 +8,8 @@ import com.fragmenterworks.ffxivextract.models.EXDF_File;
 import com.fragmenterworks.ffxivextract.models.EXDF_File.EXDF_Entry;
 import com.fragmenterworks.ffxivextract.models.EXHF_File;
 import com.fragmenterworks.ffxivextract.models.EXHF_File.EXDF_Dataset;
-import com.fragmenterworks.ffxivextract.models.SqPack_IndexFile;
-import com.fragmenterworks.ffxivextract.storage.HashDatabase;
+import com.fragmenterworks.ffxivextract.models.sqpack.index.SqPackIndexFile;
+import com.fragmenterworks.ffxivextract.paths.database.HashDatabase;
 
 import javax.swing.*;
 import javax.swing.border.CompoundBorder;
@@ -26,13 +26,12 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Comparator;
 
 @SuppressWarnings("serial")
 public class EXDF_View extends JScrollPane implements ItemListener {
 
     //EXH Context
-	private SqPack_IndexFile currentIndex;
+	private SqPackIndexFile currentIndex;
     private EXHF_File exhFile = null;
     private EXDF_File[] exdFile = null;
 
@@ -58,7 +57,7 @@ public class EXDF_View extends JScrollPane implements ItemListener {
     private final SparseArray<String> columnNames = new SparseArray<String>();
 
     //Given a EXD file, figure out EXH name, and look for it.
-    public EXDF_View(SqPack_IndexFile currentIndex, String fullPath, boolean showAsHex, boolean sortByOffset) {
+    public EXDF_View(SqPackIndexFile currentIndex, String fullPath, boolean showAsHex, boolean sortByOffset) {
 
         this();
 
@@ -95,12 +94,12 @@ public class EXDF_View extends JScrollPane implements ItemListener {
 
         //Find this thing
         try {
-            byte[] data = currentIndex.extractFile(folderName, exhName);
+            byte[] data = currentIndex.extractFile(folderName + "/" + exhName);
 
             if (data != null)
                 exhFile = new EXHF_File(data);
         } catch (IOException e) {
-            Utils.getGlobalLogger().error(e);
+            Utils.getGlobalLogger().error("", e);
         }
 
         //No EXH file found...
@@ -125,12 +124,12 @@ public class EXDF_View extends JScrollPane implements ItemListener {
         setupUI();
     }
 
-    public EXDF_View(SqPack_IndexFile currentIndex, String fullPath, EXHF_File file) {
+    public EXDF_View(SqPackIndexFile currentIndex, String fullPath, EXHF_File file) {
         this(currentIndex, fullPath, file, false, false);
     }
 
     //Given a EXH file, figure out EXD name, and look for it.
-    public EXDF_View(SqPack_IndexFile currentIndex, String fullPath, EXHF_File file, boolean showAsHex, boolean sortByOffset) {
+    public EXDF_View(SqPackIndexFile currentIndex, String fullPath, EXHF_File file, boolean showAsHex, boolean sortByOffset) {
 
         this();
 
@@ -294,18 +293,13 @@ public class EXDF_View extends JScrollPane implements ItemListener {
                 formattedExdName = formattedExdName.substring(formattedExdName.lastIndexOf("/") + 1);
 
                 try {
-                    //Hey we accidently found something
-                    if (HashDatabase.getFileName(HashDatabase.computeCRC(formattedExdName.getBytes(), 0, formattedExdName.getBytes().length)) == null) {
-                        if (!(numLanguages > 5 && (formattedExdName.contains("chs") || formattedExdName.contains("cht") || formattedExdName.contains("ko")))) {
-                            HashDatabase.addPathToDB(exhFolder + "/" + formattedExdName, currentIndex.getName());
-                        }
-                    }
-                    byte[] data = currentIndex.extractFile(exhFolder, formattedExdName);
+                    HashDatabase.addPath(exhFolder + "/" + formattedExdName);
+                    byte[] data = currentIndex.extractFile(exhFolder + "/" + formattedExdName);
 
                     if (exdFile != null && data != null)
                         exdFile[(i * numLanguages) + j] = new EXDF_File(data);
                 } catch (IOException e) {
-                    Utils.getGlobalLogger().error(e);
+                    Utils.getGlobalLogger().error("", e);
                 }
             }
         }
@@ -511,7 +505,7 @@ public class EXDF_View extends JScrollPane implements ItemListener {
                     }
                 }
             } catch (Exception e) {
-                Utils.getGlobalLogger().error(e);
+                Utils.getGlobalLogger().error("", e);
                 return "";
             }
         }
@@ -593,145 +587,145 @@ public class EXDF_View extends JScrollPane implements ItemListener {
             switch (slot) {
                 case 13: //Weapon
                 case 2:
-                    HashDatabase.addPathToDB(String.format("chara/weapon/w%04d/obj/body/b%04d/model/w%04db%04d.mdl", model1[0], model1[1], model1[0], model1[1]), "040000");
+                    HashDatabase.addPath(String.format("chara/weapon/w%04d/obj/body/b%04d/model/w%04db%04d.mdl", model1[0], model1[1], model1[0], model1[1]));
                     break;
                 case 3: //Equipment
-                    HashDatabase.addPathToDB(String.format("chara/equipment/e%04d/model/c0101e%04d_%s.mdl", model1[0], model1[0], "met"), "040000");
-                    HashDatabase.addPathToDB(String.format("chara/equipment/e%04d/model/c0201e%04d_%s.mdl", model1[0], model1[0], "met"), "040000");
-                    HashDatabase.addPathToDB(String.format("chara/equipment/e%04d/model/c0301e%04d_%s.mdl", model1[0], model1[0], "met"), "040000");
-                    HashDatabase.addPathToDB(String.format("chara/equipment/e%04d/model/c0401e%04d_%s.mdl", model1[0], model1[0], "met"), "040000");
-                    HashDatabase.addPathToDB(String.format("chara/equipment/e%04d/model/c0501e%04d_%s.mdl", model1[0], model1[0], "met"), "040000");
-                    HashDatabase.addPathToDB(String.format("chara/equipment/e%04d/model/c0601e%04d_%s.mdl", model1[0], model1[0], "met"), "040000");
-                    HashDatabase.addPathToDB(String.format("chara/equipment/e%04d/model/c0701e%04d_%s.mdl", model1[0], model1[0], "met"), "040000");
-                    HashDatabase.addPathToDB(String.format("chara/equipment/e%04d/model/c0801e%04d_%s.mdl", model1[0], model1[0], "met"), "040000");
-                    HashDatabase.addPathToDB(String.format("chara/equipment/e%04d/model/c0901e%04d_%s.mdl", model1[0], model1[0], "met"), "040000");
-                    HashDatabase.addPathToDB(String.format("chara/equipment/e%04d/model/c1001e%04d_%s.mdl", model1[0], model1[0], "met"), "040000");
-                    HashDatabase.addPathToDB(String.format("chara/equipment/e%04d/model/c1101e%04d_%s.mdl", model1[0], model1[0], "met"), "040000");
-                    HashDatabase.addPathToDB(String.format("chara/equipment/e%04d/model/c1201e%04d_%s.mdl", model1[0], model1[0], "met"), "040000");
+                    HashDatabase.addPath(String.format("chara/equipment/e%04d/model/c0101e%04d_%s.mdl", model1[0], model1[0], "met"));
+                    HashDatabase.addPath(String.format("chara/equipment/e%04d/model/c0201e%04d_%s.mdl", model1[0], model1[0], "met"));
+                    HashDatabase.addPath(String.format("chara/equipment/e%04d/model/c0301e%04d_%s.mdl", model1[0], model1[0], "met"));
+                    HashDatabase.addPath(String.format("chara/equipment/e%04d/model/c0401e%04d_%s.mdl", model1[0], model1[0], "met"));
+                    HashDatabase.addPath(String.format("chara/equipment/e%04d/model/c0501e%04d_%s.mdl", model1[0], model1[0], "met"));
+                    HashDatabase.addPath(String.format("chara/equipment/e%04d/model/c0601e%04d_%s.mdl", model1[0], model1[0], "met"));
+                    HashDatabase.addPath(String.format("chara/equipment/e%04d/model/c0701e%04d_%s.mdl", model1[0], model1[0], "met"));
+                    HashDatabase.addPath(String.format("chara/equipment/e%04d/model/c0801e%04d_%s.mdl", model1[0], model1[0], "met"));
+                    HashDatabase.addPath(String.format("chara/equipment/e%04d/model/c0901e%04d_%s.mdl", model1[0], model1[0], "met"));
+                    HashDatabase.addPath(String.format("chara/equipment/e%04d/model/c1001e%04d_%s.mdl", model1[0], model1[0], "met"));
+                    HashDatabase.addPath(String.format("chara/equipment/e%04d/model/c1101e%04d_%s.mdl", model1[0], model1[0], "met"));
+                    HashDatabase.addPath(String.format("chara/equipment/e%04d/model/c1201e%04d_%s.mdl", model1[0], model1[0], "met"));
                     break;
                 case 4:
-                    HashDatabase.addPathToDB(String.format("chara/equipment/e%04d/model/c0101e%04d_%s.mdl", model1[0], model1[0], "top"), "040000");
-                    HashDatabase.addPathToDB(String.format("chara/equipment/e%04d/model/c0201e%04d_%s.mdl", model1[0], model1[0], "top"), "040000");
-                    HashDatabase.addPathToDB(String.format("chara/equipment/e%04d/model/c0301e%04d_%s.mdl", model1[0], model1[0], "top"), "040000");
-                    HashDatabase.addPathToDB(String.format("chara/equipment/e%04d/model/c0401e%04d_%s.mdl", model1[0], model1[0], "top"), "040000");
-                    HashDatabase.addPathToDB(String.format("chara/equipment/e%04d/model/c0501e%04d_%s.mdl", model1[0], model1[0], "top"), "040000");
-                    HashDatabase.addPathToDB(String.format("chara/equipment/e%04d/model/c0601e%04d_%s.mdl", model1[0], model1[0], "top"), "040000");
-                    HashDatabase.addPathToDB(String.format("chara/equipment/e%04d/model/c0701e%04d_%s.mdl", model1[0], model1[0], "top"), "040000");
-                    HashDatabase.addPathToDB(String.format("chara/equipment/e%04d/model/c0801e%04d_%s.mdl", model1[0], model1[0], "top"), "040000");
-                    HashDatabase.addPathToDB(String.format("chara/equipment/e%04d/model/c0901e%04d_%s.mdl", model1[0], model1[0], "top"), "040000");
-                    HashDatabase.addPathToDB(String.format("chara/equipment/e%04d/model/c1001e%04d_%s.mdl", model1[0], model1[0], "top"), "040000");
-                    HashDatabase.addPathToDB(String.format("chara/equipment/e%04d/model/c1101e%04d_%s.mdl", model1[0], model1[0], "top"), "040000");
-                    HashDatabase.addPathToDB(String.format("chara/equipment/e%04d/model/c1201e%04d_%s.mdl", model1[0], model1[0], "top"), "040000");
+                    HashDatabase.addPath(String.format("chara/equipment/e%04d/model/c0101e%04d_%s.mdl", model1[0], model1[0], "top"));
+                    HashDatabase.addPath(String.format("chara/equipment/e%04d/model/c0201e%04d_%s.mdl", model1[0], model1[0], "top"));
+                    HashDatabase.addPath(String.format("chara/equipment/e%04d/model/c0301e%04d_%s.mdl", model1[0], model1[0], "top"));
+                    HashDatabase.addPath(String.format("chara/equipment/e%04d/model/c0401e%04d_%s.mdl", model1[0], model1[0], "top"));
+                    HashDatabase.addPath(String.format("chara/equipment/e%04d/model/c0501e%04d_%s.mdl", model1[0], model1[0], "top"));
+                    HashDatabase.addPath(String.format("chara/equipment/e%04d/model/c0601e%04d_%s.mdl", model1[0], model1[0], "top"));
+                    HashDatabase.addPath(String.format("chara/equipment/e%04d/model/c0701e%04d_%s.mdl", model1[0], model1[0], "top"));
+                    HashDatabase.addPath(String.format("chara/equipment/e%04d/model/c0801e%04d_%s.mdl", model1[0], model1[0], "top"));
+                    HashDatabase.addPath(String.format("chara/equipment/e%04d/model/c0901e%04d_%s.mdl", model1[0], model1[0], "top"));
+                    HashDatabase.addPath(String.format("chara/equipment/e%04d/model/c1001e%04d_%s.mdl", model1[0], model1[0], "top"));
+                    HashDatabase.addPath(String.format("chara/equipment/e%04d/model/c1101e%04d_%s.mdl", model1[0], model1[0], "top"));
+                    HashDatabase.addPath(String.format("chara/equipment/e%04d/model/c1201e%04d_%s.mdl", model1[0], model1[0], "top"));
                     break;
                 case 5:
-                    HashDatabase.addPathToDB(String.format("chara/equipment/e%04d/model/c0101e%04d_%s.mdl", model1[0], model1[0], "glv"), "040000");
-                    HashDatabase.addPathToDB(String.format("chara/equipment/e%04d/model/c0201e%04d_%s.mdl", model1[0], model1[0], "glv"), "040000");
-                    HashDatabase.addPathToDB(String.format("chara/equipment/e%04d/model/c0301e%04d_%s.mdl", model1[0], model1[0], "glv"), "040000");
-                    HashDatabase.addPathToDB(String.format("chara/equipment/e%04d/model/c0401e%04d_%s.mdl", model1[0], model1[0], "glv"), "040000");
-                    HashDatabase.addPathToDB(String.format("chara/equipment/e%04d/model/c0501e%04d_%s.mdl", model1[0], model1[0], "glv"), "040000");
-                    HashDatabase.addPathToDB(String.format("chara/equipment/e%04d/model/c0601e%04d_%s.mdl", model1[0], model1[0], "glv"), "040000");
-                    HashDatabase.addPathToDB(String.format("chara/equipment/e%04d/model/c0701e%04d_%s.mdl", model1[0], model1[0], "glv"), "040000");
-                    HashDatabase.addPathToDB(String.format("chara/equipment/e%04d/model/c0801e%04d_%s.mdl", model1[0], model1[0], "glv"), "040000");
-                    HashDatabase.addPathToDB(String.format("chara/equipment/e%04d/model/c0901e%04d_%s.mdl", model1[0], model1[0], "glv"), "040000");
-                    HashDatabase.addPathToDB(String.format("chara/equipment/e%04d/model/c1001e%04d_%s.mdl", model1[0], model1[0], "glv"), "040000");
-                    HashDatabase.addPathToDB(String.format("chara/equipment/e%04d/model/c1101e%04d_%s.mdl", model1[0], model1[0], "glv"), "040000");
-                    HashDatabase.addPathToDB(String.format("chara/equipment/e%04d/model/c1201e%04d_%s.mdl", model1[0], model1[0], "glv"), "040000");
+                    HashDatabase.addPath(String.format("chara/equipment/e%04d/model/c0101e%04d_%s.mdl", model1[0], model1[0], "glv"));
+                    HashDatabase.addPath(String.format("chara/equipment/e%04d/model/c0201e%04d_%s.mdl", model1[0], model1[0], "glv"));
+                    HashDatabase.addPath(String.format("chara/equipment/e%04d/model/c0301e%04d_%s.mdl", model1[0], model1[0], "glv"));
+                    HashDatabase.addPath(String.format("chara/equipment/e%04d/model/c0401e%04d_%s.mdl", model1[0], model1[0], "glv"));
+                    HashDatabase.addPath(String.format("chara/equipment/e%04d/model/c0501e%04d_%s.mdl", model1[0], model1[0], "glv"));
+                    HashDatabase.addPath(String.format("chara/equipment/e%04d/model/c0601e%04d_%s.mdl", model1[0], model1[0], "glv"));
+                    HashDatabase.addPath(String.format("chara/equipment/e%04d/model/c0701e%04d_%s.mdl", model1[0], model1[0], "glv"));
+                    HashDatabase.addPath(String.format("chara/equipment/e%04d/model/c0801e%04d_%s.mdl", model1[0], model1[0], "glv"));
+                    HashDatabase.addPath(String.format("chara/equipment/e%04d/model/c0901e%04d_%s.mdl", model1[0], model1[0], "glv"));
+                    HashDatabase.addPath(String.format("chara/equipment/e%04d/model/c1001e%04d_%s.mdl", model1[0], model1[0], "glv"));
+                    HashDatabase.addPath(String.format("chara/equipment/e%04d/model/c1101e%04d_%s.mdl", model1[0], model1[0], "glv"));
+                    HashDatabase.addPath(String.format("chara/equipment/e%04d/model/c1201e%04d_%s.mdl", model1[0], model1[0], "glv"));
                     break;
                 case 6:
                     break;
                 case 7:
-                    HashDatabase.addPathToDB(String.format("chara/equipment/e%04d/model/c0101e%04d_%s.mdl", model1[0], model1[0], "dwn"), "040000");
-                    HashDatabase.addPathToDB(String.format("chara/equipment/e%04d/model/c0201e%04d_%s.mdl", model1[0], model1[0], "dwn"), "040000");
-                    HashDatabase.addPathToDB(String.format("chara/equipment/e%04d/model/c0301e%04d_%s.mdl", model1[0], model1[0], "dwn"), "040000");
-                    HashDatabase.addPathToDB(String.format("chara/equipment/e%04d/model/c0401e%04d_%s.mdl", model1[0], model1[0], "dwn"), "040000");
-                    HashDatabase.addPathToDB(String.format("chara/equipment/e%04d/model/c0501e%04d_%s.mdl", model1[0], model1[0], "dwn"), "040000");
-                    HashDatabase.addPathToDB(String.format("chara/equipment/e%04d/model/c0601e%04d_%s.mdl", model1[0], model1[0], "dwn"), "040000");
-                    HashDatabase.addPathToDB(String.format("chara/equipment/e%04d/model/c0701e%04d_%s.mdl", model1[0], model1[0], "dwn"), "040000");
-                    HashDatabase.addPathToDB(String.format("chara/equipment/e%04d/model/c0801e%04d_%s.mdl", model1[0], model1[0], "dwn"), "040000");
-                    HashDatabase.addPathToDB(String.format("chara/equipment/e%04d/model/c0901e%04d_%s.mdl", model1[0], model1[0], "dwn"), "040000");
-                    HashDatabase.addPathToDB(String.format("chara/equipment/e%04d/model/c1001e%04d_%s.mdl", model1[0], model1[0], "dwn"), "040000");
-                    HashDatabase.addPathToDB(String.format("chara/equipment/e%04d/model/c1101e%04d_%s.mdl", model1[0], model1[0], "dwn"), "040000");
-                    HashDatabase.addPathToDB(String.format("chara/equipment/e%04d/model/c1201e%04d_%s.mdl", model1[0], model1[0], "dwn"), "040000");
+                    HashDatabase.addPath(String.format("chara/equipment/e%04d/model/c0101e%04d_%s.mdl", model1[0], model1[0], "dwn"));
+                    HashDatabase.addPath(String.format("chara/equipment/e%04d/model/c0201e%04d_%s.mdl", model1[0], model1[0], "dwn"));
+                    HashDatabase.addPath(String.format("chara/equipment/e%04d/model/c0301e%04d_%s.mdl", model1[0], model1[0], "dwn"));
+                    HashDatabase.addPath(String.format("chara/equipment/e%04d/model/c0401e%04d_%s.mdl", model1[0], model1[0], "dwn"));
+                    HashDatabase.addPath(String.format("chara/equipment/e%04d/model/c0501e%04d_%s.mdl", model1[0], model1[0], "dwn"));
+                    HashDatabase.addPath(String.format("chara/equipment/e%04d/model/c0601e%04d_%s.mdl", model1[0], model1[0], "dwn"));
+                    HashDatabase.addPath(String.format("chara/equipment/e%04d/model/c0701e%04d_%s.mdl", model1[0], model1[0], "dwn"));
+                    HashDatabase.addPath(String.format("chara/equipment/e%04d/model/c0801e%04d_%s.mdl", model1[0], model1[0], "dwn"));
+                    HashDatabase.addPath(String.format("chara/equipment/e%04d/model/c0901e%04d_%s.mdl", model1[0], model1[0], "dwn"));
+                    HashDatabase.addPath(String.format("chara/equipment/e%04d/model/c1001e%04d_%s.mdl", model1[0], model1[0], "dwn"));
+                    HashDatabase.addPath(String.format("chara/equipment/e%04d/model/c1101e%04d_%s.mdl", model1[0], model1[0], "dwn"));
+                    HashDatabase.addPath(String.format("chara/equipment/e%04d/model/c1201e%04d_%s.mdl", model1[0], model1[0], "dwn"));
                     break;
                 case 8:
-                    HashDatabase.addPathToDB(String.format("chara/equipment/e%04d/model/c0101e%04d_%s.mdl", model1[0], model1[0], "met"), "040000");
+                    HashDatabase.addPath(String.format("chara/equipment/e%04d/model/c0101e%04d_%s.mdl", model1[0], model1[0], "met"));
                     break;
                 case 9: //Accessory
-                    HashDatabase.addPathToDB(String.format("chara/equipment/a%04d/model/c0101a%04d_%s.mdl", model1[0], model1[0], "ear"), "040000");
-                    HashDatabase.addPathToDB(String.format("chara/equipment/a%04d/model/c0201a%04d_%s.mdl", model1[0], model1[0], "ear"), "040000");
-                    HashDatabase.addPathToDB(String.format("chara/equipment/a%04d/model/c0301a%04d_%s.mdl", model1[0], model1[0], "ear"), "040000");
-                    HashDatabase.addPathToDB(String.format("chara/equipment/a%04d/model/c0401a%04d_%s.mdl", model1[0], model1[0], "ear"), "040000");
-                    HashDatabase.addPathToDB(String.format("chara/equipment/a%04d/model/c0501a%04d_%s.mdl", model1[0], model1[0], "ear"), "040000");
-                    HashDatabase.addPathToDB(String.format("chara/equipment/a%04d/model/c0601a%04d_%s.mdl", model1[0], model1[0], "ear"), "040000");
-                    HashDatabase.addPathToDB(String.format("chara/equipment/a%04d/model/c0701a%04d_%s.mdl", model1[0], model1[0], "ear"), "040000");
-                    HashDatabase.addPathToDB(String.format("chara/equipment/a%04d/model/c0801a%04d_%s.mdl", model1[0], model1[0], "ear"), "040000");
-                    HashDatabase.addPathToDB(String.format("chara/equipment/a%04d/model/c0901a%04d_%s.mdl", model1[0], model1[0], "ear"), "040000");
-                    HashDatabase.addPathToDB(String.format("chara/equipment/a%04d/model/c1001a%04d_%s.mdl", model1[0], model1[0], "ear"), "040000");
-                    HashDatabase.addPathToDB(String.format("chara/equipment/a%04d/model/c1101a%04d_%s.mdl", model1[0], model1[0], "ear"), "040000");
-                    HashDatabase.addPathToDB(String.format("chara/equipment/a%04d/model/c1201a%04d_%s.mdl", model1[0], model1[0], "ear"), "040000");
+                    HashDatabase.addPath(String.format("chara/equipment/a%04d/model/c0101a%04d_%s.mdl", model1[0], model1[0], "ear"));
+                    HashDatabase.addPath(String.format("chara/equipment/a%04d/model/c0201a%04d_%s.mdl", model1[0], model1[0], "ear"));
+                    HashDatabase.addPath(String.format("chara/equipment/a%04d/model/c0301a%04d_%s.mdl", model1[0], model1[0], "ear"));
+                    HashDatabase.addPath(String.format("chara/equipment/a%04d/model/c0401a%04d_%s.mdl", model1[0], model1[0], "ear"));
+                    HashDatabase.addPath(String.format("chara/equipment/a%04d/model/c0501a%04d_%s.mdl", model1[0], model1[0], "ear"));
+                    HashDatabase.addPath(String.format("chara/equipment/a%04d/model/c0601a%04d_%s.mdl", model1[0], model1[0], "ear"));
+                    HashDatabase.addPath(String.format("chara/equipment/a%04d/model/c0701a%04d_%s.mdl", model1[0], model1[0], "ear"));
+                    HashDatabase.addPath(String.format("chara/equipment/a%04d/model/c0801a%04d_%s.mdl", model1[0], model1[0], "ear"));
+                    HashDatabase.addPath(String.format("chara/equipment/a%04d/model/c0901a%04d_%s.mdl", model1[0], model1[0], "ear"));
+                    HashDatabase.addPath(String.format("chara/equipment/a%04d/model/c1001a%04d_%s.mdl", model1[0], model1[0], "ear"));
+                    HashDatabase.addPath(String.format("chara/equipment/a%04d/model/c1101a%04d_%s.mdl", model1[0], model1[0], "ear"));
+                    HashDatabase.addPath(String.format("chara/equipment/a%04d/model/c1201a%04d_%s.mdl", model1[0], model1[0], "ear"));
                     break;
                 case 10:
-                    HashDatabase.addPathToDB(String.format("chara/equipment/a%04d/model/c0101a%04d_%s.mdl", model1[0], model1[0], "nek"), "040000");
-                    HashDatabase.addPathToDB(String.format("chara/equipment/a%04d/model/c0201a%04d_%s.mdl", model1[0], model1[0], "nek"), "040000");
-                    HashDatabase.addPathToDB(String.format("chara/equipment/a%04d/model/c0301a%04d_%s.mdl", model1[0], model1[0], "nek"), "040000");
-                    HashDatabase.addPathToDB(String.format("chara/equipment/a%04d/model/c0401a%04d_%s.mdl", model1[0], model1[0], "nek"), "040000");
-                    HashDatabase.addPathToDB(String.format("chara/equipment/a%04d/model/c0501a%04d_%s.mdl", model1[0], model1[0], "nek"), "040000");
-                    HashDatabase.addPathToDB(String.format("chara/equipment/a%04d/model/c0601a%04d_%s.mdl", model1[0], model1[0], "nek"), "040000");
-                    HashDatabase.addPathToDB(String.format("chara/equipment/a%04d/model/c0701a%04d_%s.mdl", model1[0], model1[0], "nek"), "040000");
-                    HashDatabase.addPathToDB(String.format("chara/equipment/a%04d/model/c0801a%04d_%s.mdl", model1[0], model1[0], "nek"), "040000");
-                    HashDatabase.addPathToDB(String.format("chara/equipment/a%04d/model/c0901a%04d_%s.mdl", model1[0], model1[0], "nek"), "040000");
-                    HashDatabase.addPathToDB(String.format("chara/equipment/a%04d/model/c1001a%04d_%s.mdl", model1[0], model1[0], "nek"), "040000");
-                    HashDatabase.addPathToDB(String.format("chara/equipment/a%04d/model/c1101a%04d_%s.mdl", model1[0], model1[0], "nek"), "040000");
-                    HashDatabase.addPathToDB(String.format("chara/equipment/a%04d/model/c1201a%04d_%s.mdl", model1[0], model1[0], "nek"), "040000");
+                    HashDatabase.addPath(String.format("chara/equipment/a%04d/model/c0101a%04d_%s.mdl", model1[0], model1[0], "nek"));
+                    HashDatabase.addPath(String.format("chara/equipment/a%04d/model/c0201a%04d_%s.mdl", model1[0], model1[0], "nek"));
+                    HashDatabase.addPath(String.format("chara/equipment/a%04d/model/c0301a%04d_%s.mdl", model1[0], model1[0], "nek"));
+                    HashDatabase.addPath(String.format("chara/equipment/a%04d/model/c0401a%04d_%s.mdl", model1[0], model1[0], "nek"));
+                    HashDatabase.addPath(String.format("chara/equipment/a%04d/model/c0501a%04d_%s.mdl", model1[0], model1[0], "nek"));
+                    HashDatabase.addPath(String.format("chara/equipment/a%04d/model/c0601a%04d_%s.mdl", model1[0], model1[0], "nek"));
+                    HashDatabase.addPath(String.format("chara/equipment/a%04d/model/c0701a%04d_%s.mdl", model1[0], model1[0], "nek"));
+                    HashDatabase.addPath(String.format("chara/equipment/a%04d/model/c0801a%04d_%s.mdl", model1[0], model1[0], "nek"));
+                    HashDatabase.addPath(String.format("chara/equipment/a%04d/model/c0901a%04d_%s.mdl", model1[0], model1[0], "nek"));
+                    HashDatabase.addPath(String.format("chara/equipment/a%04d/model/c1001a%04d_%s.mdl", model1[0], model1[0], "nek"));
+                    HashDatabase.addPath(String.format("chara/equipment/a%04d/model/c1101a%04d_%s.mdl", model1[0], model1[0], "nek"));
+                    HashDatabase.addPath(String.format("chara/equipment/a%04d/model/c1201a%04d_%s.mdl", model1[0], model1[0], "nek"));
                     break;
                 case 11:
-                    HashDatabase.addPathToDB(String.format("chara/equipment/a%04d/model/c0101a%04d_%s.mdl", model1[0], model1[0], "wrs"), "040000");
-                    HashDatabase.addPathToDB(String.format("chara/equipment/a%04d/model/c0201a%04d_%s.mdl", model1[0], model1[0], "wrs"), "040000");
-                    HashDatabase.addPathToDB(String.format("chara/equipment/a%04d/model/c0301a%04d_%s.mdl", model1[0], model1[0], "wrs"), "040000");
-                    HashDatabase.addPathToDB(String.format("chara/equipment/a%04d/model/c0401a%04d_%s.mdl", model1[0], model1[0], "wrs"), "040000");
-                    HashDatabase.addPathToDB(String.format("chara/equipment/a%04d/model/c0501a%04d_%s.mdl", model1[0], model1[0], "wrs"), "040000");
-                    HashDatabase.addPathToDB(String.format("chara/equipment/a%04d/model/c0601a%04d_%s.mdl", model1[0], model1[0], "wrs"), "040000");
-                    HashDatabase.addPathToDB(String.format("chara/equipment/a%04d/model/c0701a%04d_%s.mdl", model1[0], model1[0], "wrs"), "040000");
-                    HashDatabase.addPathToDB(String.format("chara/equipment/a%04d/model/c0801a%04d_%s.mdl", model1[0], model1[0], "wrs"), "040000");
-                    HashDatabase.addPathToDB(String.format("chara/equipment/a%04d/model/c0901a%04d_%s.mdl", model1[0], model1[0], "wrs"), "040000");
-                    HashDatabase.addPathToDB(String.format("chara/equipment/a%04d/model/c1001a%04d_%s.mdl", model1[0], model1[0], "wrs"), "040000");
-                    HashDatabase.addPathToDB(String.format("chara/equipment/a%04d/model/c1101a%04d_%s.mdl", model1[0], model1[0], "wrs"), "040000");
-                    HashDatabase.addPathToDB(String.format("chara/equipment/a%04d/model/c1201a%04d_%s.mdl", model1[0], model1[0], "wrs"), "040000");
+                    HashDatabase.addPath(String.format("chara/equipment/a%04d/model/c0101a%04d_%s.mdl", model1[0], model1[0], "wrs"));
+                    HashDatabase.addPath(String.format("chara/equipment/a%04d/model/c0201a%04d_%s.mdl", model1[0], model1[0], "wrs"));
+                    HashDatabase.addPath(String.format("chara/equipment/a%04d/model/c0301a%04d_%s.mdl", model1[0], model1[0], "wrs"));
+                    HashDatabase.addPath(String.format("chara/equipment/a%04d/model/c0401a%04d_%s.mdl", model1[0], model1[0], "wrs"));
+                    HashDatabase.addPath(String.format("chara/equipment/a%04d/model/c0501a%04d_%s.mdl", model1[0], model1[0], "wrs"));
+                    HashDatabase.addPath(String.format("chara/equipment/a%04d/model/c0601a%04d_%s.mdl", model1[0], model1[0], "wrs"));
+                    HashDatabase.addPath(String.format("chara/equipment/a%04d/model/c0701a%04d_%s.mdl", model1[0], model1[0], "wrs"));
+                    HashDatabase.addPath(String.format("chara/equipment/a%04d/model/c0801a%04d_%s.mdl", model1[0], model1[0], "wrs"));
+                    HashDatabase.addPath(String.format("chara/equipment/a%04d/model/c0901a%04d_%s.mdl", model1[0], model1[0], "wrs"));
+                    HashDatabase.addPath(String.format("chara/equipment/a%04d/model/c1001a%04d_%s.mdl", model1[0], model1[0], "wrs"));
+                    HashDatabase.addPath(String.format("chara/equipment/a%04d/model/c1101a%04d_%s.mdl", model1[0], model1[0], "wrs"));
+                    HashDatabase.addPath(String.format("chara/equipment/a%04d/model/c1201a%04d_%s.mdl", model1[0], model1[0], "wrs"));
                     break;
                 case 12:
-                    HashDatabase.addPathToDB(String.format("chara/accessory/a%04d/model/c0101a%04d_%s.mdl", model1[0], model1[0], "rir"), "040000");
-                    HashDatabase.addPathToDB(String.format("chara/accessory/a%04d/model/c0201a%04d_%s.mdl", model1[0], model1[0], "rir"), "040000");
-                    HashDatabase.addPathToDB(String.format("chara/accessory/a%04d/model/c0301a%04d_%s.mdl", model1[0], model1[0], "rir"), "040000");
-                    HashDatabase.addPathToDB(String.format("chara/accessory/a%04d/model/c0401a%04d_%s.mdl", model1[0], model1[0], "rir"), "040000");
-                    HashDatabase.addPathToDB(String.format("chara/accessory/a%04d/model/c0501a%04d_%s.mdl", model1[0], model1[0], "rir"), "040000");
-                    HashDatabase.addPathToDB(String.format("chara/accessory/a%04d/model/c0601a%04d_%s.mdl", model1[0], model1[0], "rir"), "040000");
-                    HashDatabase.addPathToDB(String.format("chara/accessory/a%04d/model/c0701a%04d_%s.mdl", model1[0], model1[0], "rir"), "040000");
-                    HashDatabase.addPathToDB(String.format("chara/accessory/a%04d/model/c0801a%04d_%s.mdl", model1[0], model1[0], "rir"), "040000");
-                    HashDatabase.addPathToDB(String.format("chara/accessory/a%04d/model/c0901a%04d_%s.mdl", model1[0], model1[0], "rir"), "040000");
-                    HashDatabase.addPathToDB(String.format("chara/accessory/a%04d/model/c1001a%04d_%s.mdl", model1[0], model1[0], "rir"), "040000");
-                    HashDatabase.addPathToDB(String.format("chara/accessory/a%04d/model/c1101a%04d_%s.mdl", model1[0], model1[0], "rir"), "040000");
-                    HashDatabase.addPathToDB(String.format("chara/accessory/a%04d/model/c1201a%04d_%s.mdl", model1[0], model1[0], "rir"), "040000");
-                    HashDatabase.addPathToDB(String.format("chara/accessory/a%04d/model/c0101a%04d_%s.mdl", model1[0], model1[0], "ril"), "040000");
-                    HashDatabase.addPathToDB(String.format("chara/accessory/a%04d/model/c0201a%04d_%s.mdl", model1[0], model1[0], "ril"), "040000");
-                    HashDatabase.addPathToDB(String.format("chara/accessory/a%04d/model/c0301a%04d_%s.mdl", model1[0], model1[0], "ril"), "040000");
-                    HashDatabase.addPathToDB(String.format("chara/accessory/a%04d/model/c0401a%04d_%s.mdl", model1[0], model1[0], "ril"), "040000");
-                    HashDatabase.addPathToDB(String.format("chara/accessory/a%04d/model/c0501a%04d_%s.mdl", model1[0], model1[0], "ril"), "040000");
-                    HashDatabase.addPathToDB(String.format("chara/accessory/a%04d/model/c0601a%04d_%s.mdl", model1[0], model1[0], "ril"), "040000");
-                    HashDatabase.addPathToDB(String.format("chara/accessory/a%04d/model/c0701a%04d_%s.mdl", model1[0], model1[0], "ril"), "040000");
-                    HashDatabase.addPathToDB(String.format("chara/accessory/a%04d/model/c0801a%04d_%s.mdl", model1[0], model1[0], "ril"), "040000");
-                    HashDatabase.addPathToDB(String.format("chara/accessory/a%04d/model/c0901a%04d_%s.mdl", model1[0], model1[0], "ril"), "040000");
-                    HashDatabase.addPathToDB(String.format("chara/accessory/a%04d/model/c1001a%04d_%s.mdl", model1[0], model1[0], "ril"), "040000");
-                    HashDatabase.addPathToDB(String.format("chara/accessory/a%04d/model/c1101a%04d_%s.mdl", model1[0], model1[0], "ril"), "040000");
-                    HashDatabase.addPathToDB(String.format("chara/accessory/a%04d/model/c1201a%04d_%s.mdl", model1[0], model1[0], "ril"), "040000");
+                    HashDatabase.addPath(String.format("chara/accessory/a%04d/model/c0101a%04d_%s.mdl", model1[0], model1[0], "rir"));
+                    HashDatabase.addPath(String.format("chara/accessory/a%04d/model/c0201a%04d_%s.mdl", model1[0], model1[0], "rir"));
+                    HashDatabase.addPath(String.format("chara/accessory/a%04d/model/c0301a%04d_%s.mdl", model1[0], model1[0], "rir"));
+                    HashDatabase.addPath(String.format("chara/accessory/a%04d/model/c0401a%04d_%s.mdl", model1[0], model1[0], "rir"));
+                    HashDatabase.addPath(String.format("chara/accessory/a%04d/model/c0501a%04d_%s.mdl", model1[0], model1[0], "rir"));
+                    HashDatabase.addPath(String.format("chara/accessory/a%04d/model/c0601a%04d_%s.mdl", model1[0], model1[0], "rir"));
+                    HashDatabase.addPath(String.format("chara/accessory/a%04d/model/c0701a%04d_%s.mdl", model1[0], model1[0], "rir"));
+                    HashDatabase.addPath(String.format("chara/accessory/a%04d/model/c0801a%04d_%s.mdl", model1[0], model1[0], "rir"));
+                    HashDatabase.addPath(String.format("chara/accessory/a%04d/model/c0901a%04d_%s.mdl", model1[0], model1[0], "rir"));
+                    HashDatabase.addPath(String.format("chara/accessory/a%04d/model/c1001a%04d_%s.mdl", model1[0], model1[0], "rir"));
+                    HashDatabase.addPath(String.format("chara/accessory/a%04d/model/c1101a%04d_%s.mdl", model1[0], model1[0], "rir"));
+                    HashDatabase.addPath(String.format("chara/accessory/a%04d/model/c1201a%04d_%s.mdl", model1[0], model1[0], "rir"));
+                    HashDatabase.addPath(String.format("chara/accessory/a%04d/model/c0101a%04d_%s.mdl", model1[0], model1[0], "ril"));
+                    HashDatabase.addPath(String.format("chara/accessory/a%04d/model/c0201a%04d_%s.mdl", model1[0], model1[0], "ril"));
+                    HashDatabase.addPath(String.format("chara/accessory/a%04d/model/c0301a%04d_%s.mdl", model1[0], model1[0], "ril"));
+                    HashDatabase.addPath(String.format("chara/accessory/a%04d/model/c0401a%04d_%s.mdl", model1[0], model1[0], "ril"));
+                    HashDatabase.addPath(String.format("chara/accessory/a%04d/model/c0501a%04d_%s.mdl", model1[0], model1[0], "ril"));
+                    HashDatabase.addPath(String.format("chara/accessory/a%04d/model/c0601a%04d_%s.mdl", model1[0], model1[0], "ril"));
+                    HashDatabase.addPath(String.format("chara/accessory/a%04d/model/c0701a%04d_%s.mdl", model1[0], model1[0], "ril"));
+                    HashDatabase.addPath(String.format("chara/accessory/a%04d/model/c0801a%04d_%s.mdl", model1[0], model1[0], "ril"));
+                    HashDatabase.addPath(String.format("chara/accessory/a%04d/model/c0901a%04d_%s.mdl", model1[0], model1[0], "ril"));
+                    HashDatabase.addPath(String.format("chara/accessory/a%04d/model/c1001a%04d_%s.mdl", model1[0], model1[0], "ril"));
+                    HashDatabase.addPath(String.format("chara/accessory/a%04d/model/c1101a%04d_%s.mdl", model1[0], model1[0], "ril"));
+                    HashDatabase.addPath(String.format("chara/accessory/a%04d/model/c1201a%04d_%s.mdl", model1[0], model1[0], "ril"));
                     break;
                 default:
                     continue;
             }
 
             if (path != null) {
-                HashDatabase.addPathToDB(path, "040000");
+                HashDatabase.addPath(path);
                 if (path2 != null)
-                    HashDatabase.addPathToDB(path2, "040000");
+                    HashDatabase.addPath(path2);
             }
         }
     }
@@ -810,7 +804,7 @@ public class EXDF_View extends JScrollPane implements ItemListener {
             }
             br.close();
         } catch (IOException e) {
-            Utils.getGlobalLogger().error(e);
+            Utils.getGlobalLogger().error("", e);
         }
     }
 

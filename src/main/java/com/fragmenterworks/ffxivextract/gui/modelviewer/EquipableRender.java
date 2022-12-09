@@ -1,8 +1,8 @@
 package com.fragmenterworks.ffxivextract.gui.modelviewer;
 
 import com.fragmenterworks.ffxivextract.models.Model;
-import com.fragmenterworks.ffxivextract.models.SqPack_IndexFile;
-import com.fragmenterworks.ffxivextract.storage.HashDatabase;
+import com.fragmenterworks.ffxivextract.models.sqpack.index.SqPackIndexFile;
+import com.fragmenterworks.ffxivextract.paths.database.HashDatabase;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -33,16 +33,16 @@ class EquipableRender {
     private Model rir;
     private Model ril;
 
-    public void setModel(int type, SqPack_IndexFile modelIndexFile, String modelPath, int varient) throws IOException {
+    public void setModel(int type, SqPackIndexFile modelIndexFile, String modelPath, int variant) throws IOException {
         byte[] modelData = modelIndexFile.extractFile(modelPath);
 
         if (modelData == null)
             return;
 
-        HashDatabase.addPathToDB(modelPath, "040000");
+        HashDatabase.addPath(modelPath);
 
         Model model = new Model(modelPath, modelIndexFile, modelData, modelIndexFile.getEndian());
-        model.loadVariant(varient);
+        model.loadVariant(variant);
 
         switch (type) {
             case 0:
@@ -82,8 +82,7 @@ class EquipableRender {
     }
 
     public ArrayList<Model> getModels() {
-        ArrayList<Model> models = new ArrayList<Model>();
-
+        ArrayList<Model> models = new ArrayList<>();
         if (met != null)
             models.add(met);
         if (top != null)

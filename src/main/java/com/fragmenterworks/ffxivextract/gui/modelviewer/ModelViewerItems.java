@@ -7,8 +7,8 @@ import com.fragmenterworks.ffxivextract.helpers.EXDDef;
 import com.fragmenterworks.ffxivextract.helpers.SparseArray;
 import com.fragmenterworks.ffxivextract.helpers.Utils;
 import com.fragmenterworks.ffxivextract.models.Model;
-import com.fragmenterworks.ffxivextract.models.SqPack_IndexFile;
-import com.fragmenterworks.ffxivextract.storage.HashDatabase;
+import com.fragmenterworks.ffxivextract.models.sqpack.index.SqPackIndexFile;
+import com.fragmenterworks.ffxivextract.paths.database.HashDatabase;
 import com.jogamp.opengl.GLCapabilities;
 import com.jogamp.opengl.GLProfile;
 import com.jogamp.opengl.awt.GLCanvas;
@@ -23,8 +23,6 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import java.awt.*;
 import java.awt.event.*;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -69,10 +67,10 @@ class ModelViewerItems extends JPanel {
     private int lastOriginX, lastOriginY;
     private int lastX, lastY;
 
-    private final SqPack_IndexFile modelIndexFile;
+    private final SqPackIndexFile modelIndexFile;
     private final EXDF_View itemView;
 
-    public ModelViewerItems(ModelViewerWindow parent, SqPack_IndexFile modelIndex, EXDF_View itemView) {
+    public ModelViewerItems(ModelViewerWindow parent, SqPackIndexFile modelIndex, EXDF_View itemView) {
 
         this.parent = parent;
         this.modelIndexFile = modelIndex;
@@ -464,10 +462,8 @@ class ModelViewerItems extends JPanel {
             }
 
             modelData = modelIndexFile.extractFile(modelPath);
-        } catch (FileNotFoundException e) {
-            Utils.getGlobalLogger().error(e);
-        } catch (IOException e) {
-            Utils.getGlobalLogger().error(e);
+        } catch (Exception e) {
+            Utils.getGlobalLogger().error("", e);
         }
 
         if (modelData == null && (characterNumber != 101 && characterNumber != 201)) {
@@ -483,7 +479,7 @@ class ModelViewerItems extends JPanel {
         }
 
         if (modelData != null) {
-            HashDatabase.addPathToDB(modelPath, "040000");
+            HashDatabase.addPath(modelPath);
 
             Model model = new Model(modelPath, modelIndexFile, modelData, modelIndexFile.getEndian());
             model.loadVariant(currentItem.varient == 0 ? 1 : currentItem.varient);
@@ -492,7 +488,6 @@ class ModelViewerItems extends JPanel {
 
         txtPath.setText(modelPath);
         txtModelInfo.setText(String.format("Id: %d, Model: %d, Variant: %d", currentItem.id, currentItem.model, currentItem.varient));
-
     }
 
     private boolean loadItems() {
@@ -501,8 +496,9 @@ class ModelViewerItems extends JPanel {
         try {
             for (int i = 0; i < view.getTable().getRowCount(); i++) {
                 if (view.getTable().getValueAt(i, 0) instanceof Integer && !view.getTable().getValueAt(i, EXDDef.INDEX_ITEM_MODEL1).equals("0, 0, 0, 0")) {
+
                     String[] model1Split = ((String) view.getTable().getValueAt(i, EXDDef.INDEX_ITEM_MODEL1)).split(",");
-                    String[] model2Split = ((String) view.getTable().getValueAt(i, EXDDef.INDEX_ITEM_MODEL1)).split(",");
+//                    String[] model2Split = ((String) view.getTable().getValueAt(i, EXDDef.INDEX_ITEM_MODEL2)).split(",");
 
                     int slot = (Integer) view.getTable().getValueAt(i, EXDDef.INDEX_ITEM_SLOT);
 
@@ -521,7 +517,7 @@ class ModelViewerItems extends JPanel {
                 }
             }
         } catch (Exception e) {
-            Utils.getGlobalLogger().error(e);
+            Utils.getGlobalLogger().error("", e);
             return false;
         }
         lstItems.setModel(new ItemsListModel());

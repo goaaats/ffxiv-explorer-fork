@@ -1,18 +1,16 @@
 package com.fragmenterworks.ffxivextract.helpers;
 
-import com.fragmenterworks.ffxivextract.models.SqPack_IndexFile;
-import com.fragmenterworks.ffxivextract.models.SqPack_IndexFile.SqPack_File;
-import com.fragmenterworks.ffxivextract.models.SqPack_IndexFile.SqPack_Folder;
-import com.fragmenterworks.ffxivextract.storage.HashDatabase;
+import com.fragmenterworks.ffxivextract.models.sqpack.index.SqPackIndexFile;
+import com.fragmenterworks.ffxivextract.models.sqpack.model.SqPackFile;
+import com.fragmenterworks.ffxivextract.models.sqpack.model.SqPackFolder;
+import com.fragmenterworks.ffxivextract.paths.database.HashDatabase;
 
 import javax.swing.*;
 import java.io.*;
-import java.sql.SQLException;
+import java.util.ArrayList;
 
-@SuppressWarnings("serial")
 public class PathSearcher extends JFrame {
-    public PathSearcher() {
-    }
+    public PathSearcher() {}
 /*
 	static String folders[] = {
 			"common/",
@@ -44,7 +42,7 @@ public class PathSearcher extends JFrame {
 
         Utils.getGlobalLogger().info("Opening {}...", path);
 
-        SqPack_IndexFile currentIndexFile = new SqPack_IndexFile(path, true);
+        SqPackIndexFile currentIndexFile = SqPackIndexFile.read(path);
 
         int numFound = 0;
         int numFoundFolder = 0;
@@ -52,30 +50,20 @@ public class PathSearcher extends JFrame {
         int numNewFound = 0;
         int numNewFoundFolder = 0;
 
+        var paths = new ArrayList<String>();
+
         for (int folderIndex = 0; folderIndex < folders.length; folderIndex++) {
             Utils.getGlobalLogger().info("Searching for folder {}...", folders[folderIndex]);
-
-            HashDatabase.beginConnection();
-            try {
-                HashDatabase.setAutoCommit(false);
-            } catch (SQLException e1) {
-                Utils.getGlobalLogger().error(e1);
-            }
             String string = folders[folderIndex];
-            for (int i = 0; i < currentIndexFile.getPackFolders().length; i++) {
-                try {
-                    HashDatabase.commit();
-                } catch (SQLException e1) {
-                    Utils.getGlobalLogger().error(e1);
-                }
-                SqPack_Folder f = currentIndexFile.getPackFolders()[i];
-                for (int j = 0; j < f.getFiles().length; j++) {
-                    SqPack_File fi = f.getFiles()[j];
+            for (int i = 0; i < currentIndexFile.getFolders().size(); i++) {
+                SqPackFolder f = currentIndexFile.getFolders().get(i);
+                for (int j = 0; j < f.getFiles().size(); j++) {
+                    SqPackFile fi = f.getFiles().get(j);
                     byte[] data;
                     try {
-                        if (currentIndexFile.getContentType(fi.dataoffset) == 4)
+                        if (currentIndexFile.getContentType(fi.getElement()) == 4)
                             continue;
-                        data = currentIndexFile.extractFile(fi.dataoffset, null);
+                        data = currentIndexFile.extractFile(fi.getElement(), null);
                         if (data == null || (data.length >= 8 && data[0] == 'S' && data[1] == 'E' && data[2] == 'D' && data[3] == 'B' && data[4] == 'S' && data[5] == 'S' && data[6] == 'C' && data[7] == 'F'))
                             continue;
 
@@ -103,45 +91,25 @@ public class PathSearcher extends JFrame {
 
                                         //Get full path
                                         String fullpath = new String(data, i2, endString - i2);
-
-                                        //Add to list
-                                        //if (HashDatabase.getFolder(f.getId()) == null)
-                                        //{
-                                        Utils.getGlobalLogger().info("NEW => {}", fullpath);
-                                        numNewFound++;
-                                        numNewFoundFolder++;
-                                        HashDatabase.addPathToDB(fullpath, currentIndexFile.getName());
-                                        //}
-                                        //else
-                                        //{
-                                        //	numFound++;
-                                        //	numFoundFolder++;
-                                        //}
-
-                                    } else {
-									}
+                                        paths.add(fullpath);
+                                    }
                                 } else
                                     break;
                             }
                         }
-                    } catch (IOException e) {
-                        Utils.getGlobalLogger().error(e);
+                    } catch (Exception e) {
+                        Utils.getGlobalLogger().error("", e);
                     }
-
                 }
-
             }
-            Utils.getGlobalLogger().info("Found {} paths, {} were new.", numFoundFolder, numNewFoundFolder);
-            numFoundFolder = 0;
-            numNewFoundFolder = 0;
-            try {
-                HashDatabase.commit();
-            } catch (SQLException e) {
-                Utils.getGlobalLogger().error(e);
-            }
-            HashDatabase.closeConnection();
         }
-        Utils.getGlobalLogger().info("Found {} paths, {} were new.", numFound, numNewFound);
+
+        var newCount = HashDatabase.addPaths(paths);
+        if (newCount > 0) {
+            Utils.getGlobalLogger().info("Found {} paths, {} were new.", numFound, numNewFound);
+        } else {
+            Utils.getGlobalLogger().info("Path search failed.");
+        }
     }
 
     public static void addModelsFromItemsTable(String path) {

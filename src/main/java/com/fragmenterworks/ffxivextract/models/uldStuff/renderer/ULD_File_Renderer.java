@@ -104,7 +104,7 @@ public class ULD_File_Renderer implements MouseListener, MouseMotionListener {
                 Constructor<? extends GraphicsElement> constructor = aClass.getDeclaredConstructor();
                 return constructor.newInstance();
             } catch (NoSuchMethodException | IllegalAccessException | InstantiationException | InvocationTargetException e) {
-//				Utils.getGlobalLogger().error(e);
+//				Utils.getGlobalLogger().error("", e);
                 return null;
             }
         }
@@ -113,7 +113,7 @@ public class ULD_File_Renderer implements MouseListener, MouseMotionListener {
             constructor = GraphicsContainer.class.getDeclaredConstructor();
             return constructor.newInstance();
         } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException | InstantiationException e) {
-//			Utils.getGlobalLogger().error(e);
+//			Utils.getGlobalLogger().error("", e);
         }
         return null;
     }

@@ -3,7 +3,7 @@ package com.fragmenterworks.ffxivextract.gui.components;
 import com.fragmenterworks.ffxivextract.Constants;
 import com.fragmenterworks.ffxivextract.helpers.Utils;
 import com.fragmenterworks.ffxivextract.helpers.VersionUpdater.VersionCheckObject;
-import com.fragmenterworks.ffxivextract.storage.HashDatabase;
+import com.fragmenterworks.ffxivextract.paths.database.HashDatabase;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;

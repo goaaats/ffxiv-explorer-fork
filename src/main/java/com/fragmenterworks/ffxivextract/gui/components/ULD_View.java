@@ -101,7 +101,7 @@ public class ULD_View extends JPanel {
             lblPic.setVisible(true);
 
         } catch (Exception e) {
-            Utils.getGlobalLogger().error(e);
+            Utils.getGlobalLogger().error("", e);
 
             StringWriter sw = new StringWriter();
             PrintWriter pw = new PrintWriter(sw);

@@ -172,9 +172,9 @@ class LogViewerWindow extends JFrame {
                     }
 
                 } catch (FileNotFoundException e) {
-                    Utils.getGlobalLogger().error(e);
+                    Utils.getGlobalLogger().error("", e);
                 } catch (IOException e) {
-                    Utils.getGlobalLogger().error(e);
+                    Utils.getGlobalLogger().error("", e);
                 }
             }
         } else {

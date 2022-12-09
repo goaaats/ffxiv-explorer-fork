@@ -6,8 +6,8 @@ import com.fragmenterworks.ffxivextract.gui.components.OpenGL_View;
 import com.fragmenterworks.ffxivextract.helpers.Utils;
 import com.fragmenterworks.ffxivextract.models.EXHF_File;
 import com.fragmenterworks.ffxivextract.models.Model;
-import com.fragmenterworks.ffxivextract.models.SqPack_IndexFile;
-import com.fragmenterworks.ffxivextract.storage.HashDatabase;
+import com.fragmenterworks.ffxivextract.models.sqpack.index.SqPackIndexFile;
+import com.fragmenterworks.ffxivextract.paths.database.HashDatabase;
 import com.jogamp.opengl.GLCapabilities;
 import com.jogamp.opengl.GLProfile;
 import com.jogamp.opengl.awt.GLCanvas;
@@ -35,7 +35,7 @@ class ModelViewerFurniture extends JPanel {
 
     private final ModelViewerWindow parent;
 
-    private final ArrayList<ModelFurnitureEntry> entries = new ArrayList<ModelFurnitureEntry>();
+    private final ArrayList<ModelFurnitureEntry> entries = new ArrayList<>();
 
     OpenGL_View view3D;
     private final JList lstFurniture;
@@ -55,9 +55,9 @@ class ModelViewerFurniture extends JPanel {
     private int lastOriginX, lastOriginY;
     private int lastX, lastY;
 
-    private final SqPack_IndexFile modelIndexFile;
+    private final SqPackIndexFile modelIndexFile;
 
-    public ModelViewerFurniture(ModelViewerWindow parent, SqPack_IndexFile modelIndex) {
+    public ModelViewerFurniture(ModelViewerWindow parent, SqPackIndexFile modelIndex) {
 
         this.parent = parent;
         this.modelIndexFile = modelIndex;
@@ -242,14 +242,12 @@ class ModelViewerFurniture extends JPanel {
                     modelData = modelIndexFile.extractFile(modelPath);
 
 
-                } catch (FileNotFoundException e) {
-                    Utils.getGlobalLogger().error(e);
-                } catch (IOException e) {
-                    Utils.getGlobalLogger().error(e);
+                } catch (Exception e) {
+                    Utils.getGlobalLogger().error("", e);
                 }
 
                 if (modelData != null) {
-                    HashDatabase.addPathToDB(modelPath, "040000");
+                    HashDatabase.addPath(modelPath);
                     Model model = new Model(modelPath, modelIndexFile, modelData, modelIndex.getEndian());
                     renderer.setModel(model);
                 }
@@ -263,7 +261,7 @@ class ModelViewerFurniture extends JPanel {
     }
 
     private boolean loadFurniture() throws IOException {
-        SqPack_IndexFile indexFile = parent.getExdIndexFile();
+        SqPackIndexFile indexFile = parent.getExdIndexFile();
         EXHF_File exhfFileHousingFurniture = new EXHF_File(indexFile.extractFile("exd/housingfurniture.exh"));
         EXHF_File exhfFileHousingYardObject = new EXHF_File(indexFile.extractFile("exd/housingyardobject.exh"));
         EXHF_File exhfFileItem = new EXHF_File(indexFile.extractFile("exd/item.exh"));
@@ -318,7 +316,7 @@ class ModelViewerFurniture extends JPanel {
                 entries.add(new ModelFurnitureEntry(ModelFurnitureEntry.TYPE_YARDOBJECT, i, name, modelNumber, furnitureTypeName));
             }
         } catch (Exception e) {
-            //Utils.getGlobalLogger().error(e);
+            //Utils.getGlobalLogger().error("", e);
             return false;
         }
 

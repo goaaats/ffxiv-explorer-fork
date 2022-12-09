@@ -50,7 +50,7 @@ public class DatBuilder {
                 blocks.add(currentBlock);
                 position += 16000;
             } catch (IOException e) {
-                Utils.getGlobalLogger().error(e);
+                Utils.getGlobalLogger().error("", e);
             }
 
             if (currentBlock.uncompressedSize > largestBlock)
@@ -163,7 +163,7 @@ public class DatBuilder {
             sqpackHeaderBB.put(md.digest());
 
         } catch (NoSuchAlgorithmException e) {
-            Utils.getGlobalLogger().error(e);
+            Utils.getGlobalLogger().error("", e);
             return null;
         }
 
@@ -195,7 +195,7 @@ public class DatBuilder {
             dataHeaderBB.put(md.digest());
 
         } catch (NoSuchAlgorithmException e) {
-            Utils.getGlobalLogger().error(e);
+            Utils.getGlobalLogger().error("", e);
             return null;
         }
 
@@ -242,7 +242,7 @@ public class DatBuilder {
             try {
                 md = MessageDigest.getInstance("SHA1");
             } catch (NoSuchAlgorithmException e) {
-                Utils.getGlobalLogger().error(e);
+                Utils.getGlobalLogger().error("", e);
             }
             while (true) {
                 int bytesRead = fileOut.read(buffer);
@@ -267,7 +267,7 @@ public class DatBuilder {
             try {
                 fileOut.close();
             } catch (IOException e) {
-                Utils.getGlobalLogger().error(e);
+                Utils.getGlobalLogger().error("", e);
             }
         }
     }
