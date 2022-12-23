@@ -748,7 +748,20 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
                 if (exhfComponent == null || !exhfComponent.isSame(file.getName()))
                     exhfComponent = new EXDF_View(currentIndexFile, file.getFullPath(), new EXHF_File(data), options_showAsHex.getState(), options_sortByOffset.getState());
                 tabs.addTab("EXHF File", exhfComponent);
-            } catch (IOException e) {
+            } catch (
+                    IOException e) {
+                Utils.getGlobalLogger().error("", e);
+            }
+        } else if (file.getName().equals("_root.csv")) {
+            try {
+                tabs.addTab("EXLT (CSV) File", new EXL_View(currentIndexFile, file.getFullPath()));
+            } catch (Exception e) {
+                Utils.getGlobalLogger().error("", e);
+            }
+        } else if (data.length >= 3 && checkMagic(data, "EXLT")) {
+            try {
+                tabs.addTab("EXLT File", new EXL_View(currentIndexFile, file.getFullPath()));
+            } catch (Exception e) {
                 Utils.getGlobalLogger().error("", e);
             }
         } else if (data.length >= 8 && checkMagic(data, "SEDBSSCF")) {
