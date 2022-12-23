@@ -14,7 +14,7 @@
 
     <groupId>com.fragmenterworks.ffxivextract</groupId>
     <artifactId>ffxiv-explorer-fork</artifactId>
-    <version>1.9.1-FORK</version>
+    <version>1.9.2-FORK</version>
 
     <build>
         <resources>
@@ -99,14 +99,14 @@
                             </jre>
                             <versionInfo>
                                 <copyright>_</copyright>
-                                <fileVersion>1.9.1.0</fileVersion>
-                                <productVersion>1.9.1.0</productVersion>
+                                <fileVersion>1.9.2.0</fileVersion>
+                                <productVersion>1.9.2.0</productVersion>
                                 <productName>FFXIV Explorer</productName>
                                 <internalName>FFXIV Explorer</internalName>
                                 <originalFilename>FFXIV_Explorer.exe</originalFilename>
-                                <txtFileVersion>1.9.1-FORK</txtFileVersion>
+                                <txtFileVersion>1.9.2-FORK</txtFileVersion>
                                 <fileDescription>FFXIV File Explorer</fileDescription>
-                                <txtProductVersion>1.9.1-FORK</txtProductVersion>
+                                <txtProductVersion>1.9.2-FORK</txtProductVersion>
                             </versionInfo>
                         </configuration>
                     </execution>

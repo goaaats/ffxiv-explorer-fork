@@ -410,7 +410,7 @@ public class SqPack_DatFile {
                     decompressedBlock = new byte[decompressedBlockSize];
                     currentFilePointer.readFully(decompressedBlock);
                 } else //Gotta decompress
-                    decompressedBlock = decompressBlock(compressedBlockSize, decompressedBlockSize);
+                    decompressedBlock = decompressBlock1(compressedBlockSize, decompressedBlockSize);
 
                 try {
                     System.arraycopy(decompressedBlock, 0, decompressedFile, currentFileOffset, decompressedBlockSize);
