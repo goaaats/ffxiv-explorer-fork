@@ -82,7 +82,7 @@ public final class ImageDecoding {
 		for (int y = 0; y < targetHeight; y++) {
 			for (int x = 0; x < targetWidth; x++) {
 				final int pixel = buffer.getShort() & 0xffff;
-				final int r = 255 - ((pixel & 0xF)) * 16;
+				final int r = 255 - ((pixel & 0xF)) * 16; //potential bug: red and blue may be inverted
 				final int g = 255 - ((pixel & 0xF0) >> 4) * 16;
 				final int b = 255 - ((pixel & 0xF00) >> 8) * 16;
 				final int a = 255 - ((pixel & 0xF000) >> 12) * 16;
@@ -107,7 +107,7 @@ public final class ImageDecoding {
 		buffer.position(offset);
 
 		int p = 0;
-		final int r = 0;
+		final int r = 0; //potential bug: red and blue may be inverted
 		final int g = 0;
 		final int b = 0;
 		switch (channel) {
