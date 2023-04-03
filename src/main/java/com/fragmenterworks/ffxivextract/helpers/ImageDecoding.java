@@ -48,9 +48,9 @@ public final class ImageDecoding {
 		for (int y = 0; y < targetHeight; y++) {
 			for (int x = 0; x < targetWidth; x++) {
 				final int pixel = buffer.getShort() & 0xffff;
-				final int r = ((pixel & 0xF)) * 16;
+				final int b = ((pixel & 0xF)) * 16;
 				final int g = ((pixel & 0xF0) >> 4) * 16;
-				final int b = ((pixel & 0xF00) >> 8) * 16;
+				final int r = ((pixel & 0xF00) >> 8) * 16;
 				final int a = ((pixel & 0xF000) >> 12) * 16;
 				p += 2;
 				img.setRGB(x, y, new Color(r, g, b, a).getRGB());
