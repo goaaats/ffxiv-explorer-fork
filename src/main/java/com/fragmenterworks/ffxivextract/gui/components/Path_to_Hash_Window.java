@@ -2,6 +2,8 @@ package com.fragmenterworks.ffxivextract.gui.components;
 
 import java.awt.*;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -29,9 +31,9 @@ public class Path_to_Hash_Window extends JFrame {
     private JLabel indexLabel;
     private JScrollPane scrollPane;
 
-    SqPackIndexFile currentIndex;
+    private ArrayList<SqPackIndexFile> indexFiles;
 
-    public Path_to_Hash_Window(SqPackIndexFile currentIndex) {
+    public Path_to_Hash_Window(ArrayList<SqPackIndexFile> indexFiles) {
 
         setTitle(Strings.PATHTOHASH_TITLE);
         URL imageURL = getClass().getResource("/frameicon.png");
@@ -89,10 +91,6 @@ public class Path_to_Hash_Window extends JFrame {
         bottomPane = new JPanel();
 
         indexLabel = new JLabel();
-        if (currentIndex == null)
-            indexLabel.setText("Current index: None");
-        else
-            indexLabel.setText(String.format("Current index: %06x", currentIndex.getIndexId()));
         bottomPane.add(indexLabel);
 
         autoCommitCheckBox = new JCheckBox(Strings.PATHTOHASH_AUTO_COMMIT);
@@ -109,7 +107,7 @@ public class Path_to_Hash_Window extends JFrame {
 
         contentPane.add(bottomPane, BorderLayout.SOUTH);
 
-        setIndex(currentIndex);
+        setIndexFiles(indexFiles);
     }
 
     private void commit() {
@@ -144,7 +142,8 @@ public class Path_to_Hash_Window extends JFrame {
         Border border = BorderFactory.createLineBorder(Color.RED, 2);
 
         try {
-            if (currentIndex != null && currentIndex.fileExists(path)) {
+            var finalPath = path;
+            if (indexFiles != null && indexFiles.stream().anyMatch(x -> x.fileExists(finalPath))) {
                 HashDatabase.addPath(edtFullPath.getText());
                 border = BorderFactory.createLineBorder(Color.GREEN, 2);
             }
@@ -160,12 +159,12 @@ public class Path_to_Hash_Window extends JFrame {
                 Strings.PATHTOHASH_FULL_HASH + String.format("0x%08X (%s)", hashes.fullHash, hashes.fullHash & 0xFFFFFFFFL));
     }
 
-    public void setIndex(SqPackIndexFile currentIndex) {
-        this.currentIndex = currentIndex;
-        if (currentIndex == null)
+    public void setIndexFiles(ArrayList<SqPackIndexFile> indexFiles) {
+        this.indexFiles = indexFiles;
+        if (this.indexFiles == null)
             indexLabel.setText("Current index: None");
         else
-            indexLabel.setText(String.format("Current index: %06x", currentIndex.getIndexId()));
+            indexLabel.setText("Current index: " + this.indexFiles.stream().map(x -> (CharSequence)String.format("%06x", x.getIndexId())).collect(Collectors.joining(", ")));
     }
 
 }

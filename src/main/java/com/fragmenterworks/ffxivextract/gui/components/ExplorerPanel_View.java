@@ -5,28 +5,25 @@ import com.fragmenterworks.ffxivextract.models.sqpack.index.IIndexUpdateListener
 import com.fragmenterworks.ffxivextract.models.sqpack.index.SqPackIndexFile;
 import com.fragmenterworks.ffxivextract.models.sqpack.model.SqPackFile;
 import com.fragmenterworks.ffxivextract.models.sqpack.model.SqPackFolder;
-import com.fragmenterworks.ffxivextract.paths.CrcResult;
-import com.fragmenterworks.ffxivextract.paths.database.IHashUpdateListener;
 
 import javax.swing.*;
+import javax.swing.event.TreeExpansionEvent;
 import javax.swing.event.TreeSelectionListener;
+import javax.swing.event.TreeWillExpandListener;
 import javax.swing.tree.*;
 import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Enumeration;
+import java.nio.file.Paths;
+import java.util.*;
 
-public class ExplorerPanel_View extends JScrollPane implements MouseListener, IIndexUpdateListener {
-
-    private SqPackIndexFile currentIndex;
+public class ExplorerPanel_View extends JScrollPane implements MouseListener, IIndexUpdateListener, TreeWillExpandListener {
     private boolean enableHashUpdate = true;
 
     private final JTree fileTree;
-    private final DefaultMutableTreeNode root = new DefaultMutableTreeNode("No File Loaded");
+    private final RootFolder root = new RootFolder();
 
     PopupMenu contextMenu;
 
@@ -36,30 +33,50 @@ public class ExplorerPanel_View extends JScrollPane implements MouseListener, II
 
         };
 
-        fileTree.setCellRenderer(new TreeRenderer());
+        var renderer = new DefaultTreeCellRenderer() {
+            @Override
+            public Component getTreeCellRendererComponent(JTree tree, Object value, boolean sel, boolean exp, boolean leaf, int row, boolean hasFocus) {
+                setTextNonSelectionColor(Color.BLACK);
+
+                if (value instanceof SelfRenderable)
+                    value = ((SelfRenderable) value).getNodeText();
+                else
+                    value = "No File Loaded";
+
+                super.getTreeCellRendererComponent(tree, value, sel, exp, leaf, row, hasFocus);
+                return this;
+            }
+        };
+        var fileIcon = (Icon) UIManager.get("FileView.fileIcon");
+        var folderIcon = (Icon) UIManager.get("FileView.directoryIcon");
+        renderer.setLeafIcon(fileIcon);
+        renderer.setOpenIcon(folderIcon);
+        renderer.setClosedIcon(folderIcon);
+        fileTree.setCellRenderer(renderer);
+
         fileTree.setShowsRootHandles(false);
         fileTree.addMouseListener(this);
+        fileTree.addTreeWillExpandListener(this);
 
         contextMenu = new PopupMenu();
         MenuItem copyPath = new MenuItem("Copy full path");
         copyPath.addActionListener(e -> {
-            String path = "";
             TreePath[] selectedPaths = fileTree.getSelectionPaths();
 
             if (selectedPaths == null)
                 return;
 
-            TreePath tp = selectedPaths[0];
-            Object obj = ((DefaultMutableTreeNode) tp.getLastPathComponent()).getUserObject();
-
-            if (obj == null)
-                return;
-            else if (obj instanceof SqPackFolder)
-                path = ((SqPackFolder) obj).getName();
-            else if (obj instanceof SqPackFile) {
-                path = ((SqPackFile) obj).getFullPath();
+            var strings = new ArrayList<String>();
+            for (var selectedPath : selectedPaths) {
+                var selectedObject = selectedPath.getLastPathComponent();
+                if (selectedObject instanceof SelfRenderable) {
+                    var path = ((SelfRenderable) selectedObject).getFullPath();
+                    if (path != null)
+                        strings.add(path);
+                }
             }
-            StringSelection selection = new StringSelection(path);
+
+            StringSelection selection = new StringSelection(String.join("\n", strings));
             Clipboard clip = Toolkit.getDefaultToolkit().getSystemClipboard();
             clip.setContents(selection, selection);
         });
@@ -73,38 +90,16 @@ public class ExplorerPanel_View extends JScrollPane implements MouseListener, II
     }
 
     public void fileOpened(SqPackIndexFile index) {
-        currentIndex = index;
-        currentIndex.addListener(this);
-        load();
-        ((DefaultTreeModel) fileTree.getModel()).reload();
+        root.addIndex(index, (DefaultTreeModel) fileTree.getModel());
+        if (root.getChildCount() == 1)
+            fileTree.expandPath(new TreePath(((VirtualFolder) root.getChildAt(0)).getPath()));
     }
 
-    public void fileClosed() {
-        currentIndex.removeListener(this);
-        currentIndex = null;
-        unload();
-        ((DefaultTreeModel) fileTree.getModel()).reload();
+    public void fileClosed(SqPackIndexFile index) {
+        root.removeIndex(index, (DefaultTreeModel) fileTree.getModel());
     }
 
-    public void load() {
-        for (var folder : currentIndex.getFolders()) {
-            DefaultMutableTreeNode folderNode = new DefaultMutableTreeNode(folder);
-            for (var file : folder.getFiles())
-                folderNode.add(new DefaultMutableTreeNode(file));
-            root.add(folderNode);
-        }
-        for (var file : currentIndex.getFiles()) {
-            if (file.getParent() == null)
-                root.add(new DefaultMutableTreeNode(file));
-        }
-    }
-
-    private void unload() {
-        root.removeAllChildren();
-    }
-
-    public void setEnableHashUpdate(boolean enableHashUpdate)
-    {
+    public void setEnableHashUpdate(boolean enableHashUpdate) {
         this.enableHashUpdate = enableHashUpdate;
     }
 
@@ -118,7 +113,7 @@ public class ExplorerPanel_View extends JScrollPane implements MouseListener, II
     }
 
     @Override
-    public void onIndexUpdate() {
+    public void onIndexUpdate(SqPackIndexFile indexFile) {
         Utils.getGlobalLogger().debug("Index update");
 
         if (!enableHashUpdate) {
@@ -126,55 +121,31 @@ public class ExplorerPanel_View extends JScrollPane implements MouseListener, II
             return;
         }
 
-        unload();
-        load();
-        ((DefaultTreeModel) fileTree.getModel()).reload();
+        root.removeIndex(indexFile, (DefaultTreeModel) fileTree.getModel());
+        root.addIndex(indexFile, (DefaultTreeModel) fileTree.getModel());
     }
 
-    private class TreeRenderer extends DefaultTreeCellRenderer {
-
-        private final Icon fileIcon = (Icon) UIManager.get("FileView.fileIcon");
-        private final Icon folderIcon = (Icon) UIManager.get("FileView.directoryIcon");
-
-        @Override
-        public Component getTreeCellRendererComponent(JTree tree, Object value, boolean sel, boolean exp, boolean leaf, int row, boolean hasFocus) {
-            DefaultMutableTreeNode node = (DefaultMutableTreeNode) value;
-            setTextNonSelectionColor(Color.BLACK);
-
-            if (node.getUserObject() instanceof SqPackFolder) //FOLDER
-            {
-                SqPackFolder folder = (SqPackFolder) node.getUserObject();
-
-                value = folder.getName();
-
-                setOpenIcon(getDefaultOpenIcon());
-                setClosedIcon(getDefaultClosedIcon());
-            } else if (node.getUserObject() instanceof SqPackFile) //FILE
-            {
-                SqPackFile file = (SqPackFile) node.getUserObject();
-	        	
-	        	/*if (currentCompareFile != null && currentCompareFile.isNewFile(file.getId()))
-	        		setTextNonSelectionColor(new Color(0,150,0));
-	        	else
-	        		setTextNonSelectionColor(Color.BLACK);
-	        	*/
-                value = file.getName();
-
-                setLeafIcon(fileIcon);
-                setLeafIcon(fileIcon);
-            } else //ROOT
-            {
-                if (tree.getModel().getChildCount(node) == 0)
-                    value = "No File Loaded";
-                else
-                    value = "Dat File";
-                setOpenIcon(folderIcon);
-                setClosedIcon(folderIcon);
+    @Override
+    public void treeWillExpand(TreeExpansionEvent event) {
+        var item = event.getPath().getLastPathComponent();
+        if (item instanceof VirtualFolder) {
+            var folder = (VirtualFolder) item;
+            folder.populate();
+            if (folder.shouldAutoExpandChildren()) {
+                for (var i = 0; i < folder.getChildCount(); i++) {
+                    final var child = folder.getChildAt(i);
+                    if (child instanceof UnknownVirtualFolder)
+                        continue;
+                    if (child instanceof VirtualFolder)
+                        SwingUtilities.invokeLater(() -> fileTree.expandPath(new TreePath(((VirtualFolder) child).getPath())));
+                }
             }
-
-            super.getTreeCellRendererComponent(tree, value, sel, exp, leaf, row, hasFocus);
-            return this;
         }
+    }
+
+    @Override
+    public void treeWillCollapse(TreeExpansionEvent event) {
+
     }
 
     public boolean isOnlyFolder() {
@@ -189,6 +160,38 @@ public class ExplorerPanel_View extends JScrollPane implements MouseListener, II
         Object obj = ((DefaultMutableTreeNode) selectedPaths[0].getLastPathComponent()).getUserObject();
 
         return (obj instanceof SqPackFolder);
+    }
+
+    public ArrayList<SqPackIndexFile> getAllIndexFiles() {
+        return root.getAllIndexFiles();
+    }
+
+    public ArrayList<SqPackIndexFile> getSelectedIndexFiles() {
+        var selectedIndices = new HashSet<SqPackIndexFile>();
+        TreePath[] selectedPaths = fileTree.getSelectionPaths();
+
+        if (selectedPaths == null)
+            return new ArrayList<>(selectedIndices);
+
+        for (TreePath tp : selectedPaths) {
+            var obj = tp.getLastPathComponent();
+            while (obj != null) {
+                if (!(obj instanceof DefaultMutableTreeNode))
+                    break;
+
+                var node = (DefaultMutableTreeNode)obj;
+                obj = node.getParent();
+
+                if (!(node instanceof VirtualFolder))
+                    continue;
+
+                var folder = (VirtualFolder)node;
+                var indexFile = folder.getIndexFile();
+                if (indexFile != null)
+                    selectedIndices.add(indexFile);
+            }
+        }
+        return new ArrayList<>(selectedIndices);
     }
 
     public ArrayList<SqPackFile> getSelectedFiles() {
@@ -232,15 +235,279 @@ public class ExplorerPanel_View extends JScrollPane implements MouseListener, II
     }
 
     @Override
-    public void mousePressed(MouseEvent e) {}
+    public void mousePressed(MouseEvent e) {
+    }
 
     @Override
-    public void mouseReleased(MouseEvent e) {}
+    public void mouseReleased(MouseEvent e) {
+    }
 
     @Override
-    public void mouseEntered(MouseEvent e) {}
+    public void mouseEntered(MouseEvent e) {
+    }
 
     @Override
-    public void mouseExited(MouseEvent e) {}
+    public void mouseExited(MouseEvent e) {
+    }
+
+    private interface SelfRenderable {
+        String getNodeText();
+        String getFullPath();
+    }
+
+    private static class RootFolder extends DefaultMutableTreeNode implements SelfRenderable {
+        public void addIndex(SqPackIndexFile indexFile, DefaultTreeModel model) {
+            var indexNode = new VirtualFolder(indexFile.getPath(), Paths.get(indexFile.getPath()).getFileName().toString());
+            indexNode.setUserObject(indexFile);
+
+            var children = new ArrayList<VirtualFolder>(getChildCount());
+            for (var i = 0; i < getChildCount(); i++)
+                children.add((VirtualFolder) getChildAt(i));
+
+            var pos = Collections.binarySearch(children, indexNode);
+            if (pos >= 0)
+                return;  // don't re-open what's already opened
+            pos = ~pos;
+
+            var unknownFolder = new UnknownVirtualFolder();
+
+            for (var folder : indexFile.getFolders()) {
+                var name = folder.getName();
+                if (name.startsWith("~"))
+                    unknownFolder.getOrCreateSubfolder(name).setUserObject(folder);
+                else
+                    indexNode.getOrCreateSubfolder(name).setUserObject(folder);
+            }
+
+            if (!unknownFolder.subfolders.isEmpty())
+                indexNode.subfolders.put(unknownFolder.name, unknownFolder);
+
+            for (var file : indexFile.getFiles()) {
+                // If a file has a parent, then it will be lazy-expanded later on.
+                if (file.getParent() != null)
+                    continue;
+
+                var name = file.getName();
+                if (name.startsWith("~")) {
+                    unknownFolder.addFile(file);
+                    continue;
+                }
+
+                var off = name.lastIndexOf('/');
+                if (off == -1) {
+                    unknownFolder.addFile(file);
+                    continue;
+                }
+
+                var path = name.substring(0, off);
+                unknownFolder.getOrCreateSubfolder(path).addFile(file);
+            }
+
+            insert(indexNode, pos);
+            model.nodesWereInserted(this, new int[]{pos});
+        }
+
+        public void removeIndex(SqPackIndexFile indexFile, DefaultTreeModel model) {
+            var removedIndices = new ArrayList<Integer>();
+            var removedObjects = new ArrayList<>();
+            for (var i = getChildCount() - 1; i >= 0; --i) {
+                if (((VirtualFolder) getChildAt(i)).getUserObject() == indexFile) {
+                    removedObjects.add(getChildAt(i));
+                    removedIndices.add(i);
+                    remove(i);
+                }
+            }
+            model.nodesWereRemoved(this,
+                    removedIndices.stream().mapToInt(Integer::intValue).toArray(),
+                    removedObjects.toArray());
+        }
+
+        @Override
+        public String getNodeText() {
+            if (getChildCount() == 0)
+                return "No file loaded";
+            else if (getChildCount() == 1)
+                return "1 file loaded";
+            else
+                return getChildCount() + " files opened";
+        }
+
+        @Override
+        public String getFullPath() {
+            return null;
+        }
+
+        public ArrayList<SqPackIndexFile> getAllIndexFiles() {
+            var children = new ArrayList<SqPackIndexFile>(getChildCount());
+            for (var i = 0; i < getChildCount(); i++)
+                children.add(((VirtualFolder) getChildAt(i)).getIndexFile());
+            return children;
+        }
+    }
+
+    private static class VirtualFolder extends DefaultMutableTreeNode implements SelfRenderable, Comparable<VirtualFolder> {
+        public final String name;
+        public final String displayName;
+        public HashMap<String, VirtualFolder> subfolders = new HashMap<>();
+        public ArrayList<VirtualFile> files = new ArrayList<>();
+
+        private boolean _populated = false;
+
+        public VirtualFolder(String name, String displayName) {
+            super(null, false);
+            this.name = name;
+            this.displayName = displayName;
+        }
+
+        public SqPackFolder getFolder() {
+            return userObject instanceof SqPackFolder ? (SqPackFolder) userObject : null;
+        }
+
+        public SqPackIndexFile getIndexFile() {
+            return userObject instanceof SqPackIndexFile ? (SqPackIndexFile) userObject : null;
+        }
+
+        public VirtualFolder getOrCreateSubfolder(String path) {
+            var sepOffset = path.indexOf('/');
+            var name = sepOffset == -1 ? path : path.substring(0, sepOffset);
+            var subfolder = subfolders.get(name);
+            if (subfolder == null)
+                subfolders.put(name, subfolder = new VirtualFolder(name, name));
+            if (sepOffset != -1)
+                subfolder = subfolder.getOrCreateSubfolder(path.substring(sepOffset + 1));
+            setAllowsChildren(true);
+            return subfolder;
+        }
+
+        public void addFile(SqPackFile file) {
+            files.add(new VirtualFile(file));
+            setAllowsChildren(true);
+        }
+
+        public void populate() {
+            if (_populated)
+                return;
+
+            var sortedSubfolders = new ArrayList<>(subfolders.values());
+            Collections.sort(sortedSubfolders);
+            for (var subfolder : sortedSubfolders) {
+                add(subfolder);
+
+                var hasChildren = subfolder.getAllowsChildren();
+                if (!hasChildren)
+                    hasChildren = !subfolder.files.isEmpty();
+                if (!hasChildren)
+                    hasChildren = !subfolder.subfolders.isEmpty();
+                if (!hasChildren) {
+                    var realFolder = subfolder.getFolder();
+                    if (realFolder != null)
+                        hasChildren = !realFolder.getFiles().isEmpty();
+                }
+                subfolder.setAllowsChildren(hasChildren);
+            }
+
+            var folder = getFolder();
+            if (folder != null) {
+                files.ensureCapacity(files.size() + folder.getFiles().size());
+                for (var file : folder.getFiles())
+                    files.add(new VirtualFile(file));
+            }
+
+            Collections.sort(files);
+            for (var file : files)
+                add(file);
+
+            _populated = true;
+        }
+
+        public boolean shouldAutoExpandChildren() {
+            var count = subfolders.size() + files.size();
+            if (count < 2)
+                return true;
+            if (count > 2)
+                return false;
+            return subfolders.values().stream().anyMatch(x -> x instanceof UnknownVirtualFolder);
+        }
+
+        @Override
+        public int compareTo(VirtualFolder o) {
+            return name.compareTo(o.name);
+        }
+
+        @Override
+        public boolean isLeaf() {
+            return subfolders.isEmpty() && files.isEmpty() && (getFolder() == null || getFolder().getFiles().isEmpty());
+        }
+
+        @Override
+        public String getNodeText() {
+            return displayName;
+        }
+
+        @Override
+        public String getFullPath() {
+            if (getParent() instanceof VirtualFolder) {
+                var parentPath = ((VirtualFolder) getParent()).getFullPath();
+                if (parentPath == null)
+                    return name;
+                return parentPath + "/" + name;
+            }
+
+            return name;
+        }
+    }
+
+    private static class UnknownVirtualFolder extends VirtualFolder {
+        public UnknownVirtualFolder() {
+            super("?", "<unknown>");
+        }
+
+        @Override
+        public String getFullPath() {
+            if (getParent() instanceof VirtualFolder)
+                return ((VirtualFolder) getParent()).getFullPath();
+
+            return name;
+        }
+    }
+
+    private static class VirtualFile extends DefaultMutableTreeNode implements SelfRenderable, Comparable<VirtualFile> {
+        public VirtualFile(SqPackFile file) {
+            super(file, false);
+        }
+
+        public SqPackFile getFile() {
+            return (SqPackFile) userObject;
+        }
+
+        @Override
+        public int compareTo(VirtualFile o) {
+            return getFile().getName().compareTo(o.getFile().getName());
+        }
+
+        @Override
+        public boolean isLeaf() {
+            return true;
+        }
+
+        @Override
+        public String getNodeText() {
+            return getFile().getName();
+        }
+
+        @Override
+        public String getFullPath() {
+            var name = getFile().getName();
+
+            if (getParent() instanceof VirtualFolder) {
+                var parentPath = ((VirtualFolder) getParent()).getFullPath();
+                if (parentPath == null)
+                    return name;
+                return parentPath + "/" + name;
+            }
+
+            return name;
+        }
+    }
 }
 

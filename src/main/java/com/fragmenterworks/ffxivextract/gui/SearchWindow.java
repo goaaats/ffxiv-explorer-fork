@@ -15,6 +15,7 @@ import java.awt.event.KeyEvent;
 import java.net.URL;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.Arrays;
 
 class SearchWindow extends JDialog {
@@ -22,7 +23,7 @@ class SearchWindow extends JDialog {
 	JMenuBar menu = new JMenuBar();
 
 	// FILE IO
-	private final SqPackIndexFile currentIndexFile;
+	private final ArrayList<SqPackIndexFile> indexFiles;
 	private final ISearchComplete searchCallback;
 
 	// UI
@@ -44,10 +45,11 @@ class SearchWindow extends JDialog {
 	// SAVED SEARCH
 	private boolean lastSearchWasString;
 	private String lastString;
+	private int lastIndex = 0;
 	private int lastFolder = 0;
 	private int lastFile = 0;
 
-	public SearchWindow(JFrame parent, SqPackIndexFile currentIndexFile, ISearchComplete searchCallback) {
+	public SearchWindow(JFrame parent, ArrayList<SqPackIndexFile> indexFiles, ISearchComplete searchCallback) {
 		super(parent, ModalityType.APPLICATION_MODAL);
 		this.setTitle(Strings.DIALOG_TITLE_SEARCH);
 		URL imageURL = getClass().getResource("/frameicon.png");
@@ -55,7 +57,7 @@ class SearchWindow extends JDialog {
 		this.setIconImage(image.getImage());
 		this.searchCallback = searchCallback;
 
-		this.currentIndexFile = currentIndexFile;
+		this.indexFiles = indexFiles;
 
 		// String search
 		pnlSearchString = new JPanel(new GridBagLayout());
@@ -194,63 +196,72 @@ class SearchWindow extends JDialog {
 	private void doStringSearch(String string) {
 		lastSearchWasString = true;
 		lastString = string;
-		for (int i = lastFolder; i < currentIndexFile.getFolders().size(); i++) {
-			SqPackFolder f = currentIndexFile.getFolders().get(i);
-			for (int j = lastFile; j < f.getFiles().size(); j++) {
-				SqPackFile fi = f.getFiles().get(j);
-				byte[] data = currentIndexFile.extractFile(fi.getElement(), null);
-				if (data == null)
-					continue;
+		for (int iIndex = lastIndex; iIndex < indexFiles.size(); iIndex++) {
+			var index = indexFiles.get(iIndex);
 
-				boolean breakOutOfFile = false;
-				for (int i2 = 0; i2 < data.length - string.length(); i2++) {
-					for (int j2 = 0; j2 < string.length(); j2++) {
-						if (Character.toLowerCase(data[i2 + j2]) == Character
-								.toLowerCase(string.charAt(j2))) {
-							if (j2 == string.length() - 1) {
+			for (int iFolder = lastFolder; iFolder < index.getFolders().size(); iFolder++) {
+				var folder = index.getFolders().get(iFolder);
 
-								if (Constants.DEBUG) {
-									System.out.println(String.format("Folder: %08X", f.getHash()));
-									System.out.println(String.format("File: %08X", fi.getHash()));
-									System.out.println("---");
+				for (int iFile = lastFile; iFile < folder.getFiles().size(); iFile++) {
+					var file = folder.getFiles().get(iFile);
+
+					byte[] data = index.extractFile(file.getElement(), null);
+					if (data == null)
+						continue;
+
+					boolean breakOutOfFile = false;
+					for (int i2 = 0; i2 < data.length - string.length(); i2++) {
+						for (int j2 = 0; j2 < string.length(); j2++) {
+							if (Character.toLowerCase(data[i2 + j2]) == Character
+									.toLowerCase(string.charAt(j2))) {
+								if (j2 == string.length() - 1) {
+
+									if (Constants.DEBUG) {
+										System.out.printf("Index: %06X\n", index.getIndexId());
+										System.out.printf("Folder: %08X\n", folder.getHash());
+										System.out.printf("File: %08X\n", file.getHash());
+										System.out.println("---");
+									}
+									Object[] options = {"Continue", "Open",
+											"Stop Search"};
+
+									int n = JOptionPane.showOptionDialog(
+											this,
+											String.format("Found result in:\nIndex: %06X\nFolder: %s\nFile: %s",
+													index.getIndexId(), folder.getName(), file.getName()),
+											"Searching through DAT...",
+											JOptionPane.YES_NO_CANCEL_OPTION,
+											JOptionPane.QUESTION_MESSAGE,
+											null,
+											options,
+											options[2]);
+									switch (n) {
+										case 0:
+											breakOutOfFile = true;
+											break;
+										case 1:
+											lastIndex = iIndex;
+											lastFolder = iFolder;
+											lastFile = iFile + 1;
+											searchCallback.onSearchChosen(file);
+											this.setVisible(false);
+											return;
+										case 2:
+											searchCallback.onSearchChosen(null);
+											setVisible(false);
+											return;
+									}
+
+								} else {
 								}
-								Object[] options = {"Continue", "Open",
-										"Stop Search"};
-
-								int n = JOptionPane.showOptionDialog(
-										this,
-										"Found result in folder: " + f.getName() + ", file: " + fi.getName(),
-										"Searching through DAT...",
-										JOptionPane.YES_NO_CANCEL_OPTION,
-										JOptionPane.QUESTION_MESSAGE,
-										null,
-										options,
-										options[2]);
-								switch (n) {
-									case 0:
-										breakOutOfFile = true;
-										break;
-									case 1:
-										lastFolder = i + 1;
-										lastFile = j + 1;
-										searchCallback.onSearchChosen(fi);
-										this.setVisible(false);
-										return;
-									case 2:
-										searchCallback.onSearchChosen(null);
-										setVisible(false);
-										return;
-								}
-
-							} else {
-							}
-						} else
+							} else
+								break;
+						}
+						if (breakOutOfFile)
 							break;
 					}
-					if (breakOutOfFile)
-						break;
-				}
 
+				}
 			}
 		}
 
@@ -270,12 +281,16 @@ class SearchWindow extends JDialog {
 		byte[] compareBuffer = new byte[searchArray.length];
 
 		// Do search
-		for (int i = lastFolder; i < currentIndexFile.getFolders().size(); i++) {
-			SqPackFolder f = currentIndexFile.getFolders().get(i);
-			for (int j = lastFile; j < f.getFiles().size(); j++) {
-				SqPackFile fi = f.getFiles().get(j);
-				byte[] data = currentIndexFile.extractFile(fi.getElement(), null);
+		for (int iIndex = lastIndex; iIndex < indexFiles.size(); iIndex++) {
+			var index = indexFiles.get(iIndex);
 
+			for (int iFolder = lastFolder; iFolder < index.getFolders().size(); iFolder++) {
+				var folder = index.getFolders().get(iFolder);
+
+				for (int iFile = lastFile; iFile < folder.getFiles().size(); iFile++) {
+					var file = folder.getFiles().get(iFile);
+
+					byte[] data = index.extractFile(file.getElement(), null);
 					if (data == null)
 						continue;
 
@@ -289,8 +304,9 @@ class SearchWindow extends JDialog {
 							dataBB.position(dataBB.position() - compareBuffer.length + 1);
 							if (Arrays.equals(compareBuffer, searchArray)) {
 								if (Constants.DEBUG) {
-									System.out.println(String.format("Folder: %08X", f.getHash()));
-									System.out.println(String.format("File: %08X", fi.getHash()));
+									System.out.printf("Index: %06X\n", index.getIndexId());
+									System.out.printf("Folder: %08X\n", folder.getHash());
+									System.out.printf("File: %08X\n", file.getHash());
 									System.out.println("---");
 								}
 
@@ -298,7 +314,8 @@ class SearchWindow extends JDialog {
 
 								int n = JOptionPane.showOptionDialog(
 										this,
-										"Found result in folder: " + f.getName() + ", file: " + fi.getName(),
+										String.format("Found result in:\nIndex: %06X\nFolder: %s\nFile: %s",
+												index.getIndexId(), folder.getName(), file.getName()),
 										"Searching through DAT...",
 										JOptionPane.YES_NO_CANCEL_OPTION,
 										JOptionPane.QUESTION_MESSAGE,
@@ -310,9 +327,10 @@ class SearchWindow extends JDialog {
 										breakOutOfFile = true;
 										break;
 									case 1:
-										lastFolder = i + 1;
-										lastFile = j + 1;
-										searchCallback.onSearchChosen(fi);
+										lastIndex = iIndex;
+										lastFolder = iFolder;
+										lastFile = iFile + 1;
+										searchCallback.onSearchChosen(file);
 										this.setVisible(false);
 										return;
 									case 2:
@@ -327,6 +345,7 @@ class SearchWindow extends JDialog {
 						}
 					}
 
+				}
 			}
 		}
 
@@ -348,6 +367,7 @@ class SearchWindow extends JDialog {
 	}
 
 	public void reset() {
+		lastIndex = 0;
 		lastFile = 0;
 		lastFolder = 0;
 	}
