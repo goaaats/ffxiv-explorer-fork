@@ -1,6 +1,7 @@
 package com.fragmenterworks.ffxivextract.models.sqpack.model;
 
 import com.fragmenterworks.ffxivextract.models.sqpack.index.HashElement;
+import com.fragmenterworks.ffxivextract.models.sqpack.index.SqPackIndexFile;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,12 +11,14 @@ public class SqPackFolder {
 	String name;
 	int folderHash;
 	List<SqPackFile> files;
+	SqPackIndexFile parentIndexFile;
 
-	public SqPackFolder(HashElement element, int folderHash, String name) {
+	public SqPackFolder(HashElement element, int folderHash, String name, SqPackIndexFile parentIndexFile) {
 		this.element = element;
 		this.folderHash = folderHash;
 		this.name = name;
-		files = new ArrayList<>();
+		this.files = new ArrayList<>();
+		this.parentIndexFile = parentIndexFile;
 	}
 
 	public int getHash() {

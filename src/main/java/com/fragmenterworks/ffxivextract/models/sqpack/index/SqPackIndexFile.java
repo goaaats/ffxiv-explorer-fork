@@ -38,7 +38,6 @@ public class SqPackIndexFile implements IHashUpdateListener {
 	private final HashMap<String, SqPackFolder> folderCache;
 	private final List<SqPackFolder> folders;
 	private final List<SqPackFile> files;
-
 	private final List<Path> correspondingDatFiles;
 
 	private int itemsLoaded = 0;
@@ -127,7 +126,7 @@ public class SqPackIndexFile implements IHashUpdateListener {
 			}
 
 			for (int i = 0; i < hashCount; i++) {
-				if (progressBar != null) {
+				if (progressBar != null && i % 10000 == 0) {
 					progressBar.setValue(i);
 					loadLabel.setText("Loading hashes: " + i + "/" + hashCount);
 				}
@@ -138,7 +137,7 @@ public class SqPackIndexFile implements IHashUpdateListener {
 			}
 
 			for (int i = 0; i < synonymCount; i++) {
-				if (progressBar != null) {
+				if (progressBar != null && i % 10000 == 0) {
 					progressBar.setValue(hashCount + i);
 					loadLabel.setText("Loading synonyms: " + i + "/" + synonymCount);
 				}
@@ -157,7 +156,7 @@ public class SqPackIndexFile implements IHashUpdateListener {
 			}
 
 			for (int i = 0; i < hashCount; i++) {
-				if (progressBar != null) {
+				if (progressBar != null && i % 10000 == 0) {
 					progressBar.setValue(i);
 					loadLabel.setText("Loading hashes: " + i + "/" + hashCount);
 				}
@@ -168,7 +167,7 @@ public class SqPackIndexFile implements IHashUpdateListener {
 			}
 
 			for (int i = 0; i < synonymCount; i++) {
-				if (progressBar != null) {
+				if (progressBar != null && i % 10000 == 0) {
 					progressBar.setValue(hashCount + i);
 					loadLabel.setText("Loading synonyms: " + i + "/" + synonymCount);
 				}
@@ -205,11 +204,11 @@ public class SqPackIndexFile implements IHashUpdateListener {
 		String finalFolderName = folderName;
 		SqPackFolder folder = folderCache.getOrDefault(finalFolderName, null);
 		if (folder == null) {
-			folder = new SqPackFolder(element, element.getFolderHash(), folderName);
+			folder = new SqPackFolder(element, element.getFolderHash(), folderName, this);
 			folderCache.put(folder.getName(), folder);
 		}
 
-		var file = new SqPackFile(element, element.getFileHash(), fileName, folder);
+		var file = new SqPackFile(element, element.getFileHash(), fileName, folder, this);
 		folder.getFiles().add(file);
 		files.add(file);
 
@@ -247,16 +246,16 @@ public class SqPackIndexFile implements IHashUpdateListener {
 			var crc = PathUtils.computeHashesWithLower(folderName + "/" + fileName);
 			SqPackFolder folder = folderCache.getOrDefault(folderName, null);
 			if (folder == null) {
-				folder = new SqPackFolder(element, crc.folderHash, folderName);
+				folder = new SqPackFolder(element, crc.folderHash, folderName, this);
 				folderCache.put(folder.getName(), folder);
 			}
 
-			var file = new SqPackFile(element, crc.fileHash, fileName, folder);
+			var file = new SqPackFile(element, crc.fileHash, fileName, folder, this);
 			folder.getFiles().add(file);
 			files.add(file);
 			itemsUnhashed += 1;
 		} else {
-			var file = new SqPackFile(element, element.hash, fullName, null);
+			var file = new SqPackFile(element, element.hash, fullName, null, this);
 			files.add(file);
 		}
 
@@ -273,11 +272,11 @@ public class SqPackIndexFile implements IHashUpdateListener {
 
 		SqPackFolder folder = folderCache.getOrDefault(folderName, null);
 		if (folder == null) {
-			folder = new SqPackFolder(synonym, crc.folderHash, folderName);
+			folder = new SqPackFolder(synonym, crc.folderHash, folderName, this);
 			folderCache.put(folder.getName(), folder);
 		}
 
-		var file = new SqPackFile(synonym, crc.fileHash, fileName, folder);
+		var file = new SqPackFile(synonym, crc.fileHash, fileName, folder, this);
 		folder.getFiles().add(file);
 		files.add(file);
 
@@ -286,51 +285,68 @@ public class SqPackIndexFile implements IHashUpdateListener {
 	}
 
 	private void parseContent(JProgressBar progressBar, JLabel loadLabel) {
+		int i1 = 0, i2 = 0;
 
 		if (fileInfo.indexType == 0) {
+			var m1 = synonyms64.size();
+			var m2 = hashes64.size();
+
 			if (progressBar != null) {
-				progressBar.setMaximum(synonyms64.size() + hashes64.size());
+				progressBar.setMaximum(m1 + m2);
 				progressBar.setValue(0);
 			}
 
-			for (var synonym : synonyms64) {
-				if (progressBar != null)
-					progressBar.setValue(progressBar.getValue() + 1);
-				if (loadLabel != null)
-					loadLabel.setText("Parsing: " + progressBar.getValue() + "/" + progressBar.getMaximum());
-				parseSynonym(synonym);
+			for (; i1 < synonyms64.size(); i1++) {
+				if (i1 % 10000 == 0) {
+					if (progressBar != null)
+						progressBar.setValue(i1 + i2);
+					if (loadLabel != null)
+						loadLabel.setText("Parsing: " + (i1 + i2) + "/" + (m1 + m2));
+				}
+
+				parseSynonym(synonyms64.get(i1));
 			}
 
-			for (var element : hashes64) {
-				if (progressBar != null)
-					progressBar.setValue(progressBar.getValue() + 1);
-				if (loadLabel != null)
-					loadLabel.setText("Parsing: " + progressBar.getValue() + "/" + progressBar.getMaximum());
+			for (; i2 < hashes64.size(); i2++) {
+				if (i2 % 10000 == 0) {
+					if (progressBar != null)
+						progressBar.setValue(i1 + i2);
+					if (loadLabel != null)
+						loadLabel.setText("Parsing: " + (i1 + i2) + "/" + (m1 + m2));
+				}
 
-				parseElement64(element);
+				parseElement64(hashes64.get(i2));
 			}
+
 		} else if (fileInfo.indexType == 2) {
+			var m1 = synonyms32.size();
+			var m2 = hashes32.size();
 
 			if (progressBar != null) {
-				progressBar.setMaximum(synonyms32.size() + hashes32.size());
+				progressBar.setMaximum(m1 + m2);
 				progressBar.setValue(0);
 			}
 
-			for (var synonym : synonyms32) {
-				if (progressBar != null)
-					progressBar.setValue(progressBar.getValue() + 1);
-				if (loadLabel != null)
-					loadLabel.setText("Parsing: " + progressBar.getValue() + "/" + progressBar.getMaximum());
-				parseSynonym(synonym);
+			for (; i1 < synonyms32.size(); i1++) {
+				if (i1 % 10000 == 0) {
+					if (progressBar != null)
+						progressBar.setValue(i1 + i2);
+					if (loadLabel != null)
+						loadLabel.setText(String.format("Parsing: %d/%d", i1 + i2, m1 + m2));
+				}
+
+				parseSynonym(synonyms32.get(i1));
 			}
 
-			for (var element : hashes32) {
-				if (progressBar != null)
-					progressBar.setValue(progressBar.getValue() + 1);
-				if (loadLabel != null)
-					loadLabel.setText("Parsing: " + progressBar.getValue() + "/" + progressBar.getMaximum());
+			for (; i2 < hashes32.size(); i2++) {
+				if (i2 % 10000 == 0) {
+					if (progressBar != null)
+						progressBar.setValue(i1 + i2);
+					if (loadLabel != null)
+						loadLabel.setText(String.format("Parsing: %d/%d", i1 + i2, m1 + m2));
+				}
 
-				parseElement32(element);
+				parseElement32(hashes32.get(i2));
 			}
 		}
 
@@ -378,7 +394,7 @@ public class SqPackIndexFile implements IHashUpdateListener {
 			if (file.getHash() == notification.fullHash) {
 				var folder = folderCache.getOrDefault(notification.folder, null);
 				if (folder == null) {
-					folder = new SqPackFolder(file.getElement(), notification.folderHash, notification.folder);
+					folder = new SqPackFolder(file.getElement(), notification.folderHash, notification.folder, this);
 					folderCache.put(folder.getName(), folder);
 					folders.add(folder);
 				}
@@ -396,7 +412,7 @@ public class SqPackIndexFile implements IHashUpdateListener {
 		sortAll();
 
 		for (var listener : listeners)
-			listener.onIndexUpdate();
+			listener.onIndexUpdate(this);
 	}
 
 	@Override
@@ -590,6 +606,10 @@ public class SqPackIndexFile implements IHashUpdateListener {
 
 	public ByteOrder getEndian() {
 		return byteOrder;
+	}
+
+	public String getPath() {
+		return indexFilePath;
 	}
 
 	public int getIndexId() {
