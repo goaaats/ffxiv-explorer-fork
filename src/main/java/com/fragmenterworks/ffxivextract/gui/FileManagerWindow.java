@@ -48,6 +48,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
     private Path_to_Hash_Window pathHashWindow;
     private final ExplorerPanel_View fileTree = new ExplorerPanel_View();
     private final JSplitPane splitPane;
+    private final LayoutSilencingPane splitPaneLeft, splitPaneRight;
     private final JLabel lblOffsetValue;
     private final JLabel lblHashValue;
     private final JLabel lblContentTypeValue;
@@ -119,10 +120,16 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
         };
         defaultScrollPane.setViewport(defaultViewPort);
 
-        splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, fileTree, defaultScrollPane);
+        splitPaneLeft = new LayoutSilencingPane();
+        splitPaneLeft.setChild(fileTree);
+        splitPaneRight = new LayoutSilencingPane();
+        splitPaneRight.setChild(defaultScrollPane);
+
+        splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, splitPaneLeft, splitPaneRight);
         pnlContent.add(splitPane);
 
-        splitPane.setDividerLocation(150);
+        splitPane.setDividerLocation(320);
+        splitPane.setResizeWeight(0);
 
         fileTree.addTreeSelectionListener(this);
 
@@ -221,7 +228,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 
             setTitle(Constants.APPNAME);
             hexView.setBytes(null);
-            splitPane.setRightComponent(defaultScrollPane);
+            splitPaneRight.setChild(defaultScrollPane);
             file_Close.setEnabled(false);
             file_hardClose.setEnabled(false);
             search_search.setEnabled(false);
@@ -615,7 +622,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
     public void valueChanged(TreeSelectionEvent e) {
 
         if (fileTree.isOnlyFolder()) {
-            splitPane.setRightComponent(defaultScrollPane);
+            splitPaneRight.setChild(defaultScrollPane);
             lblOffsetValue.setText("*");
             lblHashValue.setText("*");
             lblContentTypeValue.setText("*");
@@ -679,7 +686,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
             JLabel lblFNFError = new JLabel("This is currently a placeholder, there is no data here.");
             tabs.addTab("No Data", lblFNFError);
             hexView.setBytes(null);
-            splitPane.setRightComponent(tabs);
+            splitPaneRight.setChild(tabs);
             return;
         }
 
@@ -689,7 +696,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
             JLabel lblLoadError = new JLabel("Something went terribly wrong extracting this file.");
             tabs.addTab("Extract Error", lblLoadError);
             hexView.setBytes(null);
-            splitPane.setRightComponent(tabs);
+            splitPaneRight.setChild(tabs);
             return;
         }
 
@@ -711,7 +718,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
                 tabs.addTab("Error", lblLoadError);
                 hexView.setBytes(data);
                 tabs.addTab("Raw Hex", hexView);
-                splitPane.setRightComponent(tabs);
+                splitPaneRight.setChild(tabs);
                 return;
             }
 
@@ -722,7 +729,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
             JLabel lblLoadError = new JLabel("Something went terribly wrong extracting this file.");
             tabs.addTab("Extract Error", lblLoadError);
             hexView.setBytes(null);
-            splitPane.setRightComponent(tabs);
+            splitPaneRight.setChild(tabs);
             return;
         }
 
@@ -816,7 +823,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
         hexView.setBytes(data);
         //if (contentType != 3)
         tabs.addTab("Raw Hex", hexView);
-        splitPane.setRightComponent(tabs);
+        splitPaneRight.setChild(tabs);
     }
 
     private boolean checkMagic(byte[] data, String magic) {
