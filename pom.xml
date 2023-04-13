@@ -6,6 +6,11 @@
 
     <repositories>
         <repository>
+            <id>jogamp</id>
+            <name>jogamp</name>
+            <url>https://jogamp.org/deployment/maven/</url>
+        </repository>
+        <repository>
             <id>Beatunes</id>
             <name>Hosts some JCraft libs</name>
             <url>https://www.beatunes.com/repo/maven2/</url>
@@ -96,6 +101,12 @@
                                 <minVersion>11</minVersion>
                                 <requiresJdk>false</requiresJdk>
                                 <requires64Bit>64</requires64Bit>
+                                <opts>
+                                    <!-- https://github.com/jzy3d/jogl/issues/4 -->
+                                    <opt>--add-exports java.base/java.lang=ALL-UNNAMED</opt>
+                                    <opt>--add-exports java.desktop/sun.awt=ALL-UNNAMED</opt>
+                                    <opt>--add-exports java.desktop/sun.java2d=ALL-UNNAMED</opt>
+                                </opts>
                             </jre>
                             <versionInfo>
                                 <copyright>_</copyright>
@@ -149,22 +160,22 @@
         <dependency>
             <groupId>org.jogamp.gluegen</groupId>
             <artifactId>gluegen-rt-main</artifactId>
-            <version>2.3.1</version>
+            <version>2.4.0</version>
         </dependency>
         <dependency>
             <groupId>org.jogamp.joal</groupId>
             <artifactId>joal-main</artifactId>
-            <version>2.3.2</version>
+            <version>2.4.0</version>
         </dependency>
         <dependency>
             <groupId>org.jogamp.jogl</groupId>
             <artifactId>jogl-all-main</artifactId>
-            <version>2.3.1</version>
+            <version>2.4.0</version>
         </dependency>
         <dependency>
             <groupId>org.jogamp.jocl</groupId>
             <artifactId>jocl-main</artifactId>
-            <version>2.3.2</version>
+            <version>2.4.0</version>
         </dependency>
     </dependencies>
 </project>
