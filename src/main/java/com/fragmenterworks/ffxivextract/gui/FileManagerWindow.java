@@ -1066,7 +1066,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 
                             for (int l = 0; l < (tempView.getNumLangs()); l++) {
 
-                                String path = lastSaveLocation.getCanonicalPath() + "\\" + folderName + "\\" + fileName;
+                                String path = lastSaveLocation.getCanonicalPath() + File.separator + folderName + File.separator + fileName;
 
                                 File mkDirPath = new File(path);
                                 mkDirPath.getParentFile().mkdirs();
@@ -1098,7 +1098,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 
                                 fileName = exhName;
 
-                                path = lastSaveLocation.getCanonicalPath() + "\\" + folderName + "\\" + fileName;
+                                path = lastSaveLocation.getCanonicalPath() + File.separator + folderName + File.separator + fileName;
 
                                 File mkDirPath = new File(path);
                                 mkDirPath.getParentFile().mkdirs();
@@ -1110,7 +1110,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
                         } else if (extension.equals(".obj")) {
                             Model model = new Model(folderName + "/" + fileName, indexFile, data, indexFile.getEndian());
 
-                            String path = lastSaveLocation.getCanonicalPath() + "\\" + folderName + "\\" + fileName;
+                            String path = lastSaveLocation.getCanonicalPath() + File.separator + folderName + File.separator + fileName;
 
                             File mkDirPath = new File(path);
                             mkDirPath.getParentFile().mkdirs();
@@ -1141,7 +1141,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
                                     extension = ".vs.cso";
                                     String path = lastSaveLocation.getCanonicalPath();
 
-                                    path = lastSaveLocation.getCanonicalPath() + "\\" + folderName + "\\" + fileName;
+                                    path = lastSaveLocation.getCanonicalPath() + File.separator + folderName + File.separator + fileName;
 
                                     File mkDirPath = new File(path);
                                     mkDirPath.getParentFile().mkdirs();
@@ -1155,7 +1155,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
                                     extension = ".ps.cso";
                                     String path = lastSaveLocation.getCanonicalPath();
 
-                                    path = lastSaveLocation.getCanonicalPath() + "\\" + folderName + "\\" + fileName;
+                                    path = lastSaveLocation.getCanonicalPath() + File.separator + folderName + File.separator + fileName;
 
                                     File mkDirPath = new File(path);
                                     mkDirPath.getParentFile().mkdirs();
@@ -1194,7 +1194,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 
                                 String path = lastSaveLocation.getCanonicalPath();
 
-                                path = lastSaveLocation.getCanonicalPath() + "\\" + folderName + "\\" + fileName;
+                                path = lastSaveLocation.getCanonicalPath() + File.separator + folderName + File.separator + fileName;
 
                                 File mkDirPath = new File(path);
                                 mkDirPath.getParentFile().mkdirs();
@@ -1220,7 +1220,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
                     if (!doConvert)
                         extension = "";
 
-                    String path = lastSaveLocation.getCanonicalPath() + "\\" + folderName + "\\" + fileName;
+                    String path = lastSaveLocation.getCanonicalPath() + File.separator + folderName + File.separator + fileName;
 
                     File mkDirPath = new File(path);
                     mkDirPath.getParentFile().mkdirs();

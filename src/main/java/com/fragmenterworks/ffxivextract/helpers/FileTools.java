@@ -73,8 +73,8 @@ public class FileTools {
             sqPakPath += File.separator;
         }
 
-        if (!sqPakPath.endsWith("\\game\\sqpack\\ffxiv\\")) {
-            sqPakPath += "\\game\\sqpack\\ffxiv\\";
+        if (!sqPakPath.endsWith(File.separator + "game" + File.separator + "sqpack" + File.separator + "ffxiv" + File.separator)) {
+            sqPakPath += File.separator + "game" + File.separator + "sqpack" + File.separator + "ffxiv" + File.separator;
         }
 
         SqPackIndexFile index = null;
