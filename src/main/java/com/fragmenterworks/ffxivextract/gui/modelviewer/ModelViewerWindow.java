@@ -8,6 +8,7 @@ import com.fragmenterworks.ffxivextract.models.sqpack.index.SqPackIndexFile;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 
@@ -72,7 +73,10 @@ public class ModelViewerWindow extends JFrame {
         protected Void doInBackground() {
             try {
                 dialog.nextFile(0, "0a0000");
-                exdIndexFile = SqPackIndexFile.read(getSqpackPath() + "\\game\\sqpack\\ffxiv\\0a0000.win32.index");
+                exdIndexFile = SqPackIndexFile.read(
+                    getSqpackPath() + File.separator +
+                            "game" + File.separator + "sqpack" + File.separator + "ffxiv" + File.separator + "0a0000.win32.index"
+                );
                 dialog.nextFile(1, "040000");
                 modelIndexFile = exdIndexFile.getIndexForIdFromSameRepo(0x040000);
                 dialog.nextFile(2, "010000");
