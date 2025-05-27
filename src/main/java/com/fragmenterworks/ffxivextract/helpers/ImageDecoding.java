@@ -53,7 +53,7 @@ public final class ImageDecoding {
 				final int b = ((pixel & 0xF00) >> 8) * 16;
 				final int a = ((pixel & 0xF000) >> 12) * 16;
 				p += 2;
-				img.setRGB(x, y, new Color(r, g, b, a).getRGB());
+				img.setRGB(x, y, new Color(b, g, r, a).getRGB());
 			}
 		}
 		return img;
