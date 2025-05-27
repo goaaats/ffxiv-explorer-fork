@@ -18,6 +18,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class ExplorerPanel_View extends JScrollPane implements MouseListener, IIndexUpdateListener, TreeWillExpandListener {
     private boolean enableHashUpdate = true;
@@ -179,13 +180,13 @@ public class ExplorerPanel_View extends JScrollPane implements MouseListener, II
                 if (!(obj instanceof DefaultMutableTreeNode))
                     break;
 
-                var node = (DefaultMutableTreeNode)obj;
+                var node = (DefaultMutableTreeNode) obj;
                 obj = node.getParent();
 
                 if (!(node instanceof VirtualFolder))
                     continue;
 
-                var folder = (VirtualFolder)node;
+                var folder = (VirtualFolder) node;
                 var indexFile = folder.getIndexFile();
                 if (indexFile != null)
                     selectedIndices.add(indexFile);
@@ -194,30 +195,57 @@ public class ExplorerPanel_View extends JScrollPane implements MouseListener, II
         return new ArrayList<>(selectedIndices);
     }
 
+    public int getSelectionCount() {
+        return fileTree.getSelectionCount();
+    }
+
+    public SqPackFile getSelectedSingleFile() {
+        var selectedPaths = fileTree.getSelectionPaths();
+        if (selectedPaths == null || selectedPaths.length != 1)
+            return null;
+        if (selectedPaths[0].getLastPathComponent() instanceof VirtualFile)
+            return ((VirtualFile) selectedPaths[0].getLastPathComponent()).getFile();
+        return null;
+    }
+
     public ArrayList<SqPackFile> getSelectedFiles() {
-        ArrayList<SqPackFile> selectedFiles = new ArrayList<>();
-        TreePath[] selectedPaths = fileTree.getSelectionPaths();
+        ArrayList<TreeNode> remainingNodes;
+        {
+            var selectedPaths = fileTree.getSelectionPaths();
+            if (selectedPaths == null)
+                return new ArrayList<>();
 
-        if (selectedPaths == null)
-            return selectedFiles;
-
-        for (TreePath tp : selectedPaths) {
-            Object obj = ((DefaultMutableTreeNode) tp.getLastPathComponent()).getUserObject();
-            if (obj == null)
-                continue;
-            if (obj instanceof SqPackFolder) {
-                int children = ((DefaultMutableTreeNode) tp.getLastPathComponent()).getChildCount();
-                for (int i = 0; i < children; i++) {
-                    SqPackFile file = (SqPackFile) ((DefaultMutableTreeNode) ((DefaultMutableTreeNode) tp.getLastPathComponent()).getChildAt(i)).getUserObject();
-                    if (!selectedFiles.contains(file))
-                        selectedFiles.add(file);
-                }
-            }
-            if (obj instanceof SqPackFile)
-                selectedFiles.add((SqPackFile) obj);
+            var tmp = Arrays.stream(selectedPaths)
+                    .map(x -> (TreeNode) x.getLastPathComponent())
+                    .collect(Collectors.toList());
+            remainingNodes = tmp instanceof ArrayList<?>
+                    ? (ArrayList<TreeNode>) tmp
+                    : new ArrayList<>(tmp);
         }
 
-        return selectedFiles;
+        var files = new ArrayList<SqPackFile>();
+
+        while (!remainingNodes.isEmpty()) {
+            var node = remainingNodes.get(remainingNodes.size() - 1);
+            remainingNodes.remove(remainingNodes.size() - 1);
+
+            if (node instanceof VirtualFile) {
+                var file = (VirtualFile) node;
+                files.add(file.getFile());
+            } else {
+                if (node instanceof VirtualFolder) {
+                    var folder = (VirtualFolder) node;
+                    folder.populate();
+                }
+
+                var childCount = node.getChildCount();
+                remainingNodes.ensureCapacity(remainingNodes.size() + childCount);
+                for (var i = 0; i < childCount; i++)
+                    remainingNodes.add(node.getChildAt(i));
+            }
+        }
+
+        return files;
     }
 
     public void select(long offset) {
@@ -252,6 +280,7 @@ public class ExplorerPanel_View extends JScrollPane implements MouseListener, II
 
     private interface SelfRenderable {
         String getNodeText();
+
         String getFullPath();
     }
 

@@ -631,7 +631,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
             return;
         }
 
-        if (fileTree.getSelectedFiles().size() == 0) {
+        if (fileTree.getSelectionCount() == 0) {
             file_Extract.setEnabled(false);
             file_ExtractRaw.setEnabled(false);
             return;
@@ -640,12 +640,12 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
             file_ExtractRaw.setEnabled(true);
         }
 
-        if (fileTree.getSelectedFiles().size() > 1) {
+        var selectedFile = fileTree.getSelectedSingleFile();
+        if (selectedFile == null) {
             lblOffsetValue.setText("*");
             lblHashValue.setText("*");
             lblContentTypeValue.setText("*");
         } else {
-            var selectedFile = fileTree.getSelectedFiles().get(0);
             int datNum = selectedFile.getElement().getDatafileId();
             long realOffset = selectedFile.getElement().getOffset();
 
@@ -1030,12 +1030,20 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
         protected Void doInBackground() throws Exception {
             EXDF_View tempView = null;
 
+            var selectedFiles = fileTree.getSelectedFiles();
             for (int i = 0; i < files.size(); i++) {
                 var file = files.get(i);
                 var indexFile = file.getParentIndexFile();
                 
                 try {
-                    String folderName = file.getParent() == null ? "" : file.getParent().getName();
+                    String folderName;
+                    var parentIndexId = file.getParentIndexFile().getIndexId();
+                    if (file.getParent() == null)
+                        folderName = String.format("~%06X", parentIndexId);
+                    else if (file.getParent().getName().startsWith("~"))
+                        folderName = String.format("~%06X/%s", parentIndexId, file.getParent().getName());
+                    else
+                        folderName = file.getParent().getName();
                     String fileName = file.getName();
 
                     loadingDialog.nextFile(i, folderName + "/" + fileName);
@@ -1059,7 +1067,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
                             EXHF_File outFile = new EXHF_File(data);
 
                             tempView = new EXDF_View(indexFile,
-                                    fileTree.getSelectedFiles().get(i).getFullPath(),
+                                    selectedFiles.get(i).getFullPath(),
                                     outFile,
                                     options_showAsHex.getState(),
                                     options_sortByOffset.getState());
@@ -1081,7 +1089,7 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
                                 continue;
 
                             tempView = new EXDF_View(indexFile,
-                                    fileTree.getSelectedFiles().get(i).getFullPath(),
+                                    selectedFiles.get(i).getFullPath(),
                                     options_showAsHex.getState(),
                                     options_sortByOffset.getState());
 

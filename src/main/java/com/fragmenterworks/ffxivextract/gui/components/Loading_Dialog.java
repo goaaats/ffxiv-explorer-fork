@@ -4,6 +4,7 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 
 public class Loading_Dialog extends JDialog {
+    private final int SCREEN_UPDATE_INTERVAL = 100; // ms
 
     private final JLabel txtCurrentFile;
     private final JLabel txtCurrentBlock;
@@ -12,6 +13,8 @@ public class Loading_Dialog extends JDialog {
 
     private final int numFiles;
     private int numBlocks;
+
+    private long nextScreenUpdate;
 
     public boolean isCancelled = false;
 
@@ -52,9 +55,15 @@ public class Loading_Dialog extends JDialog {
         fileProgress.setValue(curFile);
         blockProgress.setValue(0);
         txtCurrentFile.setText(filename + " (" + curFile + "/" + numFiles + ")");
+        nextScreenUpdate = 0;
     }
 
     public void nextBlock(int currentBlock) {
+        var now = System.currentTimeMillis();
+        if (now < nextScreenUpdate)
+            return;
+        
+        nextScreenUpdate = now + SCREEN_UPDATE_INTERVAL;
         blockProgress.setValue(currentBlock);
         txtCurrentBlock.setText("Decompressing block " + currentBlock + " of " + numBlocks);
     }
