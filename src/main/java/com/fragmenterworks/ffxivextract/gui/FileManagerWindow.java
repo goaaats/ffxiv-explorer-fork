@@ -1270,16 +1270,11 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
             conn.setRequestMethod("GET");
             var in = new GZIPInputStream(conn.getInputStream());
             var reader = new BufferedReader(new InputStreamReader(in));
-            var line = reader.readLine();
-
-            var paths = new ArrayList<String>();
-            while (line != null) {
-                paths.add(line);
-                line = reader.readLine();
-            }
-
-            HashDatabase.addPaths(paths);
-
+            var paths = reader.lines().toList();
+            loadingDialog.setDeterminate(paths.size());
+            HashDatabase.addPaths(paths, progress -> {
+                SwingUtilities.invokeLater(() -> loadingDialog.setProgress(progress));
+            });
             return null;
         }
 
