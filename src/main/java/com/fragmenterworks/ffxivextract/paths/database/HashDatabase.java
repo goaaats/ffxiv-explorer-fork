@@ -13,6 +13,7 @@ import java.nio.ByteOrder;
 import java.nio.file.Files;
 import java.sql.*;
 import java.util.*;
+import java.util.function.IntConsumer;
 
 public class HashDatabase {
 
@@ -225,8 +226,9 @@ public class HashDatabase {
         return addPaths(Collections.singletonList(fullPath)) > 0;
     }
 
-    public static int addPaths(List<String> paths) {
+    public static int addPaths(List<String> paths, IntConsumer progressCallback) {
         int count = 0;
+        int processed = 0;
         var notifications = new ArrayList<HashUpdateNotification>();
         try {
             var oldAutoCommit = conn.getAutoCommit();
@@ -235,6 +237,9 @@ public class HashDatabase {
             var fileStatement = conn.prepareStatement("INSERT OR IGNORE INTO filenames VALUES(?, ?)");
             var folderStatement = conn.prepareStatement("INSERT OR IGNORE INTO folders VALUES(?, ?)");
             var statement = conn.prepareStatement("INSERT OR IGNORE INTO fullpaths VALUES(?, ?, ?, ?, ?, ?)");
+
+            int batchSize = 10000;
+            int batchCount = 0;
 
             for (String line : paths) {
                 String path = line.toLowerCase();
@@ -249,13 +254,13 @@ public class HashDatabase {
 
                 Utils.getGlobalLogger().debug("Adding entry {}", path);
 
-                int added = 0;
-
                 fileStatement.setLong(1, fileNameId);
                 fileStatement.setString(2, fileName);
+                fileStatement.addBatch();
 
                 folderStatement.setLong(1, folderId);
                 folderStatement.setString(2, folder);
+                folderStatement.addBatch();
 
                 statement.setInt(1, indexId);
                 statement.setInt(2, hashes.fullHash);
@@ -263,15 +268,34 @@ public class HashDatabase {
                 statement.setInt(4, hashes.fileHash);
                 statement.setLong(5, folderId);
                 statement.setLong(6, fileNameId);
-
-                fileStatement.execute();
-                folderStatement.execute();
-                added += statement.executeUpdate();
+                statement.addBatch();
 
                 notifications.add(new HashUpdateNotification(indexId, hashes.fullHash, hashes.folderHash, hashes.fileHash, folder, fileName));
 
-                if (added > 0)
-                    count++;
+                batchCount++;
+                processed++;
+
+                if (batchCount % batchSize == 0) {
+                    fileStatement.executeBatch();
+                    folderStatement.executeBatch();
+                    int[] addedRows = statement.executeBatch();
+
+                    count += Arrays.stream(addedRows).filter(added -> added > 0).count();
+                    batchCount = 0;
+
+                    if (progressCallback != null) {
+                        progressCallback.accept(processed);
+                    }
+                }
+            }
+
+            fileStatement.executeBatch();
+            folderStatement.executeBatch();
+            int[] addedRows = statement.executeBatch();
+            count += Arrays.stream(addedRows).filter(added -> added > 0).count();
+
+            if (progressCallback != null) {
+                progressCallback.accept(processed);
             }
 
             conn.commit();
@@ -290,6 +314,10 @@ public class HashDatabase {
         }
 
         return count;
+    }
+
+    public static int addPaths(List<String> paths) {
+        return addPaths(paths, null);
     }
 
     public static int importFilePaths(File selectedFile) {

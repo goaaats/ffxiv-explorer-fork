@@ -1265,21 +1265,16 @@ public class FileManagerWindow extends JFrame implements TreeSelectionListener, 
 
         @Override
         protected Void doInBackground() throws Exception {
-            var url = new URL("https://rl2.perchbird.dev/download/export/PathList.gz");
+            var url = new URL("https://rl2.perchbird.dev/download/PathList.gz");
             var conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
             var in = new GZIPInputStream(conn.getInputStream());
             var reader = new BufferedReader(new InputStreamReader(in));
-            var line = reader.readLine();
-
-            var paths = new ArrayList<String>();
-            while (line != null) {
-                paths.add(line);
-                line = reader.readLine();
-            }
-
-            HashDatabase.addPaths(paths);
-
+            var paths = reader.lines().toList();
+            loadingDialog.setDeterminate(paths.size());
+            HashDatabase.addPaths(paths, progress -> {
+                SwingUtilities.invokeLater(() -> loadingDialog.setProgress(progress));
+            });
             return null;
         }
 
