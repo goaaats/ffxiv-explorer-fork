@@ -12,8 +12,8 @@ import java.nio.ByteOrder;
 
 public class EXHF_File extends Game_File {
 
-    public final static String[] languageCodes = {"", "_ja", "_en", "_de", "_fr", "_chs", "_cht", "_ko"};
-    public final static String[] languageNames = {"", "Japanese", "English", "German", "French", "Chinese - Singapore", "Chinese - Traditional", "Korean"};
+    public final static String[] languageCodes = {"", "_ja", "_en", "_de", "_fr", "_chs", "_cht", "_ko", "_tc"};
+    public final static String[] languageNames = {"", "Japanese", "English", "German", "French", "Chinese - Singapore", "Chinese - Traditional", "Korean", "Traditional - Chinese"};
 
     private EXDF_Dataset[] datasetTable;
     private EXDF_Page[] pageTable;
